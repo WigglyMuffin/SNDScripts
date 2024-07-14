@@ -294,34 +294,20 @@ function QuestInstance() -- Targetting/Movement Logic for Solo Duties
     end
 end
 
--- i hate this functions existence
-function GetNodeTextLookupUpdate(number1, number2, number3, number4, number5)
-    if (number3 == nil or number3 == "x") then
-        return GetNodeText("_ToDoList", number1, number2)
-    elseif (number4 == nil or number4 == "x") then
-        return GetNodeText("_ToDoList", number1, number2, number3)
-    elseif (number5 == nil or number5 == "x") then
-        return GetNodeText("_ToDoList", number1, number2, number3, number4)
-    end
-    return GetNodeText("_ToDoList", number1, number2, number3, number4, number5)
+function GetNodeTextLookupUpdate(GetNodeTextMatchLocation)
+    return GetNodeText("_ToDoList", GetNodeTextMatchLocation)
 end
 
--- usage: QuestChecker(ArcanistEnemies[1], 50, "_ToDoList"|"MonsterNote", 15, 3, x, x, x, "Report to Thubyrgeim at the Arcanists' Guild.")
--- use x as replacement for number if shorter
+-- usage: QuestChecker(ArcanistEnemies[3], 25, "_ToDoList", "Slay little ladybugs.")
 
-
--- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
--- GetNodeTextType needs adding to GetNodeTextLookupUpdate() and QuestChecker() and UIChecker()
--- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
-function QuestChecker(target_name, target_distance, GetNodeTextType, GNT1, GNT2, GNT3, GNT4, GNT5, GetNodeTextMatch) -- Quest and UI element handler
+function QuestChecker(target_name, target_distance, GetNodeTextType, GetNodeTextMatch) -- Quest and UI element handler
     local target = target_name
     local enemy_max_dist = target_distance
+    local GetNodeTextMatchLocation = tostring.(NodeScanner(GetNodeTextType, GetNodeTextMatch))
     while true do
-        SpecialChecks(GetNodeTextType)
-        if GetNodeTextLookupUpdate(GetNodeTextType,GNT1,GNT2,GNT3,GNT4,GNT5) == GetNodeTextMatch then
-            SpecialChecks(GetNodeTextType, true)
+        UiCheck(GetNodeTextType)
+        if GetNodeTextLookupUpdate(GetNodeTextMatchLocation) == GetNodeTextMatch then
+            UiCheck(GetNodeTextType, true)
             break
         end
         QuestCombat(target_name)
@@ -331,8 +317,32 @@ function QuestChecker(target_name, target_distance, GetNodeTextType, GNT1, GNT2,
         yield("/rotation off")
     end
 end
+-- QuestChecker(ArcanistEnemies[7], 40, "_ToDoList", "Report to Thubyrgeim at the Arcanists' Guild.")
 
-function SpecialChecks(GetNodeTextType, CloseUI)
+function NodeScanner(GetNodeTextType, GetNodeTextMatch)
+    if GetNodeTextType == "MonsterNote" then
+        return -- no scanner for monsternote yet
+    elseif GetNodeTextType == "_ToDoList" then
+        return TodoListScanner(GetNodeTextMatch)
+    end
+end
+
+function TodoListScanner(GetNodeTextMatch)
+    for location = 2, 21 do
+        for subNode = 1, 13 do
+            local nodeCheck = GetNodeText("_ToDoList", location, subNode)
+            if nodeCheck == GetNodeTextMatch then
+                yield("/echo " .. nodeCheck .. " found at: ".. location .." ".. subNode)
+                return location, subNode
+            end
+        end
+    end
+    yield("/echo Quest not found")
+    return
+end
+
+
+function UiCheck(GetNodeTextType, CloseUI)
     -- hunting log checks
     if GetNodeTextType == "MonsterNote" then
         if CloseUI() then
