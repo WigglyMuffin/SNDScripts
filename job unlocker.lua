@@ -3,17 +3,18 @@
 --##########################################
 
 -- Only set one of these
--- Should really change to a DO_TYPE_QUESTS = "Arcanist" or something
-DO_ARCANIST_QUESTS = 1
+-- Should really change to a DO_JOB_QUESTS = "Arcanist" or something
+--DO_JOB_QUESTS = "Arcanist"
+DO_ARCANIST_QUESTS = 0
 DO_ARCHER_QUESTS = 0
 
-DO_DOL_QUESTS = 1
+DO_DOL_QUESTS = 0
 
-DO_MAELSTROM_LOG_1 = 0
+DO_MAELSTROM_LOG_1 = 1
 DO_MAELSTROM_LOG_2 = 0
 
 -- Quest unlocks
-DO_HALATALI = 0
+DO_HALATALI = 1
 DO_THE_SUNKEN_TEMPLE_OF_QARN = 0
 DO_DZEMAEL_DARKHOLD = 0
 DO_THE_AURUM_VALE = 0
@@ -341,7 +342,6 @@ function TodoListScanner(GetNodeTextMatch)
     return
 end
 
-
 function UiCheck(GetNodeTextType, CloseUI)
     -- hunting log checks
     if GetNodeTextType == "MonsterNote" then
@@ -411,32 +411,37 @@ function LogOut()
     until not IsAddonVisible("SelectYesno")
 end
 
+-- usage: Movement(674.92, 19.37, 436.02)
+function Movement(X_Position, Y_Position, Z_Position)
+    yield("/vnav moveto " .. X_Position .. Y_Position .. Z_Position)
+end
+
 --##############
 --   ARCANIST
 --##############
 
 -- limsa arcanists' first quest level 1 "Way of the Arcanist"
-function ACN_1()
+function Arcanist1()
     Teleporter("Limsa", "tp")
     ZoneTransitions()
     Teleporter("Arcanist", "li")
     ZoneTransitions()
-    yield("/vnav moveto -327.86 12.89 9.79")
+    Movement(-327.86, 12.89, 9.79)
     VNavChecker()
     yield("/target Thubyrgeim")
     -- yield("/pinteract")
     -- yield("/waitaddon SelectYesno <maxwait.15><wait.9.5>")
     -- yield("/pcall SelectYesno true 0")
     QuestNPC("SelectYesno", true, 0)
-    yield("/vnav moveto -335.29 11.99 54.45")
+    Movement(-335.29, 11.99, 54.45)
     VNavChecker()
     Teleporter("Tempest", "li")
     ZoneTransitions()
-    yield("/vnav moveto 14.71 64.52 87.16")
+    Movement(14.71, 64.52, 87.16)
     VNavChecker()
     QuestChecker(ArcanistEnemies[1], 25, "_ToDoList", 13, 3, x, x, x, "Slay wharf rats.")
     QuestChecker(ArcanistEnemies[3], 25, "_ToDoList", 15, 3, x, x, x, "Slay little ladybugs.")
-    yield("/vnav moveto 232.67 40.64 57.39")
+    Movement(232.67, 40.64, 57.39)
     VNavChecker()
     QuestChecker(ArcanistEnemies[2], 25, "_ToDoList", 13, 3, x, x, x, "Report to Thubyrgeim at the Arcanists' Guild.")
     --yield("/wait 1.6")
@@ -444,29 +449,29 @@ function ACN_1()
     ZoneTransitions()
     Teleporter("Arcanist", "li")
     ZoneTransitions()
-    yield("/vnav moveto -327.86 12.89 9.79 ")
+    Movement(-327.86, 12.89, 9.79)
     VNavChecker()
     yield("/target Thubyrgeim")
     QuestNPC()
 end
 
 -- limsa arcanists' second quest level 5 "What's in the Box"
-function ACN_2()
-    yield("/vnav moveto -327.86 12.89 9.79")
+function Arcanist2()
+    Movement(-327.86, 12.89, 9.79)
     VNavChecker()
     yield("/target Thubyrgeim")
     QuestNPC()
-    yield("/vnav moveto -335.29 11.99 54.45")
+    Movement(-335.29, 11.99, 54.45)
     VNavChecker()
     Teleporter("Zephyr", "li")
     ZoneTransitions()
-    yield("/vnav moveto 219.94 66.81 287.77")
+    Movement(219.94, 66.81, 287.77)
     VNavChecker()
     ZoneTransitions()
-    yield("/vnav moveto 381.76 71.93 -256.04")
+    Movement(381.76, 71.93, -256.04)
     VNavChecker()
     QuestChecker(ArcanistEnemies[4], 25, "_ToDoList", 13, 3, x, x, x, "Slay wild dodos.")
-    yield("/vnav moveto 418.06 65.90 -160.37")
+    Movement(418.06, 65.90, -160.37)
     VNavChecker()
     QuestChecker(ArcanistEnemies[5], 25, "_ToDoList", 13, 3, x, x, x, "Report to Thubyrgeim at the Arcanists' Guild.")
     --yield("/wait 1.6")
@@ -474,15 +479,15 @@ function ACN_2()
     ZoneTransitions()
     Teleporter("Arcanist", "li")
     ZoneTransitions()
-    yield("/vnav moveto -327.86 12.89 9.79")
+    Movement(-327.86, 12.89, 9.79)
     VNavChecker()
     yield("/target Thubyrgeim")
     QuestNPC()
-    yield("/vnav moveto -335.29 11.99 54.45")
+    Movement(-335.29, 11.99, 54.45)
     VNavChecker()
     Teleporter("Zephyr", "li")
     ZoneTransitions()
-    yield("/vnav moveto -0.007 24.5 194.68")
+    Movement(-0.007, 24.5, 194.68)
     VNavChecker()
     yield("/target Practice Crates")
     QuestNPC()
@@ -494,7 +499,7 @@ function ACN_2()
         yield("/wait 0.1")
     until not GetCharacterCondition(26)
     yield("/rotation off")
-    yield("/vnav moveto -0.007 24.5 194.68")
+    Movement(-0.007, 24.5, 194.68)
     VNavChecker()
     yield("/wait 1.6")
     -- probably should make this a function for future stuff...
@@ -520,27 +525,27 @@ function ACN_2()
     ZoneTransitions()
     Teleporter("Arcanist", "li")
     ZoneTransitions()
-    yield("/vnav moveto -327.86 12.89 9.79")
+    Movement(-327.86, 12.89, 9.79)
     VNavChecker()
     yield("/target Thubyrgeim")
     QuestNPC()
 end
 
 -- limsa arcanists' third quest level 10 "Tactical Planning"
-function ACN_3()
-    yield("/vnav moveto -327.86 12.89 9.79")
+function Arcanist3()
+    Movement(-327.86, 12.89, 9.79)
     VNavChecker()
     yield("/target Thubyrgeim")
     QuestNPC()
     Teleporter("Swiftperch", "tp")
     ZoneTransitions()
-    yield("/vnav moveto 674.92 19.37 436.02")
+    Movement(674.92, 19.37, 436.02)
     VNavChecker()
     QuestChecker(ArcanistEnemies[6], 25, "_ToDoList", 13, 3, x, x, x, "Slay roselings.")
     --yield("/wait 1.6")
     Teleporter("Moraby", "tp")
     ZoneTransitions()
-    yield("/vnav moveto 30.84 46.18 831.01")
+    Movement(30.84, 46.18, 831.01)
     VNavChecker()
     QuestChecker(ArcanistEnemies[7], 40, "_ToDoList", 13, 3, x, x, x, "Report to Thubyrgeim at the Arcanists' Guild.")
     --yield("/wait 1.6")
@@ -548,18 +553,18 @@ function ACN_3()
     ZoneTransitions()
     Teleporter("Arcanist", "li")
     ZoneTransitions()
-    yield("/vnav moveto -327.86 12.89 9.79")
+    Movement(-327.86, 12.89, 9.79)
     VNavChecker()
     yield("/target Thubyrgeim")
     QuestNPC()
-    yield("/vnav moveto -347.72 -2.37 12.88")
+    Movement(-347.72, -2.37, 12.88)
     VNavChecker()
     yield("/target K'lyhia")
     yield("/lockon")
     QuestNPC()
     Teleporter("Summerford", "tp")
     ZoneTransitions()
-    yield("/vnav moveto -103.76 46.15 -253.17")
+    Movement(-103.76, 46.15, -253.17)
     VNavChecker()
     yield("/target K'lyhia")
     yield("/pinteract")
@@ -578,7 +583,7 @@ function ACN_3()
     ZoneTransitions()
     Teleporter("Arcanist", "li")
     ZoneTransitions()
-    yield("/vnav moveto -327.86 12.89 9.79")
+    Movement(-327.86, 12.89, 9.79)
     VNavChecker()
     yield("/target Thubyrgeim")
     QuestNPC()
@@ -589,17 +594,17 @@ end
 --##############
 
 -- gridania arcanists' first quest level 1 "Way of the Archer"
-function ARC_1()
+function Archer1()
 
 end
 
 -- gridania arcanists' second quest level 5 "A Matter of Perspective"
-function ARC_2()
+function Archer2()
 
 end
 
 -- gridania arcanists' third quest level 10 "Training with Leih"
-function ARC_3()
+function Archer3()
 
 end
 
@@ -607,12 +612,12 @@ end
 -- JOB UNLOCKS
 --##############
 
-function FSH_UNLOCK()
+function FisherUnlock()
     Teleporter("Limsa", "tp")
     ZoneTransitions()
     Teleporter("Fisher", "li")
     ZoneTransitions()
-    yield("/vnav moveto -167.30 4.55 152.46")
+    Movement(-167.30, 4.55, 152.46)
     VNavChecker()
     yield("/target N'nmulika")
     yield("/pint")
@@ -624,9 +629,9 @@ function FSH_UNLOCK()
     yield("/wait 1.6")
     yield("/target N'nmulika")
     QuestNPC()
-    yield("/vnav moveto -173.59 4.2 162.77")
+    Movement(-173.59, 4.2, 162.77)
     VNavChecker()
-    yield("/vnav moveto -165.74 4.55 165.38")
+    Movement(-165.74, 4.55, 165.38)
     VNavChecker()
     yield("/target Sisipu")
     yield("/pint")
@@ -637,12 +642,12 @@ function FSH_UNLOCK()
     until IsPlayerAvailable()
 end
 
-function MIN_UNLOCK()
+function MinerUnlock()
     Teleporter("Ul'dah", "tp")
     ZoneTransitions()
     Teleporter("Miner", "li")
     ZoneTransitions()
-    yield("/vnav moveto 1.54 7.6 153.55")
+    Movement(1.54, 7.6, 153.55)
     VNavChecker()
     yield("/target Linette")
     yield("/pint")
@@ -654,7 +659,7 @@ function MIN_UNLOCK()
     yield("/wait 1.6")
     yield("/target Linette")
     QuestNPC()
-    yield("/vnav moveto -17.33 6.2 157.59")
+    Movement(-17.33, 6.2, 157.59)
     VNavChecker()
     yield("/target Adalberta")
     yield("/pint")
@@ -665,12 +670,12 @@ function MIN_UNLOCK()
     until IsPlayerAvailable()
 end
 
-function BTN_UNLOCK()
+function BotanistUnlock()
     Teleporter("Gridania", "tp")
     ZoneTransitions()
     Teleporter("Botanist", "li")
     ZoneTransitions()
-    yield("/vnav moveto -238.64 8 -144.90")
+    Movement(-238.64, 8, -144.90)
     VNavChecker()
     yield("/target Leonceault")
     yield("/pint")
@@ -682,7 +687,7 @@ function BTN_UNLOCK()
     yield("/wait 1.6")
     yield("/target Leonceault")
     QuestNPC()
-    yield("/vnav moveto -234.09 6.23 -170.02")
+    Movement(-234.09, 6.23, -170.02)
     VNavChecker()
     yield("/target Fufucha")
     yield("/pint")
@@ -697,11 +702,44 @@ end
 -- HUNT UNLOCKS
 --##############
 
-function Maelstrom_Rank_1()
+function MaelstromRank1()
     
 end
 
-function Maelstrom_Rank_2()
+function MaelstromRank2()
+    
+end
+
+--#################
+-- DUNGEON UNLOCKS
+--#################
+
+-- needs updating once nodescanner works
+function HalataliUnlock()
+    Teleporter("Horizon", "tp")
+    ZoneTransitions()
+    Movement(-471.37, 23.01, -355.12)
+    VNavChecker()
+    yield("/target Nedrick Ironheart")
+    QuestNPC()
+    -- once accepted quest
+    Teleporter("Camp Drybone", "tp")
+    ZoneTransitions()
+    Movement(-330.92, -22.48, 434.14)
+    VNavChecker()
+    yield("/target Fafajoni")
+    QuestNPC()
+end
+
+function TheSunkenTempleOfQarnUnlock()
+    
+end
+
+function DzemaelDarkholdUnlock()
+    
+end
+
+function TheAurumValeUnlock()
     
 end
 
@@ -714,29 +752,49 @@ function main()
     yield("/vbm cfg AI Enabled true")
     yield("/vbmai on")
     if DO_ARCANIST_QUESTS == 1 then
-        ACN_1()
-        ACN_2()
-        ACN_3()
+        Arcanist1()
+        Arcanist2()
+        Arcanist3()
     elseif DO_ARCHER_QUESTS == 1 then
-        ARC_1()
-        ARC_2()
-        ARC_3()
+        Archer1()
+        Archer2()
+        Archer3()
     end
     
+-- DoL
     if DO_DOL_QUESTS == 1 then
-        FSH_UNLOCK()
-        MIN_UNLOCK()
-        BTN_UNLOCK()
+        FisherUnlock()
+        MinerUnlock()
+        BotanistUnlock()
     end
     
+-- Hunt Logs
     if MaelstromEnemiesLog1 == 1 then
-        Maelstrom_Rank_1()
+        MaelstromRank1()
     end
     
     if MaelstromEnemiesLog2 == 1 then
-        Maelstrom_Rank_2()
+        MaelstromRank2()
     end
     
+-- Quests
+    if DO_HALATALI == 1 then
+        HalataliUnlock()
+    end
+    
+    if DO_THE_SUNKEN_TEMPLE_OF_QARN == 1 then
+        TheSunkenTempleOfQarnUnlock()
+    end
+    
+    if DO_DZEMAEL_DARKHOLD == 1 then
+        DzemaelDarkholdUnlock()
+    end
+    
+    if DO_THE_AURUM_VALE == 1 then
+        TheAurumValeUnlock()
+    end
+    
+-- GC tp
     Teleporter("gc", "li")
 end
 
