@@ -14,7 +14,7 @@ DO_MAELSTROM_LOG_1 = 1
 DO_MAELSTROM_LOG_2 = 0
 
 -- Quest unlocks
-DO_HALATALI = 1
+DO_HALATALI = 0
 DO_THE_SUNKEN_TEMPLE_OF_QARN = 0
 DO_DZEMAEL_DARKHOLD = 0
 DO_THE_AURUM_VALE = 0
@@ -413,7 +413,25 @@ end
 
 -- usage: Movement(674.92, 19.37, 436.02)
 function Movement(X_Position, Y_Position, Z_Position)
-    yield("/vnav moveto " .. X_Position .. Y_Position .. Z_Position)
+    NavReload()
+    repeat
+        yield("/wait 0.1")
+    until NavIsReady()
+    repeat
+        yield("/wait 0.1")
+        yield("/vnav moveto " .. X_Position .. Y_Position .. Z_Position)
+    until PathIsRunning()
+end
+
+-- usage: Interact()
+function Interact()
+    repeat
+        yield("/wait 0.1")
+    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
+    yield("/pint")
+    repeat
+        yield("/wait 0.1")
+    until IsPlayerAvailable()
 end
 
 --##############
@@ -702,8 +720,108 @@ end
 -- HUNT UNLOCKS
 --##############
 
-function MaelstromRank1()
-    
+function MaelstromRank1() --needs nodescanner adding and the matching text adjusting
+    -- Amalj'aa Hunter
+    Teleporter("Camp Drybone", "tp")
+    ZoneTransitions()
+    Movement(-112.60, -27.88, 343.99)
+    VNavChecker()
+    -- QuestChecker(MaelstromEnemiesLog1[1], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    Movement(-122.43, -30.10, 297.20)
+    VNavChecker()
+    -- QuestChecker(MaelstromEnemiesLog1[1], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    Movement(-122.43, -30.10, 297.20)
+    VNavChecker()
+    -- QuestChecker(MaelstromEnemiesLog1[1], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- Amalj'aa Bruiser
+    Movement(-169.97, -46.71, 493.46)
+    VNavChecker()
+    ZoneTransitions()
+    Movement(-157.06, 26.13, -410.14)
+    VNavChecker()
+    yield("/target Aetheryte")
+    Interact()
+    Movement(-32.69, 15.53, -277.9)
+    VNavChecker()
+    -- QuestChecker(MaelstromEnemiesLog1[8], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    Movement(-9.38, 15.62, -291.08)
+    VNavChecker()
+    -- QuestChecker(MaelstromEnemiesLog1[8], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(MaelstromEnemiesLog1[8], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- Sylvan Groan + Sylvan Sough
+    Teleporter("Bentbranch Meadows", "tp")
+    ZoneTransitions()
+    Movement(389.27, -3.36, -186.45)
+    VNavChecker()
+    ZoneTransitions()
+    Movement(-189.88, 4.43, 294.46)
+    VNavChecker()
+    yield("/target Aetheryte")
+    Interact()
+    Movement(-135.26, 15.12, -1.46)
+    VNavChecker()
+    -- QuestChecker(MaelstromEnemiesLog1[5], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(MaelstromEnemiesLog1[6], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    Movement(-104.98, 18.52, 14.46)
+    VNavChecker()
+    -- QuestChecker(MaelstromEnemiesLog1[5], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(MaelstromEnemiesLog1[6], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    Movement(-71.64, 17.58, 7.27)
+    VNavChecker()
+    -- QuestChecker(MaelstromEnemiesLog1[5], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(MaelstromEnemiesLog1[6], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- Kobold Pickman
+    Teleporter("Aleport", "tp")
+    ZoneTransitions()
+    Movement(417.30, 35.15, -17.66)
+    VNavChecker()
+    ZoneTransitions()
+    Movement(-477.30, 26.29, 61.12)
+    VNavChecker()
+    -- QuestChecker(MaelstromEnemiesLog1[7], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(MaelstromEnemiesLog1[7], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    Movement(-432.12, 38.29, 19.78)
+    VNavChecker()
+    -- QuestChecker(MaelstromEnemiesLog1[7], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- Ixali Straightbeak
+    Teleporter("New Gridania", "tp")
+    ZoneTransitions()
+    yield("/target Aetheryte")
+    Interact()
+    QuestNPCSingle("SelectString", true, "0")
+    yield("/pcall TelepotTown true 11 4u <wait.1>")
+    yield("/pcall TelepotTown true 11 4u")
+    ZoneTransitions()
+    Movement(-231, 15.75, -89.25)
+    VNavChecker()
+    ZoneTransitions()
+    Movement(53.52, -37.91, 312.72)
+    VNavChecker()
+    -- QuestChecker(MaelstromEnemiesLog1[9], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    Movement(75.32, -38.07, 331.25)
+    VNavChecker()
+    -- QuestChecker(MaelstromEnemiesLog1[9], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    Movement(75.83, -41.24, 352.80)
+    VNavChecker()
+    -- QuestChecker(MaelstromEnemiesLog1[9], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- Ixali Wildtalon
+    Movement(-36.96, -39.16, 232.40)
+    VNavChecker()
+    yield("/target Aetheryte")
+    Interact()
+    Movement(-405, 9.5, 128)
+    VNavChecker()
+    ZoneTransitions()
+    Movement(468.13, 232.79, 321.85)
+    -- QuestChecker(MaelstromEnemiesLog1[10], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    VNavChecker()
+    Movement(224.32, 301.51, -142.16)
+    VNavChecker()
+    Movement(229.20, 312.91, -235.02)
+    VNavChecker()
+    yield("/target Aetheryte")
+    Interact()
+    Teleport("Limsa", "tp")
 end
 
 function MaelstromRank2()
@@ -714,9 +832,10 @@ end
 -- DUNGEON UNLOCKS
 --#################
 
+-- can also probably use questionable once commands or ipc work better
 -- needs updating once nodescanner works
 function HalataliUnlock()
-    Teleporter("Horizon", "tp")
+    Teleporter("Horizon", "tp") -- could also use vesper bay ticket but needs the teleporter function adjusting
     ZoneTransitions()
     Movement(-471.37, 23.01, -355.12)
     VNavChecker()
