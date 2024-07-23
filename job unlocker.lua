@@ -321,24 +321,29 @@ end
 -- QuestChecker(ArcanistEnemies[7], 40, "_ToDoList", "Report to Thubyrgeim at the Arcanists' Guild.")
 
 function NodeScanner(GetNodeTextType, GetNodeTextMatch)
-    if GetNodeTextType == "MonsterNote" then
-        return -- no scanner for monsternote yet
-    elseif GetNodeTextType == "_ToDoList" then
-        return TodoListScanner(GetNodeTextMatch)
-    end
-end
-
-function TodoListScanner(GetNodeTextMatch)
-    for location = 2, 21 do
-        for subNode = 1, 13 do
-            local nodeCheck = GetNodeText("_ToDoList", location, subNode)
+    NodeTypeCount = tonumber(GetNodeListCount(GetNodeTextType))
+    for location = 0, NodeTypeCount do
+        for subNode = 0, 60 do
+            yield("/wait 0.0001")
+            local nodeCheck = GetNodeText(GetNodeTextType, location, subNode)
             if nodeCheck == GetNodeTextMatch then
-                yield("/echo " .. nodeCheck .. " found at: ".. location .." ".. subNode)
                 return location, subNode
             end
         end
     end
-    yield("/echo Quest not found")
+    -- deeper scan
+    for location = 0, NodeTypeCount do
+        for subNode = 0, 60 do
+            for subNode2 = 0, 20 do
+                yield("/wait 0.0001")
+                local nodeCheck = GetNodeText(GetNodeTextType, location, subNode, subNode2)
+                if nodeCheck == GetNodeTextMatch then
+                    return location, subNode, subNode2
+                end
+            end
+        end
+    end
+    yield("/echo Can't find the node text")
     return
 end
 
