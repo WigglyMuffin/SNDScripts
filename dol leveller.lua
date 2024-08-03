@@ -1,13 +1,15 @@
+-- Ideally used with The Road to 90 buff, otherwise it will take double the amount for everything
+-- You need approx 2m gil per character you wish to level through this with The Road to 90, probably 4mil with no buff (no clue, you won't have the double xp though)
+-- You likely only need around 20-30 per item it asks for, fish 2-3, very unlikely you need more than that, don't spend more than 20k or try not to
+-- This is not a full automated script (yet, maybe maybe not)
+-- It will teleport you to a market board, you are required to purchase the items the GC asks for, after that it will auto turnin and log off, you will need to start the script again for additional characters
+-- If the market board does not have the item you need, stop the script and go to another world, start the script again
+-- Closing the market board early doesn't matter either, cancel the tp and buy items, then /tp limsa
+-- You should use the Yes Already plugin to bypass the capped seals warning or it will break the script
+
 --##########################################
 --   CONFIGS
 --##########################################
-
-
-
-
-
-
-
 
 
 --##########################################
@@ -83,13 +85,35 @@ end
 
 -- usage: Teleporter("Limsa", "tp")
 function Teleporter(Location, TP_Kind) -- Teleporter handler
+    local lifestream_stopped = false
+    -- Initial check to ensure player can teleport
     repeat
         yield("/wait 0.1")
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
-    yield("/" .. TP_Kind .. " " .. Location)
-    repeat
-        yield("/wait 0.1")
-    until IsPlayerAvailable()
+    -- Try teleport, retry if fail indefinitely
+    while true do
+        -- Stop lifestream only once per teleport attempt
+        if TP_Kind == "li" and not lifestream_stopped then
+            yield("/lifestream stop")
+            lifestream_stopped = true
+            yield("/wait 0.1")
+        end
+        -- Attempt teleport
+        if not IsPlayerCasting() then
+            yield("/" .. TP_Kind .. " " .. Location)
+            yield("/wait 1")
+            -- If casting was not interrupted, reset lifestream_stopped for next retry
+            if not IsPlayerCasting() then
+                lifestream_stopped = false
+            end
+        else
+            yield("/wait 0.1")
+        end
+        -- Exit if successful conditions are met
+        if GetCharacterCondition(45) or GetCharacterCondition(51) then
+            break
+        end
+    end
 end
 
 function OpenTimers()

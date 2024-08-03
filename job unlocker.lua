@@ -1,3 +1,11 @@
+-- You should have used Questionable plugin (https://git.carvel.li/liza/Questionable/) or equivalent for MSQ completion up to certain points listed below, but at the very least up until you can select your GC
+-- All options are better used when a mount is unlocked, mounts are not required as it has fallback but will slow the speed of completion
+-- Job quests are completed so you can unlock other jobs which are required for min/btn/fsh unlocks, only the first 3 job quests are included here
+-- DoL unlocks are for use with the dol leveller script, but mainly for ability to bulk level up retainers so they can be min/btn/fsh jobs
+-- Maelstrom log rank 1 should be used after you have selected your GC and ideally have gotten your mount (not required but speeds everything up)
+-- Maelstrom log rank 2 should be used after you have a combat 47 as Aurum Vale requires level 47
+-- The quest unlocks will unlock the optional quests required for each stage of the Maelstrom progression, see the comments below for what they are for
+
 --##########################################
 --   CONFIGS
 --##########################################
@@ -14,13 +22,10 @@ DO_MAELSTROM_LOG_1 = 1
 DO_MAELSTROM_LOG_2 = 0
 
 -- Quest unlocks
-DO_HALATALI = 0
-DO_THE_SUNKEN_TEMPLE_OF_QARN = 0
-DO_DZEMAEL_DARKHOLD = 0
-DO_THE_AURUM_VALE = 0
-
--- Level until n
-DO_LEVEL = 47
+DO_HALATALI = 0                  -- Maelstrom hunt log 1 hunt enemies       Hallo Halatali
+DO_THE_SUNKEN_TEMPLE_OF_QARN = 0 -- Maelstrom hunt log 2 hunt enemies       Braving New Depths
+DO_DZEMAEL_DARKHOLD = 0          -- Chief Storm Sergeant requirement        Shadows Uncast (Maelstrom)
+DO_THE_AURUM_VALE = 0            -- Second Storm Lieutenant requirement     Going for Gold
 
 --##########################################
 --   DON'T TOUCH ANYTHING BELOW HERE 
@@ -367,13 +372,36 @@ end
 -- usage: Teleporter("Limsa", "tp")
 -- add support for item tp
 function Teleporter(Location, TP_Kind) -- Teleporter handler
+    local lifestream_stopped = false
+    local extra_cast_time_buffer = 1
+    -- Initial check to ensure player can teleport
     repeat
         yield("/wait 0.1")
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
-    yield("/" .. TP_Kind .. " " .. Location)
-    repeat
-        yield("/wait 0.1")
-    until IsPlayerAvailable()
+    -- Try teleport, retry if fail indefinitely
+    while true do
+        -- Stop lifestream only once per teleport attempt
+        if TP_Kind == "li" and not lifestream_stopped then
+            yield("/lifestream stop")
+            lifestream_stopped = true
+            yield("/wait 0.1")
+        end
+        -- Attempt teleport
+        if not IsPlayerCasting() then
+            yield("/" .. TP_Kind .. " " .. Location)
+            yield("/wait " .. 1 + extra_cast_time_buffer) -- Wait for cast to complete
+            -- If casting was not interrupted, reset lifestream_stopped for next retry
+            if not IsPlayerCasting() then
+                lifestream_stopped = false
+            end
+        else
+            yield("/wait 0.1")
+        end
+        -- Exit if successful conditions are met
+        if GetCharacterCondition(45) or GetCharacterCondition(51) then
+            break
+        end
+    end
 end
 
 -- usage: Mount("SDS Fenrir") can leave empty for mount roulette
@@ -424,7 +452,7 @@ function Movement(X_Position, Y_Position, Z_Position)
     until NavIsReady()
     repeat
         yield("/wait 0.1")
-        yield("/vnav moveto " .. X_Position .. Y_Position .. Z_Position)
+        yield("/vnav moveto " .. X_Position .." ".. Y_Position.. " " .. Z_Position)
     until PathIsRunning()
 end
 
