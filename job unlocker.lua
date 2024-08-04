@@ -300,11 +300,24 @@ function QuestInstance() -- Targetting/Movement Logic for Solo Duties
 end
 
 function GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get_node_text_location_1, get_node_text_location_2)
+    bypass = "next task"
     if get_node_text_location_2 == nil then 
-        return GetNodeText(get_node_text_type, get_node_text_location, get_node_text_location_1)
+        LogInfo("GetNodeTextLookupUpdate: "..get_node_text_type.." "..get_node_text_location.." "..get_node_text_location_1)
+        get_node_text = GetNodeText(get_node_text_type, get_node_text_location, get_node_text_location_1)
+        if get_node_text == get_node_text_location_1 then
+            return bypass
+        else
+            return get_node_text
+        end
     --- i hate
     else
-        return GetNodeText(get_node_text_type, get_node_text_location, get_node_text_location_1, get_node_text_location_2)
+        LogInfo("GetNodeTextLookupUpdate2: "..get_node_text_type.." "..get_node_text_location.." "..get_node_text_location_1.." "..get_node_text_location_2)
+        get_node_text = GetNodeText(get_node_text_type, get_node_text_location, get_node_text_location_1, get_node_text_location_2)
+        if get_node_text == get_node_text_location_2 then
+            return bypass
+        else
+            return get_node_text
+        end
     --- this function
     end
     yield("/echo uh GetNodeTextLookupUpdate fucked up")
@@ -323,7 +336,6 @@ function QuestChecker(target_name, target_distance, get_node_text_type, get_node
     while true do
         --UiCheck(get_node_text_type)
         updated_node_text = GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get_node_text_location_1, get_node_text_location_2)
-        yield("/echo gushidshjido")
         LogInfo("[JU] updated_node_text: "..updated_node_text)
         LogInfo("[JU] Extract: "..extractTask(updated_node_text))
         local last_char = string.sub(updated_node_text, -1)
@@ -405,7 +417,7 @@ end
 -- add support for item tp
 function Teleporter(location, tp_kind) -- Teleporter handler
     local lifestream_stopped = false
-    local extra_cast_time_buffer = 1
+    local extra_cast_time_buffer = 0
     -- Initial check to ensure player can teleport
     repeat
         yield("/wait 0.1")
@@ -421,14 +433,15 @@ function Teleporter(location, tp_kind) -- Teleporter handler
         -- Attempt teleport
         if not IsPlayerCasting() then
             yield("/" .. tp_kind .. " " .. location)
-            yield("/wait " .. 1 + extra_cast_time_buffer) -- Wait for cast to complete
+            yield("/wait 2")
             -- If casting was not interrupted, reset lifestream_stopped for next retry
             if not IsPlayerCasting() then
                 lifestream_stopped = false
             end
-        else
-            yield("/wait 0.1")
+        elseif IsPlayerCasting() then
+            yield("/wait " .. 4 + extra_cast_time_buffer) -- Wait for cast to complete
         end
+
         -- Exit if successful conditions are met
         if GetCharacterCondition(45) or GetCharacterCondition(51) then
             break
@@ -711,57 +724,51 @@ end
    
 -- gridania arcanists' second quest level 5 "A Matter of Perspective"
 function Archer2()
-    --Teleporter("New Gridania", "tp")
-    --ZoneTransitions()
-    --Teleporter("Archers' Guild", "li")
-    --ZoneTransitions()
-    --Movement(207.80, 0.10, 35.06)
-    --VNavChecker()
-    --yield("/target Luciane")
-    --QuestNPC()
-    --Movement(187.65, -1.25, 63.54)
-    --VNavChecker()
-    --yield("/target Archery Butt")
-    --yield("/wait 0.5")
-    --yield('/ac "Heavy Shot"')
-    --Movement(109.31, 0.12, 59.86)
-    --VNavChecker()
-    --yield("/target Archery Butt")
-    --yield("/wait 0.5")
-    --yield('/ac "Heavy Shot"')
-    --Movement(50.87, 0.93, 25.88)
-    --VNavChecker()
-    --yield("/target Archery Butt")
-    --yield("/wait 0.5")
-    --yield('/ac "Heavy Shot"')
-    --Movement(51.35, -1.52, 61.06)
-    --VNavChecker()
-    --yield("/target Archery Butt")
-    --yield("/wait 0.5")
-    --yield('/ac "Heavy Shot"')
-    --Movement(66.11, -4.96, 91.91)
-    --VNavChecker()
-    --yield("/target Archery Butt")
-    --yield("/wait 0.5")
-    --yield('/ac "Heavy Shot"')
-    --Movement(57.20, -8.56, 105.41)
-    --VNavChecker()
-    --yield("/target Archery Butt")
-    --yield("/wait 0.5")
-    --yield('/ac "Heavy Shot"')
-    --Movement(34.93, 1.92, 34.09)
-    --VNavChecker()
-    --Teleporter("Archers' Guild", "li")
-    --ZoneTransitions()
-    --Movement(207.80, 0.10, 35.06)
-    --VNavChecker()
-    --yield("/target Luciane")
-    --QuestNPC()
-    --Teleporter("Fallgourd","tp")
-    --ZoneTransitions()
+    Teleporter("New Gridania", "tp")
+    ZoneTransitions()
+    Teleporter("Archers' Guild", "li")
+    ZoneTransitions()
+    Movement(207.80, 0.10, 35.06)
+    VNavChecker()
+    yield("/target Luciane")
+    QuestNPC()
+    Movement(187.65, -1.25, 63.54)
+    VNavChecker()
+    yield("/target Archery Butt")
+    yield('/ac "Heavy Shot"')
+    Movement(109.31, 0.12, 59.86)
+    VNavChecker()
+    yield("/target Archery Butt")
+    yield('/ac "Heavy Shot"')
+    Movement(50.87, 0.93, 25.88)
+    VNavChecker()
+    yield("/target Archery Butt")
+    yield('/ac "Heavy Shot"')
+    Movement(51.35, -1.52, 61.06)
+    VNavChecker()
+    yield("/target Archery Butt")
+    yield('/ac "Heavy Shot"')
+    Movement(66.11, -4.96, 91.91)
+    VNavChecker()
+    yield("/target Archery Butt")
+    yield('/ac "Heavy Shot"')
+    Movement(57.20, -8.56, 105.41)
+    VNavChecker()
+    yield("/target Archery Butt")
+    yield('/ac "Heavy Shot"')
+    Movement(34.93, 1.92, 34.09)
+    VNavChecker()
+    Teleporter("Archers' Guild", "li")
+    ZoneTransitions()
+    Movement(207.80, 0.10, 35.06)
+    VNavChecker()
+    yield("/target Luciane")
+    QuestNPC()
+    Teleporter("Fallgourd","tp")
+    ZoneTransitions()
     Movement(307.65, -19.79, 171.31)
     VNavChecker()
-    QuestChecker(ArcherEnemies[4], 25, "_ToDoList", "Slay opo-opos.")
+    QuestChecker(ArcherEnemies[4], 60, "_ToDoList", "Slay opo-opos.")
     Movement(301.68, -9.38, 11.51)
     VNavChecker()
     QuestChecker(ArcherEnemies[5], 60, "_ToDoList", "Slay microchus.")
@@ -777,6 +784,7 @@ end
 
 -- gridania arcanists' third quest level 10 "Training with Leih"
 function Archer3()
+    yield("/wait 1")
     yield("/target Luciane")
     QuestNPC()
     Movement(208.91, 0.00, 29.65)
@@ -789,35 +797,35 @@ function Archer3()
     Movement(-88.03, -4.58, -73.39)
     VNavChecker()
     yield("/target Archery Butt")
-    yield("/wait 0.1")
     yield('/ac "Heavy Shot"')
+    yield("/wait 0.2")
     Movement(-112.35, -3.95, -64.35)
     VNavChecker()
     yield("/target Archery Butt")
-    yield("/wait 0.1")
     yield('/ac "Heavy Shot"')
-    Movement(-122.00, -3.26, -66.78)
+    yield("/wait 0.2")
+    Movement(-135.89, -1.61, -71.04)
     VNavChecker()
     yield("/target Archery Butt")
-    yield("/wait 0.1")
     yield('/ac "Heavy Shot"')
+    yield("/wait 0.2")
     --Second zone
     Movement(-146.34, 3.64, -129.18)
     VNavChecker()
     yield("/target Archery Butt")
-    yield("/wait 0.1")
     yield('/ac "Heavy Shot"')
+    yield("/wait 0.2")
     Movement(-111.04, 7.75, -164.70)
     VNavChecker()
     yield("/target Archery Butt")
-    yield("/wait 0.1")
     yield('/ac "Heavy Shot"')
+    yield("/wait 0.2")
     -- Third zone
     Movement(-80.48, 0.53, -176.20)
     VNavChecker()
     yield("/target Archery Butt")
-    yield("/wait 0.1")
     yield('/ac "Heavy Shot"')
+    yield("/wait 0.2")
     -- Report to Leih Aliapoh
     Teleporter("New Gridania", "tp")
     ZoneTransitions()
@@ -856,10 +864,10 @@ function Archer3()
     ZoneTransitions()
     Movement(-496.79, 8.99, 89.93)
     VNavChecker()
-    QuestChecker(ArcherEnemies[7], 25, "_ToDoList", "Slay northern vultures.")
+    QuestChecker(ArcherEnemies[7], 50, "_ToDoList", "Slay northern vultures.")
     Movement(-448.56, -0.31, 226.01)
     VNavChecker()
-    QuestChecker(ArcherEnemies[6], 25, "_ToDoList", "Slay tree slugs.")
+    QuestChecker(ArcherEnemies[6], 50, "_ToDoList", "Slay tree slugs.")
     --Report to Leih
     Teleporter("New Gridania", "tp")
     ZoneTransitions()
@@ -870,8 +878,10 @@ function Archer3()
     yield("/target Leih Aliapoh")
     QuestNPC()
     -- report to Luciane
+    Movement(207.80, 0.10, 35.06)
+    VNavChecker()
     yield("/target Luciane")
-    QuestNPC()
+    yield("/pint")
     repeat 
         yield("/wait 0.1")
     until IsAddonReady("SelectYesno")
