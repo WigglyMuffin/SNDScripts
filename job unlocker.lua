@@ -14,11 +14,11 @@
 -- Should really change to a DO_JOB_QUESTS = "Arcanist" or something
 --DO_JOB_QUESTS = "Arcanist"
 DO_ARCANIST_QUESTS = 0
-DO_ARCHER_QUESTS = 0
+DO_ARCHER_QUESTS = 1
 
 DO_DOL_QUESTS = 0
 
-DO_MAELSTROM_LOG_1 = 1
+DO_MAELSTROM_LOG_1 = 0
 DO_MAELSTROM_LOG_2 = 0
 
 -- Quest unlocks
@@ -158,19 +158,18 @@ end
 -- ALWAYS takes target = X
 -- ALWAYS takes enemy_max_dist = X
 -- not explicitly used
-function QuestCombat(target1)
-    local all_targets = {target1}
+function QuestCombat(target, enemy_max_dist)
+    local all_targets = {target}
     local combined_list = {}
     local best_target = 0
     local lowest_distance = 0
     for _, current_target in ipairs(all_targets) do
         local current_list = {}
         for i = 0, 20 do
-            yield("/echo <list." .. i .. ">")
+            --yield("/echo <list." .. i .. ">")
             yield("/target " .. current_target .. " <list." .. i .. ">")
             yield("/wait 0.1")
-            local current_target_name = GetTargetName()
-            if (current_target_name == target1) and GetTargetHP() > 0 and GetDistanceToTarget() <= enemy_max_dist then
+            if (GetTargetName() == target) and GetTargetHP() > 0 and GetDistanceToTarget() <= enemy_max_dist then
                 local distance = GetDistanceToTarget()
                 table.insert(current_list, {target = current_target, index = i, distance = distance})
             end
@@ -300,8 +299,17 @@ function QuestInstance() -- Targetting/Movement Logic for Solo Duties
     end
 end
 
-function GetNodeTextLookupUpdate(GetNodeTextMatchLocation)
-    return GetNodeText("_ToDoList", GetNodeTextMatchLocation)
+function GetNodeTextLookupUpdate(GetNodeTextType, GetNodeTextLocation, GetNodeTextLocation_1, GetNodeTextLocation_2)
+    if (not GetNodeTextLocation_2 and not GetNodeTextLocation_1) then
+        return GetNodeText(GetNodeTextType, GetNodeTextLocation)
+    --- i 
+    elseif (not GetNodeTextLocation_2 and GetNodeTextLocation_1) then 
+        return GetNodeText(GetNodeTextType, GetNodeTextLocation, GetNodeTextLocation_1)
+    --- hate
+    elseif (GetNodeTextLocation_2 and GetNodeTextLocation_1) then
+        return GetNodeText(GetNodeTextType, GetNodeTextLocation, GetNodeTextLocation_1, GetNodeTextLocation_2)
+    --- this function
+    end
 end
 
 -- usage: QuestChecker(ArcanistEnemies[3], 25, "_ToDoList", "Slay little ladybugs.")
@@ -309,14 +317,19 @@ end
 function QuestChecker(target_name, target_distance, GetNodeTextType, GetNodeTextMatch) -- Quest and UI element handler
     local target = target_name
     local enemy_max_dist = target_distance
-    local GetNodeTextMatchLocation = tostring.(NodeScanner(GetNodeTextType, GetNodeTextMatch))
+    local GetNodeTextLocation, GetNodeTextLocation_1, GetNodeTextLocation_2 = NodeScanner(GetNodeTextType, GetNodeTextMatch)
+    local function extractTask(text)
+        local task = string.match(text, "^(.-)%s%d+/%d+$")
+        return task or text
+    end
     while true do
         UiCheck(GetNodeTextType)
-        if GetNodeTextLookupUpdate(GetNodeTextMatchLocation) == GetNodeTextMatch then
+        UpdatedNodeText = GetNodeTextLookupUpdate(GetNodeTextType, GetNodeTextLocation, GetNodeTextLocation_1, GetNodeTextLocation_2)
+        if UpdatedNodeText == GetNodeTextMatch then
             UiCheck(GetNodeTextType, true)
             break
         end
-        QuestCombat(target_name)
+        QuestCombat(target_name, enemy_max_dist)
     end
     -- checks if player in combat before ending rotation solver
     if not GetCharacterCondition(26) then
@@ -327,11 +340,21 @@ end
 
 function NodeScanner(GetNodeTextType, GetNodeTextMatch)
     NodeTypeCount = tonumber(GetNodeListCount(GetNodeTextType))
+    local function extractTask(text)
+        local task = string.match(text, "^(.-)%s*%d*/%d*$")
+        return task or text
+    end
     for location = 0, NodeTypeCount do
         for subNode = 0, 60 do
             yield("/wait 0.0001")
             local nodeCheck = GetNodeText(GetNodeTextType, location, subNode)
-            if nodeCheck == GetNodeTextMatch then
+            local CleanNodeText = extractTask(nodeCheck)
+            if CleanNodeText == nil then
+            else 
+                    LogInfo(tostring(CleanNodeText))
+            end
+            if CleanNodeText == GetNodeTextMatch then
+                yield("/e ".. tostring(location) .." ".. tostring(subNode))
                 return location, subNode
             end
         end
@@ -342,7 +365,13 @@ function NodeScanner(GetNodeTextType, GetNodeTextMatch)
             for subNode2 = 0, 20 do
                 yield("/wait 0.0001")
                 local nodeCheck = GetNodeText(GetNodeTextType, location, subNode, subNode2)
-                if nodeCheck == GetNodeTextMatch then
+                local CleanNodeText = extractTask(nodeCheck)
+                if CleanNodeText == nil then
+                else 
+                    LogInfo(tostring(CleanNodeText))
+                end
+                if CleanNodeText == GetNodeTextMatch then
+                    yield("/e ".. tostring(location) .." ".. tostring(subNode) .." ".. tostring(subNode2))
                     return location, subNode, subNode2
                 end
             end
@@ -646,17 +675,179 @@ end
 
 -- gridania arcanists' first quest level 1 "Way of the Archer"
 function Archer1()
-
+    -- forgot to do this one, probs will later.
 end
-
+   
 -- gridania arcanists' second quest level 5 "A Matter of Perspective"
 function Archer2()
-
+    Teleporter("New Gridania", "tp")
+    ZoneTransitions()
+    Teleporter("Archers' Guild", "li")
+    ZoneTransitions()
+    Movement(207.80, 0.10, 35.06)
+    VNavChecker()
+    yield("/target Luciane")
+    QuestNPC()
+    Movement(187.65, -1.25, 63.54)
+    VNavChecker()
+    yield("/target Archery Butt")
+    yield("/wait 0.5")
+    yield('/ac "Heavy Shot"')
+    Movement(109.31, 0.12, 59.86)
+    VNavChecker()
+    yield("/target Archery Butt")
+    yield("/wait 0.5")
+    yield('/ac "Heavy Shot"')
+    Movement(50.87, 0.93, 25.88)
+    VNavChecker()
+    yield("/target Archery Butt")
+    yield("/wait 0.5")
+    yield('/ac "Heavy Shot"')
+    Movement(51.35, -1.52, 61.06)
+    VNavChecker()
+    yield("/target Archery Butt")
+    yield("/wait 0.5")
+    yield('/ac "Heavy Shot"')
+    Movement(66.11, -4.96, 91.91)
+    VNavChecker()
+    yield("/target Archery Butt")
+    yield("/wait 0.5")
+    yield('/ac "Heavy Shot"')
+    Movement(57.20, -8.56, 105.41)
+    VNavChecker()
+    yield("/target Archery Butt")
+    yield("/wait 0.5")
+    yield('/ac "Heavy Shot"')
+    Movement(34.93, 1.92, 34.09)
+    VNavChecker()
+    Teleporter("Archers' Guild", "li")
+    ZoneTransitions()
+    Movement(207.80, 0.10, 35.06)
+    VNavChecker()
+    yield("/target Luciane")
+    QuestNPC()
+    Teleporter("Fallgourd","tp")
+    ZoneTransitions()
+    Movement(307.65, -19.79, 171.31)
+    VNavChecker()
+    QuestChecker(ArcherEnemies[4], 25, "_ToDoList", "Slay opo-opos.")
+    Movement(301.68, -9.38, 11.51)
+    VNavChecker()
+    QuestChecker(ArcherEnemies[5], 60, "_ToDoList", "Slay microchus.")
+    Teleporter("New Gridania", "tp")
+    ZoneTransitions()
+    Teleporter("Archers' Guild", "li")
+    ZoneTransitions()
+    Movement(207.80, 0.10, 35.06)
+    VNavChecker()
+    yield("/target Luciane")
+    QuestNPC()
 end
 
 -- gridania arcanists' third quest level 10 "Training with Leih"
 function Archer3()
-
+    yield("/target Luciane")
+    QuestNPC()
+    Movement(208.91, 0.00, 29.65)
+    VNavChecker()
+    yield("/target Leih Aliapoh")
+    QuestNPC()
+    Teleporter("Bentbranch", "tp")
+    ZoneTransitions()
+     First zone
+    Movement(-88.03, -4.58, -73.39)
+    VNavChecker()
+    yield("/target Archery Butt")
+    yield("/wait 0.1")
+    yield('/ac "Heavy Shot"')
+    Movement(-112.35, -3.95, -64.35)
+    VNavChecker()
+    yield("/target Archery Butt")
+    yield("/wait 0.1")
+    yield('/ac "Heavy Shot"')
+    Movement(-122.00, -3.26, -66.78)
+    VNavChecker()
+    yield("/target Archery Butt")
+    yield("/wait 0.1")
+    yield('/ac "Heavy Shot"')
+     Second zone
+    Movement(-146.34, 3.64, -129.18)
+    VNavChecker()
+    yield("/target Archery Butt")
+    yield("/wait 0.1")
+    yield('/ac "Heavy Shot"')
+    Movement(-111.04, 7.75, -164.70)
+    VNavChecker()
+    yield("/target Archery Butt")
+    yield("/wait 0.1")
+    yield('/ac "Heavy Shot"')
+    -- Third zone
+    Movement(-80.48, 0.53, -176.20)
+    VNavChecker()
+    yield("/target Archery Butt")
+    yield("/wait 0.1")
+    yield('/ac "Heavy Shot"')
+    -- Report to Leih Aliapoh
+    Teleporter("New Gridania", "tp")
+    ZoneTransitions()
+    Teleporter("Archers' Guild", "li")
+    ZoneTransitions()
+    Movement(208.91, 0.00, 29.65)
+    VNavChecker()
+    yield("/target Leih Aliapoh")
+    QuestNPC()
+     Kill some enemies
+    Movement(147.35, -0.24, 84.22)
+    VNavChecker()
+    Movement(115.20, -0.14, 74.28)
+    VNavChecker()
+    Movement(94.11, 3.91, 24.27)
+    VNavChecker()
+    Movement(99.57, 4.77, 17.09)
+    VNavChecker()
+    Movement(101.94, 5.31, 13.12)
+    yield("/wait 2")
+    ZoneTransitions()
+    Movement(179.43, -2.16, -242.84)
+    VNavChecker()
+    yield("/target Romarique")
+    yield("/wait 0.5")
+    yield("/pint")
+    repeat 
+        yield("/wait 0.1")
+    until IsAddonReady("SelectIconString")
+    yield("/pcall SelectIconString true 0")
+    yield("/wait 1")
+    repeat 
+        yield("/wait 0.1")
+    until IsAddonReady("SelectYesno")
+    yield("/pcall SelectYesno true 0")
+    ZoneTransitions()
+    Movement(-496.79, 8.99, 89.93)
+    VNavChecker()
+    QuestChecker(ArcherEnemies[7], 25, "_ToDoList", "Slay northern vultures.")
+    Movement(-448.56, -0.31, 226.01)
+    VNavChecker()
+    QuestChecker(ArcherEnemies[6], 25, "_ToDoList", "Report to Leih Aliapoh.")
+    -- Report to Leih
+    Teleporter("New Gridania", "tp")
+    ZoneTransitions()
+    Teleporter("Archers' Guild", "li")
+    ZoneTransitions()
+    Movement(208.91, 0.00, 29.65)
+    VNavChecker()
+    yield("/target Leih Aliapoh")
+    QuestNPC()
+    -- report to Luciane
+    yield("/target Luciane")
+    QuestNPC()
+    repeat 
+        yield("/wait 0.1")
+    until IsNodeVisible("SelectYesno")
+    yield("/pcall SelectIconString false 0")
+    repeat 
+        yield("/wait 0.1")
+    until IsPlayerAvailable()
 end
 
 --##############
