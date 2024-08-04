@@ -437,15 +437,33 @@ function Teleporter(location, tp_kind) -- Teleporter handler
 end
 
 -- usage: Mount("SDS Fenrir") can leave empty for mount roulette
+<<<<<<< HEAD
 function Mount(mount_name)
     -- return if player already mounted
+=======
+function Mount(MountName)
+    local max_retries = 10   -- Maximum number of retries
+    local retry_interval = 1 -- Time interval between retries in seconds
+    local retries = 0       -- Counter for the number of retries
+    
+    -- Check if the player has unlocked mounts by checking the quest completion
+    if not (IsQuestComplete(66236) or IsQuestComplete(66237) or IsQuestComplete(66238)) then
+        yield('/e You do not have a mount unlocked, please consider completing the "My Little Chocobo" quest.')
+        yield("/e Skipping mount.")
+        return
+    end
+    
+    -- Return if the player is already mounted
+>>>>>>> 9656b36a20df2d82a6ef40271811673c0eb63bc2
     if GetCharacterCondition(4) then
         return
     end
-    -- wait until the player is available, not casting, and not in combat
+    
+    -- Initial check to ensure the player can mount
     repeat
         yield("/wait 0.1")
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
+<<<<<<< HEAD
     -- if mount_name is empty then use mount roulette instead
     if mount_name == nil then
         repeat
@@ -457,8 +475,37 @@ function Mount(mount_name)
             yield('/mount "' .. mount_name .. '"')
             yield("/wait 0.1")
         until GetCharacterCondition(27) 
+=======
+    
+    -- Retry loop for mounting with a max retry limit (set above)
+    while retries < max_retries do
+        -- Attempt to mount using the chosen mount or Mount Roulette if none
+        if MountName == nil then
+            yield('/ac "Mount Roulette"')
+        else
+            yield('/mount "' .. MountName .. '"')
+        end
+        
+        -- Wait for the retry interval
+        yield("/wait " .. retry_interval)
+        
+        -- Exit loop if the player mounted
+        if GetCharacterCondition(4) then
+            yield("/e Successfully mounted after " .. retries .. " retries.")
+            break
+        end
+        
+        -- Increment the retry counter
+        retries = retries + 1
+>>>>>>> 9656b36a20df2d82a6ef40271811673c0eb63bc2
     end
-    -- wait until player available and is mounted
+    
+    -- Check if max retries were reached without success
+    if retries >= max_retries then
+        yield("/e Failed to mount after max retries (" .. max_retries .. ").")
+    end
+    
+    -- Check player is available and mounted
     repeat
         yield("/wait 0.1")
     until IsPlayerAvailable() and GetCharacterCondition(4)
