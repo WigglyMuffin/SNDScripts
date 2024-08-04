@@ -33,7 +33,7 @@ DO_THE_AURUM_VALE = false            -- Second Storm Lieutenant requirement     
 --##########################################
 
 -- Enemy names for Arcanist quests
-local arcanist_enemies = {
+local ArcanistEnemies = {
     "Wharf Rat",           -- arcanist_01 quest 1
     "Aurelia",             -- arcanist_02 quest 1
     "Little Ladybug",      -- arcanist_03 quest 1
@@ -44,7 +44,7 @@ local arcanist_enemies = {
 }
 
 -- Enemy names for Archer quests
-local archer_enemies = {
+local ArcherEnemies = {
     "Ground Squirrel",     -- archer_01 quest 1
     "Little Ladybug",      -- archer_02 quest 1
     "Forest Funguar",      -- archer_03 quest 1
@@ -55,7 +55,7 @@ local archer_enemies = {
 }
 
 -- Enemy names for Maelstrom hunting log 1 (02-04 are inside "Halatali")
-local maelstrom_enemies_log1 = {
+local MaelstromEnemiesLog1 = {
     "Amalj'aa Hunter",     -- maelstrom_01 "MonsterNote", 2, 18, 3
     "Heckler Imp",         -- maelstrom_02 "MonsterNote", 2, 19, 3
     "Doctore",             -- maelstrom_03 "MonsterNote", 2, 20, 3
@@ -69,7 +69,7 @@ local maelstrom_enemies_log1 = {
 }
 
 -- Enemy names for Maelstrom hunting log 2 (13-15 are inside "The Sunken Temple of Qarn")
-local maelstrom_enemies_log2 = {
+local MaelstromEnemiesLog2 = {
     "Amalj'aa Divinator",  -- maelstrom_11 "MonsterNote", 2, 18, 3
     "Kobold Pitman",       -- maelstrom_12 "MonsterNote", 2, 19, 3
     "Temple Bat",          -- maelstrom_13 "MonsterNote", 2, 20, 3
@@ -299,49 +299,49 @@ function QuestInstance() -- Targetting/Movement Logic for Solo Duties
     end
 end
 
-function GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get_node_text_location1, get_node_text_location2)
-    if (not get_node_text_location_2 and not get_node_text_location_1) then
-        return GetNodeText(get_node_text_type, get_node_text_location)
-    --- i 
-    elseif (not get_node_text_location_2 and get_node_text_location_1) then 
+function GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get_node_text_location_1, get_node_text_location_2)
+    if get_node_text_location_2 == nil then 
         return GetNodeText(get_node_text_type, get_node_text_location, get_node_text_location_1)
-    --- hate
-    elseif (get_node_text_location_2 and get_node_text_location_1) then
+    --- i hate
+    else
         return GetNodeText(get_node_text_type, get_node_text_location, get_node_text_location_1, get_node_text_location_2)
     --- this function
     end
+    yield("/echo uh GetNodeTextLookupUpdate fucked up")
 end
 
--- usage: QuestChecker(arcanist_enemies[3], 25, "_ToDoList", "Slay little ladybugs.")
+-- usage: QuestChecker(ArcanistEnemies[3], 25, "_ToDoList", "Slay little ladybugs.")
 
 function QuestChecker(target_name, target_distance, get_node_text_type, get_node_text_match) -- Quest and UI element handler
     local target = target_name
     local enemy_max_dist = target_distance
-    local get_node_text_location, get_node_text_location1, get_node_text_location2 = NodeScanner(get_node_text_type, get_node_text_match)
+    local get_node_text_location, get_node_text_location_1, get_node_text_location_2 = NodeScanner(get_node_text_type, get_node_text_match)
     local function extractTask(text)
         local task = string.match(text, "^(.-)%s%d+/%d+$")
         return task or text
     end
     while true do
         --UiCheck(get_node_text_type)
-        updated_node_text = GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get_node_text_location1, get_node_text_location2)
+        updated_node_text = GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get_node_text_location_1, get_node_text_location_2)
+        yield("/echo gushidshjido")
+        LogInfo("[JU] updated_node_text: "..updated_node_text)
         LogInfo("[JU] Extract: "..extractTask(updated_node_text))
         local last_char = string.sub(updated_node_text, -1)
-        LogInfo("[JU] updated_node_text: "..updated_node_text)
+        LogInfo("[JU] last char: "..updated_node_text)
         yield("/wait 2")
         if updated_node_text == get_node_text_match or not string.match(last_char, "%d") then
             --UiCheck(get_node_text_type, true)
             LogInfo("GUUUUUUUUUUUH")
             break
         end
-        -- QuestCombat(target_name, enemy_max_dist)
+        QuestCombat(target_name, enemy_max_dist)
     end
     -- checks if player in combat before ending rotation solver
     if not GetCharacterCondition(26) then
         yield("/rotation off")
     end
 end
--- QuestChecker(arcanist_enemies[7], 40, "_ToDoList", "Report to Thubyrgeim at the Arcanists' Guild.")
+-- QuestChecker(ArcanistEnemies[7], 40, "_ToDoList", "Report to Thubyrgeim at the Arcanists' Guild.")
 
 function NodeScanner(get_node_text_type, get_node_text_match)
     node_type_count = tonumber(GetNodeListCount(get_node_text_type))
@@ -356,7 +356,7 @@ function NodeScanner(get_node_text_type, get_node_text_match)
             local clean_node_text = extractTask(node_check)
             if clean_node_text == nil then
             else 
-                    LogInfo(tostring(clean_node_text))
+                --LogInfo(tostring(clean_node_text))
             end
             if clean_node_text == get_node_text_match then
                 return location, sub_node
@@ -372,7 +372,7 @@ function NodeScanner(get_node_text_type, get_node_text_match)
                 local clean_node_text = extractTask(node_check)
                 if clean_node_text == nil then
                 else 
-                    LogInfo(tostring(clean_node_text))
+                    --LogInfo(tostring(clean_node_text))
                 end
                 if clean_node_text == get_node_text_match then
                     return location, sub_node, sub_node2
@@ -522,11 +522,11 @@ function Arcanist1()
     ZoneTransitions()
     Movement(14.71, 64.52, 87.16)
     VNavChecker()
-    QuestChecker(arcanist_enemies[1], 25, "_ToDoList", 13, 3, x, x, x, "Slay wharf rats.")
-    QuestChecker(arcanist_enemies[3], 25, "_ToDoList", 15, 3, x, x, x, "Slay little ladybugs.")
+    QuestChecker(ArcanistEnemies[1], 25, "_ToDoList", 13, 3, x, x, x, "Slay wharf rats.")
+    QuestChecker(ArcanistEnemies[3], 25, "_ToDoList", 15, 3, x, x, x, "Slay little ladybugs.")
     Movement(232.67, 40.64, 57.39)
     VNavChecker()
-    QuestChecker(arcanist_enemies[2], 25, "_ToDoList", 13, 3, x, x, x, "Report to Thubyrgeim at the Arcanists' Guild.")
+    QuestChecker(ArcanistEnemies[2], 25, "_ToDoList", 13, 3, x, x, x, "Report to Thubyrgeim at the Arcanists' Guild.")
     --yield("/wait 1.6")
     Teleporter("Limsa", "tp")
     ZoneTransitions()
@@ -553,10 +553,10 @@ function Arcanist2()
     ZoneTransitions()
     Movement(381.76, 71.93, -256.04)
     VNavChecker()
-    QuestChecker(arcanist_enemies[4], 25, "_ToDoList", 13, 3, x, x, x, "Slay wild dodos.")
+    QuestChecker(ArcanistEnemies[4], 25, "_ToDoList", 13, 3, x, x, x, "Slay wild dodos.")
     Movement(418.06, 65.90, -160.37)
     VNavChecker()
-    QuestChecker(arcanist_enemies[5], 25, "_ToDoList", 13, 3, x, x, x, "Report to Thubyrgeim at the Arcanists' Guild.")
+    QuestChecker(ArcanistEnemies[5], 25, "_ToDoList", 13, 3, x, x, x, "Report to Thubyrgeim at the Arcanists' Guild.")
     --yield("/wait 1.6")
     Teleporter("Limsa", "tp")
     ZoneTransitions()
@@ -624,13 +624,13 @@ function Arcanist3()
     ZoneTransitions()
     Movement(674.92, 19.37, 436.02)
     VNavChecker()
-    QuestChecker(arcanist_enemies[6], 25, "_ToDoList", 13, 3, x, x, x, "Slay roselings.")
+    QuestChecker(ArcanistEnemies[6], 25, "_ToDoList", 13, 3, x, x, x, "Slay roselings.")
     --yield("/wait 1.6")
     Teleporter("Moraby", "tp")
     ZoneTransitions()
     Movement(30.84, 46.18, 831.01)
     VNavChecker()
-    QuestChecker(arcanist_enemies[7], 40, "_ToDoList", 13, 3, x, x, x, "Report to Thubyrgeim at the Arcanists' Guild.")
+    QuestChecker(ArcanistEnemies[7], 40, "_ToDoList", 13, 3, x, x, x, "Report to Thubyrgeim at the Arcanists' Guild.")
     --yield("/wait 1.6")
     Teleporter("Limsa", "tp")
     ZoneTransitions()
@@ -683,60 +683,60 @@ end
    
 -- gridania arcanists' second quest level 5 "A Matter of Perspective"
 function Archer2()
-    Teleporter("New Gridania", "tp")
-    ZoneTransitions()
-    Teleporter("Archers' Guild", "li")
-    ZoneTransitions()
-    Movement(207.80, 0.10, 35.06)
-    VNavChecker()
-    yield("/target Luciane")
-    QuestNPC()
-    Movement(187.65, -1.25, 63.54)
-    VNavChecker()
-    yield("/target Archery Butt")
-    yield("/wait 0.5")
-    yield('/ac "Heavy Shot"')
-    Movement(109.31, 0.12, 59.86)
-    VNavChecker()
-    yield("/target Archery Butt")
-    yield("/wait 0.5")
-    yield('/ac "Heavy Shot"')
-    Movement(50.87, 0.93, 25.88)
-    VNavChecker()
-    yield("/target Archery Butt")
-    yield("/wait 0.5")
-    yield('/ac "Heavy Shot"')
-    Movement(51.35, -1.52, 61.06)
-    VNavChecker()
-    yield("/target Archery Butt")
-    yield("/wait 0.5")
-    yield('/ac "Heavy Shot"')
-    Movement(66.11, -4.96, 91.91)
-    VNavChecker()
-    yield("/target Archery Butt")
-    yield("/wait 0.5")
-    yield('/ac "Heavy Shot"')
-    Movement(57.20, -8.56, 105.41)
-    VNavChecker()
-    yield("/target Archery Butt")
-    yield("/wait 0.5")
-    yield('/ac "Heavy Shot"')
-    Movement(34.93, 1.92, 34.09)
-    VNavChecker()
-    Teleporter("Archers' Guild", "li")
-    ZoneTransitions()
-    Movement(207.80, 0.10, 35.06)
-    VNavChecker()
-    yield("/target Luciane")
-    QuestNPC()
-    Teleporter("Fallgourd","tp")
-    ZoneTransitions()
+    --Teleporter("New Gridania", "tp")
+    --ZoneTransitions()
+    --Teleporter("Archers' Guild", "li")
+    --ZoneTransitions()
+    --Movement(207.80, 0.10, 35.06)
+    --VNavChecker()
+    --yield("/target Luciane")
+    --QuestNPC()
+    --Movement(187.65, -1.25, 63.54)
+    --VNavChecker()
+    --yield("/target Archery Butt")
+    --yield("/wait 0.5")
+    --yield('/ac "Heavy Shot"')
+    --Movement(109.31, 0.12, 59.86)
+    --VNavChecker()
+    --yield("/target Archery Butt")
+    --yield("/wait 0.5")
+    --yield('/ac "Heavy Shot"')
+    --Movement(50.87, 0.93, 25.88)
+    --VNavChecker()
+    --yield("/target Archery Butt")
+    --yield("/wait 0.5")
+    --yield('/ac "Heavy Shot"')
+    --Movement(51.35, -1.52, 61.06)
+    --VNavChecker()
+    --yield("/target Archery Butt")
+    --yield("/wait 0.5")
+    --yield('/ac "Heavy Shot"')
+    --Movement(66.11, -4.96, 91.91)
+    --VNavChecker()
+    --yield("/target Archery Butt")
+    --yield("/wait 0.5")
+    --yield('/ac "Heavy Shot"')
+    --Movement(57.20, -8.56, 105.41)
+    --VNavChecker()
+    --yield("/target Archery Butt")
+    --yield("/wait 0.5")
+    --yield('/ac "Heavy Shot"')
+    --Movement(34.93, 1.92, 34.09)
+    --VNavChecker()
+    --Teleporter("Archers' Guild", "li")
+    --ZoneTransitions()
+    --Movement(207.80, 0.10, 35.06)
+    --VNavChecker()
+    --yield("/target Luciane")
+    --QuestNPC()
+    --Teleporter("Fallgourd","tp")
+    --ZoneTransitions()
     Movement(307.65, -19.79, 171.31)
     VNavChecker()
-    QuestChecker(archer_enemies[4], 25, "_ToDoList", "Slay opo-opos.")
+    QuestChecker(ArcherEnemies[4], 25, "_ToDoList", "Slay opo-opos.")
     Movement(301.68, -9.38, 11.51)
     VNavChecker()
-    QuestChecker(archer_enemies[5], 60, "_ToDoList", "Slay microchus.")
+    QuestChecker(ArcherEnemies[5], 60, "_ToDoList", "Slay microchus.")
     Teleporter("New Gridania", "tp")
     ZoneTransitions()
     Teleporter("Archers' Guild", "li")
@@ -828,10 +828,10 @@ function Archer3()
     ZoneTransitions()
     Movement(-496.79, 8.99, 89.93)
     VNavChecker()
-    QuestChecker(archer_enemies[7], 25, "_ToDoList", "Slay northern vultures.")
+    QuestChecker(ArcherEnemies[7], 25, "_ToDoList", "Slay northern vultures.")
     Movement(-448.56, -0.31, 226.01)
     VNavChecker()
-    QuestChecker(archer_enemies[6], 25, "_ToDoList", "Slay tree slugs.")
+    QuestChecker(ArcherEnemies[6], 25, "_ToDoList", "Slay tree slugs.")
     --Report to Leih
     Teleporter("New Gridania", "tp")
     ZoneTransitions()
@@ -953,13 +953,13 @@ function MaelstromRank1() --needs nodescanner adding and the matching text adjus
     ZoneTransitions()
     Movement(-112.60, -27.88, 343.99)
     VNavChecker()
-    -- QuestChecker(maelstrom_enemies_log1[1], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(MaelstromEnemiesLog1[1], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(-122.43, -30.10, 297.20)
     VNavChecker()
-    -- QuestChecker(maelstrom_enemies_log1[1], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(MaelstromEnemiesLog1[1], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(-122.43, -30.10, 297.20)
     VNavChecker()
-    -- QuestChecker(maelstrom_enemies_log1[1], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(MaelstromEnemiesLog1[1], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     -- Amalj'aa Bruiser
     Movement(-169.97, -46.71, 493.46)
     VNavChecker()
@@ -970,11 +970,11 @@ function MaelstromRank1() --needs nodescanner adding and the matching text adjus
     Interact()
     Movement(-32.69, 15.53, -277.9)
     VNavChecker()
-    -- QuestChecker(maelstrom_enemies_log1[8], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(MaelstromEnemiesLog1[8], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(-9.38, 15.62, -291.08)
     VNavChecker()
-    -- QuestChecker(maelstrom_enemies_log1[8], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
-    -- QuestChecker(maelstrom_enemies_log1[8], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(MaelstromEnemiesLog1[8], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(MaelstromEnemiesLog1[8], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     -- Sylvan Groan + Sylvan Sough
     Teleporter("Bentbranch Meadows", "tp")
     ZoneTransitions()
@@ -987,16 +987,16 @@ function MaelstromRank1() --needs nodescanner adding and the matching text adjus
     Interact()
     Movement(-135.26, 15.12, -1.46)
     VNavChecker()
-    -- QuestChecker(maelstrom_enemies_log1[5], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
-    -- QuestChecker(maelstrom_enemies_log1[6], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(MaelstromEnemiesLog1[5], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(MaelstromEnemiesLog1[6], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(-104.98, 18.52, 14.46)
     VNavChecker()
-    -- QuestChecker(maelstrom_enemies_log1[5], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
-    -- QuestChecker(maelstrom_enemies_log1[6], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(MaelstromEnemiesLog1[5], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(MaelstromEnemiesLog1[6], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(-71.64, 17.58, 7.27)
     VNavChecker()
-    -- QuestChecker(maelstrom_enemies_log1[5], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
-    -- QuestChecker(maelstrom_enemies_log1[6], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(MaelstromEnemiesLog1[5], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(MaelstromEnemiesLog1[6], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     -- Kobold Pickman
     Teleporter("Aleport", "tp")
     ZoneTransitions()
@@ -1005,11 +1005,11 @@ function MaelstromRank1() --needs nodescanner adding and the matching text adjus
     ZoneTransitions()
     Movement(-477.30, 26.29, 61.12)
     VNavChecker()
-    -- QuestChecker(maelstrom_enemies_log1[7], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
-    -- QuestChecker(maelstrom_enemies_log1[7], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(MaelstromEnemiesLog1[7], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(MaelstromEnemiesLog1[7], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(-432.12, 38.29, 19.78)
     VNavChecker()
-    -- QuestChecker(maelstrom_enemies_log1[7], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(MaelstromEnemiesLog1[7], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     -- Ixali Straightbeak
     Teleporter("New Gridania", "tp")
     ZoneTransitions()
@@ -1024,13 +1024,13 @@ function MaelstromRank1() --needs nodescanner adding and the matching text adjus
     ZoneTransitions()
     Movement(53.52, -37.91, 312.72)
     VNavChecker()
-    -- QuestChecker(maelstrom_enemies_log1[9], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(MaelstromEnemiesLog1[9], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(75.32, -38.07, 331.25)
     VNavChecker()
-    -- QuestChecker(maelstrom_enemies_log1[9], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(MaelstromEnemiesLog1[9], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(75.83, -41.24, 352.80)
     VNavChecker()
-    -- QuestChecker(maelstrom_enemies_log1[9], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(MaelstromEnemiesLog1[9], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     -- Ixali Wildtalon
     Movement(-36.96, -39.16, 232.40)
     VNavChecker()
@@ -1040,7 +1040,7 @@ function MaelstromRank1() --needs nodescanner adding and the matching text adjus
     VNavChecker()
     ZoneTransitions()
     Movement(468.13, 232.79, 321.85)
-    -- QuestChecker(maelstrom_enemies_log1[10], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(MaelstromEnemiesLog1[10], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     VNavChecker()
     Movement(224.32, 301.51, -142.16)
     VNavChecker()
