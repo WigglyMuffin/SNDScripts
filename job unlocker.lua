@@ -13,19 +13,19 @@
 -- Only set one of these
 -- Should really change to a DO_JOB_QUESTS = "Arcanist" or something
 --DO_JOB_QUESTS = "Arcanist"
-DO_ARCANIST_QUESTS = 0
-DO_ARCHER_QUESTS = 1
+DO_ARCANIST_QUESTS = false
+DO_ARCHER_QUESTS = true
 
-DO_DOL_QUESTS = 0
+DO_DOL_QUESTS = false
 
-DO_MAELSTROM_LOG_1 = 0
-DO_MAELSTROM_LOG_2 = 0
+DO_MAELSTROM_LOG_1 = false
+DO_MAELSTROM_LOG_2 = false
 
 -- Quest unlocks
-DO_HALATALI = 0                  -- Maelstrom hunt log 1 hunt enemies       Hallo Halatali
-DO_THE_SUNKEN_TEMPLE_OF_QARN = 0 -- Maelstrom hunt log 2 hunt enemies       Braving New Depths
-DO_DZEMAEL_DARKHOLD = 0          -- Chief Storm Sergeant requirement        Shadows Uncast (Maelstrom)
-DO_THE_AURUM_VALE = 0            -- Second Storm Lieutenant requirement     Going for Gold
+DO_HALATALI = false                  -- Maelstrom hunt log 1 hunt enemies       Hallo Halatali
+DO_THE_SUNKEN_TEMPLE_OF_QARN = false -- Maelstrom hunt log 2 hunt enemies       Braving New Depths
+DO_DZEMAEL_DARKHOLD = false          -- Chief Storm Sergeant requirement        Shadows Uncast (Maelstrom)
+DO_THE_AURUM_VALE = false            -- Second Storm Lieutenant requirement     Going for Gold
 
 --##########################################
 --   DON'T TOUCH ANYTHING BELOW HERE 
@@ -33,7 +33,7 @@ DO_THE_AURUM_VALE = 0            -- Second Storm Lieutenant requirement     Goin
 --##########################################
 
 -- Enemy names for Arcanist quests
-local ArcanistEnemies = {
+local arcanist_enemies = {
     "Wharf Rat",           -- arcanist_01 quest 1
     "Aurelia",             -- arcanist_02 quest 1
     "Little Ladybug",      -- arcanist_03 quest 1
@@ -44,7 +44,7 @@ local ArcanistEnemies = {
 }
 
 -- Enemy names for Archer quests
-local ArcherEnemies = {
+local archer_enemies = {
     "Ground Squirrel",     -- archer_01 quest 1
     "Little Ladybug",      -- archer_02 quest 1
     "Forest Funguar",      -- archer_03 quest 1
@@ -55,7 +55,7 @@ local ArcherEnemies = {
 }
 
 -- Enemy names for Maelstrom hunting log 1 (02-04 are inside "Halatali")
-local MaelstromEnemiesLog1 = {
+local maelstrom_enemies_log1 = {
     "Amalj'aa Hunter",     -- maelstrom_01 "MonsterNote", 2, 18, 3
     "Heckler Imp",         -- maelstrom_02 "MonsterNote", 2, 19, 3
     "Doctore",             -- maelstrom_03 "MonsterNote", 2, 20, 3
@@ -69,7 +69,7 @@ local MaelstromEnemiesLog1 = {
 }
 
 -- Enemy names for Maelstrom hunting log 2 (13-15 are inside "The Sunken Temple of Qarn")
-local MaelstromEnemiesLog2 = {
+local maelstrom_enemies_log2 = {
     "Amalj'aa Divinator",  -- maelstrom_11 "MonsterNote", 2, 18, 3
     "Kobold Pitman",       -- maelstrom_12 "MonsterNote", 2, 19, 3
     "Temple Bat",          -- maelstrom_13 "MonsterNote", 2, 20, 3
@@ -111,25 +111,25 @@ function ZoneTransitions() --Zone transition checker, does nothing if changing z
 end
 
 -- usage: QuestNPC("SelectYesno"|"CutSceneSelectString", true, 0)
-function QuestNPC(DialogueType, DialogueConfirm, DialogueOption) -- NPC interaction handler. DialogueOption optional.
+function QuestNPC(dialogue_type, dialogue_confirm, dialogue_option) -- NPC interaction handler. dialogue_option optional.
     while not GetCharacterCondition(32) do
         yield("/pint")
         yield("/wait 0.1")
     end
-    if DialogueConfirm then
+    if dialogue_confirm then
         repeat 
             yield("/wait 0.1")
-        until IsAddonVisible(DialogueType)
-        if DialogueOption == nil then
+        until IsAddonVisible(dialogue_type)
+        if dialogue_option == nil then
             repeat
-                yield("/pcall " .. DialogueType .. " true 0")
+                yield("/pcall " .. dialogue_type .. " true 0")
                 yield("/wait 0.1")
-            until not IsAddonVisible(DialogueType)
+            until not IsAddonVisible(dialogue_type)
         else
             repeat
-                yield("/pcall " .. DialogueType .. " true " .. DialogueOption)
+                yield("/pcall " .. dialogue_type .. " true " .. dialogue_option)
                 yield("/wait 0.1")
-            until not IsAddonVisible(DialogueType)
+            until not IsAddonVisible(dialogue_type)
         end
     end
     repeat
@@ -138,18 +138,18 @@ function QuestNPC(DialogueType, DialogueConfirm, DialogueOption) -- NPC interact
 end
 
 -- usage: QuestNPCSingle("SelectYesno"|"CutSceneSelectString", true, 0)
-function QuestNPCSingle(DialogueType, DialogueConfirm, DialogueOption) -- NPC interaction handler, only supports one dialogue option for now. DialogueOption optional.
+function QuestNPCSingle(dialogue_type, dialogue_confirm, dialogue_option) -- NPC interaction handler, only supports one dialogue option for now. dialogue_option optional.
     while not GetCharacterCondition(32) do
         yield("/pint")
         yield("/wait 0.5")
     end
-    if DialogueConfirm then
+    if dialogue_confirm then
         yield("/wait 0.5")
-        if DialogueOption == nil then
-            yield("/pcall " .. DialogueType .. " true 0")
+        if dialogue_option == nil then
+            yield("/pcall " .. dialogue_type .. " true 0")
             yield("/wait 0.5")
         else
-            yield("/pcall " .. DialogueType .. " true " .. DialogueOption)
+            yield("/pcall " .. dialogue_type .. " true " .. dialogue_option)
             yield("/wait 0.5")
         end
     end
@@ -299,81 +299,83 @@ function QuestInstance() -- Targetting/Movement Logic for Solo Duties
     end
 end
 
-function GetNodeTextLookupUpdate(GetNodeTextType, GetNodeTextLocation, GetNodeTextLocation_1, GetNodeTextLocation_2)
-    if (not GetNodeTextLocation_2 and not GetNodeTextLocation_1) then
-        return GetNodeText(GetNodeTextType, GetNodeTextLocation)
+function GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get_node_text_location1, get_node_text_location2)
+    if (not get_node_text_location_2 and not get_node_text_location_1) then
+        return GetNodeText(get_node_text_type, get_node_text_location)
     --- i 
-    elseif (not GetNodeTextLocation_2 and GetNodeTextLocation_1) then 
-        return GetNodeText(GetNodeTextType, GetNodeTextLocation, GetNodeTextLocation_1)
+    elseif (not get_node_text_location_2 and get_node_text_location_1) then 
+        return GetNodeText(get_node_text_type, get_node_text_location, get_node_text_location_1)
     --- hate
-    elseif (GetNodeTextLocation_2 and GetNodeTextLocation_1) then
-        return GetNodeText(GetNodeTextType, GetNodeTextLocation, GetNodeTextLocation_1, GetNodeTextLocation_2)
+    elseif (get_node_text_location_2 and get_node_text_location_1) then
+        return GetNodeText(get_node_text_type, get_node_text_location, get_node_text_location_1, get_node_text_location_2)
     --- this function
     end
 end
 
--- usage: QuestChecker(ArcanistEnemies[3], 25, "_ToDoList", "Slay little ladybugs.")
+-- usage: QuestChecker(arcanist_enemies[3], 25, "_ToDoList", "Slay little ladybugs.")
 
-function QuestChecker(target_name, target_distance, GetNodeTextType, GetNodeTextMatch) -- Quest and UI element handler
+function QuestChecker(target_name, target_distance, get_node_text_type, get_node_text_match) -- Quest and UI element handler
     local target = target_name
     local enemy_max_dist = target_distance
-    local GetNodeTextLocation, GetNodeTextLocation_1, GetNodeTextLocation_2 = NodeScanner(GetNodeTextType, GetNodeTextMatch)
+    local get_node_text_location, get_node_text_location1, get_node_text_location2 = NodeScanner(get_node_text_type, get_node_text_match)
     local function extractTask(text)
         local task = string.match(text, "^(.-)%s%d+/%d+$")
         return task or text
     end
     while true do
-        UiCheck(GetNodeTextType)
-        UpdatedNodeText = GetNodeTextLookupUpdate(GetNodeTextType, GetNodeTextLocation, GetNodeTextLocation_1, GetNodeTextLocation_2)
-        LogInfo("[JU] "..UpdatedNodeText)
-        if UpdatedNodeText == GetNodeTextMatch then
-            UiCheck(GetNodeTextType, true)
+        --UiCheck(get_node_text_type)
+        updated_node_text = GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get_node_text_location1, get_node_text_location2)
+        LogInfo("[JU] Extract: "..extractTask(updated_node_text))
+        local last_char = string.sub(updated_node_text, -1)
+        LogInfo("[JU] updated_node_text: "..updated_node_text)
+        yield("/wait 2")
+        if updated_node_text == get_node_text_match or not string.match(last_char, "%d") then
+            --UiCheck(get_node_text_type, true)
+            LogInfo("GUUUUUUUUUUUH")
             break
         end
-        QuestCombat(target_name, enemy_max_dist)
+        -- QuestCombat(target_name, enemy_max_dist)
     end
     -- checks if player in combat before ending rotation solver
     if not GetCharacterCondition(26) then
         yield("/rotation off")
     end
 end
--- QuestChecker(ArcanistEnemies[7], 40, "_ToDoList", "Report to Thubyrgeim at the Arcanists' Guild.")
+-- QuestChecker(arcanist_enemies[7], 40, "_ToDoList", "Report to Thubyrgeim at the Arcanists' Guild.")
 
-function NodeScanner(GetNodeTextType, GetNodeTextMatch)
-    NodeTypeCount = tonumber(GetNodeListCount(GetNodeTextType))
+function NodeScanner(get_node_text_type, get_node_text_match)
+    node_type_count = tonumber(GetNodeListCount(get_node_text_type))
     local function extractTask(text)
         local task = string.match(text, "^(.-)%s*%d*/%d*$")
         return task or text
     end
-    for location = 0, NodeTypeCount do
-        for subNode = 0, 60 do
+    for location = 0, node_type_count do
+        for sub_node = 0, 60 do
             yield("/wait 0.0001")
-            local nodeCheck = GetNodeText(GetNodeTextType, location, subNode)
-            local CleanNodeText = extractTask(nodeCheck)
-            if CleanNodeText == nil then
+            local node_check = GetNodeText(get_node_text_type, location, sub_node)
+            local clean_node_text = extractTask(node_check)
+            if clean_node_text == nil then
             else 
-                    LogInfo(tostring(CleanNodeText))
+                    LogInfo(tostring(clean_node_text))
             end
-            if CleanNodeText == GetNodeTextMatch then
-                yield("/e ".. tostring(location) .." ".. tostring(subNode))
-                return location, subNode
+            if clean_node_text == get_node_text_match then
+                return location, sub_node
             end
         end
     end
     -- deeper scan
-    for location = 0, NodeTypeCount do
-        for subNode = 0, 60 do
-            for subNode2 = 0, 20 do
+    for location = 0, node_type_count do
+        for sub_node = 0, 60 do
+            for sub_node2 = 0, 20 do
                 yield("/wait 0.0001")
-                local nodeCheck = GetNodeText(GetNodeTextType, location, subNode, subNode2)
-                local CleanNodeText = extractTask(nodeCheck)
-                if CleanNodeText == nil then
+                local node_check = GetNodeText(get_node_text_type, location, sub_node, sub_node2)
+                local clean_node_text = extractTask(node_check)
+                if clean_node_text == nil then
                 else 
-                    LogInfo(tostring(CleanNodeText))
+                    LogInfo(tostring(clean_node_text))
                 end
-                if CleanNodeText == GetNodeTextMatch then
-                    yield("/e ".. tostring(location) .." ".. tostring(subNode) .." ".. tostring(subNode2))
-                    return location, subNode, subNode2
+                if clean_node_text == get_node_text_match then
+                    return location, sub_node, sub_node2
                 end
             end
         end
@@ -382,10 +384,10 @@ function NodeScanner(GetNodeTextType, GetNodeTextMatch)
     return
 end
 
-function UiCheck(GetNodeTextType, CloseUI)
+function UiCheck(get_node_text_type, close_ui)
     -- hunting log checks
-    if GetNodeTextType == "MonsterNote" then
-        if CloseUI() then
+    if get_node_text_type == "MonsterNote" then
+        if close_ui() then
             repeat
                 yield("/huntinglog")
                 yield("/wait 0.5")
@@ -401,7 +403,7 @@ end
 
 -- usage: Teleporter("Limsa", "tp")
 -- add support for item tp
-function Teleporter(Location, TP_Kind) -- Teleporter handler
+function Teleporter(location, tp_kind) -- Teleporter handler
     local lifestream_stopped = false
     local extra_cast_time_buffer = 1
     -- Initial check to ensure player can teleport
@@ -411,14 +413,14 @@ function Teleporter(Location, TP_Kind) -- Teleporter handler
     -- Try teleport, retry if fail indefinitely
     while true do
         -- Stop lifestream only once per teleport attempt
-        if TP_Kind == "li" and not lifestream_stopped then
+        if tp_kind == "li" and not lifestream_stopped then
             yield("/lifestream stop")
             lifestream_stopped = true
             yield("/wait 0.1")
         end
         -- Attempt teleport
         if not IsPlayerCasting() then
-            yield("/" .. TP_Kind .. " " .. Location)
+            yield("/" .. tp_kind .. " " .. location)
             yield("/wait " .. 1 + extra_cast_time_buffer) -- Wait for cast to complete
             -- If casting was not interrupted, reset lifestream_stopped for next retry
             if not IsPlayerCasting() then
@@ -435,7 +437,7 @@ function Teleporter(Location, TP_Kind) -- Teleporter handler
 end
 
 -- usage: Mount("SDS Fenrir") can leave empty for mount roulette
-function Mount(MountName)
+function Mount(mount_name)
     -- return if player already mounted
     if GetCharacterCondition(4) then
         return
@@ -444,15 +446,15 @@ function Mount(MountName)
     repeat
         yield("/wait 0.1")
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
-    -- if MountName is empty then use mount roulette instead
-    if MountName == nil then
+    -- if mount_name is empty then use mount roulette instead
+    if mount_name == nil then
         repeat
             yield('/ac "Mount Roulette"')
             yield("/wait 0.1")
         until GetCharacterCondition(27)
     else
         repeat
-            yield('/mount "' .. MountName .. '"')
+            yield('/mount "' .. mount_name .. '"')
             yield("/wait 0.1")
         until GetCharacterCondition(27) 
     end
@@ -475,14 +477,14 @@ function LogOut()
 end
 
 -- usage: Movement(674.92, 19.37, 436.02)
-function Movement(X_Position, Y_Position, Z_Position)
+function Movement(x_position, y_position, z_position)
     NavReload()
     repeat
         yield("/wait 0.1")
     until NavIsReady()
     repeat
         yield("/wait 0.1")
-        yield("/vnav moveto " .. X_Position .." ".. Y_Position.. " " .. Z_Position)
+        yield("/vnav moveto " .. x_position .." ".. y_position.. " " .. z_position)
     until PathIsRunning()
 end
 
@@ -520,11 +522,11 @@ function Arcanist1()
     ZoneTransitions()
     Movement(14.71, 64.52, 87.16)
     VNavChecker()
-    QuestChecker(ArcanistEnemies[1], 25, "_ToDoList", 13, 3, x, x, x, "Slay wharf rats.")
-    QuestChecker(ArcanistEnemies[3], 25, "_ToDoList", 15, 3, x, x, x, "Slay little ladybugs.")
+    QuestChecker(arcanist_enemies[1], 25, "_ToDoList", 13, 3, x, x, x, "Slay wharf rats.")
+    QuestChecker(arcanist_enemies[3], 25, "_ToDoList", 15, 3, x, x, x, "Slay little ladybugs.")
     Movement(232.67, 40.64, 57.39)
     VNavChecker()
-    QuestChecker(ArcanistEnemies[2], 25, "_ToDoList", 13, 3, x, x, x, "Report to Thubyrgeim at the Arcanists' Guild.")
+    QuestChecker(arcanist_enemies[2], 25, "_ToDoList", 13, 3, x, x, x, "Report to Thubyrgeim at the Arcanists' Guild.")
     --yield("/wait 1.6")
     Teleporter("Limsa", "tp")
     ZoneTransitions()
@@ -551,10 +553,10 @@ function Arcanist2()
     ZoneTransitions()
     Movement(381.76, 71.93, -256.04)
     VNavChecker()
-    QuestChecker(ArcanistEnemies[4], 25, "_ToDoList", 13, 3, x, x, x, "Slay wild dodos.")
+    QuestChecker(arcanist_enemies[4], 25, "_ToDoList", 13, 3, x, x, x, "Slay wild dodos.")
     Movement(418.06, 65.90, -160.37)
     VNavChecker()
-    QuestChecker(ArcanistEnemies[5], 25, "_ToDoList", 13, 3, x, x, x, "Report to Thubyrgeim at the Arcanists' Guild.")
+    QuestChecker(arcanist_enemies[5], 25, "_ToDoList", 13, 3, x, x, x, "Report to Thubyrgeim at the Arcanists' Guild.")
     --yield("/wait 1.6")
     Teleporter("Limsa", "tp")
     ZoneTransitions()
@@ -622,13 +624,13 @@ function Arcanist3()
     ZoneTransitions()
     Movement(674.92, 19.37, 436.02)
     VNavChecker()
-    QuestChecker(ArcanistEnemies[6], 25, "_ToDoList", 13, 3, x, x, x, "Slay roselings.")
+    QuestChecker(arcanist_enemies[6], 25, "_ToDoList", 13, 3, x, x, x, "Slay roselings.")
     --yield("/wait 1.6")
     Teleporter("Moraby", "tp")
     ZoneTransitions()
     Movement(30.84, 46.18, 831.01)
     VNavChecker()
-    QuestChecker(ArcanistEnemies[7], 40, "_ToDoList", 13, 3, x, x, x, "Report to Thubyrgeim at the Arcanists' Guild.")
+    QuestChecker(arcanist_enemies[7], 40, "_ToDoList", 13, 3, x, x, x, "Report to Thubyrgeim at the Arcanists' Guild.")
     --yield("/wait 1.6")
     Teleporter("Limsa", "tp")
     ZoneTransitions()
@@ -731,10 +733,10 @@ function Archer2()
     ZoneTransitions()
     Movement(307.65, -19.79, 171.31)
     VNavChecker()
-    QuestChecker(ArcherEnemies[4], 25, "_ToDoList", "Slay opo-opos.")
+    QuestChecker(archer_enemies[4], 25, "_ToDoList", "Slay opo-opos.")
     Movement(301.68, -9.38, 11.51)
     VNavChecker()
-    QuestChecker(ArcherEnemies[5], 60, "_ToDoList", "Slay microchus.")
+    QuestChecker(archer_enemies[5], 60, "_ToDoList", "Slay microchus.")
     Teleporter("New Gridania", "tp")
     ZoneTransitions()
     Teleporter("Archers' Guild", "li")
@@ -747,90 +749,90 @@ end
 
 -- gridania arcanists' third quest level 10 "Training with Leih"
 function Archer3()
-    --yield("/target Luciane")
-    --QuestNPC()
-    --Movement(208.91, 0.00, 29.65)
-    --VNavChecker()
-    --yield("/target Leih Aliapoh")
-    --QuestNPC()
-    --Teleporter("Bentbranch", "tp")
-    --ZoneTransitions()
-    -- First zone
-    --Movement(-88.03, -4.58, -73.39)
-    --VNavChecker()
-    --yield("/target Archery Butt")
-    --yield("/wait 0.1")
-    --yield('/ac "Heavy Shot"')
-    --Movement(-112.35, -3.95, -64.35)
-    --VNavChecker()
-    --yield("/target Archery Butt")
-    --yield("/wait 0.1")
-    --yield('/ac "Heavy Shot"')
-    --Movement(-122.00, -3.26, -66.78)
-    --VNavChecker()
-    --yield("/target Archery Butt")
-    --yield("/wait 0.1")
-    --yield('/ac "Heavy Shot"')
-    -- Second zone
-    --Movement(-146.34, 3.64, -129.18)
-    --VNavChecker()
-    --yield("/target Archery Butt")
-    --yield("/wait 0.1")
-    --yield('/ac "Heavy Shot"')
-    --Movement(-111.04, 7.75, -164.70)
-    --VNavChecker()
-    --yield("/target Archery Butt")
-    --yield("/wait 0.1")
-    --yield('/ac "Heavy Shot"')
-    ---- Third zone
-    --Movement(-80.48, 0.53, -176.20)
-    --VNavChecker()
-    --yield("/target Archery Butt")
-    --yield("/wait 0.1")
-    --yield('/ac "Heavy Shot"')
-    ---- Report to Leih Aliapoh
-    --Teleporter("New Gridania", "tp")
-    --ZoneTransitions()
-    --Teleporter("Archers' Guild", "li")
-    --ZoneTransitions()
-    --Movement(208.91, 0.00, 29.65)
-    --VNavChecker()
-    --yield("/target Leih Aliapoh")
-    --QuestNPC()
-    ---- Kill some enemies
-    --Movement(147.35, -0.24, 84.22)
-    --VNavChecker()
-    --Movement(115.20, -0.14, 74.28)
-    --VNavChecker()
-    --Movement(94.11, 3.91, 24.27)
-    --VNavChecker()
-    --Movement(99.57, 4.77, 17.09)
-    --VNavChecker()
-    --Movement(101.94, 5.31, 13.12)
-    --yield("/wait 2")
-    --ZoneTransitions()
-    --Movement(179.43, -2.16, -242.84)
-    --VNavChecker()
-    --yield("/target Romarique")
-    --yield("/wait 0.5")
-    --yield("/pint")
-    --repeat 
-    --    yield("/wait 0.1")
-    --until IsAddonReady("SelectIconString")
-    --yield("/pcall SelectIconString true 0")
-    --yield("/wait 1")
-    --repeat 
-    --    yield("/wait 0.1")
-    --until IsAddonReady("SelectYesno")
-    --yield("/pcall SelectYesno true 0")
-    --ZoneTransitions()
-    --Movement(-496.79, 8.99, 89.93)
-    --VNavChecker()
-    --QuestChecker(ArcherEnemies[7], 25, "_ToDoList", "Slay northern vultures.")
-    --Movement(-448.56, -0.31, 226.01)
-    --VNavChecker()
-    QuestChecker(ArcherEnemies[6], 25, "_ToDoList", "Slay tree slugs.")
-    -- Report to Leih
+    yield("/target Luciane")
+    QuestNPC()
+    Movement(208.91, 0.00, 29.65)
+    VNavChecker()
+    yield("/target Leih Aliapoh")
+    QuestNPC()
+    Teleporter("Bentbranch", "tp")
+    ZoneTransitions()
+    --First zone
+    Movement(-88.03, -4.58, -73.39)
+    VNavChecker()
+    yield("/target Archery Butt")
+    yield("/wait 0.1")
+    yield('/ac "Heavy Shot"')
+    Movement(-112.35, -3.95, -64.35)
+    VNavChecker()
+    yield("/target Archery Butt")
+    yield("/wait 0.1")
+    yield('/ac "Heavy Shot"')
+    Movement(-122.00, -3.26, -66.78)
+    VNavChecker()
+    yield("/target Archery Butt")
+    yield("/wait 0.1")
+    yield('/ac "Heavy Shot"')
+    --Second zone
+    Movement(-146.34, 3.64, -129.18)
+    VNavChecker()
+    yield("/target Archery Butt")
+    yield("/wait 0.1")
+    yield('/ac "Heavy Shot"')
+    Movement(-111.04, 7.75, -164.70)
+    VNavChecker()
+    yield("/target Archery Butt")
+    yield("/wait 0.1")
+    yield('/ac "Heavy Shot"')
+    -- Third zone
+    Movement(-80.48, 0.53, -176.20)
+    VNavChecker()
+    yield("/target Archery Butt")
+    yield("/wait 0.1")
+    yield('/ac "Heavy Shot"')
+    -- Report to Leih Aliapoh
+    Teleporter("New Gridania", "tp")
+    ZoneTransitions()
+    Teleporter("Archers' Guild", "li")
+    ZoneTransitions()
+    Movement(208.91, 0.00, 29.65)
+    VNavChecker()
+    yield("/target Leih Aliapoh")
+    QuestNPC()
+    -- Kill some enemies
+    Movement(147.35, -0.24, 84.22)
+    VNavChecker()
+    Movement(115.20, -0.14, 74.28)
+    VNavChecker()
+    Movement(94.11, 3.91, 24.27)
+    VNavChecker()
+    Movement(99.57, 4.77, 17.09)
+    VNavChecker()
+    Movement(101.94, 5.31, 13.12)
+    yield("/wait 2")
+    ZoneTransitions()
+    Movement(179.43, -2.16, -242.84)
+    VNavChecker()
+    yield("/target Romarique")
+    yield("/wait 0.5")
+    yield("/pint")
+    repeat 
+        yield("/wait 0.1")
+    until IsAddonReady("SelectIconString")
+    yield("/pcall SelectIconString true 0")
+    yield("/wait 1")
+    repeat 
+        yield("/wait 0.1")
+    until IsAddonReady("SelectYesno")
+    yield("/pcall SelectYesno true 0")
+    ZoneTransitions()
+    Movement(-496.79, 8.99, 89.93)
+    VNavChecker()
+    QuestChecker(archer_enemies[7], 25, "_ToDoList", "Slay northern vultures.")
+    Movement(-448.56, -0.31, 226.01)
+    VNavChecker()
+    QuestChecker(archer_enemies[6], 25, "_ToDoList", "Slay tree slugs.")
+    --Report to Leih
     Teleporter("New Gridania", "tp")
     ZoneTransitions()
     Teleporter("Archers' Guild", "li")
@@ -844,8 +846,8 @@ function Archer3()
     QuestNPC()
     repeat 
         yield("/wait 0.1")
-    until IsNodeVisible("SelectYesno")
-    yield("/pcall SelectIconString false 0")
+    until IsAddonReady("SelectYesno")
+    yield("/pcall SelectYesno true 0")
     repeat 
         yield("/wait 0.1")
     until IsPlayerAvailable()
@@ -951,13 +953,13 @@ function MaelstromRank1() --needs nodescanner adding and the matching text adjus
     ZoneTransitions()
     Movement(-112.60, -27.88, 343.99)
     VNavChecker()
-    -- QuestChecker(MaelstromEnemiesLog1[1], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(maelstrom_enemies_log1[1], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(-122.43, -30.10, 297.20)
     VNavChecker()
-    -- QuestChecker(MaelstromEnemiesLog1[1], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(maelstrom_enemies_log1[1], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(-122.43, -30.10, 297.20)
     VNavChecker()
-    -- QuestChecker(MaelstromEnemiesLog1[1], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(maelstrom_enemies_log1[1], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     -- Amalj'aa Bruiser
     Movement(-169.97, -46.71, 493.46)
     VNavChecker()
@@ -968,11 +970,11 @@ function MaelstromRank1() --needs nodescanner adding and the matching text adjus
     Interact()
     Movement(-32.69, 15.53, -277.9)
     VNavChecker()
-    -- QuestChecker(MaelstromEnemiesLog1[8], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(maelstrom_enemies_log1[8], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(-9.38, 15.62, -291.08)
     VNavChecker()
-    -- QuestChecker(MaelstromEnemiesLog1[8], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
-    -- QuestChecker(MaelstromEnemiesLog1[8], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(maelstrom_enemies_log1[8], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(maelstrom_enemies_log1[8], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     -- Sylvan Groan + Sylvan Sough
     Teleporter("Bentbranch Meadows", "tp")
     ZoneTransitions()
@@ -985,16 +987,16 @@ function MaelstromRank1() --needs nodescanner adding and the matching text adjus
     Interact()
     Movement(-135.26, 15.12, -1.46)
     VNavChecker()
-    -- QuestChecker(MaelstromEnemiesLog1[5], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
-    -- QuestChecker(MaelstromEnemiesLog1[6], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(maelstrom_enemies_log1[5], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(maelstrom_enemies_log1[6], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(-104.98, 18.52, 14.46)
     VNavChecker()
-    -- QuestChecker(MaelstromEnemiesLog1[5], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
-    -- QuestChecker(MaelstromEnemiesLog1[6], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(maelstrom_enemies_log1[5], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(maelstrom_enemies_log1[6], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(-71.64, 17.58, 7.27)
     VNavChecker()
-    -- QuestChecker(MaelstromEnemiesLog1[5], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
-    -- QuestChecker(MaelstromEnemiesLog1[6], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(maelstrom_enemies_log1[5], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(maelstrom_enemies_log1[6], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     -- Kobold Pickman
     Teleporter("Aleport", "tp")
     ZoneTransitions()
@@ -1003,11 +1005,11 @@ function MaelstromRank1() --needs nodescanner adding and the matching text adjus
     ZoneTransitions()
     Movement(-477.30, 26.29, 61.12)
     VNavChecker()
-    -- QuestChecker(MaelstromEnemiesLog1[7], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
-    -- QuestChecker(MaelstromEnemiesLog1[7], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(maelstrom_enemies_log1[7], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(maelstrom_enemies_log1[7], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(-432.12, 38.29, 19.78)
     VNavChecker()
-    -- QuestChecker(MaelstromEnemiesLog1[7], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(maelstrom_enemies_log1[7], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     -- Ixali Straightbeak
     Teleporter("New Gridania", "tp")
     ZoneTransitions()
@@ -1022,13 +1024,13 @@ function MaelstromRank1() --needs nodescanner adding and the matching text adjus
     ZoneTransitions()
     Movement(53.52, -37.91, 312.72)
     VNavChecker()
-    -- QuestChecker(MaelstromEnemiesLog1[9], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(maelstrom_enemies_log1[9], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(75.32, -38.07, 331.25)
     VNavChecker()
-    -- QuestChecker(MaelstromEnemiesLog1[9], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(maelstrom_enemies_log1[9], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(75.83, -41.24, 352.80)
     VNavChecker()
-    -- QuestChecker(MaelstromEnemiesLog1[9], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(maelstrom_enemies_log1[9], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     -- Ixali Wildtalon
     Movement(-36.96, -39.16, 232.40)
     VNavChecker()
@@ -1038,7 +1040,7 @@ function MaelstromRank1() --needs nodescanner adding and the matching text adjus
     VNavChecker()
     ZoneTransitions()
     Movement(468.13, 232.79, 321.85)
-    -- QuestChecker(MaelstromEnemiesLog1[10], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    -- QuestChecker(maelstrom_enemies_log1[10], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     VNavChecker()
     Movement(224.32, 301.51, -142.16)
     VNavChecker()
@@ -1095,51 +1097,51 @@ function main()
     yield("/p")
     yield("/vbm cfg AI Enabled true")
     yield("/vbmai on")
-    if DO_ARCANIST_QUESTS == 1 then
+    if DO_ARCANIST_QUESTS then
         Arcanist1()
         Arcanist2()
         Arcanist3()
-    elseif DO_ARCHER_QUESTS == 1 then
-        --Archer1()
-        --Archer2()
+    elseif DO_ARCHER_QUESTS then
+        Archer1()
+        Archer2()
         Archer3()
     end
     
 -- DoL
-    if DO_DOL_QUESTS == 1 then
+    if DO_DOL_QUESTS then
         FisherUnlock()
         MinerUnlock()
         BotanistUnlock()
     end
     
 -- Hunt Logs
-    if MaelstromEnemiesLog1 == 1 then
+    if DO_MAELSTROM_LOG_1 then
         MaelstromRank1()
     end
     
-    if MaelstromEnemiesLog2 == 1 then
+    if DO_MAELSTROM_LOG_2 then
         MaelstromRank2()
     end
     
 -- Quests
-    if DO_HALATALI == 1 then
+    if DO_HALATALI then
         HalataliUnlock()
     end
     
-    if DO_THE_SUNKEN_TEMPLE_OF_QARN == 1 then
+    if DO_THE_SUNKEN_TEMPLE_OF_QARN then
         TheSunkenTempleOfQarnUnlock()
     end
     
-    if DO_DZEMAEL_DARKHOLD == 1 then
+    if DO_DZEMAEL_DARKHOLD then
         DzemaelDarkholdUnlock()
     end
     
-    if DO_THE_AURUM_VALE == 1 then
+    if DO_THE_AURUM_VALE then
         TheAurumValeUnlock()
     end
     
 -- GC tp
-    Teleporter("gc", "li")
+    --Teleporter("gc", "li")
 end
 
 main()
