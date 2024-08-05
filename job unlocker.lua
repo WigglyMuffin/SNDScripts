@@ -404,6 +404,10 @@ end
 
 -- NEEDS fixing
 function FisherUnlock()
+    if IsQuestComplete(66643) then
+        Echo("Already finished the Fisher quest, moving on")
+        return
+    end
     Teleporter("Limsa", "tp")
     ZoneTransitions()
     yield("/li fish")
@@ -422,6 +426,10 @@ end
 
 -- NEEDS fixing
 function MinerUnlock()
+    if IsQuestComplete(66133) then
+        Echo("Already finished the Miner quest, moving on")
+        return
+    end
     Teleporter("Ul'dah", "tp")
     ZoneTransitions()
     yield("/li weaver")
@@ -439,6 +447,10 @@ end
 
 -- NEEDS fixing
 function BotanistUnlock()
+    if IsQuestComplete(65539) then
+        Echo("Already finished the Botanist quest, moving on")
+        return
+    end
     Teleporter("Gridania", "tp")
     ZoneTransitions()
     yield("/li mih")
