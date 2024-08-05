@@ -6,31 +6,35 @@
 -- Maelstrom log rank 2 should be used after you have a combat 47 as Aurum Vale requires level 47
 -- The quest unlocks will unlock the optional quests required for each stage of the Maelstrom progression, see the comments below for what they are for
 
---##########################################
---   CONFIGS
---##########################################
+--###########
+--# CONFIGS #
+--###########
 
--- Only set one of these
 -- Should really change to a DO_JOB_QUESTS = "Arcanist" or something
---DO_JOB_QUESTS = "Arcanist"
 DO_ARCANIST_QUESTS = false
 DO_ARCHER_QUESTS = true
 
 DO_DOL_QUESTS = false
 
+-- Maelstrom Hunt logs
 DO_MAELSTROM_LOG_1 = false
 DO_MAELSTROM_LOG_2 = false
 
--- Quest unlocks
+-- Dungeon unlocks
 DO_HALATALI = false                  -- Maelstrom hunt log 1 hunt enemies       Hallo Halatali
 DO_THE_SUNKEN_TEMPLE_OF_QARN = false -- Maelstrom hunt log 2 hunt enemies       Braving New Depths
 DO_DZEMAEL_DARKHOLD = false          -- Chief Storm Sergeant requirement        Shadows Uncast (Maelstrom)
 DO_THE_AURUM_VALE = false            -- Second Storm Lieutenant requirement     Going for Gold
 
---##########################################
---   DON'T TOUCH ANYTHING BELOW HERE 
---   UNLESS YOU KNOW WHAT YOU'RE DOING
---##########################################
+-- Housing unlocks
+DO_THE_LAVENDER_BEDS = false         -- The Lavender Beds Housing   Where the Heart Is (The Lavender Beds)
+DO_THE_GOBLET = false                -- The Goblet Housing          Where the Heart Is (The Goblet)
+DO_MIST = false                      -- Mist Housing                Where the Heart Is (Mist)
+
+--#####################################
+--#  DON'T TOUCH ANYTHING BELOW HERE  #
+--# UNLESS YOU KNOW WHAT YOU'RE DOING #
+--#####################################
 
 -- Enemy names for Arcanist quests
 local ArcanistEnemies = {
@@ -54,39 +58,60 @@ local ArcherEnemies = {
     "Northern Vulture"     -- archer_07 quest 3
 }
 
--- Enemy names for Maelstrom hunting log 1 (02-04 are inside "Halatali")
+-- Enemy names for Maelstrom hunting log 1
 local MaelstromEnemiesLog1 = {
-    "Amalj'aa Hunter",     -- maelstrom_01 "MonsterNote", 2, 18, 3
-    "Heckler Imp",         -- maelstrom_02 "MonsterNote", 2, 19, 3
-    "Doctore",             -- maelstrom_03 "MonsterNote", 2, 20, 3
-    "Firemane",            -- maelstrom_04 "MonsterNote", 2, 21, 3
-    "Sylvan Groan",        -- maelstrom_05 "MonsterNote", 2, 22, 3
-    "Sylvan Sough",        -- maelstrom_06 "MonsterNote", 2, 23, 3
-    "Kobold Pickman",      -- maelstrom_07 "MonsterNote", 2, 24, 3
-    "Amalj'aa Bruiser",    -- maelstrom_08 "MonsterNote", 2, 25, 3
-    "Ixali Straightbreak", -- maelstrom_09 "MonsterNote", 2, 26, 3
-    "Ixali Wildtalon"      -- maelstrom_10 "MonsterNote", 2, 27, 3
+    "Amalj'aa Hunter",     -- maelstrom_01
+    "Heckler Imp",         -- maelstrom_02 "Halatali"
+    "Doctore",             -- maelstrom_03 "Halatali"
+    "Firemane",            -- maelstrom_04 "Halatali"
+    "Sylvan Groan",        -- maelstrom_05
+    "Sylvan Sough",        -- maelstrom_06
+    "Kobold Pickman",      -- maelstrom_07
+    "Amalj'aa Bruiser",    -- maelstrom_08
+    "Ixali Straightbreak", -- maelstrom_09
+    "Ixali Wildtalon"      -- maelstrom_10
 }
 
--- Enemy names for Maelstrom hunting log 2 (13-15 are inside "The Sunken Temple of Qarn")
+-- Enemy names for Maelstrom hunting log 2
 local MaelstromEnemiesLog2 = {
-    "Amalj'aa Divinator",  -- maelstrom_11 "MonsterNote", 2, 18, 3
-    "Kobold Pitman",       -- maelstrom_12 "MonsterNote", 2, 19, 3
-    "Temple Bat",          -- maelstrom_13 "MonsterNote", 2, 20, 3
-    "The Condemned",       -- maelstrom_14 "MonsterNote", 2, 21, 3
-    "Teratotaur",          -- maelstrom_15 "MonsterNote", 2, 22, 3
-    "Kobold Bedesman",     -- maelstrom_16 "MonsterNote", 2, 23, 3
-    "Kobold Priest",       -- maelstrom_17 "MonsterNote", 2, 24, 3
-    "Sylvan Sigh",         -- maelstrom_18 "MonsterNote", 2, 25, 3
-    "Shelfscale Sahagin",  -- maelstrom_19 "MonsterNote", 2, 26, 3
-    "Amalj'aa Pugilist"    -- maelstrom_20 "MonsterNote", 2, 27, 3
+    "Amalj'aa Divinator",  -- maelstrom_11
+    "Kobold Pitman",       -- maelstrom_12
+    "Temple Bat",          -- maelstrom_13 "The Sunken Temple of Qarn"
+    "The Condemned",       -- maelstrom_14 "The Sunken Temple of Qarn"
+    "Teratotaur",          -- maelstrom_15 "The Sunken Temple of Qarn"
+    "Kobold Bedesman",     -- maelstrom_16
+    "Kobold Priest",       -- maelstrom_17
+    "Sylvan Sigh",         -- maelstrom_18
+    "Shelfscale Sahagin",  -- maelstrom_19
+    "Amalj'aa Pugilist"    -- maelstrom_20
 }
 
-local QuestIDs = {
-    66233,                 -- Hallo Halatali "Halatali"
-    66300,                 -- Braving New Depths "The Sunken Temple of Qarn"
-    66664,                 -- Shadows Uncast (Maelstrom) "Dzemael Darkhold"
-    66667                  -- Gilding the Bilious (Maelstrom) "The Aurum Vale"
+-- usage: QuestID[1].questNumber or QuestID[1].id or QuestID[1].questName
+local QuestID = {
+    -- Dungeons
+    {questNumber = 1,  id = 66233, questName = "Hallo Halatali"},                         -- Halatali
+    {questNumber = 2,  id = 66300, questName = "Braving New Depths"},                     -- The Sunken Temple of Qarn
+    {questNumber = 3,  id = 66664, questName = "Shadows Uncast (Maelstrom)"},             -- Dzemael Darkhold
+    {questNumber = 4,  id = 66667, questName = "Gilding the Bilious (Maelstrom)"},        -- The Aurum Vale
+    -- Housing
+    {questNumber = 5,  id = 66748, questName = "Where the Heart Is (The Lavender Beds)"}, -- The Lavender Beds
+    {questNumber = 6,  id = 66749, questName = "Where the Heart Is (The Goblet)"},        -- The Goblet
+    {questNumber = 7,  id = 66750, questName = "Where the Heart Is (Mist)"},              -- Mist
+    -- DoL
+    {questNumber = 8,  id = 66133, questName = "Way of the Miner"},                       -- Miner
+    {questNumber = 9,  id = 65539, questName = "Way of the Botanist"},                    -- Botanist
+    {questNumber = 10, id = 66643, questName = "Way of the Fisher"},                      -- Fisher
+    -- Mount
+    {questNumber = 11, id = 66236, questName = "My Little Chocobo (Twin Adder)"},
+    {questNumber = 12, id = 66237, questName = "My Little Chocobo (Maelstrom)"},
+    {questNumber = 13, id = 66238, questName = "My Little Chocobo (Immortal Flames)"},
+    -- Job Quests
+    {questNumber = 14, id = 65988, questName = "Way of the Arcanist"},                    -- Arcanist Quest 01
+    {questNumber = 15, id = 65990, questName = "My First Grimoire"},                      -- Arcanist Quest 02
+    {questNumber = 16, id = 65991, questName = "What's in the Box"},                      -- Arcanist Quest 03
+    {questNumber = 17, id = 65667, questName = "Way of the Archer"},                      -- Archer Quest 01
+    {questNumber = 18, id = 65755, questName = "My First Bow"},                           -- Archer Quest 02
+    {questNumber = 19, id = 65582, questName = "A Matter of Perspective"}                 -- Archer Quest 03
 }
 
 -- usage: ZoneTransitions()
@@ -445,7 +470,7 @@ function Mount(mount_name)
     local retries = 0        -- Counter for the number of retries
     
     -- Check if the player has unlocked mounts by checking the quest completion
-    if not (IsQuestComplete(66236) or IsQuestComplete(66237) or IsQuestComplete(66238)) then
+    if not (IsQuestComplete(QuestID[11]) or IsQuestComplete(QuestID[12]) or IsQuestComplete(QuestID[13])) then
         if not mount_message then
             yield('/e You do not have a mount unlocked, please consider completing the "My Little Chocobo" quest.')
             yield("/e Skipping mount.")
@@ -599,13 +624,19 @@ function Interact()
     until IsPlayerAvailable()
 end
 
---##############
---   ARCANIST
---##############
+--############
+--# ARCANIST #
+--############
 
 -- NEEDS fixing
 -- limsa arcanists' first quest level 1 "Way of the Arcanist"
 function Arcanist1()
+    if IsQuestComplete(QuestID[14].id) then
+        yield('/e You have already completed the "' .. QuestID[14].questName .. '" quest.')
+        yield("/e Skipping unlock.")
+        return
+    end
+    
     Teleporter("Limsa", "tp")
     ZoneTransitions()
     Teleporter("Arcanist", "li")
@@ -637,6 +668,12 @@ end
 -- NEEDS fixing
 -- limsa arcanists' second quest level 5 "What's in the Box"
 function Arcanist2()
+    if IsQuestComplete(QuestID[15].id) then
+        yield('/e You have already completed the "' .. QuestID[15].questName .. '" quest.')
+        yield("/e Skipping unlock.")
+        return
+    end
+    
     Movement(-327.86, 12.89, 9.79)
     yield("/target Thubyrgeim")
     QuestNPC()
@@ -704,6 +741,12 @@ end
 -- NEEDS fixing
 -- limsa arcanists' third quest level 10 "Tactical Planning"
 function Arcanist3()
+    if IsQuestComplete(QuestID[16].id) then
+        yield('/e You have already completed the "' .. QuestID[16].questName .. '" quest.')
+        yield("/e Skipping unlock.")
+        return
+    end
+    
     Movement(-327.86, 12.89, 9.79)
     yield("/target Thubyrgeim")
     QuestNPC()
@@ -753,17 +796,29 @@ function Arcanist3()
     QuestNPC()
 end
 
---##############
---   ARCHER
---##############
+--##########
+--# ARCHER #
+--##########
 
 -- gridania archer first quest level 1 "Way of the Archer"
 function Archer1()
+    if IsQuestComplete(QuestID[17].id) then
+        yield('/e You have already completed the "' .. QuestID[17].questName .. '" quest.')
+        yield("/e Skipping unlock.")
+        return
+    end
+    
     -- forgot to do this one, probs will later.
 end
    
 -- gridania archer second quest level 5 "A Matter of Perspective"
 function Archer2()
+    if IsQuestComplete(QuestID[18].id) then
+        yield('/e You have already completed the "' .. QuestID[18].questName .. '" quest.')
+        yield("/e Skipping unlock.")
+        return
+    end
+    
     Teleporter("New Gridania", "tp")
     ZoneTransitions()
     Teleporter("Archers' Guild", "li")
@@ -812,6 +867,12 @@ end
 
 -- gridania archer third quest level 10 "Training with Leih"
 function Archer3()
+    if IsQuestComplete(QuestID[19].id) then
+        yield('/e You have already completed the "' .. QuestID[19].questName .. '" quest.')
+        yield("/e Skipping unlock.")
+        return
+    end
+    
     yield("/wait 1")
     yield("/target Luciane")
     QuestNPC()
@@ -902,40 +963,18 @@ function Archer3()
     until IsPlayerAvailable()
 end
 
---##############
--- JOB UNLOCKS
---##############
-
--- NEEDS fixing
-function FisherUnlock()
-    Teleporter("Limsa", "tp")
-    ZoneTransitions()
-    Teleporter("Fisher", "li")
-    ZoneTransitions()
-    Movement(-167.30, 4.55, 152.46)
-    yield("/target N'nmulika")
-    yield("/pint")
-    yield("/waitaddon SelectYesno <maxwait.15><wait.0.5>")
-    yield("/pcall SelectYesno true 0")
-    repeat
-        yield("/wait 0.1")
-    until IsPlayerAvailable()
-    yield("/wait 1.6")
-    yield("/target N'nmulika")
-    QuestNPC()
-    Movement(-173.59, 4.2, 162.77)
-    Movement(-165.74, 4.55, 165.38)
-    yield("/target Sisipu")
-    yield("/pint")
-    yield("/waitaddon SelectYesno <maxwait.15><wait.0.5>")
-    yield("/pcall SelectYesno true 0")
-    repeat
-        yield("/wait 0.1")
-    until IsPlayerAvailable()
-end
+--###############
+--# JOB UNLOCKS #
+--###############
 
 -- NEEDS fixing
 function MinerUnlock()
+    if IsQuestComplete(QuestID[8].id) then
+        yield('/e You have already completed the "' .. QuestID[8].questName .. '" quest.')
+        yield("/e Skipping unlock.")
+        return
+    end
+    
     Teleporter("Ul'dah", "tp")
     ZoneTransitions()
     Teleporter("Miner", "li")
@@ -963,6 +1002,12 @@ end
 
 -- NEEDS fixing
 function BotanistUnlock()
+    if IsQuestComplete(QuestID[9].id) then
+        yield('/e You have already completed the "' .. QuestID[9].questName .. '" quest.')
+        yield("/e Skipping unlock.")
+        return
+    end
+    
     Teleporter("Gridania", "tp")
     ZoneTransitions()
     Teleporter("Botanist", "li")
@@ -988,9 +1033,43 @@ function BotanistUnlock()
     until IsPlayerAvailable()
 end
 
---##############
--- HUNT UNLOCKS
---##############
+-- NEEDS fixing
+function FisherUnlock()
+    if IsQuestComplete(QuestID[10].id) then
+        yield('/e You have already completed the "' .. QuestID[10].questName .. '" quest.')
+        yield("/e Skipping unlock.")
+        return
+    end
+    
+    Teleporter("Limsa", "tp")
+    ZoneTransitions()
+    Teleporter("Fisher", "li")
+    ZoneTransitions()
+    Movement(-167.30, 4.55, 152.46)
+    yield("/target N'nmulika")
+    yield("/pint")
+    yield("/waitaddon SelectYesno <maxwait.15><wait.0.5>")
+    yield("/pcall SelectYesno true 0")
+    repeat
+        yield("/wait 0.1")
+    until IsPlayerAvailable()
+    yield("/wait 1.6")
+    yield("/target N'nmulika")
+    QuestNPC()
+    Movement(-173.59, 4.2, 162.77)
+    Movement(-165.74, 4.55, 165.38)
+    yield("/target Sisipu")
+    yield("/pint")
+    yield("/waitaddon SelectYesno <maxwait.15><wait.0.5>")
+    yield("/pcall SelectYesno true 0")
+    repeat
+        yield("/wait 0.1")
+    until IsPlayerAvailable()
+end
+
+--################
+--# HUNT UNLOCKS #
+--################
 
 -- NEEDS fixing
 function MaelstromRank1() --needs nodescanner adding and the matching text adjusting
@@ -1074,16 +1153,22 @@ function MaelstromRank1() --needs nodescanner adding and the matching text adjus
 end
 
 function MaelstromRank2()
-    
+    -- stuff goes here
 end
 
---#################
--- DUNGEON UNLOCKS
---#################
+--###################
+--# DUNGEON UNLOCKS #
+--###################
 
 -- can also probably use questionable once commands or ipc work better
 -- needs updating once nodescanner works
 function HalataliUnlock()
+    if IsQuestComplete(QuestID[1].id) then
+        yield('/e You have already completed the "' .. QuestID[1].questName .. '" quest.')
+        yield("/e Skipping unlock.")
+        return
+    end
+
     Teleporter("Horizon", "tp") -- could also use vesper bay ticket but needs the teleporter function adjusting
     ZoneTransitions()
     Movement(-471.37, 23.01, -355.12)
@@ -1098,20 +1183,69 @@ function HalataliUnlock()
 end
 
 function TheSunkenTempleOfQarnUnlock()
+    if IsQuestComplete(QuestID[2].id) then
+        yield('/e You have already completed the "' .. QuestID[2].questName .. '" quest.')
+        yield("/e Skipping unlock.")
+        return
+    end
     
+    -- stuff goes here
 end
 
 function DzemaelDarkholdUnlock()
+    if IsQuestComplete(QuestID[3].id) then
+        yield('/e You have already completed the "' .. QuestID[3].questName .. '" quest.')
+        yield("/e Skipping unlock.")
+        return
+    end
     
+    -- stuff goes here
 end
 
 function TheAurumValeUnlock()
+    if IsQuestComplete(QuestID[4].id) then
+        yield('/e You have already completed the "' .. QuestID[4].questName .. '" quest.')
+        yield("/e Skipping unlock.")
+        return
+    end
     
+    -- stuff goes here
 end
 
---##########################################
---  MAIN SCRIPT
---##########################################
+function TheLavenderBedsUnlock()
+    if IsQuestComplete(QuestID[5].id) then
+        yield('/e You have already completed the "' .. QuestID[5].questName .. '" quest.')
+        yield("/e Skipping unlock.")
+        return
+    end
+    
+    -- stuff goes here
+end
+
+function TheGobletUnlock()
+    if IsQuestComplete(QuestID[6].id) then
+        yield('/e You have already completed the "' .. QuestID[6].questName .. '" quest.')
+        yield("/e Skipping unlock.")
+        return
+    end
+    
+    -- stuff goes here
+end
+
+function MistUnlock()
+    if IsQuestComplete(QuestID[7].id) then
+        yield('/e You have already completed the "' .. QuestID[7].questName .. '" quest.')
+        yield("/e Skipping unlock.")
+        return
+    end
+    
+    -- stuff goes here
+end
+
+--###############
+--# MAIN SCRIPT #
+--###############
+
 function main()
     yield("/at e")
     yield("/p")
@@ -1143,7 +1277,7 @@ function main()
         MaelstromRank2()
     end
     
--- Quests
+-- Dungeons
     if DO_HALATALI then
         HalataliUnlock()
     end
@@ -1158,6 +1292,19 @@ function main()
     
     if DO_THE_AURUM_VALE then
         TheAurumValeUnlock()
+    end
+    
+-- Housing
+    if DO_THE_LAVENDER_BEDS then
+        TheLavenderBedsUnlock()
+    end
+    
+    if DO_THE_GOBLET then
+        TheGobletUnlock()
+    end
+    
+    if DO_MIST then
+        MistUnlock()
     end
 end
 
