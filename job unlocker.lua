@@ -10,6 +10,15 @@
 --   CONFIGS
 --##########################################
 
+-- this toggle allows you to run the script on as many characters as you'd like, it'll rotate between them
+multichar = false
+
+local chars = {
+    "example example@world",
+    "example example@world",
+    "example example@world"
+}
+
 -- Only set one of these
 -- Should really change to a DO_JOB_QUESTS = "Arcanist" or something
 --DO_JOB_QUESTS = "Arcanist"
@@ -28,8 +37,8 @@ DO_DZEMAEL_DARKHOLD = false          -- Chief Storm Sergeant requirement        
 DO_THE_AURUM_VALE = false            -- Second Storm Lieutenant requirement     Going for Gold
 
 --##########################################
---   DON'T TOUCH ANYTHING BELOW HERE 
---   UNLESS YOU KNOW WHAT YOU'RE DOING
+--   DON'T TOUCH ANYTHING BELOW HERE       #
+--   UNLESS YOU KNOW WHAT YOU'RE DOING     #
 --##########################################
 
 -- Enemy names for Arcanist quests
@@ -421,7 +430,7 @@ function FisherUnlock()
     Movement(-173.59, 4.2, 162.77)
     Movement(-165.74, 4.55, 165.38)
     Target("Sisipu")
-    QuestNPCSingle("SelectYesno", true, 0)
+    QuestNPC("SelectYesno", true, 0)
 end
 
 -- NEEDS fixing
@@ -442,7 +451,7 @@ function MinerUnlock()
     QuestNPC()
     Movement(-17.33, 6.2, 157.59)
     Target("Adalberta")
-    QuestNPCSingle("SelectYesno", true, 0)
+    QuestNPC("SelectYesno", true, 0)
 end
 
 -- NEEDS fixing
@@ -464,7 +473,7 @@ function BotanistUnlock()
     QuestNPC()
     Movement(-234.09, 6.23, -170.02)
     Target("Fufucha")
-    QuestNPCSingle("SelectYesno", true, 0)
+    QuestNPC("SelectYesno", true, 0)
 end
 
 --##############
@@ -641,4 +650,21 @@ function Main()
     end
 end
 
-Main()
+if multichar then
+    for _, char in ipairs(chars) do
+        if GetCharacterName(true) == char then
+            -- continue, no relogging needed
+        else
+            yield("/ays relog " ..char)
+            yield("<wait.15.0>")
+            yield("/waitaddon NamePlate <maxwait.6000><wait.5>")
+        end
+        repeat
+            yield("/wait 0.1")
+        until IsPlayerAvailable()
+        Main()
+        ::skip::
+    end
+else
+    Main()
+end
