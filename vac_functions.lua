@@ -685,12 +685,28 @@ end
 -- Clicks and delivers the top option X amount of times  
 -- Works because when you deliver one the others move up
 function GcProvisioningDeliver(amount)
-    yield("/pcall GrandCompanySupplyList true 1 0")
-    repeat
-        Sleep(0.1)
-    until IsAddonReady("Request")
-    yield("/pcall Request true 0")
-    repeat
-        Sleep(0.1)
-    until IsAddonReady("GrandCompanySupplyList")
+    local amount = amount
+    if not amount then
+        amount = 1
+    end
+    for i = 1, amount do
+        yield("/pcall GrandCompanySupplyList true 1 0")
+        local err_counter_request = 0
+        local err_counter_supply = 0
+        repeat
+            Sleep(0.1)
+            err_counter_request = err_counter_request+1
+        until IsAddonReady("Request") or err_counter_request >= 30
+        if err_counter_request >= 30 then
+            Echo("Something went wrong or request window was auto skipped, continuing")
+            err_counter_request = 0
+        else 
+            yield("/pcall Request true 0")
+        end
+        repeat
+            Sleep(0.1)
+            err_counter_supply = err_counter_supply+1
+        until IsAddonReady("GrandCompanySupplyList") or err_counter_supply >= 30
+        err_counter_supply = 0
+    end
 end
