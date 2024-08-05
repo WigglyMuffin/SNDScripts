@@ -470,7 +470,7 @@ function Mount(mount_name)
     local retries = 0        -- Counter for the number of retries
     
     -- Check if the player has unlocked mounts by checking the quest completion
-    if not (IsQuestComplete(QuestID[11]) or IsQuestComplete(QuestID[12]) or IsQuestComplete(QuestID[13])) then
+    if not (IsQuestComplete(QuestID[11].id) or IsQuestComplete(QuestID[12].id) or IsQuestComplete(QuestID[13].id)) then
         if not mount_message then
             yield('/e You do not have a mount unlocked, please consider completing the "My Little Chocobo" quest.')
             yield("/e Skipping mount.")
