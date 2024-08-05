@@ -37,10 +37,6 @@ DO_THE_SUNKEN_TEMPLE_OF_QARN = false -- Maelstrom hunt log 2 hunt enemies       
 DO_DZEMAEL_DARKHOLD = false          -- Chief Storm Sergeant requirement        Shadows Uncast (Maelstrom)
 DO_THE_AURUM_VALE = false            -- Second Storm Lieutenant requirement     Going for Gold
 
---##########################################
---   DON'T TOUCH ANYTHING BELOW HERE       #
---   UNLESS YOU KNOW WHAT YOU'RE DOING     #
---##########################################
 -- Housing unlocks
 DO_THE_LAVENDER_BEDS = false         -- The Lavender Beds Housing   Where the Heart Is (The Lavender Beds)
 DO_THE_GOBLET = false                -- The Goblet Housing          Where the Heart Is (The Goblet)
