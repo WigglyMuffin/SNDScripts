@@ -130,7 +130,7 @@ function QuestNPC(dialogue_type, dialogue_confirm, dialogue_option) -- NPC inter
 end
 
 -- usage: QuestNPCSingle("SelectYesno"|"CutSceneSelectString", true, 0)
-function QuestNPCSingle(dialogue_type, dialogue_confirm, dialogue_option) -- NPC interaction handler, only supports one dialogue option for now. dialogue_option optional.
+function QuestNPCSingle(dialogue_type, dialogue_confirm, dialogue_option) -- NPC interaction handler. dialogue_option optional.
     while not GetCharacterCondition(32) do
         yield("/pint")
         yield("/wait 0.5")
@@ -147,8 +147,6 @@ function QuestNPCSingle(dialogue_type, dialogue_confirm, dialogue_option) -- NPC
     end
 end
 
--- ALWAYS takes target = X
--- ALWAYS takes enemy_max_dist = X
 -- not explicitly used
 function QuestCombat(target, enemy_max_dist)
     local all_targets = {target}
@@ -316,7 +314,6 @@ function GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get
 end
 
 -- usage: QuestChecker(ArcanistEnemies[3], 25, "_ToDoList", "Slay little ladybugs.")
-
 function QuestChecker(target_name, target_distance, get_node_text_type, get_node_text_match) -- Quest and UI element handler
     local target = target_name
     local enemy_max_dist = target_distance
@@ -345,7 +342,6 @@ function QuestChecker(target_name, target_distance, get_node_text_type, get_node
         yield("/rotation off")
     end
 end
--- QuestChecker(ArcanistEnemies[7], 40, "_ToDoList", "Report to Thubyrgeim at the Arcanists' Guild.")
 
 function NodeScanner(get_node_text_type, get_node_text_match)
     node_type_count = tonumber(GetNodeListCount(get_node_text_type))
@@ -442,19 +438,19 @@ function Teleporter(location, tp_kind) -- Teleporter handler
 end
 
 -- usage: Mount("SDS Fenrir") can leave empty for mount roulette
-mountmessage = false
+local mount_message = false
 function Mount(mount_name)
     local max_retries = 10   -- Maximum number of retries
     local retry_interval = 1 -- Time interval between retries in seconds
-    local retries = 0       -- Counter for the number of retries
+    local retries = 0        -- Counter for the number of retries
     
     -- Check if the player has unlocked mounts by checking the quest completion
     if not (IsQuestComplete(66236) or IsQuestComplete(66237) or IsQuestComplete(66238)) then
-        if not mountmessage then
+        if not mount_message then
             yield('/e You do not have a mount unlocked, please consider completing the "My Little Chocobo" quest.')
             yield("/e Skipping mount.")
         else
-            mountmessage = true
+            mount_message = true
         end
         return
     end
@@ -514,6 +510,14 @@ function LogOut()
     until not IsAddonVisible("SelectYesno")
 end
 
+-- NEEDS adding to Movement()
+-- function VNavChecker() --Movement checker, does nothing if moving
+    -- yield("/wait 1.0")
+    -- repeat
+        -- yield("/wait 0.1")
+    -- until not PathIsRunning() and IsPlayerAvailable()
+-- end
+
 -- usage: Movement(674.92, 19.37, 436.02)
 function Movement(x_position, y_position, z_position)
     local function floor_position(pos)
@@ -526,7 +530,7 @@ function Movement(x_position, y_position, z_position)
 
     local range = 3
 
-    local function NavTo()
+    local function NavToDestination()
         NavReload()
         repeat
             yield("/wait 0.1")
@@ -542,7 +546,7 @@ function Movement(x_position, y_position, z_position)
         yield("/wait 1.0")
     end
 
-    NavTo()
+    NavToDestination()
 
     while true do
         local xpos = floor_position(GetPlayerRawXPos())
@@ -575,7 +579,7 @@ function Movement(x_position, y_position, z_position)
             if math.abs(xpos - x_position_floored) > range or
                math.abs(ypos - y_position_floored) > range or
                math.abs(zpos - z_position_floored) > range then
-                NavTo()
+                NavToDestination()
                 yield('/gaction "Jump"')
                 yield("/wait 0.5")
                 yield('/gaction "Jump"')
@@ -599,6 +603,7 @@ end
 --   ARCANIST
 --##############
 
+-- NEEDS fixing
 -- limsa arcanists' first quest level 1 "Way of the Arcanist"
 function Arcanist1()
     Teleporter("Limsa", "tp")
@@ -612,7 +617,6 @@ function Arcanist1()
     -- yield("/pcall SelectYesno true 0")
     QuestNPC("SelectYesno", true, 0)
     Movement(-335.29, 11.99, 54.45)
-    
     Teleporter("Tempest", "li")
     ZoneTransitions()
     Movement(14.71, 64.52, 87.16)
@@ -630,6 +634,7 @@ function Arcanist1()
     QuestNPC()
 end
 
+-- NEEDS fixing
 -- limsa arcanists' second quest level 5 "What's in the Box"
 function Arcanist2()
     Movement(-327.86, 12.89, 9.79)
@@ -696,10 +701,10 @@ function Arcanist2()
     QuestNPC()
 end
 
+-- NEEDS fixing
 -- limsa arcanists' third quest level 10 "Tactical Planning"
 function Arcanist3()
     Movement(-327.86, 12.89, 9.79)
-    
     yield("/target Thubyrgeim")
     QuestNPC()
     Teleporter("Swiftperch", "tp")
@@ -752,12 +757,12 @@ end
 --   ARCHER
 --##############
 
--- gridania arcanists' first quest level 1 "Way of the Archer"
+-- gridania archer first quest level 1 "Way of the Archer"
 function Archer1()
     -- forgot to do this one, probs will later.
 end
    
--- gridania arcanists' second quest level 5 "A Matter of Perspective"
+-- gridania archer second quest level 5 "A Matter of Perspective"
 function Archer2()
     Teleporter("New Gridania", "tp")
     ZoneTransitions()
@@ -805,7 +810,7 @@ function Archer2()
     QuestNPC()
 end
 
--- gridania arcanists' third quest level 10 "Training with Leih"
+-- gridania archer third quest level 10 "Training with Leih"
 function Archer3()
     yield("/wait 1")
     yield("/target Luciane")
@@ -901,13 +906,13 @@ end
 -- JOB UNLOCKS
 --##############
 
+-- NEEDS fixing
 function FisherUnlock()
     Teleporter("Limsa", "tp")
     ZoneTransitions()
     Teleporter("Fisher", "li")
     ZoneTransitions()
     Movement(-167.30, 4.55, 152.46)
-    
     yield("/target N'nmulika")
     yield("/pint")
     yield("/waitaddon SelectYesno <maxwait.15><wait.0.5>")
@@ -919,9 +924,7 @@ function FisherUnlock()
     yield("/target N'nmulika")
     QuestNPC()
     Movement(-173.59, 4.2, 162.77)
-    
     Movement(-165.74, 4.55, 165.38)
-    
     yield("/target Sisipu")
     yield("/pint")
     yield("/waitaddon SelectYesno <maxwait.15><wait.0.5>")
@@ -931,13 +934,13 @@ function FisherUnlock()
     until IsPlayerAvailable()
 end
 
+-- NEEDS fixing
 function MinerUnlock()
     Teleporter("Ul'dah", "tp")
     ZoneTransitions()
     Teleporter("Miner", "li")
     ZoneTransitions()
     Movement(1.54, 7.6, 153.55)
-    
     yield("/target Linette")
     yield("/pint")
     yield("/waitaddon SelectYesno <maxwait.15><wait.0.5>")
@@ -949,7 +952,6 @@ function MinerUnlock()
     yield("/target Linette")
     QuestNPC()
     Movement(-17.33, 6.2, 157.59)
-    
     yield("/target Adalberta")
     yield("/pint")
     yield("/waitaddon SelectYesno <maxwait.15><wait.0.5>")
@@ -959,13 +961,13 @@ function MinerUnlock()
     until IsPlayerAvailable()
 end
 
+-- NEEDS fixing
 function BotanistUnlock()
     Teleporter("Gridania", "tp")
     ZoneTransitions()
     Teleporter("Botanist", "li")
     ZoneTransitions()
     Movement(-238.64, 8, -144.90)
-    
     yield("/target Leonceault")
     yield("/pint")
     yield("/waitaddon SelectYesno <maxwait.15><wait.0.5>")
@@ -977,7 +979,6 @@ function BotanistUnlock()
     yield("/target Leonceault")
     QuestNPC()
     Movement(-234.09, 6.23, -170.02)
-    
     yield("/target Fufucha")
     yield("/pint")
     yield("/waitaddon SelectYesno <maxwait.15><wait.0.5>")
@@ -991,68 +992,54 @@ end
 -- HUNT UNLOCKS
 --##############
 
+-- NEEDS fixing
 function MaelstromRank1() --needs nodescanner adding and the matching text adjusting
     -- Amalj'aa Hunter
     Teleporter("Camp Drybone", "tp")
     ZoneTransitions()
     Movement(-112.60, -27.88, 343.99)
-    
     -- QuestChecker(MaelstromEnemiesLog1[1], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(-122.43, -30.10, 297.20)
-    
     -- QuestChecker(MaelstromEnemiesLog1[1], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(-122.43, -30.10, 297.20)
-    
     -- QuestChecker(MaelstromEnemiesLog1[1], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     -- Amalj'aa Bruiser
     Movement(-169.97, -46.71, 493.46)
-    
     ZoneTransitions()
     Movement(-157.06, 26.13, -410.14)
-    
     yield("/target Aetheryte")
     Interact()
     Movement(-32.69, 15.53, -277.9)
-    
     -- QuestChecker(MaelstromEnemiesLog1[8], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(-9.38, 15.62, -291.08)
-    
     -- QuestChecker(MaelstromEnemiesLog1[8], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     -- QuestChecker(MaelstromEnemiesLog1[8], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     -- Sylvan Groan + Sylvan Sough
     Teleporter("Bentbranch Meadows", "tp")
     ZoneTransitions()
     Movement(389.27, -3.36, -186.45)
-    
     ZoneTransitions()
     Movement(-189.88, 4.43, 294.46)
-    
     yield("/target Aetheryte")
     Interact()
     Movement(-135.26, 15.12, -1.46)
-    
     -- QuestChecker(MaelstromEnemiesLog1[5], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     -- QuestChecker(MaelstromEnemiesLog1[6], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(-104.98, 18.52, 14.46)
-    
     -- QuestChecker(MaelstromEnemiesLog1[5], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     -- QuestChecker(MaelstromEnemiesLog1[6], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(-71.64, 17.58, 7.27)
-    
     -- QuestChecker(MaelstromEnemiesLog1[5], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     -- QuestChecker(MaelstromEnemiesLog1[6], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     -- Kobold Pickman
     Teleporter("Aleport", "tp")
     ZoneTransitions()
     Movement(417.30, 35.15, -17.66)
-    
     ZoneTransitions()
     Movement(-477.30, 26.29, 61.12)
-    
     -- QuestChecker(MaelstromEnemiesLog1[7], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     -- QuestChecker(MaelstromEnemiesLog1[7], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(-432.12, 38.29, 19.78)
-    
     -- QuestChecker(MaelstromEnemiesLog1[7], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     -- Ixali Straightbeak
     Teleporter("New Gridania", "tp")
@@ -1064,32 +1051,23 @@ function MaelstromRank1() --needs nodescanner adding and the matching text adjus
     yield("/pcall TelepotTown true 11 4u")
     ZoneTransitions()
     Movement(-231, 15.75, -89.25)
-    
     ZoneTransitions()
     Movement(53.52, -37.91, 312.72)
-    
     -- QuestChecker(MaelstromEnemiesLog1[9], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(75.32, -38.07, 331.25)
-    
     -- QuestChecker(MaelstromEnemiesLog1[9], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(75.83, -41.24, 352.80)
-    
     -- QuestChecker(MaelstromEnemiesLog1[9], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     -- Ixali Wildtalon
     Movement(-36.96, -39.16, 232.40)
-    
     yield("/target Aetheryte")
     Interact()
     Movement(-405, 9.5, 128)
-    
     ZoneTransitions()
     Movement(468.13, 232.79, 321.85)
     -- QuestChecker(MaelstromEnemiesLog1[10], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
-    
     Movement(224.32, 301.51, -142.16)
-    
     Movement(229.20, 312.91, -235.02)
-    
     yield("/target Aetheryte")
     Interact()
     Teleport("Limsa", "tp")
@@ -1109,14 +1087,12 @@ function HalataliUnlock()
     Teleporter("Horizon", "tp") -- could also use vesper bay ticket but needs the teleporter function adjusting
     ZoneTransitions()
     Movement(-471.37, 23.01, -355.12)
-    
     yield("/target Nedrick Ironheart")
     QuestNPC()
     -- once accepted quest
     Teleporter("Camp Drybone", "tp")
     ZoneTransitions()
     Movement(-330.92, -22.48, 434.14)
-    
     yield("/target Fafajoni")
     QuestNPC()
 end
@@ -1183,9 +1159,6 @@ function main()
     if DO_THE_AURUM_VALE then
         TheAurumValeUnlock()
     end
-    
--- GC tp
-    --Teleporter("gc", "li")
 end
 
 main()
