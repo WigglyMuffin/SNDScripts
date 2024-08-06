@@ -3,8 +3,8 @@
 -- so it should look like this
 -- %appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\vac_functions.lua
 
-function DidWeLoadcorrectly()
-	yield("/echo Loaded the functions file successfully")
+function LoadFileCheck()
+	yield("/echo Functions file loaded")
 end
 
 -- InteractAndWait()

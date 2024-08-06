@@ -17,10 +17,10 @@
 --   UNLESS YOU KNOW WHAT YOU'RE DOING
 --##########################################
 
-Loadfiyel = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
-FunctionsToLoad = loadfile(Loadfiyel)
-FunctionsToLoad()
-DidWeLoadcorrectly()
+LoadFunctionsFileLocation = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
+LoadFunctions = loadfile(LoadFunctionsFileLocation)
+LoadFunctions()
+LoadFileCheck()
 
 --##############
 --  DOL STUFF
