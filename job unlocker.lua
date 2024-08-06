@@ -426,39 +426,61 @@ function UiCheck(get_node_text_type, close_ui)
     end
 end
 
--- usage: Teleporter("Limsa", "tp")
--- add support for item tp
+-- usage: Teleporter("Limsa", "tp") or Teleporter("gc", "li")
+-- add support for item tp Teleporter("Vesper", "item")
+-- likely rewriting teleporter to have own version of lifestream with locations, coords and nav/tp handling
+-- add trade detection to initiate /busy and remove after successful tp
+-- maybe add random delays between retries
 function Teleporter(location, tp_kind) -- Teleporter handler
     local lifestream_stopped = false
-    local extra_cast_time_buffer = 0
+    local extra_cast_time_buffer = 1 -- Just in case a buffer is required, teleports are 5 seconds long. Slidecasting, ping and fps can affect casts
+    local max_retries = 10  -- Teleporter retry amount, will not tp after number has been reached for safety
+    local retries = 0
+    
     -- Initial check to ensure player can teleport
     repeat
         yield("/wait 0.1")
-    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
-    -- Try teleport, retry if fail indefinitely
-    while true do
+    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) -- 26 is combat
+    
+    -- Try teleport, retry until max_retries is reached
+    while retries < max_retries do
         -- Stop lifestream only once per teleport attempt
         if tp_kind == "li" and not lifestream_stopped then
             yield("/lifestream stop")
             lifestream_stopped = true
             yield("/wait 0.1")
         end
+        
         -- Attempt teleport
         if not IsPlayerCasting() then
             yield("/" .. tp_kind .. " " .. location)
-            yield("/wait 2")
-            -- If casting was not interrupted, reset lifestream_stopped for next retry
-            if not IsPlayerCasting() then
-                lifestream_stopped = false
+            yield("/wait 2") -- Short wait to check if casting starts
+            
+            -- Check if the player started casting, indicating a successful attempt
+            if IsPlayerCasting() then
+                yield("/wait " .. 5 + extra_cast_time_buffer) -- Wait for cast to complete
             end
-        elseif IsPlayerCasting() then
-            yield("/wait " .. 5 + extra_cast_time_buffer) -- Wait for cast to complete
         end
-
-        -- Exit if successful conditions are met
-        if GetCharacterCondition(45) or GetCharacterCondition(51) then
+        
+        -- Check if the teleport was successful
+        if GetCharacterCondition(45) or GetCharacterCondition(51) then -- 45 is BetweenAreas, 51 is BetweenAreas51
+            LogInfo("Teleport successful.")
             break
         end
+        
+        -- Teleport retry increment
+        retries = retries + 1
+        LogInfo("Retrying teleport attempt #" .. retries)
+        
+        -- Reset lifestream_stopped for next retry
+        lifestream_stopped = false
+    end
+    
+    -- Teleporter failed handling
+    if retries >= max_retries then
+        LogInfo("Teleport failed after " .. max_retries .. " attempts.")
+        yield("/e Teleport failed after " .. max_retries .. " attempts.")
+        yield("/lifestream stop") -- Not always needed but removes lifestream ui
     end
 end
 
