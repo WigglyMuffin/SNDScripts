@@ -37,9 +37,10 @@ function DOL()
     ZoneTransitions()
     yield("/li Aftcastle")
     ZoneTransitions()
-    Movement(93.00 40.27 75.60)
+    Movement(93.00, 40.27, 75.60)
     OpenGcSupplyWindow(1)
     GcProvisioningDeliver(3)
+    CloseGcSupplyWindow()
     LogOut()
 end
 

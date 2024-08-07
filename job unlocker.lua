@@ -682,7 +682,7 @@ end
 --##########################################
 --  MAIN SCRIPT
 --##########################################
-function Main()
+function Uhhh() -- renamed because i don't actually know what this is for atm
     if IsQuestComplete(QuestID[4].id) then
         yield('/e You have already completed the "' .. QuestID[4].questName .. '" quest.')
         yield("/e Skipping unlock.")
@@ -726,7 +726,7 @@ end
 --# MAIN SCRIPT #
 --###############
 
-function main()
+function Main()
     yield("/at e")
     yield("/p")
     yield("/vbm cfg AI Enabled true")
