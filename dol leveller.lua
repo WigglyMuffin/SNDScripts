@@ -7,20 +7,28 @@
 -- Closing the market board early doesn't matter either, cancel the tp and buy items, then /tp limsa
 -- You should use the Yes Already plugin to bypass the capped seals warning or it will break the script
 
---##########################################
---   CONFIGS
---##########################################
+--###########
+--# CONFIGS #
+--###########
 
+-- this toggle allows you to run the script on as many characters as you'd like, it'll rotate between them
+MULTICHAR = false
 
---##########################################
---   DON'T TOUCH ANYTHING BELOW HERE 
---   UNLESS YOU KNOW WHAT YOU'RE DOING
---##########################################
+local Chars = {
+    "example example@world",
+    "example example@world",
+    "example example@world"
+}
 
-Loadfiyel = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
-FunctionsToLoad = loadfile(Loadfiyel)
-FunctionsToLoad()
-DidWeLoadcorrectly()
+--#####################################
+--#  DON'T TOUCH ANYTHING BELOW HERE  #
+--# UNLESS YOU KNOW WHAT YOU'RE DOING #
+--#####################################
+
+LoadFunctionsFileLocation = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
+LoadFunctions = loadfile(LoadFunctionsFileLocation)
+LoadFunctions()
+LoadFileCheck()
 
 --##############
 --  DOL STUFF
@@ -43,11 +51,28 @@ function DOL()
     LogOut()
 end
 
---##########################################
---  MAIN SCRIPT
---##########################################
-function main()
+--###############
+--# MAIN SCRIPT #
+--###############
+
+function Main()
     DOL()
 end
 
-main()
+if MULTICHAR then
+    for _, char in ipairs(Chars) do
+        if GetCharacterName(true) == char then
+            -- continue, no relogging needed
+        else
+            yield("/ays relog " ..char)
+            yield("<wait.15.0>")
+            yield("/waitaddon NamePlate <maxwait.6000><wait.5>")
+        end
+        repeat
+            yield("/wait 0.1")
+        until IsPlayerAvailable()
+        Main()
+    end
+else
+    Main()
+end

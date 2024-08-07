@@ -6,14 +6,14 @@
 -- Maelstrom log rank 2 should be used after you have a combat 47 as Aurum Vale requires level 47
 -- The quest unlocks will unlock the optional quests required for each stage of the Maelstrom progression, see the comments below for what they are for
 
---##########################################
---   CONFIGS
---##########################################
+--###########
+--# CONFIGS #
+--###########
 
 -- this toggle allows you to run the script on as many characters as you'd like, it'll rotate between them
-multichar = false
+MULTICHAR = false
 
-local chars = {
+local Chars = {
     "example example@world",
     "example example@world",
     "example example@world"
@@ -113,9 +113,9 @@ local QuestID = {
     {questNumber = 9,  id = 65539, questName = "Way of the Botanist"},                    -- Botanist
     {questNumber = 10, id = 66643, questName = "Way of the Fisher"},                      -- Fisher
     -- Mount
-    {questNumber = 11, id = 66236, questName = "My Little Chocobo (Twin Adder)"},
-    {questNumber = 12, id = 66237, questName = "My Little Chocobo (Maelstrom)"},
-    {questNumber = 13, id = 66238, questName = "My Little Chocobo (Immortal Flames)"},
+    {questNumber = 11, id = 66236, questName = "My Little Chocobo (Twin Adder)"},         -- Twin Adder Chocobo
+    {questNumber = 12, id = 66237, questName = "My Little Chocobo (Maelstrom)"},          -- Maelstrom Chocobo
+    {questNumber = 13, id = 66238, questName = "My Little Chocobo (Immortal Flames)"},    -- Immortal Flames Chocobo
     -- Job Quests
     {questNumber = 14, id = 65988, questName = "Way of the Arcanist"},                    -- Arcanist Quest 01
     {questNumber = 15, id = 65990, questName = "My First Grimoire"},                      -- Arcanist Quest 02
@@ -125,11 +125,10 @@ local QuestID = {
     {questNumber = 19, id = 65582, questName = "A Matter of Perspective"}                 -- Archer Quest 03
 }
 
-
-Loadfiyel = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
-FunctionsToLoad = loadfile(Loadfiyel)
-FunctionsToLoad()
-DidWeLoadcorrectly()
+LoadFunctionsFileLocation = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
+LoadFunctions = loadfile(LoadFunctionsFileLocation)
+LoadFunctions()
+LoadFileCheck()
 
 --############
 --# ARCANIST #
@@ -726,7 +725,7 @@ end
 --# MAIN SCRIPT #
 --###############
 
-function main()
+function Main()
     yield("/at e")
     yield("/p")
     yield("/vbm cfg AI Enabled true")
@@ -788,8 +787,8 @@ function main()
     end
 end
 
-if multichar then
-    for _, char in ipairs(chars) do
+if MULTICHAR then
+    for _, char in ipairs(Chars) do
         if GetCharacterName(true) == char then
             -- continue, no relogging needed
         else

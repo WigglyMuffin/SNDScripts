@@ -1,10 +1,9 @@
--- This file needs to be dropped inside 
--- %appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\
--- so it should look like this
--- %appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\vac_functions.lua
+-- This file needs to be dropped inside %appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\
+-- So it should look like this %appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\vac_functions.lua
+-- It contains the functions required to make the scripts work
 
-function DidWeLoadcorrectly()
-	yield("/echo Loaded the functions file successfully")
+function LoadFileCheck()
+	yield("/e Successfully loaded the functions file")
 end
 
 -- InteractAndWait()
