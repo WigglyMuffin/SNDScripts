@@ -3,11 +3,7 @@
 -- It contains the functions required to make the scripts work
 
 function LoadFileCheck()
-<<<<<<< HEAD
 	yield("/e Successfully loaded the functions file")
-=======
-	yield("/echo Functions file loaded")
->>>>>>> f1c4ab3a66183c4ea1a6cbf4de5546f385d3273b
 end
 
 -- InteractAndWait()

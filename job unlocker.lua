@@ -10,6 +10,7 @@
 --# CONFIGS #
 --###########
 
+-- make this a read from JSON or some other type of file
 -- this toggle allows you to run the script on as many characters as you'd like, it'll rotate between them
 MULTICHAR = false
 
@@ -49,24 +50,24 @@ DO_MIST = false                      -- Mist Housing                Where the He
 
 -- Enemy names for Arcanist quests
 local ArcanistEnemies = {
-    "Wharf Rat",           -- arcanist_01 quest 1
-    "Aurelia",             -- arcanist_02 quest 1
-    "Little Ladybug",      -- arcanist_03 quest 1
-    "Wild Dodo",           -- arcanist_04 quest 2
-    "Tiny Mandragora",     -- arcanist_05 quest 2
-    "Roseling",            -- arcanist_06 quest 3
-    "Wild Jackal"          -- arcanist_07 quest 3
+    "Wharf Rat",           -- arcanist_01 "Way of the Arcanist"
+    "Aurelia",             -- arcanist_02 "Way of the Arcanist"
+    "Little Ladybug",      -- arcanist_03 "Way of the Arcanist"
+    "Wild Dodo",           -- arcanist_04 "My First Grimoire"
+    "Tiny Mandragora",     -- arcanist_05 "My First Grimoire"
+    "Roseling",            -- arcanist_06 "What's in the Box"
+    "Wild Jackal"          -- arcanist_07 "What's in the Box"
 }
 
 -- Enemy names for Archer quests
 local ArcherEnemies = {
-    "Ground Squirrel",     -- archer_01 quest 1
-    "Little Ladybug",      -- archer_02 quest 1
-    "Forest Funguar",      -- archer_03 quest 1
-    "Opo-opo",             -- archer_04 quest 2
-    "Microchu",            -- archer_05 quest 2
-    "Tree Slug",           -- archer_06 quest 3
-    "Northern Vulture"     -- archer_07 quest 3
+    "Ground Squirrel",     -- archer_01 "Way of the Archer"
+    "Little Ladybug",      -- archer_02 "Way of the Archer"
+    "Forest Funguar",      -- archer_03 "Way of the Archer"
+    "Opo-opo",             -- archer_04 "My First Bow"
+    "Microchu",            -- archer_05 "My First Bow"
+    "Tree Slug",           -- archer_06 "A Matter of Perspective"
+    "Northern Vulture"     -- archer_07 "A Matter of Perspective"
 }
 
 -- Enemy names for Maelstrom hunting log 1
@@ -125,10 +126,6 @@ local QuestID = {
     {questNumber = 19, id = 65582, questName = "A Matter of Perspective"}                 -- Archer Quest 03
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> f1c4ab3a66183c4ea1a6cbf4de5546f385d3273b
 LoadFunctionsFileLocation = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
 LoadFunctions = loadfile(LoadFunctionsFileLocation)
 LoadFunctions()
@@ -320,7 +317,8 @@ function Archer1()
     
     -- forgot to do this one, probs will later.
 end
-   
+
+-- NEEDS adjusting
 -- gridania archer second quest level 5 "A Matter of Perspective"
 function Archer2()
     if IsQuestComplete(QuestID[18].id) then
@@ -375,6 +373,7 @@ function Archer2()
     QuestNPC()
 end
 
+-- NEEDS adjusting
 -- gridania archer third quest level 10 "Training with Leih"
 function Archer3()
     if IsQuestComplete(QuestID[19].id) then
@@ -478,33 +477,13 @@ end
 --###############
 
 -- NEEDS fixing
-function FisherUnlock()
-    if IsQuestComplete(66643) then
-        Echo("Already finished the Fisher quest, moving on")
-        return
-    end
-    Teleporter("Limsa", "tp")
-    ZoneTransitions()
-    yield("/li fish")
-    ZoneTransitions()
-    Movement(-167.30, 4.55, 152.46)
-    Target("N'nmulika")
-    QuestNPC("SelectYesno", true, 0)
-    Sleep(1.6)
-    Target("N'nmulika")
-    QuestNPC()
-    Movement(-173.59, 4.2, 162.77)
-    Movement(-165.74, 4.55, 165.38)
-    Target("Sisipu")
-    QuestNPC("SelectYesno", true, 0)
-end
-
--- NEEDS fixing
 function MinerUnlock()
-    if IsQuestComplete(66133) then
-        Echo("Already finished the Miner quest, moving on")
+    if IsQuestComplete(QuestID[8].id) then
+        yield('/e You have already completed the "' .. QuestID[8].questName .. '" quest.')
+        yield("/e Skipping unlock.")
         return
     end
+    
     Teleporter("Ul'dah", "tp")
     ZoneTransitions()
     yield("/li weaver")
@@ -522,10 +501,12 @@ end
 
 -- NEEDS fixing
 function BotanistUnlock()
-    if IsQuestComplete(65539) then
-        Echo("Already finished the Botanist quest, moving on")
+    if IsQuestComplete(QuestID[9].id) then
+        yield('/e You have already completed the "' .. QuestID[9].questName .. '" quest.')
+        yield("/e Skipping unlock.")
         return
     end
+    
     Teleporter("Gridania", "tp")
     ZoneTransitions()
     yield("/li mih")
@@ -539,6 +520,30 @@ function BotanistUnlock()
     QuestNPC()
     Movement(-234.09, 6.23, -170.02)
     Target("Fufucha")
+    QuestNPC("SelectYesno", true, 0)
+end
+
+-- NEEDS fixing
+function FisherUnlock()
+    if IsQuestComplete(QuestID[10].id) then
+        yield('/e You have already completed the "' .. QuestID[10].questName .. '" quest.')
+        yield("/e Skipping unlock.")
+        return
+    end
+    
+    Teleporter("Limsa", "tp")
+    ZoneTransitions()
+    yield("/li fish")
+    ZoneTransitions()
+    Movement(-167.30, 4.55, 152.46)
+    Target("N'nmulika")
+    QuestNPC("SelectYesno", true, 0)
+    Sleep(1.6)
+    Target("N'nmulika")
+    QuestNPC()
+    Movement(-173.59, 4.2, 162.77)
+    Movement(-165.74, 4.55, 165.38)
+    Target("Sisipu")
     QuestNPC("SelectYesno", true, 0)
 end
 
@@ -679,13 +684,6 @@ function DzemaelDarkholdUnlock()
 end
 
 function TheAurumValeUnlock()
-    
-end
-
---##########################################
---  MAIN SCRIPT
---##########################################
-function Uhhh() -- renamed because i don't actually know what this is for atm
     if IsQuestComplete(QuestID[4].id) then
         yield('/e You have already completed the "' .. QuestID[4].questName .. '" quest.')
         yield("/e Skipping unlock.")
@@ -694,6 +692,10 @@ function Uhhh() -- renamed because i don't actually know what this is for atm
     
     -- stuff goes here
 end
+
+--###################
+--# HOUSING UNLOCKS #
+--###################
 
 function TheLavenderBedsUnlock()
     if IsQuestComplete(QuestID[5].id) then
@@ -791,6 +793,7 @@ function Main()
     end
 end
 
+-- needs rewriting
 if MULTICHAR then
     for _, char in ipairs(Chars) do
         if GetCharacterName(true) == char then

@@ -20,14 +20,11 @@ local Chars = {
     "example example@world"
 }
 
-<<<<<<< HEAD
 --#####################################
 --#  DON'T TOUCH ANYTHING BELOW HERE  #
 --# UNLESS YOU KNOW WHAT YOU'RE DOING #
 --#####################################
 
-=======
->>>>>>> f1c4ab3a66183c4ea1a6cbf4de5546f385d3273b
 LoadFunctionsFileLocation = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
 LoadFunctions = loadfile(LoadFunctionsFileLocation)
 LoadFunctions()
