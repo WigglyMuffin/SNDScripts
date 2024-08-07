@@ -20,11 +20,14 @@ local Chars = {
     "example example@world"
 }
 
+<<<<<<< HEAD
 --#####################################
 --#  DON'T TOUCH ANYTHING BELOW HERE  #
 --# UNLESS YOU KNOW WHAT YOU'RE DOING #
 --#####################################
 
+=======
+>>>>>>> f1c4ab3a66183c4ea1a6cbf4de5546f385d3273b
 LoadFunctionsFileLocation = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
 LoadFunctions = loadfile(LoadFunctionsFileLocation)
 LoadFunctions()
@@ -45,9 +48,10 @@ function DOL()
     ZoneTransitions()
     yield("/li Aftcastle")
     ZoneTransitions()
-    Movement(93.00 40.27 75.60)
+    Movement(93.00, 40.27, 75.60)
     OpenGcSupplyWindow(1)
     GcProvisioningDeliver(3)
+    CloseGcSupplyWindow()
     LogOut()
 end
 

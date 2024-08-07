@@ -3,7 +3,11 @@
 -- It contains the functions required to make the scripts work
 
 function LoadFileCheck()
+<<<<<<< HEAD
 	yield("/e Successfully loaded the functions file")
+=======
+	yield("/echo Functions file loaded")
+>>>>>>> f1c4ab3a66183c4ea1a6cbf4de5546f385d3273b
 end
 
 -- InteractAndWait()
@@ -387,7 +391,7 @@ end
 -- maybe add random delays between retries
 function Teleporter(location, tp_kind) -- Teleporter handler
     local lifestream_stopped = false
-    local extra_cast_time_buffer = 1 -- Just in case a buffer is required, teleports are 5 seconds long. Slidecasting, ping and fps can affect casts
+    local extra_cast_time_buffer = 0 -- Just in case a buffer is required, teleports are 5 seconds long. Slidecasting, ping and fps can affect casts
     local max_retries = 10  -- Teleporter retry amount, will not tp after number has been reached for safety
     local retries = 0
     
@@ -629,9 +633,9 @@ function BuyFromStore(number_in_list, amount)
     repeat
         yield("/wait 0.1")
         attempts = attempts + 1
-    until (IsAddonReady("Shop") or attempts >= 50)
+    until (IsAddonReady("Shop") or attempts >= 100)
     -- attempts above 50 is about 5 seconds
-    if attempts >= 50 then
+    if attempts >= 100 then
         Echo("Waited too long, store window not found, moving on")
     end
     if IsAddonReady("Shop") and number_in_list and amount then
@@ -695,6 +699,31 @@ function OpenGcSupplyWindow(tab)
         yield("/pcall GrandCompanySupplyList true 0 "..tab)
     end
 end
+-- usage: CloseGcSupplyWindow()  
+-- literally just closes the gc supply window  
+-- probably is due some small consistency changes but it should be fine where it is now
+function CloseGcSupplyWindow()
+    attempt_counter = 0
+    ::tryagain::
+    if IsAddonVisible("GrandCompanySupplyList") then
+        yield("/pcall GrandCompanySupplyList true -1")
+        repeat
+            Sleep(0.1)
+        until IsAddonReady("SelectString")
+        yield("/pcall SelectString true -1")
+    end
+    if IsAddonReady("SelectString") then
+        yield("/pcall SelectString true -1")
+    end
+    repeat
+        Sleep(0.1)
+        attempt_counter = attempt_counter + 1
+    until not IsAddonVisible("GrandCompanySupplyList") and not IsAddonVisible("SelectString") or attempt_counter >= 50
+    if attempt_counter >= 50 then
+        Echo("Window still open, trying again")
+        goto tryagain
+    end
+end
 
 -- usage: GcProvisioningDeliver(3)
 --
@@ -712,12 +741,12 @@ function GcProvisioningDeliver(amount)
         repeat
             Sleep(0.1)
             err_counter_request = err_counter_request+1
-        until IsAddonReady("Request") or err_counter_request >= 30
+        until IsAddonReady("GrandCompanySupplyReward") or err_counter_request >= 30
         if err_counter_request >= 30 then
             Echo("Something went wrong or request window was auto skipped, continuing")
             err_counter_request = 0
         else 
-            yield("/pcall Request true 0")
+            yield("/pcall GrandCompanySupplyReward true 0")
         end
         repeat
             Sleep(0.1)

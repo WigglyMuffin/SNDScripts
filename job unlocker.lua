@@ -125,6 +125,10 @@ local QuestID = {
     {questNumber = 19, id = 65582, questName = "A Matter of Perspective"}                 -- Archer Quest 03
 }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> f1c4ab3a66183c4ea1a6cbf4de5546f385d3273b
 LoadFunctionsFileLocation = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
 LoadFunctions = loadfile(LoadFunctionsFileLocation)
 LoadFunctions()
@@ -681,7 +685,7 @@ end
 --##########################################
 --  MAIN SCRIPT
 --##########################################
-function Main()
+function Uhhh() -- renamed because i don't actually know what this is for atm
     if IsQuestComplete(QuestID[4].id) then
         yield('/e You have already completed the "' .. QuestID[4].questName .. '" quest.')
         yield("/e Skipping unlock.")
