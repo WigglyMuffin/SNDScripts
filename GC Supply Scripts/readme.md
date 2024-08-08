@@ -6,13 +6,15 @@
 
 ## Easy mistakes
 Make sure you have a file called CharList.lua which is configured in the following format or some of the scripts won't work
-`chars = {
+```
+chars = {
     "EXAMPLE EXAMPLE@WORLD",
     "EXAMPLE EXAMPLE@WORLD",
     "EXAMPLE EXAMPLE@WORLD",
     "EXAMPLE EXAMPLE@WORLD",
     "EXAMPLE EXAMPLE@WORLD"
-}`
+}
+```
 
 Also in the script `Deliver to alts.lua` make sure that `SNDAltConfigFolder` near the top is pointing to your alts SND config folder in the case that you have your alt running under a different user account.
 Or at the very least pointing to a folder that has a copy of the generated `ProvisioningList.lua` from the `Auto Gen Provisioning List.lua` script
