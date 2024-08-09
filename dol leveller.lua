@@ -14,17 +14,14 @@
 -- this toggle allows you to run the script on as many characters as you'd like, it'll rotate between them
 MULTICHAR = false
 
-local Chars = {
-    "example example@world",
-    "example example@world",
-    "example example@world"
-}
+CharList = "CharList.lua"
 
 --#####################################
 --#  DON'T TOUCH ANYTHING BELOW HERE  #
 --# UNLESS YOU KNOW WHAT YOU'RE DOING #
 --#####################################
 
+SNDConfigFolder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
 LoadFunctionsFileLocation = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
 LoadFunctions = loadfile(LoadFunctionsFileLocation)
 LoadFunctions()
