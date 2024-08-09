@@ -53,6 +53,9 @@ end
 -- ###################################
 
 for index, item in ipairs(ProvisioningList) do
+    if item["CharNameClean"] == "" then
+        goto skip
+    end
     yield("/echo ############################")
     yield("/echo Waiting for "..item["CharNameClean"])
     yield("/echo ############################")
@@ -124,6 +127,7 @@ for index, item in ipairs(ProvisioningList) do
     yield("/echo Moving onto next char")
     yield("/echo ############################")
     yield("/wait 5")
+    ::skip::
 end
 DropboxSetItemQuantity(1, false, 0)
 yield("/echo ############################")
