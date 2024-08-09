@@ -210,6 +210,7 @@ for i = 1, #franchise_owners do
     --now we must head to the place we are meeting this filthy animal
     --first we have to find his neighbourhood, this uber driver better not complain
     --are we on the right server already?
+    local homeworld = GetHomeWorld()
     yield("/li " .. tonys_turf)
     repeat
         yield("/wait 0.1")
@@ -267,7 +268,7 @@ for i = 1, #franchise_owners do
             yield("/echo See ya " .. fat_tony .. ", a pleasure.")
             repeat
                 yield("/wait 0.1")
-            until GetCurrentWorld() == GetHomeWorld()
+            until GetCurrentWorld() == homeworld
             repeat
                 yield("/wait 0.1")
             until IsPlayerAvailable()
@@ -308,4 +309,3 @@ end
 
 --what you thought your job was done you ugly mug? get back to work you gotta pay up that gil again next month!
 --boss please i just collected the stuff be nice
-yield("/ays multi e")
