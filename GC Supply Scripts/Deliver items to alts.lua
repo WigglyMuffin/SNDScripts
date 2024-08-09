@@ -49,7 +49,7 @@ for index, item in ipairs(ProvisioningList) do
     until not IsAddonVisible("SelectYesno")
     repeat 
         Sleep(0.1)
-    until ContainsLetters(GetPartyMemberName(0))
+    until IsInParty()
 
     Echo("############################")
     Echo("Getting Ready to trade")
