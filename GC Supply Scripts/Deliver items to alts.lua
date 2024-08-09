@@ -14,6 +14,10 @@ SNDAltConfigFolder = "C:\\Users\\ff14lowres\\AppData\\Roaming\\XIVLauncher\\plug
 -- ###################################
 -- ###################################
 -- ###################################
+LoadFunctionsFileLocation = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
+LoadFunctions = loadfile(LoadFunctionsFileLocation)
+LoadFunctions()
+LoadFileCheck()
 
 DropboxSetItemQuantity(1, false, 0)
 dofile(SNDAltConfigFolder..""..ProvisioningListNameToLoad)
@@ -53,7 +57,7 @@ end
 -- ###################################
 
 for index, item in ipairs(ProvisioningList) do
-    if item["CharNameClean"] == "" then
+    if FindDCWorldIsOn(item["CharHomeWorld"]) == FindDCWorldIsOn(FindWorldByID(GetCurrentWorld())) then
         goto skip
     end
     yield("/echo ############################")
@@ -61,7 +65,7 @@ for index, item in ipairs(ProvisioningList) do
     yield("/echo ############################")
     while string.len(GetTargetName()) == 0 do
         yield('/target "' ..item["CharNameClean"]..'"')
-        yield("/wait 1")
+        Sleep(0.1)
     end
     while Distance(
         GetPlayerRawXPos(),
