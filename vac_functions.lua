@@ -538,6 +538,12 @@ function Movement(x_position, y_position, z_position)
         local max_retries = 100
         repeat
             yield("/wait 0.1")
+            
+            -- add mount vs running time to destination logic
+            if TerritorySupportsMounting then
+                Mount()
+            end
+            
             yield("/vnav moveto " .. x_position .. " " .. y_position .. " " .. z_position)
             retries = retries + 1
         until PathIsRunning() or retries >= max_retries
