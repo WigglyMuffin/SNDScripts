@@ -38,7 +38,7 @@ tony_z = 42069420
 tony firstname, lastname, meeting locationtype, returnhome 1 = yes 0 = no, 0 = fc entrance 1 = nearby bell 2 = limsa bell
 ]]
 local franchise_owners = {
-    {"EXAMPLE EXAMPLE@World", 1, 2},
+    {"EXAMPLE EXAMPLE@World", 0, 2},
     {"EXAMPLE EXAMPLE@World", 1, 2},
     {"EXAMPLE EXAMPLE@World", 1, 2},
     {"EXAMPLE EXAMPLE@World", 1, 2},
@@ -210,7 +210,6 @@ for i = 1, #franchise_owners do
     --now we must head to the place we are meeting this filthy animal
     --first we have to find his neighbourhood, this uber driver better not complain
     --are we on the right server already?
-    local homeworld = GetHomeWorld()
     yield("/li " .. tonys_turf)
     repeat
         yield("/wait 0.1")
@@ -264,11 +263,25 @@ for i = 1, #franchise_owners do
             yield("/echo wait why can't i leave " .. fat_tony .. "?")
         end
         if franchise_owners[i][2] == 1 then
-            yield("/li")
+            local home = false
             yield("/echo See ya " .. fat_tony .. ", a pleasure.")
+            if GetCurrentWorld() == GetHomeWorld() then
+                home = true
+            else
+                yield("/li")
+            end
             repeat
                 yield("/wait 0.1")
-            until GetCurrentWorld() == homeworld
+                if GetCurrentWorld() == GetHomeWorld() then
+                    if GetCurrentWorld() == 0 and GetHomeWorld() == 0 then
+                    else
+                        home = true
+                    end
+                end
+            until home
+            repeat
+                yield("/wait 0.1")
+            until IsPlayerAvailable()
             repeat
                 yield("/wait 0.1")
             until IsPlayerAvailable()
@@ -298,6 +311,7 @@ for i = 1, #franchise_owners do
                 )
                 visland_stop_moving() --added so we don't accidentally end before we get to the bell
             end
+            home = false
             --limsa bell
             if franchise_owners[i][3] == 2 then
                 yield("/echo returning to limsa bell")

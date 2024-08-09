@@ -45,7 +45,7 @@ function DOL()
     else
         yield("/li")
     end
-    while not home do
+    repeat
         Sleep(0.1)
         if GetCurrentWorld() == GetHomeWorld() then
             if GetCurrentWorld() == 0 and GetHomeWorld() == 0 then
@@ -53,7 +53,7 @@ function DOL()
                 home = true
             end
         end
-    end
+    until home
     repeat
         Sleep(0.1)
     until IsPlayerAvailable()
