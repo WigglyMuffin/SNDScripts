@@ -19,121 +19,100 @@ LoadFunctions = loadfile(LoadFunctionsFileLocation)
 LoadFunctions()
 LoadFileCheck()
 
-DropboxSetItemQuantity(1, false, 0)
 dofile(SNDAltConfigFolder..""..ProvisioningListNameToLoad)
-local function Distance(x1, y1, z1, x2, y2, z2)
-    if type(x1) ~= "number" then
-        x1 = 0
-    end
-    if type(y1) ~= "number" then
-        y1 = 0
-    end
-    if type(z1) ~= "number" then
-        z1 = 0
-    end
-    if type(x2) ~= "number" then
-        x2 = 0
-    end
-    if type(y2) ~= "number" then
-        y2 = 0
-    end
-    if type(z2) ~= "number" then
-        z2 = 0
-    end
-    zoobz = math.sqrt((x2 - x1) ^ 2 + (y2 - y1) ^ 2 + (z2 - z1) ^ 2)
-    if type(zoobz) ~= "number" then
-        zoobz = 0
-    end
-    --return math.sqrt((x2 - x1)^2 + (y2 - y1)^2 + (z2 - z1)^2)
-    return zoobz
-end
-
-function Approach(CharToApproach)
-    PathfindAndMoveTo(GetObjectRawXPos(CharToApproach), GetObjectRawYPos(CharToApproach), GetObjectRawZPos(CharToApproach), false)
-end
 
 -- ###################################
 -- ########## MAIN SCRIPT ############
 -- ###################################
+DropboxSetItemQuantity(1, false, 0)
 
 for index, item in ipairs(ProvisioningList) do
     if FindDCWorldIsOn(item["CharHomeWorld"]) == FindDCWorldIsOn(FindWorldByID(GetCurrentWorld())) then
         goto skip
     end
-    yield("/echo ############################")
-    yield("/echo Waiting for "..item["CharNameClean"])
-    yield("/echo ############################")
+    Echo("############################")
+    Echo("Waiting for "..item["CharNameClean"])
+    Echo("############################")
+    repeat 
+        Sleep(0.1)
+    until GetObjectRawXPos(tostring(item["CharNameClean"])) ~= 0
     while string.len(GetTargetName()) == 0 do
         yield('/target "' ..item["CharNameClean"]..'"')
+        Sleep(1)
+    end
+    repeat 
         Sleep(0.1)
-    end
-    while Distance(
-        GetPlayerRawXPos(),
-        GetPlayerRawYPos(),
-        GetPlayerRawZPos(),
-        GetObjectRawXPos(item["CharNameClean"]),
-        GetObjectRawYPos(item["CharNameClean"]),
-        GetObjectRawZPos(item["CharNameClean"])
-    ) > 3 do
-        while string.len(GetTargetName()) == 0 do
-            yield('/target "' ..item["CharNameClean"]..'"')
-            yield("/wait 1")
-        end
-        if not PathfindInProgress() then
-            yield("/echo ############################")
-            yield("/echo Moving towards <t>")
-            yield("/echo ############################")
-            Approach(item["CharNameClean"])
-            yield("/wait 2")
-        end
-    end
-    repeat
-        yield("/vnav stop")
-    until not PathfindInProgress()
-    yield("/echo ############################")
-    yield("/echo Getting Ready to trade")
-    yield("/echo ############################")
-    yield("/wait 0.5")
+    until IsAddonReady("SelectYesno")
+    repeat 
+        yield("/pcall SelectYesno true 0")
+        Sleep(1)
+    until not IsAddonVisible("SelectYesno")
+    repeat 
+        Sleep(0.1)
+    until ContainsLetters(GetPartyMemberName(0))
+
+    Echo("############################")
+    Echo("Getting Ready to trade")
+    Echo("############################")
+    Sleep(0.5)
+    yield('/target "' ..item["CharNameClean"]..'"')
     yield("/focustarget <t>")
-    yield("/wait 0.5")
-    DropboxSetItemQuantity(1, false, 1)
-    yield("/wait 0.2")
-    DropboxSetItemQuantity(tonumber(item["BotanistItemID"]), false, tonumber(item["BotanistItemQty"]))
-    yield("/wait 0.2")
-    DropboxSetItemQuantity(tonumber(item["MinerItemID"]), false, tonumber(item["MinerItemQty"]))
-    yield("/wait 0.2")
-    DropboxSetItemQuantity(tonumber(item["FisherItemID"]), false, tonumber(item["FisherItemQty"]))
-    yield("/wait 1")
-    yield("/echo ############################")
-    yield("/echo Starting trade!")
-    yield("/echo ############################")
+    Sleep(1)
+    if item["Row1ItemName"] then
+        yield("/dbq "..item["Row1ItemID"]..":"..item["Row1ItemAmount"])
+    end
+    Sleep(0.2)
+    if item["Row2ItemName"] then
+        yield("/dbq "..item["Row2ItemID"]..":"..item["Row2ItemAmount"])
+    end
+    Sleep(0.2)
+    if item["Row3ItemName"] then
+        yield("/dbq "..item["Row3ItemID"]..":"..item["Row3ItemAmount"])
+    end
+    Sleep(0.2)
+    yield("/dbq 1:1")
+    Sleep(1)
+    Echo("############################")
+    Echo("Starting trade!")
+    Echo("############################")
     DropboxStart()
-    yield("/wait 2")
+    Sleep(2)
     tradestatus = DropboxIsBusy()
     while tradestatus == true do
         tradestatus = DropboxIsBusy()
         LogInfo("[GCID] Currently trading...")
-        yield("/wait 2")
+        Sleep(2)
     end
-    yield("/echo ############################")
-    yield("/echo Trading done")
-    yield("/echo ############################")
-    yield("/echo ############################")
-    yield("/echo Cleaning up Dropbox")
-    yield("/echo ############################")
-    DropboxSetItemQuantity(tonumber(item["BotanistItemID"]), false, 0)
-    yield("/wait 0.2")
-    DropboxSetItemQuantity(tonumber(item["MinerItemID"]), false, 0)
-    yield("/wait 0.2")
-    DropboxSetItemQuantity(tonumber(item["FisherItemID"]), false, 0)
-    yield("/echo ############################")
-    yield("/echo Done!")
-    yield("/echo Moving onto next char")
-    yield("/echo ############################")
-    yield("/wait 5")
+    Echo("############################")
+    Echo("Trading done")
+    Echo("############################")
+    Echo("############################")
+    Echo("Cleaning up Dropbox")
+    Echo("############################")
+    yield("/dbq clear")
+    DropboxSetItemQuantity(1, false, 0)
+    Sleep(0.5)
+    DropboxSetItemQuantity(tonumber(item["Row1ItemID"]), false, 0)
+    Sleep(0.5)
+    DropboxSetItemQuantity(tonumber(item["Row1ItemID"]), false, 0)
+    Sleep(0.5)
+    DropboxSetItemQuantity(tonumber(item["Row2ItemID"]), false, 0)
+    Sleep(0.5)
+    DropboxSetItemQuantity(tonumber(item["Row2ItemID"]), false, 0)
+    Sleep(0.5)
+    DropboxSetItemQuantity(tonumber(item["Row3ItemID"]), false, 0)
+    Sleep(0.5)
+    DropboxSetItemQuantity(tonumber(item["Row3ItemID"]), false, 0)
+    Sleep(0.5)
+    DropboxSetItemQuantity(1, false, 0)
+    Echo("############################")
+    Echo("Done!")
+    Echo("############################")
+    Sleep("5")
     ::skip::
 end
 DropboxSetItemQuantity(1, false, 0)
 yield("/echo ############################")
 yield("/echo Script finished")
 yield("/echo ############################")
+LogOut()

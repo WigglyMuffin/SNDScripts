@@ -799,3 +799,26 @@ function FindDCWorldIsOn(worldName)
     end
     return nil
 end
+
+-- Usage: ContainsLetters("meow")  
+-- 
+-- Will return if whatever you provide it has letters or not
+function ContainsLetters(input)
+    if input:match("%a") then
+        return true
+    else
+        return false
+    end
+end
+
+-- Usage: CheckPartyStatus()
+--
+-- Checks if you're in a party, returns true or false
+function CheckPartyStatus()
+    local partyMemberName = GetPartyMemberName(1)
+    if partyMemberName ~= nil and partyMemberName ~= "" then
+        return true
+    else
+        return false
+    end
+end
