@@ -64,6 +64,8 @@ function DOL()
     if GetZoneID() ~= 129 then
         Teleporter("Limsa", "tp")
         ZoneTransitions()
+    else
+        Movement(-89.36, 18.80, 1.78) -- this will need rethinking but it's a failsafe if you are already in limsa since /li Aftcastle will break if you are not near a crystal
     end
     yield("/li Aftcastle")
     ZoneTransitions()
