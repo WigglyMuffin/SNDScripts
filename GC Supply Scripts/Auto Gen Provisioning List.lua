@@ -166,6 +166,7 @@ BotanistList = {
     ["Zelkova Log"] = {ID = 19933},
     ["Frantoio"] = {ID = 27820},
     ["White Oak Log"] = {ID = 27683},
+    ["White Oak Branch"] = {ID = 27816},
     ["Blood Tomato"] = {ID = 27825},
     ["Miracle Apple Log"] = {ID = 27684},
     ["Garden Beet"] = {ID = 27824},
