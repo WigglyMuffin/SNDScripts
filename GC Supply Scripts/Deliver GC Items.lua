@@ -43,6 +43,10 @@ function DOL()
     if GetCurrentWorld() == GetHomeWorld() then
         home = true
     else
+        if GetZoneID() ~= 129 then
+            Teleporter("Limsa", "tp")
+            ZoneTransitions()
+        end
         yield("/li")
     end
     repeat
@@ -57,8 +61,10 @@ function DOL()
     repeat
         Sleep(0.1)
     until IsPlayerAvailable()
-    Teleporter("Limsa", "tp")
-    ZoneTransitions()
+    if GetZoneID() ~= 129 then
+        Teleporter("Limsa", "tp")
+        ZoneTransitions()
+    end
     yield("/li Aftcastle")
     ZoneTransitions()
     Movement(93.00, 40.27, 75.60)
