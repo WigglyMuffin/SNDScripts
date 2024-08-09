@@ -811,14 +811,10 @@ function ContainsLetters(input)
     end
 end
 
--- Usage: CheckPartyStatus()
+-- Usage: IsInParty()
 --
 -- Checks if you're in a party, returns true or false
-function CheckPartyStatus()
-    local partyMemberName = GetPartyMemberName(1)
-    if partyMemberName ~= nil and partyMemberName ~= "" then
-        return true
-    else
-        return false
-    end
+function IsInParty()
+    local partyMemberName = GetPartyMemberName(0)
+    return partyMemberName ~= nil and partyMemberName ~= ""
 end
