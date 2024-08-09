@@ -725,20 +725,30 @@ end
 --
 -- Clicks and delivers the top option X amount of times  
 -- Works because when you deliver one the others move up
-function GcProvisioningDeliver(amount)
-    local amount = amount
-    if not amount then
-        amount = 1
+function GcProvisioningDeliver()
+    local amount = 4
+    local function ContainsLetters(input)
+        if input:match("%a") then
+            return true
+        else
+            return false
+        end
     end
     for i = 1, amount do
-        yield("/pcall GrandCompanySupplyList true 1 0")
+        local RowChecker = GetNodeText("ContentsInfoDetail", 101, 5)
+        if ContainsLetters(RowChecker) then
+            yield("/pcall GrandCompanySupplyList true 1 0")
+        else
+            yield("/echo Nothing left to deliver, moving on")
+            goto skip
+        end
         local err_counter_request = 0
         local err_counter_supply = 0
         repeat
             Sleep(0.1)
             err_counter_request = err_counter_request+1
-        until IsAddonReady("GrandCompanySupplyReward") or err_counter_request >= 30
-        if err_counter_request >= 30 then
+        until IsAddonReady("GrandCompanySupplyReward") or err_counter_request >= 50
+        if err_counter_request >= 50 then
             Echo("Something went wrong or request window was auto skipped, continuing")
             err_counter_request = 0
         else 
@@ -747,8 +757,9 @@ function GcProvisioningDeliver(amount)
         repeat
             Sleep(0.1)
             err_counter_supply = err_counter_supply+1
-        until IsAddonReady("GrandCompanySupplyList") or err_counter_supply >= 30
+        until IsAddonReady("GrandCompanySupplyList") or err_counter_supply >= 50
         err_counter_supply = 0
+        ::skip::
     end
 end
 

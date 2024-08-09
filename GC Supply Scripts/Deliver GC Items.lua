@@ -63,7 +63,7 @@ function DOL()
     ZoneTransitions()
     Movement(93.00, 40.27, 75.60)
     OpenGcSupplyWindow(1)
-    GcProvisioningDeliver(3)
+    GcProvisioningDeliver()
     CloseGcSupplyWindow()
     LogOut()
 end
