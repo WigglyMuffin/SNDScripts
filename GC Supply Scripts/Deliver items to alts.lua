@@ -27,7 +27,7 @@ dofile(SNDAltConfigFolder..""..ProvisioningListNameToLoad)
 DropboxSetItemQuantity(1, false, 0)
 
 for index, item in ipairs(ProvisioningList) do
-    if FindDCWorldIsOn(item["CharHomeWorld"]) == FindDCWorldIsOn(FindWorldByID(GetCurrentWorld())) then
+    if not FindDCWorldIsOn(item["CharHomeWorld"]) == FindDCWorldIsOn(FindWorldByID(GetCurrentWorld())) then
         goto skip
     end
     Echo("############################")
