@@ -540,7 +540,7 @@ function Movement(x_position, y_position, z_position)
             yield("/wait 0.1")
             
             -- add mount vs running time to destination logic
-            if TerritorySupportsMounting then
+            if TerritorySupportsMounting() then
                 Mount()
             end
             
@@ -734,14 +734,19 @@ end
 function GcProvisioningDeliver()
     local amount = 4
     local function ContainsLetters(input)
+        input = tostring(input)
         if input:match("%a") then
             return true
         else
             return false
         end
     end
+    Sleep(1)
+    repeat
+        Sleep(0.1)
+    until IsAddonReady("GrandCompanySupplyList")
     for i = 1, amount do
-        local RowChecker = GetNodeText("ContentsInfoDetail", 101, 5)
+        local RowChecker = GetNodeText("GrandCompanySupplyList", 6, 2, 10)
         if ContainsLetters(RowChecker) then
             yield("/pcall GrandCompanySupplyList true 1 0")
         else
