@@ -31,13 +31,13 @@ for index, item in ipairs(ProvisioningList) do
         goto skip
     end
     Echo("############################")
-    Echo("Waiting for "..item["CharNameClean"])
+    Echo("Waiting for "..item["CharName"])
     Echo("############################")
     repeat 
         Sleep(0.1)
-    until GetObjectRawXPos(tostring(item["CharNameClean"])) ~= 0
+    until GetObjectRawXPos(tostring(item["CharName"])) ~= 0
     while string.len(GetTargetName()) == 0 do
-        yield('/target "' ..item["CharNameClean"]..'"')
+        yield('/target "' ..item["CharName"]..'"')
         Sleep(1)
     end
     repeat 
@@ -55,7 +55,7 @@ for index, item in ipairs(ProvisioningList) do
     Echo("Getting Ready to trade")
     Echo("############################")
     Sleep(0.5)
-    yield('/target "' ..item["CharNameClean"]..'"')
+    yield('/target "' ..item["CharName"]..'"')
     yield("/focustarget <t>")
     Sleep(1)
     if item["Row1ItemName"] then
