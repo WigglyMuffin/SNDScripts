@@ -24,6 +24,10 @@ CharList = "CharList.lua"
 --##################################
 
 SNDConfigFolder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
+LoadFunctionsFileLocation = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
+LoadFunctions = loadfile(LoadFunctionsFileLocation)
+LoadFunctions()
+LoadFileCheck()
 LogInfo("[APL] ##############################")
 LogInfo("[APL] Starting script...")
 LogInfo("[APL] SNDConfigFolder: "..SNDConfigFolder)
@@ -33,6 +37,7 @@ LogInfo("[APL] CharList: "..CharList)
 LogInfo("[APL] SNDC+Char: "..SNDConfigFolder..""..CharList)
 LogInfo("[APL] ##############################")
 local ProvisioningList = {}
+
 dofile(SNDConfigFolder..""..CharList)
 yield("/echo "..chars[1])
 ItemList = {
@@ -594,21 +599,6 @@ ItemList = {
     ["Speckled Peacock Bass"] = {ID = 43833}
 }
 
-function OpenTimers()
-    repeat
-        yield("/timers")
-        yield("/wait 0.1")
-    until IsAddonVisible("ContentsInfo")
-    repeat
-        yield("/pcall ContentsInfo True 12 1")
-        yield("/wait 0.1")
-    until IsAddonVisible("ContentsInfoDetail")
-    repeat
-        yield("/timers")
-        yield("/wait 0.1")
-    until not IsAddonVisible("ContentsInfo")
-end
-
 function SerializeTable(val, name, depth)
     depth = depth or 0
     local result = ""
@@ -649,15 +639,15 @@ function GetAndSaveProvisioningToTable()
         else 
             LogInfo("[APL] Logging into: "..char)
             yield("/ays relog " ..char)
-            yield("<wait.15.0>")
+            Sleep(15)
             yield("/waitaddon NamePlate <maxwait.6000><wait.5>")
         end
         repeat
-            yield("/wait 0.1")
+            Sleep(0.1)
         until IsPlayerAvailable()
         OpenTimers()
+        Sleep(1)
 
-        local CharacterName = GetCharacterName(true)
         function ContainsLetters(input)
             if input:match("%a") then
                 return true
@@ -665,15 +655,18 @@ function GetAndSaveProvisioningToTable()
                 return false
             end
         end
+
         Row1Found = false
         Row2Found = false
         Row3Found = false
         local Row1ItemName = GetNodeText("ContentsInfoDetail", 101, 5)
+        LogInfo("[APL] "..tostring(Row1ItemName))
+        LogInfo("[APL] "..tostring(ContainsLetters(Row1ItemName)))
         if ContainsLetters(Row1ItemName) then
             LogInfo("[APL] First row text found, continuing")
             Row1Found = true
         else
-            LogInfo("[APL] Third row text not found")
+            LogInfo("[APL] First row text not found")
         end
         --
         local Row2ItemName = GetNodeText("ContentsInfoDetail", 100, 5)
@@ -685,39 +678,47 @@ function GetAndSaveProvisioningToTable()
         end
         --
         local Row3ItemName = GetNodeText("ContentsInfoDetail", 99, 5)
-        if ContainsLetters(Row2ItemName) then
-            LogInfo("[APL] Third row text found, continuing")
+        if ContainsLetters(Row3ItemName) then
+            LogInfo("[APL] Third row text found")
             Row3Found = true
         else
             LogInfo("[APL] Third row text not found")
         end
-
         if Row1Found then
+            ProvisioningList[_] = {}
+            LogInfo("[APL] Inserting from first row")
             local Row1ItemID = ItemList[Row1ItemName].ID
             local Row1ItemAmount = GetNodeText("ContentsInfoDetail", 101, 2)
-            ProvisioningList[_].Row1ItemName = Row1ItemName
-            ProvisioningList[_].Row1ItemID = Row1ItemID
-            ProvisioningList[_].Row1ItemAmount = Row1ItemAmount
+            ProvisioningList[_]["Row1ItemName"] = Row1ItemName
+            ProvisioningList[_]["Row1ItemID"] = Row1ItemID
+            ProvisioningList[_]["Row1ItemAmount"] = Row1ItemAmount
         end
         if Row2Found then
+            LogInfo("[APL] Inserting from second row")
             local Row2ItemID = ItemList[Row2ItemName].ID
             local Row2ItemAmount = GetNodeText("ContentsInfoDetail", 100, 2)
-            ProvisioningList[_].Row2ItemName = Row2ItemName
-            ProvisioningList[_].Row2ItemID = Row2ItemID
-            ProvisioningList[_].Row2ItemAmount = Row2ItemAmount
+            ProvisioningList[_]["Row2ItemName"] = Row2ItemName
+            ProvisioningList[_]["Row2ItemID"] = Row2ItemID
+            ProvisioningList[_]["Row2ItemAmount"] = Row2ItemAmount
         end
         if Row3Found then
+            LogInfo("[APL] Inserting from third row")
             local Row3ItemID = ItemList[Row3ItemName].ID
             local Row3ItemAmount = GetNodeText("ContentsInfoDetail", 99, 2)
-            ProvisioningList[_].Row3ItemName = Row3ItemName
-            ProvisioningList[_].Row3ItemID = Row3ItemID
-            ProvisioningList[_].Row3ItemAmount = Row3ItemAmount
+            ProvisioningList[_]["Row3ItemName"] = Row3ItemName
+            ProvisioningList[_]["Row3ItemID"] = Row3ItemID
+            ProvisioningList[_]["Row3ItemAmount"] = Row3ItemAmount
         end
         if Row1Found or Row2Found or Row3Found then
+            local CharHomeWorld = FindWorldByID(GetHomeWorld())
             local CharNameClean = GetCharacterName()
-            ProvisioningList[_].CharNameClean = CharNameClean
-            ProvisioningList[_].CharNameWithWorld = CharacterName
+            ProvisioningList[_]["CharName"] = CharNameClean
+            ProvisioningList[_]["CharHomeWorld"] = CharHomeWorld
         end
+        local ProvisioningListStrings = "ProvisioningList = " .. SerializeTable(ProvisioningList)
+        local Files = io.open(SNDConfigFolder..""..ProvisioningListSaveName, "w")
+        Files:write(ProvisioningListStrings)
+        Files:close()
     end
 end
 
