@@ -153,39 +153,45 @@ function EstateTeleport(estate_char_name, estate_type)
     ZoneTransitions()
 end
 
+-- Usage: RelogCharacter("First Last@Server")
+-- Relogs specified character, should be followed with a LoginCheck()
+-- Requires @Server else it will not work
+function RelogCharacter(relog_char_name)
+    repeat
+        Sleep(0.1)
+    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
+    
+    yield("/ays relog " .. relog_char_name)
+end
+
 --###############
 --# MAIN SCRIPT #
 --###############
 
-local function processAltCharacters(altCharList, destination_server, destination_zone, destination_zone_id, destination_type, destination_house)
+local function processAltCharacters(alt_char_name_list, destination_server, destination_zone, destination_zone_id, destination_type, destination_house, path_home)
     for i = 1, #alt_char_name_list do
         -- Update alt character name
         local alt_char_name = alt_char_name_list[i][1]
         
-        Echo("Picking up items from " .. main_char_name)
-        Echo("Processing " .. i .. "/" .. #alt_char_name_list)
-        
         -- Switch characters if required, looks up current character and compares
         if GetCharacterName(true) ~= alt_char_name_list[i][1] then
-            yield("/ays relog " .. alt_char_name_list[i][1])
+            RelogCharacter(alt_char_name_list[i][1])
             Sleep(2.0)
             LoginCheck()
         end
         
-        -- Not sure if this is needed twice, needs testing
-        yield("/echo Processing Tony " .. i .. "/" .. #alt_char_name_list)
+        Echo("Picking up items from: " .. main_char_name)
+        Echo("Processing " .. i .. "/" .. #alt_char_name_list .. ", current character: " .. alt_char_name)
         
         -- Check if alt character on correct server
+        -- Teleporter(destination_server, "li")
         yield("/li " .. destination_server)
-        repeat
-            Sleep(0.1)
-        until GetCurrentWorld() == WorldIDList[destination_server].ID
         
         repeat
             Sleep(0.1)
-        until IsPlayerAvailable()
+        until GetCurrentWorld() == WorldIDList[destination_server].ID and IsPlayerAvailable()
         
-        -- Alt character destination type, how alt is getting to the main
+        -- Alt character destination type, how alt char is travelling to the main
         -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
         if destination_type == 0 then
             Echo("Teleporting to " .. destination_zone .. " to find " .. main_char_name)
@@ -248,6 +254,7 @@ local function processAltCharacters(altCharList, destination_server, destination
                     -- Teleporter(GetHomeWorld(), "li")
                     yield("/li")
                 end
+                
                 repeat
                     Sleep(0.1)
                 until GetCurrentWorld() == GetHomeWorld() and IsPlayerAvailable()
@@ -265,7 +272,6 @@ local function processAltCharacters(altCharList, destination_server, destination
                 if alt_char_name_list[i][3] == 1 then
                     Echo("Attempting to go to nearest retainer bell")
                     Target("Summoning Bell")
-                    Sleep(2.0)
                     Movement(GetObjectRawXPos("Summoning Bell"), GetObjectRawYPos("Summoning Bell"), GetObjectRawZPos("Summoning Bell"))
                 end
                 
