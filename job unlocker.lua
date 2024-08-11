@@ -15,9 +15,11 @@
 MULTICHAR = false
 
 local Chars = {
-    "example example@world",
-    "example example@world",
-    "example example@world"
+--     "EXAMPLE EXAMPLE@WORLD",
+--     "EXAMPLE EXAMPLE@WORLD",
+--     "EXAMPLE EXAMPLE@WORLD",
+--     "EXAMPLE EXAMPLE@WORLD",
+--     "EXAMPLE EXAMPLE@WORLD"
 }
 
 -- Only set one of these

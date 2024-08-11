@@ -1,325 +1,279 @@
---[[
-Fat Tony script
+-- stuff could go here
 
-This is a pair script for the bagman script. basically it will load x chars go to location to wait for deliveries. when it receives a 1 gil trade, it knows its time to switch to next char.
-it won't do anything really different than bagman.
+--###################
+--# FUNCTION LOADER #
+--###################
 
-This script is a modified version of mcvaxius's script with improvements to make it faster and more consistent, also removes the reliancy on the functions file as i felt it was not needed here.
-]]
---[[
+SNDConfigFolder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
+LoadFunctionsFileLocation = SNDConfigFolder .. "vac_functions.lua"
+LoadFunctions = loadfile(LoadFunctionsFileLocation)
+LoadFunctions()
+LoadFileCheck()
 
-requires plugins
-Lifestream
-Teleporter
-Pandora -> TURN OFF AUTO NUMERICS
-automaton -> TURN OFF AUTO NUMERICS
-Dropbox -> autoconfirm
-Visland
-Vnavmesh
-Simpletweaks -> enable targeting fix
-YesAlready -> /Enter .*/
+--###########
+--# CONFIGS #
+--###########
 
-Optional:
-Autoretainer
-Liza's plugin : Kitchen Sink if you want to use her queue method
-]]
-tonys_turf = "Sagittarius" --what server will our tonies run to
-tonys_spot = "Solution 9" --where we tping to aka aetheryte name
-tony_zoneID = 186 --this is the zone id for where the aetheryte is, if its anything other than 0, it will be evaluated to see if your already in teh zone for cases of multi transfer from or to same
-tonys_house = 0 --0 fc 1 personal 2 apartment. don't judge. tony doesnt trust your bagman to come to the big house
-tony_type = 0 --0 = specific aetheryte name, 1 first estate in list outside, 2 first estate in list inside
+local destination_server = "Louisoix"     -- Server characters need to travel for collecting items
+local destination_zone = "Limsa Lominsa"  -- Zone characters need to travel for collecting items
+local destination_zone_id = 129           -- Zone ID characters need to travel for collecting items, just match it to the zone above, can be found using GetZoneID()
+local destination_house = 0               -- Options: 0 = FC, 1 = Personal, 2 = Apartment
+local destination_type = 0                -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
+local path_home = true                    -- Options: true = Paths home from destination, false = does nothing and logs out
 
---if all of these are not 42069420, then we will try to go there at the very end of the process otherwise we will go directly to fat tony himself
-tony_x = 42069420
-tony_y = 42069420
-tony_z = 42069420
+-- Usage: First Last
+-- This is your main character name
+local main_char_name = "First Last"
 
---[[
-tony firstname, lastname, meeting locationtype, returnhome 1 = yes 0 = no, 0 = fc entrance 1 = nearby bell 2 = limsa bell
-]]
-local franchise_owners = {
-    {"EXAMPLE EXAMPLE@World", 0, 2},
-    {"EXAMPLE EXAMPLE@World", 1, 2},
-    {"EXAMPLE EXAMPLE@World", 1, 2},
-    {"EXAMPLE EXAMPLE@World", 1, 2},
-    {"EXAMPLE EXAMPLE@World", 1, 2}
+-- This is a placeholder for alt character names, you do not set this and will be overwritten later
+local alt_char_name = "First Last"
+
+-- Usage: First Last@Server, return_home, return_location
+-- return_home options: 0 = no, 1 = yes
+-- return_location options: 0 = fc entrance, 1 nearby bell, 2 limsa bell
+-- This is where your alts that need items are listed
+local alt_char_name_list = {
+    --{"First Last@Server", 0, 2},
+    --{"First Last@Server", 0, 2},
+    --{"First Last@Server", 0, 2},
+    --{"First Last@Server", 0, 2},
+    --{"First Last@Server", 0, 2}
 }
 
---loadfiyel = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\_functions.lua"
---functionsToLoad = loadfile(loadfiyel)
---functionsToLoad()
---DidWeLoadcorrectly()
+--#############
+--# FUNCTIONS #
+--#############
+-- aka move this to functions file after
 
---the boss wants that monthly gil payment, have your bagman ready with the gil.
---If he has to come pick it up himself its gonna get messy
-WorldIDList={["Cerberus"]={ID=80},["Louisoix"]={ID=83},["Moogle"]={ID=71},["Omega"]={ID=39},["Phantom"]={ID=401},["Ragnarok"]={ID=97},["Sagittarius"]={ID=400},["Spriggan"]={ID=85},["Alpha"]={ID=402},["Lich"]={ID=36},["Odin"]={ID=66},["Phoenix"]={ID=56},["Raiden"]={ID=403},["Shiva"]={ID=67},["Twintania"]={ID=33},["Zodiark"]={ID=42},["Adamantoise"]={ID=73},["Cactuar"]={ID=79},["Faerie"]={ID=54},["Gilgamesh"]={ID=63},["Jenova"]={ID=40},["Midgardsormr"]={ID=65},["Sargatanas"]={ID=99},["Siren"]={ID=57},["Balmung"]={ID=91},["Brynhildr"]={ID=34},["Coeurl"]={ID=74},["Diabolos"]={ID=62},["Goblin"]={ID=81},["Malboro"]={ID=75},["Mateus"]={ID=37},["Zalera"]={ID=41},["Cuchulainn"]={ID=408},["Golem"]={ID=411},["Halicarnassus"]={ID=406},["Kraken"]={ID=409},["Maduin"]={ID=407},["Marilith"]={ID=404},["Rafflesia"]={ID=410},["Seraph"]={ID=405},["Behemoth"]={ID=78},["Excalibur"]={ID=93},["Exodus"]={ID=53},["Famfrit"]={ID=35},["Hyperion"]={ID=95},["Lamia"]={ID=55},["Leviathan"]={ID=64},["Ultros"]={ID=77},["Bismarck"]={ID=22},["Ravana"]={ID=21},["Sephirot"]={ID=86},["Sophia"]={ID=87},["Zurvan"]={ID=88},["Aegis"]={ID=90},["Atomos"]={ID=68},["Carbuncle"]={ID=45},["Garuda"]={ID=58},["Gungnir"]={ID=94},["Kujata"]={ID=49},["Tonberry"]={ID=72},["Typhon"]={ID=50},["Alexander"]={ID=43},["Bahamut"]={ID=69},["Durandal"]={ID=92},["Fenrir"]={ID=46},["Ifrit"]={ID=59},["Ridill"]={ID=98},["Tiamat"]={ID=76},["Ultima"]={ID=51},["Anima"]={ID=44},["Asura"]={ID=23},["Chocobo"]={ID=70},["Hades"]={ID=47},["Ixion"]={ID=48},["Masamune"]={ID=96},["Pandaemonium"]={ID=28},["Titan"]={ID=61},["Belias"]={ID=24},["Mandragora"]={ID=82},["Ramuh"]={ID=60},["Shinryu"]={ID=29},["Unicorn"]={ID=30},["Valefor"]={ID=52},["Yojimbo"]={ID=31},["Zeromus"]={ID=32}}
-
-yield("/ays multi d")
-fat_tony = "Firstname Lastname" --ignore this dont set it
-
-function visland_stop_moving()
-    muuv = 1
-    muuvX = GetPlayerRawXPos()
-    muuvY = GetPlayerRawYPos()
-    muuvZ = GetPlayerRawZPos()
-    while muuv == 1 do
-       yield("/wait 1")
-       if muuvX == GetPlayerRawXPos() and muuvY == GetPlayerRawYPos() and muuvZ == GetPlayerRawZPos() then
-           muuv = 0
-       end
-       muuvX = GetPlayerRawXPos()
-       muuvY = GetPlayerRawYPos()
-       muuvZ = GetPlayerRawZPos()
-    end
-    --yield("/echo movement stopped - time for GC turn ins or whatever")
-    yield("/echo movement stopped safely - script proceeding to next bit")
-    yield("/visland stop")
-    yield("/vnavmesh stop")
-    yield("/wait 0.5")
-    --added becuase simpletweaks is slow to update :(
+-- Usage: PathToChar("First Last")
+-- Finds specified character and paths to it
+function PathToChar(path_char_name)
+    Movement(GetObjectRawXPos(path_char_name), GetObjectRawYPos(path_char_name), GetObjectRawZPos(path_char_name))
 end
 
-function CharacterSafeWait()
-yield("/waitaddon NamePlate <maxwait.600> <wait.5>")
- --ZoneTransition()
-repeat
-yield("/wait 0.1")
-until IsPlayerAvailable()
+-- Finds where your estate entrance is and paths to it
+-- I think this will break though since there will be multiple entrances around a housing area
+-- So maybe needs nearest logic
+function PathToEstateEntrance()
+    Movement(GetObjectRawXPos("Entrance"), GetObjectRawYPos("Entrance"), GetObjectRawZPos("Entrance"))
 end
 
-local function distance(x1, y1, z1, x2, y2, z2)
-    if type(x1) ~= "number" then
-        x1 = 0
-    end
-    if type(y1) ~= "number" then
-        y1 = 0
-    end
-    if type(z1) ~= "number" then
-        z1 = 0
-    end
-    if type(x2) ~= "number" then
-        x2 = 0
-    end
-    if type(y2) ~= "number" then
-        y2 = 0
-    end
-    if type(z2) ~= "number" then
-        z2 = 0
-    end
-    zoobz = math.sqrt((x2 - x1) ^ 2 + (y2 - y1) ^ 2 + (z2 - z1) ^ 2)
-    if type(zoobz) ~= "number" then
-        zoobz = 0
-    end
-    --return math.sqrt((x2 - x1)^2 + (y2 - y1)^2 + (z2 - z1)^2)
-    return zoobz
-end
-
-local function approach_tony()
-    local specific_tony = 0
-    if tony_x ~= 42069420 and tony_y ~= 42069420 and tony_z ~= 42069420 then
-        specific_tony = 1
-    end
-    if specific_tony == 0 then
-        PathfindAndMoveTo(GetObjectRawXPos(fat_tony), GetObjectRawYPos(fat_tony), GetObjectRawZPos(fat_tony), false)
-    end
-    if specific_tony == 1 then
-        PathfindAndMoveTo(tony_x, tony_y, tony_z, false)
+-- Paths to Limsa bell
+function PathToLimsaBell()
+    if ZoneCheck(129, "Limsa", "tp") then
+        -- stuff could go here
+    else
+        Movement(-123.72, 18.00, 20.55)
     end
 end
 
-local function approach_entrance()
-    PathfindAndMoveTo(GetObjectRawXPos("Entrance"), GetObjectRawYPos("Entrance"), GetObjectRawZPos("Entrance"), false)
-end
-
-geel = 0
-local function shake_hands()
-    gilxit = 0
-    bababobo = 0
-    while gilxit == 0 do
-        bababobo = bababobo + 1
-        yield("/wait 1")
-        if bababobo > 15 then
-            yield("/echo where is this bagman, im gonna teach them a lesson....")
-            bababobo = 0
+-- Usage: WaitForGilIncrease(1)
+-- Obtains current gil and waits for specified gil to be traded
+-- Acts as the trigger before moving on
+function WaitForGilIncrease(gil_increase_amount)
+    -- Gil variable store before trade
+    local previous_gil = GetGil()
+    
+    while true do
+        Sleep(1.0) -- Wait for 1 second between checks
+        
+        local current_gil = GetGil()
+        if current_gil > previous_gil and (current_gil - previous_gil) == gil_increase_amount then
+            Echo(gil_increase_amount .. "Gil successfully traded")
+            break -- Exit the loop when the gil increase is detected
         end
-        if GetGil() > geel then
-            if (GetGil() - geel) == 1 then
-                gilxit = 1 --we are done, get out next tony time
-                yield("/echo allright time to deliver this to the boss")
+        
+        previous_gil = current_gil -- Update gil amount for the next check
+    end
+end
+
+-- Usage: PartyInvite("First Last")
+-- Will target and invite player to a party, and retrying if the invite timeout happens
+-- Probably think of a way to invite without needing a placeholder aka <t>
+function PartyInvite(player_invite_name)
+    local invite_timeout = 305 -- 300 Seconds is the invite timeout, adding 5 seconds for good measure
+    local start_time = os.time() -- Stores the invite time
+    
+    while not IsInParty() do
+        repeat
+            Sleep(0.1)
+        until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
+        
+        Target(player_invite_name)
+        yield("/invite")
+        
+        -- Wait for the target player to accept the invite or the timeout to expire
+        while not IsInParty() do
+            Sleep(0.1)
+            
+            -- Check if the invite has expired
+            if os.time() - start_time >= invite_timeout then
+                Echo("Invite expired. Reinviting " .. player_invite_name)
+                start_time = os.time() -- Reset the start time for the new invite
+                break -- Break the loop to resend the invite
             end
         end
-        geel = GetGil()
     end
+    -- stuff could go here
 end
 
-function ZoneTransition()
-iswehehe = IsPlayerAvailable() 
-iswoah = 0
-    repeat 
-        yield("/wait 0.5")
-        yield("/echo Are we ready? -> "..iswoah.."/20")
-iswehehe = IsPlayerAvailable() 
-iswoah = iswoah + 1
-if iswoah == 20 then
-iswehehe = false
-end
-    until not iswehehe
-iswoah = 0
-    repeat 
-        yield("/wait 0.5")
-        yield("/echo Are we ready? (backup check)-> "..iswoah.."/20")
-iswehehe = IsPlayerAvailable() 
-iswoah = iswoah + 1
-if iswoah == 20 then
-iswehehe = true
-end
-    until iswehehe
-end
-
-function return_to_limsa_bell()
-yield("/tp Limsa Lominsa")
-ZoneTransition()
-yield("/wait 2")
-yield("/wait 1")
-yield("/pcall SelectYesno true 0")
-PathfindAndMoveTo(-125.440284729, 18.0, 21.004405975342, false)
-visland_stop_moving() --added so we don't accidentally end before we get to the inn person
-end
-
-for i = 1, #franchise_owners do
-    --update tony's name
-    fat_tony = franchise_owners[i][1]
-
-    yield(
-        "/echo Loading tony to recieve protection payments Fat Tony -> " ..
-            fat_tony .. ".  Tony -> " .. franchise_owners[i][1]
-    )
-    yield("/echo Processing Tony " .. i .. "/" .. #franchise_owners)
-
-    --only switch chars if the bagman is changing. in some cases we are delivering to same tony or different tonies. we dont care about the numbers
-    if GetCharacterName(true) ~= franchise_owners[i][1] then
-        yield("/ays relog " .. franchise_owners[i][1])
-        yield("/wait 2")
-        CharacterSafeWait()
-    end
-
-    yield("/echo Processing Tony " .. i .. "/" .. #franchise_owners)
-
-    --allright time for a road trip. tony needs that bag
-    road_trip = 1 --we took a road trip
-    --now we must head to the place we are meeting this filthy animal
-    --first we have to find his neighbourhood, this uber driver better not complain
-    --are we on the right server already?
-    yield("/li " .. tonys_turf)
-    repeat
-        yield("/wait 0.1")
-    until GetCurrentWorld() == WorldIDList[tonys_turf].ID
-    repeat
-        yield("/wait 0.1")
-    until IsPlayerAvailable()
-    yield("/echo Processing Tony " .. i .. "/" .. #franchise_owners)
-
-    --now we have to walk or teleport?!!?!? to fat tony, where is he waiting this time?
-    if tony_type == 0 then
-        yield("/echo " .. fat_tony .. " is meeting us in the alleyways.. watch your back")
-        if tony_zoneID ~= GetZoneID() then --we are teleporting to Tony's spot
-            yield("/tp " .. tonys_spot)
-            yield("/wait 2")
+-- Usage: PartyDisband()
+-- Will check if player is in party and disband party
+function PartyDisband()
+    if IsInParty() then
+        repeat
+            Sleep(0.1)
+        until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
+        
+        yield("/partycmd disband")
+        
+        repeat
+            Sleep(0.1)
             yield("/pcall SelectYesno true 0")
-            ZoneTransition()
-        end
+        until not IsAddonVisible("SelectYesno")
     end
-    if tony_type > 0 then
-        yield("/echo " .. fat_tony .. " is meeting us at the estate, we will approach with respect")
-        yield("/estatelist " .. fat_tony)
-        yield("/wait 0.5")
-        --very interesting discovery
-        --1= personal, 0 = fc, 2 = apartment
-        yield("/pcall TeleportHousingFriend true " .. tonys_house)
-        ZoneTransition()
-    end
-    geel = GetGil() --get the initial geel value
+end
 
-    --ok this filthy animal is nearby. let's approach this guy, weapons sheathed, we are just doing business
-    if tony_type == 0 then
-        approach_tony()
-        visland_stop_moving()
-    end
-    if tony_type == 1 then
-        approach_entrance()
-        visland_stop_moving()
-        if tony_type == 2 then
-            yield("/interact")
-            yield("/pcall SelectYesno true 0")
-            yield("/wait 5")
+-- Usage: EstateTeleport("First Last", 0)
+-- Options: 0 = Free Company, 1 = Personal, 2 = Apartment
+-- Opens estate list of added friend and teleports to specified location
+-- ZoneTransitions() not required
+function EstateTeleport(estate_char_name, estate_type)
+    repeat
+        Sleep(0.1)
+    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
+    
+    yield("/estatelist " .. estate_char_name)
+    
+    repeat
+        Sleep(0.1)
+        yield("/pcall TeleportHousingFriend true " .. estate_type)
+    until not IsAddonVisible("TeleportHousingFriend")
+    
+    ZoneTransitions()
+end
+
+--###############
+--# MAIN SCRIPT #
+--###############
+
+local function processAltCharacters(altCharList, destination_server, destination_zone, destination_zone_id, destination_type, destination_house)
+    for i = 1, #alt_char_name_list do
+        -- Update alt character name
+        local alt_char_name = alt_char_name_list[i][1]
+        
+        Echo("Picking up items from " .. main_char_name)
+        Echo("Processing " .. i .. "/" .. #alt_char_name_list)
+        
+        -- Switch characters if required, looks up current character and compares
+        if GetCharacterName(true) ~= alt_char_name_list[i][1] then
+            yield("/ays relog " .. alt_char_name_list[i][1])
+            Sleep(2.0)
+            LoginCheck()
         end
-        approach_tony()
-        visland_stop_moving()
-    end
-    shake_hands() -- its a business doing pleasure with you tony as always
-    if road_trip == 1 then --we need to get home
-        --time to go home.. maybe?
-        if franchise_owners[i][2] == 0 then
-            yield("/echo wait why can't i leave " .. fat_tony .. "?")
-        end
-        if franchise_owners[i][2] == 1 then
-            local home = false
-            yield("/echo See ya " .. fat_tony .. ", a pleasure.")
-            if GetCurrentWorld() == GetHomeWorld() then
-                home = true
-            else
-                yield("/li")
+        
+        -- Not sure if this is needed twice, needs testing
+        yield("/echo Processing Tony " .. i .. "/" .. #alt_char_name_list)
+        
+        -- Check if alt character on correct server
+        yield("/li " .. destination_server)
+        repeat
+            Sleep(0.1)
+        until GetCurrentWorld() == WorldIDList[destination_server].ID
+        
+        repeat
+            Sleep(0.1)
+        until IsPlayerAvailable()
+        
+        -- Alt character destination type, how alt is getting to the main
+        -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
+        if destination_type == 0 then
+            Echo("Teleporting to " .. destination_zone .. " to find " .. main_char_name)
+            
+            if destination_zone_id ~= GetZoneID() then
+                Teleporter(destination_zone, "tp")
+                ZoneTransitions()
             end
+        end
+        
+        -- Requires main added to friend list for access to estate list teleports
+        -- Keeping it for future stuff
+        if destination_type > 0 then
+            Echo("Teleporting to estate to find " .. main_char_name)
+            EstateTeleport(main_char_name, destination_house)
+        end
+        
+        -- Storing the current gil of alt character to be used later
+        local previous_gil = GetGil()
+        
+        -- I really don't like the repeat of destination_type checking here, should probably be refactored into stuff above
+        -- Handle different destination types
+        -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
+        if destination_type == 0 or destination_type == 1 then
+            -- Path to main char
+            PathToChar(main_char_name)
+            -- Invite main char to party, needs a target
+            PartyInvite(main_char_name)
+            
+        elseif destination_type == 2 then
+            -- If destination_type is 2, first go to the estate entrance, then to the main character
+            PathToEstateEntrance()
+            Interact()
+            
             repeat
-                yield("/wait 0.1")
-                if GetCurrentWorld() == GetHomeWorld() then
-                    if GetCurrentWorld() == 0 and GetHomeWorld() == 0 then
-                    else
-                        home = true
-                    end
+                Sleep(0.1)
+                yield("/pcall SelectYesno true 0")
+            until not IsAddonVisible("SelectYesno")
+            
+            -- Path to main char
+            PathToChar(main_char_name)
+            -- Invite main char to party, needs a target
+            PartyInvite(main_char_name)
+        end
+        
+        -- Wait for the gil transfer to complete
+        WaitForGilIncrease(1)
+        -- Disband party once gil trigger has happened
+        PartyDisband()
+        
+        -- Alt character handling to go home
+        if path_home then
+            -- [2] return_home options: 0 = no, 1 = yes
+            -- [3] return_location options: 0 = fc entrance, 1 nearby bell, 2 limsa bell
+            if alt_char_name_list[i][2] == 1 then
+                Echo("Attempting to return to " .. GetHomeWorld())
+                
+                -- GetCurrentWorld() == 0 and GetHomeWorld() == 0
+                if GetCurrentWorld() ~= GetHomeWorld() then
+                    -- Teleporter(GetHomeWorld(), "li")
+                    yield("/li")
                 end
-            until home
-            repeat
-                yield("/wait 0.1")
-            until IsPlayerAvailable()
-            repeat
-                yield("/wait 0.1")
-            until IsPlayerAvailable()
-            if franchise_owners[i][3] == 0 then
-                yield("/tp Estate Hall")
-                ZoneTransition()
-                yield("/waitaddon NamePlate <maxwait.600><wait.5>")
-                --normal small house shenanigans
-                yield("/hold W <wait.1.0>")
-                yield("/release W")
-                yield("/target Entrance <wait.1>")
-                yield("/lockon on")
-                yield("/automove on <wait.2.5>")
-                yield("/automove off <wait.1.5>")
-                yield("/hold Q <wait.2.0>")
-                yield("/release Q")
-            end
-            --retainer bell nearby shenanigans
-            if franchise_owners[i][3] == 1 then
-                yield('/target "Summoning Bell"')
-                yield("/wait 2")
-                PathfindAndMoveTo(
-                    GetObjectRawXPos("Summoning Bell"),
-                    GetObjectRawYPos("Summoning Bell"),
-                    GetObjectRawZPos("Summoning Bell"),
-                    false
-                )
-                visland_stop_moving() --added so we don't accidentally end before we get to the bell
-            end
-            home = false
-            --limsa bell
-            if franchise_owners[i][3] == 2 then
-                yield("/echo returning to limsa bell")
-                return_to_limsa_bell()
+                repeat
+                    Sleep(0.1)
+                until GetCurrentWorld() == GetHomeWorld() and IsPlayerAvailable()
+                
+                -- FC Entrance stuff
+                if alt_char_name_list[i][3] == 0 then
+                    Echo("Attempting to go to FC Entrance")
+                    Teleporter("Estate Hall", "tp")
+                    ZoneTransitions()
+                    -- This likely needs some logic on nearest "Entrance" for nearby estates
+                    PathToEstateEntrance()
+                end
+                
+                -- Nearby Retainer Bell Stuff
+                if alt_char_name_list[i][3] == 1 then
+                    Echo("Attempting to go to nearest retainer bell")
+                    Target("Summoning Bell")
+                    Sleep(2.0)
+                    Movement(GetObjectRawXPos("Summoning Bell"), GetObjectRawYPos("Summoning Bell"), GetObjectRawZPos("Summoning Bell"))
+                end
+                
+                -- Limsa Retainer Bell Stuff
+                if alt_char_name_list[i][3] == 2 then
+                    Echo("Attempting to go to Limsa retainer bell")
+                    PathToLimsaBell()
+                end
             end
         end
     end
-end
-
---what you thought your job was done you ugly mug? get back to work you gotta pay up that gil again next month!
---boss please i just collected the stuff be nice

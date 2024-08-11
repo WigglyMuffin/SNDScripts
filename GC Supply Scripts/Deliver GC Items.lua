@@ -40,15 +40,17 @@ dofile(SNDConfigFolder..""..CharList)
 
 function DOL()
     local home = false
+    
     if GetCurrentWorld() == GetHomeWorld() then
         home = true
     else
-        if GetZoneID() ~= 129 then
-            Teleporter("Limsa", "tp")
-            ZoneTransitions()
+        if ZoneCheck(129, "Limsa", "tp") then
+            -- stuff could go here
         end
+        
         yield("/li")
     end
+    
     repeat
         Sleep(0.1)
         if GetCurrentWorld() == GetHomeWorld() then
@@ -58,15 +60,17 @@ function DOL()
             end
         end
     until home
+    
     repeat
         Sleep(0.1)
     until IsPlayerAvailable()
-    if GetZoneID() ~= 129 then
-        Teleporter("Limsa", "tp")
-        ZoneTransitions()
+    
+    if ZoneCheck(129, "Limsa", "tp") then
+        -- stuff could go here
     else
         Movement(-89.36, 18.80, 1.78) -- this will need rethinking but it's a failsafe if you are already in limsa since /li Aftcastle will break if you are not near a crystal
     end
+    
     yield("/li Aftcastle")
     ZoneTransitions()
     Movement(93.00, 40.27, 75.60)

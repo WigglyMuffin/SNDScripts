@@ -11,12 +11,29 @@ end
 -- Interacts with the current target and waits until the player is available again before proceeding
 function InteractAndWait()
     repeat
-        yield("/wait 0.1")
+        Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
     yield("/pint")
     repeat
-        yield("/wait 0.1")
+        Sleep(0.1)
     until IsPlayerAvailable()
+end
+
+-- Usage: LoginCheck()
+-- Waits until player NamePlate is visible and player is ready
+function LoginCheck()
+    repeat
+        Sleep(0.1)
+    until IsAddonVisible("NamePlate") and IsPlayerAvailable()
+end
+
+-- Usage: VNavChecker()
+-- Waits until player no longer has a nav path running
+-- Very likely getting removed
+function VNavChecker() --Movement checker, does nothing if moving
+    repeat
+        Sleep(0.1)
+    until not PathIsRunning() and IsPlayerAvailable()
 end
 
 -- Interact()
@@ -24,26 +41,48 @@ end
 -- Just interacts with the current target
 function Interact()
     repeat
-        yield("/wait 0.1")
+        Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
     yield("/pint")
 end
 
--- usage: Echo("meow")
+-- Usage: IsInParty()
+-- Checks if player is in a party, returns true if in party, returns false if not in party
+function IsInParty()
+    return GetPartyMemberName(0) ~= nil and GetPartyMemberName(0) ~= ""
+end
+
+-- Usage: ZoneCheck(129) or ZoneCheck(129, "Limsa", "tp")
+-- This will need updating once we have an idea on what to do with matching zones IDs to zone names
+-- Checks player against zone, and optionally teleports if player not in zone
+-- ZoneTransitions() not required
+function ZoneCheck(zone_id, location, tp_kind)
+    if GetZoneID() ~= zone_id then
+        if location and tp_kind then
+            Teleporter(location, tp_kind)
+            ZoneTransitions()
+        end
+        return true -- Returns true once teleport has happened
+    else
+        return false -- Returns false if zone doesn't match
+    end
+end
+
+-- Usage: Echo("meow")
 --
 -- prints provided text into chat
 function Echo(text)
-    yield("/echo "..text)
+    yield("/echo " .. text)
 end
 
--- usage: Sleep("0.5")
+-- Usage: Sleep(0.1) or Sleep("0.1")
 --
 -- replaces yield wait spam, halts the script for X seconds 
 function Sleep(time)
-    yield("/wait "..tostring(time))
+    yield("/wait " .. tostring(time))
 end
 
--- usage: ZoneTransitions()
+-- Usage: ZoneTransitions()
 --
 -- Zone transition checker, does nothing if changing zones
 function ZoneTransitions()
@@ -58,7 +97,7 @@ function ZoneTransitions()
     until IsPlayerAvailable()
 end
 
--- usage: QuestNPC("SelectYesno"|"CutSceneSelectString", true, 0)
+-- Usage: QuestNPC("SelectYesno"|"CutSceneSelectString", true, 0)
 --
 -- NPC interaction handler, only supports one dialogue option for now. DialogueOption optional.
 function QuestNPC(DialogueType, DialogueConfirm, DialogueOption)
@@ -87,7 +126,7 @@ function QuestNPC(DialogueType, DialogueConfirm, DialogueOption)
     until IsPlayerAvailable()
 end
 
--- usage: QuestNPCSingle("SelectYesno"|"CutSceneSelectString", true, 0)
+-- Usage: QuestNPCSingle("SelectYesno"|"CutSceneSelectString", true, 0)
 --
 -- NPC interaction handler. dialogue_option optional.
 function QuestNPCSingle(dialogue_type, dialogue_confirm, dialogue_option)
@@ -164,9 +203,10 @@ function QuestCombat(target, enemy_max_dist)
       yield("/wait 0.5")
 end
 
--- usage: QuestInstance()
+-- Usage: QuestInstance()
 --
 -- Targetting/Movement Logic for Solo Duties. Pretty sure this is broken atm
+-- Needs rewriting
 function QuestInstance()
     while true do
         -- Check if GetCharacterCondition(34) is false and exit if so
@@ -254,7 +294,7 @@ function QuestInstance()
     end
 end
 
--- usage: GetNodeTextLookupUpdate("_ToDolist",16,3,4) // GetNodeTextLookupUpdate("_ToDolist",16,3)
+-- Usage: GetNodeTextLookupUpdate("_ToDolist",16,3,4) // GetNodeTextLookupUpdate("_ToDolist",16,3)
 --
 -- function i really don't like the existence of, is only called by Questchecker and Nodescanner, could be called manually.
 function GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get_node_text_location_1, get_node_text_location_2)
@@ -281,7 +321,7 @@ function GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get
     yield("/echo uh GetNodeTextLookupUpdate fucked up")
 end
 
--- usage: QuestChecker(ArcanistEnemies[3], 50, "_ToDoList", "Slay little ladybugs.")
+-- Usage: QuestChecker(ArcanistEnemies[3], 50, "_ToDoList", "Slay little ladybugs.")
 --
 -- needs a rewrite to deal with hunting logs, for now it works with _ToDoList
 function QuestChecker(target_name, target_distance, get_node_text_type, get_node_text_match)
@@ -313,7 +353,7 @@ function QuestChecker(target_name, target_distance, get_node_text_type, get_node
     end
 end
 
--- usage: NodeScanner("_ToDoList", "Slay wild dodos.")
+-- Usage: NodeScanner("_ToDoList", "Slay wild dodos.")
 --
 -- scans provided node type for node that has provided text and returns minimum 2 but up to 3 variables with the location which you can use with GetNodeText()
 --
@@ -359,7 +399,7 @@ function NodeScanner(get_node_text_type, get_node_text_match)
     return
 end
 
--- usage: Uicheck("MonsterNote", true)
+-- Usage: Uicheck("MonsterNote", true)
 --
 -- Closes or opens supported ui's, true is close and false is open. Probably will be changed into individual functions like i've already done for some
 function UiCheck(get_node_text_type, close_ui)
@@ -379,8 +419,7 @@ function UiCheck(get_node_text_type, close_ui)
     end
 end
 
-
--- usage: Teleporter("Limsa", "tp") or Teleporter("gc", "li")  
+-- Usage: Teleporter("Limsa", "tp") or Teleporter("gc", "li")  
 -- add support for item tp Teleporter("Vesper", "item")  
 -- likely rewriting teleporter to have own version of lifestream with locations, coords and nav/tp handling
 -- add trade detection to initiate /busy and remove after successful tp
@@ -440,7 +479,7 @@ end
 
 -- stores if the mount message in Mount() has been sent already or not
 local mount_message = false
--- usage: Mount("SDS Fenrir") 
+-- Usage: Mount("SDS Fenrir") 
 --
 -- Can leave empty for mount roulette
 function Mount(mount_name)
@@ -502,7 +541,7 @@ function Mount(mount_name)
     until IsPlayerAvailable() and GetCharacterCondition(4)
 end
 
--- usage: LogOut()
+-- Usage: LogOut()
 function LogOut()
     repeat
         yield("/logout")
@@ -514,7 +553,7 @@ function LogOut()
     until not IsAddonVisible("SelectYesno")
 end
 
--- usage: Movement(674.92, 19.37, 436.02)
+-- Usage: Movement(674.92, 19.37, 436.02)
 --
 -- deals with vnav movement, kind of has some stuck checks but it's probably not as reliable as it can be
 function Movement(x_position, y_position, z_position)
@@ -540,7 +579,7 @@ function Movement(x_position, y_position, z_position)
             yield("/wait 0.1")
             
             -- add mount vs running time to destination logic
-            if TerritorySupportsMounting then
+            if TerritorySupportsMounting() then
                 Mount()
             end
             
@@ -589,7 +628,7 @@ function Movement(x_position, y_position, z_position)
     end
 end
 
--- usage: OpenTimers()
+-- Usage: OpenTimers()
 --
 -- Opens the timers window
 function OpenTimers()
@@ -607,7 +646,7 @@ function OpenTimers()
     until not IsAddonVisible("ContentsInfo")
 end
 
--- usage: MarketBoardChecker()
+-- Usage: MarketBoardChecker()
 --
 -- just checks if the marketboard is open and keeps the script stopped until it's closed
 function MarketBoardChecker()
@@ -624,7 +663,7 @@ function MarketBoardChecker()
     until not IsAddonVisible("ItemSearch")
 end
 
--- usage: BuyFromStore(1, 15) <--- buys 15 of X item
+-- Usage: BuyFromStore(1, 15) <--- buys 15 of X item
 --
 -- number_in_list is which item you're buying from the list, top item is 1, 2 is below that, 3 is below that etc...  
 -- only works for the "Store" addon window, i'd be careful calling it anywhere else
@@ -650,28 +689,30 @@ function BuyFromStore(number_in_list, amount)
     end
 end
 
--- usage: CloseStore()  
+-- Usage: CloseStore()  
 -- Function used to close store windows
 function CloseStore()
     if IsAddonVisible("Shop") then
         yield("/pcall Shop True -1")
     end
+    
     repeat
         yield("/wait 0.1")
     until not IsAddonVisible("Shop")
+    
     repeat
         yield("/wait 0.1")
     until IsPlayerAvailable()
 end
 
--- usage: Target("Storm Quartermaster")  
+-- Usage: Target("Storm Quartermaster")  
 -- TODO: target checking for consistency and speed
 function Target(target)
-    yield('/target "'..target..'"')
-    yield("/wait 0.5")
+    yield('/target "' .. target .. '"')
+    Sleep(0.5)
 end
 
--- usage: OpenGcSupplyWindow(1)  
+-- Usage: OpenGcSupplyWindow(1)  
 -- Supply tab is 0 // Provisioning tab is 1 // Expert Delivery is 2  
 -- Anything above or below those numbers will not work 
 --
@@ -701,7 +742,7 @@ function OpenGcSupplyWindow(tab)
         yield("/pcall GrandCompanySupplyList true 0 "..tab)
     end
 end
--- usage: CloseGcSupplyWindow()  
+-- Usage: CloseGcSupplyWindow()  
 -- literally just closes the gc supply window  
 -- probably is due some small consistency changes but it should be fine where it is now
 function CloseGcSupplyWindow()
@@ -727,21 +768,29 @@ function CloseGcSupplyWindow()
     end
 end
 
--- usage: GcProvisioningDeliver(3)
+-- Usage: GcProvisioningDeliver(3)
 --
 -- Clicks and delivers the top option X amount of times  
 -- Works because when you deliver one the others move up
 function GcProvisioningDeliver()
     local amount = 4
     local function ContainsLetters(input)
+        input = tostring(input)
         if input:match("%a") then
             return true
         else
             return false
         end
     end
+    
+    Sleep(1)
+    
+    repeat
+        Sleep(0.1)
+    until IsAddonReady("GrandCompanySupplyList")
+    
     for i = 1, amount do
-        local RowChecker = GetNodeText("ContentsInfoDetail", 101, 5)
+        local RowChecker = GetNodeText("GrandCompanySupplyList", 6, 2, 10)
         if ContainsLetters(RowChecker) then
             yield("/pcall GrandCompanySupplyList true 1 0")
         else
@@ -770,3 +819,44 @@ function GcProvisioningDeliver()
 end
 
 WorldIDList={["Cerberus"]={ID=80},["Louisoix"]={ID=83},["Moogle"]={ID=71},["Omega"]={ID=39},["Phantom"]={ID=401},["Ragnarok"]={ID=97},["Sagittarius"]={ID=400},["Spriggan"]={ID=85},["Alpha"]={ID=402},["Lich"]={ID=36},["Odin"]={ID=66},["Phoenix"]={ID=56},["Raiden"]={ID=403},["Shiva"]={ID=67},["Twintania"]={ID=33},["Zodiark"]={ID=42},["Adamantoise"]={ID=73},["Cactuar"]={ID=79},["Faerie"]={ID=54},["Gilgamesh"]={ID=63},["Jenova"]={ID=40},["Midgardsormr"]={ID=65},["Sargatanas"]={ID=99},["Siren"]={ID=57},["Balmung"]={ID=91},["Brynhildr"]={ID=34},["Coeurl"]={ID=74},["Diabolos"]={ID=62},["Goblin"]={ID=81},["Malboro"]={ID=75},["Mateus"]={ID=37},["Zalera"]={ID=41},["Cuchulainn"]={ID=408},["Golem"]={ID=411},["Halicarnassus"]={ID=406},["Kraken"]={ID=409},["Maduin"]={ID=407},["Marilith"]={ID=404},["Rafflesia"]={ID=410},["Seraph"]={ID=405},["Behemoth"]={ID=78},["Excalibur"]={ID=93},["Exodus"]={ID=53},["Famfrit"]={ID=35},["Hyperion"]={ID=95},["Lamia"]={ID=55},["Leviathan"]={ID=64},["Ultros"]={ID=77},["Bismarck"]={ID=22},["Ravana"]={ID=21},["Sephirot"]={ID=86},["Sophia"]={ID=87},["Zurvan"]={ID=88},["Aegis"]={ID=90},["Atomos"]={ID=68},["Carbuncle"]={ID=45},["Garuda"]={ID=58},["Gungnir"]={ID=94},["Kujata"]={ID=49},["Tonberry"]={ID=72},["Typhon"]={ID=50},["Alexander"]={ID=43},["Bahamut"]={ID=69},["Durandal"]={ID=92},["Fenrir"]={ID=46},["Ifrit"]={ID=59},["Ridill"]={ID=98},["Tiamat"]={ID=76},["Ultima"]={ID=51},["Anima"]={ID=44},["Asura"]={ID=23},["Chocobo"]={ID=70},["Hades"]={ID=47},["Ixion"]={ID=48},["Masamune"]={ID=96},["Pandaemonium"]={ID=28},["Titan"]={ID=61},["Belias"]={ID=24},["Mandragora"]={ID=82},["Ramuh"]={ID=60},["Shinryu"]={ID=29},["Unicorn"]={ID=30},["Valefor"]={ID=52},["Yojimbo"]={ID=31},["Zeromus"]={ID=32}}
+
+-- Usage: ContainsLetters("meow")  
+-- 
+-- Will return if whatever you provide it has letters or not
+function ContainsLetters(input)
+    if input:match("%a") then
+        return true
+    else
+        return false
+    end
+end
+
+
+-- I'm keeping this for future reference, the formula is Euclidean distance between two set of coordinate points
+-- Probably will use it for distance based calculations like the "should we mount or run" one
+-- local function distance(x1, y1, z1, x2, y2, z2)
+    -- if type(x1) ~= "number" then
+        -- x1 = 0
+    -- end
+    -- if type(y1) ~= "number" then
+        -- y1 = 0
+    -- end
+    -- if type(z1) ~= "number" then
+        -- z1 = 0
+    -- end
+    -- if type(x2) ~= "number" then
+        -- x2 = 0
+    -- end
+    -- if type(y2) ~= "number" then
+        -- y2 = 0
+    -- end
+    -- if type(z2) ~= "number" then
+        -- z2 = 0
+    -- end
+    -- zoobz = math.sqrt((x2 - x1) ^ 2 + (y2 - y1) ^ 2 + (z2 - z1) ^ 2)
+    -- if type(zoobz) ~= "number" then
+        -- zoobz = 0
+    -- end
+    -- --return math.sqrt((x2 - x1)^2 + (y2 - y1)^2 + (z2 - z1)^2)
+    -- return zoobz
+-- end
