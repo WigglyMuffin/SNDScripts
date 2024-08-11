@@ -283,3 +283,4 @@ local function processAltCharacters(alt_char_name_list, destination_server, dest
             end
         end
     end
+end
