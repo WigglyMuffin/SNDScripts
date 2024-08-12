@@ -10,7 +10,7 @@ CharList = "CharList.lua"
 -- located in %appdata%\xivlauncher\pluginConfigs\SomethingNeedDoing
 -- usually anyway
 -- i do it this way so you can share the same character list between scripts
--- chars = {
+-- character_list = {
 --     "EXAMPLE EXAMPLE@WORLD",
 --     "EXAMPLE EXAMPLE@WORLD",
 --     "EXAMPLE EXAMPLE@WORLD",
@@ -39,7 +39,7 @@ LogInfo("[APL] ##############################")
 local ProvisioningList = {}
 
 dofile(SNDConfigFolder..""..CharList)
-yield("/echo "..chars[1])
+yield("/echo "..character_list[1])
 ItemList = {
     ["Copper Ore"] = {ID = 5106},
     ["Muddy Water"] = {ID = 5488},
@@ -632,7 +632,7 @@ function SerializeTable(val, name, depth)
 end
 
 function GetAndSaveProvisioningToTable()
-    for _, char in ipairs(chars) do
+    for _, char in ipairs(character_list) do
         LogInfo("[APL] Processing char number ".._)
         if GetCharacterName(true) == char then
             LogInfo("[APL] Already on the right character: "..char)

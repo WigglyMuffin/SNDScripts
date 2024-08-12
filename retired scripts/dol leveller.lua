@@ -59,7 +59,7 @@ function Main()
 end
 
 if MULTICHAR then
-    for _, char in ipairs(chars) do
+    for _, char in ipairs(character_list) do
         if GetCharacterName(true) == char then
             -- continue, no relogging needed
         else
