@@ -795,18 +795,17 @@ function Main()
     end
 end
 
--- needs rewriting
 if MULTICHAR then
-    for _, char in ipairs(Chars) do
+    for _, char in ipairs(chars) do
         if GetCharacterName(true) == char then
             -- continue, no relogging needed
         else
-            yield("/ays relog " ..char)
-            yield("<wait.15.0>")
-            yield("/waitaddon NamePlate <maxwait.6000><wait.5>")
+            RelogCharacter(char)
+            Sleep(15.0)
+            LoginCheck()
         end
         repeat
-            yield("/wait 0.1")
+            Sleep(0.1)
         until IsPlayerAvailable()
         Main()
     end
