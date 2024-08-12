@@ -856,39 +856,38 @@ function ContainsLetters(input)
     end
 end
 
--- I'm keeping this for future reference, the formula is Euclidean distance between two set of coordinate points
--- Probably will use it for distance based calculations like the "should we mount or run" one
--- local function distance(x1, y1, z1, x2, y2, z2)
-    -- if type(x1) ~= "number" then
-        -- x1 = 0
-    -- end
-    -- if type(y1) ~= "number" then
-        -- y1 = 0
-    -- end
-    -- if type(z1) ~= "number" then
-        -- z1 = 0
-    -- end
-    -- if type(x2) ~= "number" then
-        -- x2 = 0
-    -- end
-    -- if type(y2) ~= "number" then
-        -- y2 = 0
-    -- end
-    -- if type(z2) ~= "number" then
-        -- z2 = 0
-    -- end
-    -- zoobz = math.sqrt((x2 - x1) ^ 2 + (y2 - y1) ^ 2 + (z2 - z1) ^ 2)
-    -- if type(zoobz) ~= "number" then
-        -- zoobz = 0
-    -- end
-    -- --return math.sqrt((x2 - x1)^2 + (y2 - y1)^2 + (z2 - z1)^2)
-    -- return zoobz
--- end
+-- Usage: Distance(-96.71, 18.60, 0.50, -88.33, 18.60, -10.48) or anything that gives you an x y z pos value
+-- Used to calculate the distance between two sets of x y z coordinates
+-- Euclidean Distance
+function Distance(x1, y1, z1, x2, y2, z2)
+    local dx = x2 - x1
+    local dy = y2 - y1
+    local dz = z2 - z1
+    return math.sqrt(dx^2 + dy^2 + dz^2)
+end
 
--- Usage: PathToChar("First Last")
--- Finds specified character and paths to it
-function PathToChar(path_char_name)
-    Movement(GetObjectRawXPos(path_char_name), GetObjectRawYPos(path_char_name), GetObjectRawZPos(path_char_name))
+-- Usage: DistanceName("First Last", "First Last") or DistanceName("Aetheryte", "Retainer Bell")
+-- Used to calculate the distance between two object names
+-- Euclidean Distance
+function DistanceName(distance_char_name1, distance_char_name2)
+    local x1 = GetObjectRawXPos(distance_char_name1)
+    local y1 = GetObjectRawYPos(distance_char_name1)
+    local z1 = GetObjectRawZPos(distance_char_name1)
+    
+    local x2 = GetObjectRawXPos(distance_char_name2)
+    local y2 = GetObjectRawYPos(distance_char_name2)
+    local z2 = GetObjectRawZPos(distance_char_name2)
+    
+    local dx = x2 - x1
+    local dy = y2 - y1
+    local dz = z2 - z1
+    return math.sqrt(dx^2 + dy^2 + dz^2)
+end
+
+-- Usage: PathToObject("First Last") or PathToObject("Aetheryte")
+-- Finds specified object and paths to it
+function PathToObject(path_object_name)
+    Movement(GetObjectRawXPos(path_object_name), GetObjectRawYPos(path_object_name), GetObjectRawZPos(path_object_name))
 end
 
 -- Finds where your estate entrance is and paths to it
