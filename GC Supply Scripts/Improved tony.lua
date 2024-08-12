@@ -89,7 +89,7 @@ local function processAltCharacters(alt_char_name_list, destination_server, dest
         -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
         if destination_type == 0 or destination_type == 1 then
             -- Path to main char
-            PathToChar(main_char_name)
+            PathToObject(main_char_name)
             -- Invite main char to party, needs a target
             PartyInvite(main_char_name)
             
@@ -104,7 +104,7 @@ local function processAltCharacters(alt_char_name_list, destination_server, dest
             until not IsAddonVisible("SelectYesno")
             
             -- Path to main char
-            PathToChar(main_char_name)
+            PathToObject(main_char_name)
             -- Invite main char to party, needs a target
             PartyInvite(main_char_name)
         end
