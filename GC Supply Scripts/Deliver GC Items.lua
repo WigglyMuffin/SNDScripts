@@ -12,7 +12,7 @@ MULTICHAR = true
 CharList = "CharList.lua"
 -- you need to use the following format in your CharList.lua
 -- i do it this way so you can share the same character list between scripts
--- chars = {
+-- character_list = {
 --     "EXAMPLE EXAMPLE@WORLD",
 --     "EXAMPLE EXAMPLE@WORLD",
 --     "EXAMPLE EXAMPLE@WORLD",
@@ -89,16 +89,16 @@ function Main()
 end
 
 if MULTICHAR then
-    for _, char in ipairs(chars) do
+    for _, char in ipairs(character_list) do
         if GetCharacterName(true) == char then
             -- continue, no relogging needed
         else
-            yield("/ays relog " ..char)
-            yield("<wait.15.0>")
-            yield("/waitaddon NamePlate <maxwait.6000><wait.5>")
+            RelogCharacter(char)
+            Sleep(15.0)
+            LoginCheck()
         end
         repeat
-            yield("/wait 0.1")
+            Sleep(0.1)
         until IsPlayerAvailable()
         Main()
     end

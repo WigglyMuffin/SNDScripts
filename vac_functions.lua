@@ -918,7 +918,7 @@ function WaitForGilIncrease(gil_increase_amount)
         
         local current_gil = GetGil()
         if current_gil > previous_gil and (current_gil - previous_gil) == gil_increase_amount then
-            Echo(gil_increase_amount .. "Gil successfully traded")
+            Echo(gil_increase_amount .. " Gil successfully traded")
             break -- Exit the loop when the gil increase is detected
         end
         
