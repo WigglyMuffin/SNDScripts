@@ -87,13 +87,13 @@ end
 -- Zone transition checker, does nothing if changing zones
 function ZoneTransitions()
     repeat 
-         yield("/wait 0.1")
+         Sleep(0.1)
     until GetCharacterCondition(45) or GetCharacterCondition(51)
     repeat 
-        yield("/wait 0.1")
+        Sleep(0.1)
     until not GetCharacterCondition(45) or not GetCharacterCondition(51)
     repeat
-        yield("/wait 0.1")
+        Sleep(0.1)
     until IsPlayerAvailable()
 end
 
@@ -103,26 +103,26 @@ end
 function QuestNPC(DialogueType, DialogueConfirm, DialogueOption)
     while not GetCharacterCondition(32) do
         yield("/pint")
-        yield("/wait 0.1")
+        Sleep(0.1)
     end
     if DialogueConfirm then
         repeat 
-            yield("/wait 0.1")
+            Sleep(0.1)
         until IsAddonVisible(DialogueType)
         if DialogueOption == nil then
             repeat
                 yield("/pcall " .. DialogueType .. " true 0")
-                yield("/wait 0.1")
+                Sleep(0.1)
             until not IsAddonVisible(DialogueType)
         else
             repeat
                 yield("/pcall " .. DialogueType .. " true " .. DialogueOption)
-                yield("/wait 0.1")
+                Sleep(0.1)
             until not IsAddonVisible(DialogueType)
         end
     end
     repeat
-        yield("/wait 0.1")
+        Sleep(0.1)
     until IsPlayerAvailable()
 end
 
@@ -132,19 +132,19 @@ end
 function QuestNPCSingle(dialogue_type, dialogue_confirm, dialogue_option)
     while not GetCharacterCondition(32) do
         yield("/pint")
-        yield("/wait 0.5")
+        Sleep(0.5)
     end
     if dialogue_confirm then
         repeat 
-            yield("/wait 0.1")
+            Sleep(0.1)
         until IsAddonReady(dialogue_type)
-        yield("/wait 0.5")
+        Sleep(0.5)
         if dialogue_option == nil then
             yield("/pcall " .. dialogue_type .. " true 0")
-            yield("/wait 0.5")
+            Sleep(0.5)
         else
             yield("/pcall " .. dialogue_type .. " true " .. dialogue_option)
-            yield("/wait 0.5")
+            Sleep(0.5)
         end
     end
 end
@@ -160,7 +160,7 @@ function QuestCombat(target, enemy_max_dist)
         for i = 0, 10 do
             --yield("/echo <list." .. i .. ">")
             yield("/target " .. current_target .. " <list." .. i .. ">")
-            yield("/wait 0.1")
+            Sleep(0.1)
             if (GetTargetName() == target) and GetTargetHP() > 0 and GetDistanceToTarget() <= enemy_max_dist then
                 local distance = GetDistanceToTarget()
                 table.insert(current_list, {target = current_target, index = i, distance = distance})
@@ -182,7 +182,7 @@ function QuestCombat(target, enemy_max_dist)
         --yield("/echo best_entry.target = " .. tostring(best_entry.target))
         --yield("/echo best_entry.index = " .. tostring(best_entry.index))
         --yield("/echo =====================")
-        yield("/wait 0.5")
+        Sleep(0.5)
 
         local dist_to_enemy = GetDistanceToTarget()
 
@@ -191,16 +191,16 @@ function QuestCombat(target, enemy_max_dist)
                 yield("/rotation auto")
                 yield("/vnavmesh movetarget")
                 
-                yield("/wait 0.2")
+                Sleep(0.2)
             until GetDistanceToTarget() <= 3
             yield('/ac "Auto-attack"')
             yield("/vnavmesh stop")
         end
     end
     repeat
-      yield("/wait 0.1")
+      Sleep(0.1)
     until GetTargetHP() == 0
-      yield("/wait 0.5")
+      Sleep(0.5)
 end
 
 -- Usage: QuestInstance()
@@ -215,16 +215,16 @@ function QuestInstance()
         end
 
         if not IsPlayerAvailable() then
-            yield("/wait 1")
+            Sleep(1.0)
             yield("/pcall SelectYesno true 0")
         elseif GetCharacterCondition(1) then
             yield("/pint")
-            yield("/wait 1")
+            Sleep(1.0)
             while IsPlayerCasting() do 
-                yield("/wait 0.5")
+                Sleep(0.5)
             end
             repeat 
-                yield("/wait 0.1")
+                Sleep(0.1)
                 -- Check condition in the middle of the loop
                 if not GetCharacterCondition(34) then
                     break
@@ -232,7 +232,7 @@ function QuestInstance()
             until not IsAddonVisible("SelectYesno")
         elseif not IsPlayerAvailable() and not GetCharacterCondition(26) then
             repeat
-                yield("/wait 0.1")
+                Sleep(0.1)
                 -- Check condition in the middle of the loop
                 if not GetCharacterCondition(34) then
                     break
@@ -243,7 +243,7 @@ function QuestInstance()
             while GetCharacterCondition(34) do
                 if paused then
                     repeat
-                        yield("/wait 0.1")
+                        Sleep(0.1)
                         -- Check condition in the middle of the loop
                         if not GetCharacterCondition(34) then
                             break
@@ -251,7 +251,7 @@ function QuestInstance()
                     until GetCharacterCondition(26, false)
                     paused = false
                 else
-                    yield("/wait 1")
+                    Sleep(1.0)
                     yield("/rotation auto")
 
                     local current_target = GetTargetName()
@@ -260,7 +260,7 @@ function QuestInstance()
                         yield("/targetenemy") 
                         current_target = GetTargetName()
                         if current_target == "" then
-                            yield("/wait 1") 
+                            Sleep(1.0)
                         end
                     end
 
@@ -270,7 +270,7 @@ function QuestInstance()
                     if dist_to_enemy and dist_to_enemy > 0 and dist_to_enemy <= enemy_max_dist then
                         local enemy_x, enemy_y, enemy_z = GetTargetRawXPos(), GetTargetRawYPos(), GetTargetRawZPos()
                         yield("/vnavmesh moveto " .. enemy_x .. " " .. enemy_y .. " " .. enemy_z)
-                        yield("/wait 3")
+                        Sleep(3.0)
                         yield("/vnavmesh stop")  
                     end
 
@@ -339,7 +339,7 @@ function QuestChecker(target_name, target_distance, get_node_text_type, get_node
         LogInfo("[JU] Extract: "..extractTask(updated_node_text))
         local last_char = string.sub(updated_node_text, -1)
         LogInfo("[JU] last char: "..updated_node_text)
-        yield("/wait 2")
+        Sleep(2.0)
         if updated_node_text == get_node_text_match or not string.match(last_char, "%d") then
             --UiCheck(get_node_text_type, true)
             LogInfo("GUUUUUUUUUUUH")
@@ -366,7 +366,7 @@ function NodeScanner(get_node_text_type, get_node_text_match)
     end
     for location = 0, node_type_count do
         for sub_node = 0, 60 do
-            yield("/wait 0.0001")
+            Sleep(0.0001)
             local node_check = GetNodeText(get_node_text_type, location, sub_node)
             local clean_node_text = extractTask(node_check)
             if clean_node_text == nil then
@@ -382,7 +382,7 @@ function NodeScanner(get_node_text_type, get_node_text_match)
     for location = 0, node_type_count do
         for sub_node = 0, 60 do
             for sub_node2 = 0, 20 do
-                yield("/wait 0.0001")
+                Sleep(0.0001)
                 local node_check = GetNodeText(get_node_text_type, location, sub_node, sub_node2)
                 local clean_node_text = extractTask(node_check)
                 if clean_node_text == nil then
@@ -408,12 +408,12 @@ function UiCheck(get_node_text_type, close_ui)
         if close_ui() then
             repeat
                 yield("/huntinglog")
-                yield("/wait 0.5")
+                Sleep(0.1)
             until not IsAddonVisible("MonsterNote")
         else
             repeat
                 yield("/huntinglog")
-                yield("/wait 0.5")
+                Sleep(0.1)
             until IsAddonVisible("MonsterNote")
         end
     end
@@ -426,13 +426,13 @@ end
 -- maybe add random delays between retries
 function Teleporter(location, tp_kind) -- Teleporter handler
     local lifestream_stopped = false
-    local extra_cast_time_buffer = 0 -- Just in case a buffer is required, teleports are 5 seconds long. Slidecasting, ping and fps can affect casts
+    local cast_time_buffer = 5 -- Just in case a buffer is required, teleports are 5 seconds long. Slidecasting, ping and fps can affect casts
     local max_retries = 10  -- Teleporter retry amount, will not tp after number has been reached for safety
     local retries = 0
     
     -- Initial check to ensure player can teleport
     repeat
-        yield("/wait 0.1")
+        Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) -- 26 is combat
     
     -- Try teleport, retry until max_retries is reached
@@ -441,17 +441,17 @@ function Teleporter(location, tp_kind) -- Teleporter handler
         if tp_kind == "li" and not lifestream_stopped then
             yield("/lifestream stop")
             lifestream_stopped = true
-            yield("/wait 0.1")
+            Sleep(0.1)
         end
         
         -- Attempt teleport
         if not IsPlayerCasting() then
             yield("/" .. tp_kind .. " " .. location)
-            yield("/wait 2") -- Short wait to check if casting starts
+            Sleep(2.0) -- Short wait to check if casting starts
             
             -- Check if the player started casting, indicating a successful attempt
             if IsPlayerCasting() then
-                yield("/wait " .. 5 + extra_cast_time_buffer) -- Wait for cast to complete
+                Sleep(cast_time_buffer) -- Wait for cast to complete
             end
         end
         
@@ -484,7 +484,7 @@ local mount_message = false
 -- Will use Company Chocobo if left empty
 function Mount(mount_name)
     local max_retries = 10   -- Maximum number of retries
-    local retry_interval = 1 -- Time interval between retries in seconds
+    local retry_interval = 1.0 -- Time interval between retries in seconds
     local retries = 0        -- Counter for the number of retries
 
     -- Check if the player has unlocked mounts by checking the quest completion
@@ -505,7 +505,7 @@ function Mount(mount_name)
     
     -- Initial check to ensure the player can mount
     repeat
-        yield("/wait 0.1")
+        Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
     
     -- Retry loop for mounting with a max retry limit (set above)
@@ -518,7 +518,7 @@ function Mount(mount_name)
         end
         
         -- Wait for the retry interval
-        yield("/wait " .. retry_interval)
+        Sleep(retry_interval)
         
         -- Exit loop if the player mounted
         if GetCharacterCondition(4) then
@@ -537,7 +537,7 @@ function Mount(mount_name)
     
     -- Check player is available and mounted
     repeat
-        yield("/wait 0.1")
+        Sleep(0.1)
     until IsPlayerAvailable() and GetCharacterCondition(4)
 end
 
@@ -545,11 +545,11 @@ end
 function LogOut()
     repeat
         yield("/logout")
-        yield("/wait 0.1")
+        Sleep(0.1)
     until IsAddonVisible("SelectYesno")
     repeat
         yield("/pcall SelectYesno true 0")
-        yield("/wait 0.1")
+        Sleep(0.1)
     until not IsAddonVisible("SelectYesno")
 end
 
@@ -570,13 +570,13 @@ function Movement(x_position, y_position, z_position)
     local function NavToDestination()
         NavReload()
         repeat
-            yield("/wait 0.1")
+            Sleep(0.1)
         until NavIsReady()
 
         local retries = 0
         local max_retries = 100
         repeat
-            yield("/wait 0.1")
+            Sleep(0.1)
             
             -- add mount vs running time to destination logic
             if TerritorySupportsMounting() then
@@ -586,7 +586,7 @@ function Movement(x_position, y_position, z_position)
             yield("/vnav moveto " .. x_position .. " " .. y_position .. " " .. z_position)
             retries = retries + 1
         until PathIsRunning() or retries >= max_retries
-        yield("/wait 1.0")
+        Sleep(1.0)
     end
 
     NavToDestination()
@@ -596,7 +596,7 @@ function Movement(x_position, y_position, z_position)
         local ypos = floor_position(GetPlayerRawYPos())
         local zpos = floor_position(GetPlayerRawZPos())
 
-        yield("/wait 0.1")
+        Sleep(0.1)
 
         -- Check if within 3 numbers of each pos
         if math.abs(xpos - x_position_floored) <= range and
@@ -609,7 +609,7 @@ function Movement(x_position, y_position, z_position)
             end
         end
 
-        yield("/wait 0.5")
+        Sleep(0.5)
         
         local xpos2 = floor_position(GetPlayerRawXPos())
         local ypos2 = floor_position(GetPlayerRawYPos())
@@ -621,7 +621,7 @@ function Movement(x_position, y_position, z_position)
                math.abs(zpos - z_position_floored) > range then
                 NavToDestination()
                 yield('/gaction "Jump"')
-                yield("/wait 0.5")
+                Sleep(0.5)
                 yield('/gaction "Jump"')
             end
         end
@@ -634,15 +634,15 @@ end
 function OpenTimers()
     repeat
         yield("/timers")
-        yield("/wait 0.1")
+        Sleep(0.1)
     until IsAddonVisible("ContentsInfo")
     repeat
         yield("/pcall ContentsInfo True 12 1")
-        yield("/wait 0.1")
+        Sleep(0.1)
     until IsAddonVisible("ContentsInfoDetail")
     repeat
         yield("/timers")
-        yield("/wait 0.1")
+        Sleep(0.1)
     until not IsAddonVisible("ContentsInfo")
 end
 
@@ -652,14 +652,14 @@ end
 function MarketBoardChecker()
     local ItemSearchWasVisible = false
     repeat
-        yield("/wait 0.1")
+        Sleep(0.1)
         if IsAddonVisible("ItemSearch") then
             ItemSearchWasVisible = true
         end
     until ItemSearchWasVisible
     
     repeat
-        yield("/wait 0.1")
+        Sleep(0.1)
     until not IsAddonVisible("ItemSearch")
 end
 
@@ -672,8 +672,8 @@ function BuyFromStore(number_in_list, amount)
     number_in_list = number_in_list - 1
     attempts = 0
     repeat
-        yield("/wait 0.1")
         attempts = attempts + 1
+        Sleep(0.1)
     until (IsAddonReady("Shop") or attempts >= 100)
     -- attempts above 50 is about 5 seconds
     if attempts >= 100 then
@@ -682,10 +682,10 @@ function BuyFromStore(number_in_list, amount)
     if IsAddonReady("Shop") and number_in_list and amount then
         yield("/pcall Shop True 0 "..number_in_list.." "..amount)
         repeat
-            yield("/wait 0.1")
+            Sleep(0.1)
         until IsAddonReady("SelectYesno")
         yield("/pcall SelectYesno true 0")
-        yield("/wait 0.5")
+        Sleep(0.5)
     end
 end
 
@@ -697,19 +697,21 @@ function CloseStore()
     end
     
     repeat
-        yield("/wait 0.1")
+        Sleep(0.1)
     until not IsAddonVisible("Shop")
     
     repeat
-        yield("/wait 0.1")
-    until IsPlayerAvailable()
+        Sleep(0.1)
+    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
 end
 
 -- Usage: Target("Storm Quartermaster")  
 -- TODO: target checking for consistency and speed
 function Target(target)
-    yield('/target "' .. target .. '"')
-    Sleep(0.5)
+    repeat
+        yield('/target "' .. target .. '"')
+        Sleep(0.1)
+    until IsAddonVisible("_TargetInfo")
 end
 
 -- Usage: OpenGcSupplyWindow(1)  
@@ -759,8 +761,8 @@ function CloseGcSupplyWindow()
         yield("/pcall SelectString true -1")
     end
     repeat
-        Sleep(0.1)
         attempt_counter = attempt_counter + 1
+        Sleep(0.1)
     until not IsAddonVisible("GrandCompanySupplyList") and not IsAddonVisible("SelectString") or attempt_counter >= 50
     if attempt_counter >= 50 then
         Echo("Window still open, trying again")
@@ -797,8 +799,8 @@ function GcProvisioningDeliver()
         local err_counter_request = 0
         local err_counter_supply = 0
         repeat
-            Sleep(0.1)
             err_counter_request = err_counter_request+1
+            Sleep(0.1)
         until IsAddonReady("GrandCompanySupplyReward") or err_counter_request >= 50
         if err_counter_request >= 50 then
             Echo("Something went wrong or request window was auto skipped, continuing")
@@ -807,8 +809,8 @@ function GcProvisioningDeliver()
             yield("/pcall GrandCompanySupplyReward true 0")
         end
         repeat
-            Sleep(0.1)
             err_counter_supply = err_counter_supply+1
+            Sleep(0.1)
         until IsAddonReady("GrandCompanySupplyList") or err_counter_supply >= 50
         err_counter_supply = 0
         ::skip::
@@ -967,8 +969,8 @@ function PartyDisband()
         yield("/partycmd disband")
         
         repeat
-            Sleep(0.1)
             yield("/pcall SelectYesno true 0")
+            Sleep(0.1)
         until not IsAddonVisible("SelectYesno")
     end
 end
@@ -985,8 +987,8 @@ function EstateTeleport(estate_char_name, estate_type)
     yield("/estatelist " .. estate_char_name)
     
     repeat
-        Sleep(0.1)
         yield("/pcall TeleportHousingFriend true " .. estate_type)
+        Sleep(0.1)
     until not IsAddonVisible("TeleportHousingFriend")
     
     ZoneTransitions()
@@ -995,10 +997,39 @@ end
 -- Usage: RelogCharacter("First Last@Server")
 -- Relogs specified character, should be followed with a LoginCheck()
 -- Requires @Server else it will not work
+-- Requires Auto Retainer plugin
 function RelogCharacter(relog_char_name)
     repeat
         Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
     
     yield("/ays relog " .. relog_char_name)
+end
+
+-- Usage: EquipRecommendedGear()
+-- Equips recommended gear if any available
+function EquipRecommendedGear()
+    repeat
+        Sleep(0.1)
+    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
+    
+    repeat
+        yield("/character")
+        Sleep(0.1)
+    until IsAddonVisible("Character")
+    
+    repeat
+        yield("/pcall Character true 12")
+        Sleep(0.1)
+    until IsAddonVisible("RecommendEquip")
+    
+    repeat
+        yield("/character")
+        Sleep(0.1)
+    until not IsAddonVisible("Character")
+    
+    repeat
+        yield("/pcall RecommendEquip true 0")
+        Sleep(0.1)
+    until not IsAddonVisible("RecommendEquip")
 end
