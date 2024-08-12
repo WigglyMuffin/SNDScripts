@@ -81,9 +81,10 @@ for index, item in ipairs(ProvisioningList) do
         Sleep(0.5)
         DropboxSetItemQuantity(tonumber(item["Row3ItemID"]), false, tonumber(item["Row3ItemAmount"]))
     end
-    Sleep(0.2)
-    yield("/dbq 1:1")
+    DropboxSetItemQuantity(1, false, 1)
     Sleep(1)
+    DropboxSetItemQuantity(1, false, 1)
+    Sleep(0.5)
     Echo("############################")
     Echo("Starting trade!")
     Echo("############################")
