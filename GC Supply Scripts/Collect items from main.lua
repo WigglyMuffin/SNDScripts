@@ -44,7 +44,7 @@ local alt_char_name_list = {
 --# MAIN SCRIPT #
 --###############
 
-local function processAltCharacters(alt_char_name_list, destination_server, destination_zone, destination_zone_id, destination_type, destination_house, path_home)
+local function ProcessAltCharacters(alt_char_name_list, destination_server, destination_zone, destination_zone_id, destination_type, destination_house, path_home)
     for i = 1, #alt_char_name_list do
         -- Update alt character name
         local alt_char_name = alt_char_name_list[i][1]
@@ -111,6 +111,12 @@ local function processAltCharacters(alt_char_name_list, destination_server, dest
         
         -- Wait for the gil transfer to complete
         WaitForGilIncrease(1)
+        
+        -- Notify when all characters are finished
+        if i == #alt_char_name_list then
+        Echo("Finished all" .. #alt_char_name_list .. " characters <se.6><se.6><se.6>")
+        end
+        
         -- Disband party once gil trigger has happened
         PartyDisband()
         
@@ -157,4 +163,4 @@ local function processAltCharacters(alt_char_name_list, destination_server, dest
     end
 end
 
-processAltCharacters(alt_char_name_list, destination_server, destination_zone, destination_zone_id, destination_type, destination_house, path_home)
+ProcessAltCharacters(alt_char_name_list, destination_server, destination_zone, destination_zone_id, destination_type, destination_house, path_home)
