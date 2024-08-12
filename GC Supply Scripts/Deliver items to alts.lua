@@ -7,6 +7,8 @@
 ProvisioningListNameToLoad = "ProvisioningList.lua"
 SNDAltConfigFolder = "C:\\Users\\ff14lowres\\AppData\\Roaming\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
 
+-- this can be used to skip forward x amount of characters in case something somehow went wrong
+CharsToSkip = 0
 
 -- ###################################
 -- ###################################
@@ -27,6 +29,10 @@ dofile(SNDAltConfigFolder..""..ProvisioningListNameToLoad)
 DropboxSetItemQuantity(1, false, 0)
 
 for index, item in ipairs(ProvisioningList) do
+    yield("/echo "..index)
+    if index <= CharsToSkip then
+        goto skip
+    end
     if item["CharHomeWorld"] == nil then
         LogInfo("Item doesn't exist, skipping")
         goto skip
@@ -127,4 +133,3 @@ DropboxSetItemQuantity(1, false, 0)
 yield("/echo ############################")
 yield("/echo Script finished")
 yield("/echo ############################")
-LogOut()
