@@ -481,7 +481,7 @@ end
 local mount_message = false
 -- Usage: Mount("SDS Fenrir") 
 --
--- Can leave empty for mount roulette
+-- Will use Company Chocobo if left empty
 function Mount(mount_name)
     local max_retries = 10   -- Maximum number of retries
     local retry_interval = 1 -- Time interval between retries in seconds
@@ -512,7 +512,7 @@ function Mount(mount_name)
     while retries < max_retries do
         -- Attempt to mount using the chosen mount or Mount Roulette if none
         if mount_name == nil then
-            yield('/ac "Mount Roulette"')
+            yield('/mount "Company Chocobo"')
         else
             yield('/mount "' .. mount_name .. '"')
         end
