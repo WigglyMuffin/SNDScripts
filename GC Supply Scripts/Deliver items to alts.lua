@@ -27,7 +27,12 @@ dofile(SNDAltConfigFolder..""..ProvisioningListNameToLoad)
 DropboxSetItemQuantity(1, false, 0)
 
 for index, item in ipairs(ProvisioningList) do
+    if item["CharHomeWorld"] == nil then
+        LogInfo("Item doesn't exist, skipping")
+        goto skip
+    end
     if not FindDCWorldIsOn(item["CharHomeWorld"]) == FindDCWorldIsOn(FindWorldByID(GetCurrentWorld())) then
+        LogInfo(""..item["CharName"].." is on a different DC, skipping")
         goto skip
     end
     Echo("############################")
@@ -57,17 +62,24 @@ for index, item in ipairs(ProvisioningList) do
     Sleep(0.5)
     yield('/target "' ..item["CharName"]..'"')
     yield("/focustarget <t>")
+    yield("/dropbox")
     Sleep(1)
     if item["Row1ItemName"] then
-        yield("/dbq "..item["Row1ItemID"]..":"..item["Row1ItemAmount"])
+        DropboxSetItemQuantity(tonumber(item["Row1ItemID"]), false, tonumber(item["Row1ItemAmount"]))
+        Sleep(0.5)
+        DropboxSetItemQuantity(tonumber(item["Row1ItemID"]), false, tonumber(item["Row1ItemAmount"]))
     end
     Sleep(0.2)
     if item["Row2ItemName"] then
-        yield("/dbq "..item["Row2ItemID"]..":"..item["Row2ItemAmount"])
+        DropboxSetItemQuantity(tonumber(item["Row2ItemID"]), false, tonumber(item["Row2ItemAmount"]))
+        Sleep(0.5)
+        DropboxSetItemQuantity(tonumber(item["Row2ItemID"]), false, tonumber(item["Row2ItemAmount"]))
     end
     Sleep(0.2)
     if item["Row3ItemName"] then
-        yield("/dbq "..item["Row3ItemID"]..":"..item["Row3ItemAmount"])
+        DropboxSetItemQuantity(tonumber(item["Row3ItemID"]), false, tonumber(item["Row3ItemAmount"]))
+        Sleep(0.5)
+        DropboxSetItemQuantity(tonumber(item["Row3ItemID"]), false, tonumber(item["Row3ItemAmount"]))
     end
     Sleep(0.2)
     yield("/dbq 1:1")
@@ -89,7 +101,6 @@ for index, item in ipairs(ProvisioningList) do
     Echo("############################")
     Echo("Cleaning up Dropbox")
     Echo("############################")
-    yield("/dbq clear")
     DropboxSetItemQuantity(1, false, 0)
     Sleep(0.5)
     DropboxSetItemQuantity(tonumber(item["Row1ItemID"]), false, 0)
