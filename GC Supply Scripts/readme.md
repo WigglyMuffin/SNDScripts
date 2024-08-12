@@ -1,7 +1,7 @@
 # Using these scripts
 1. Run `Auto gen Provisioning List.lua` on your alt account to generate a ProvisioningList file which is used for the later scripts, places a file with everything it gathered in `%appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\`
 2. When the above finishes you can run `Generate List of items to gather.lua` to find out what you need to gather in a slightly messy list called `List_to_gather.txt` which places itself in `%appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\`
-3. Once you have everything on the account you're trading from you run `Deliver items to alts.lua` in the location the alts are coming to, and run a properly configured `Improved tony.lua` on the alt account so they come and pick up all the needed items
+3. Once you have everything on the account you're trading from you run `Deliver items to alts.lua` in the location the alts are coming to, and run a properly configured `Collect items from main.lua` on the alt account so they come and pick up all the needed items
 4. Finally you just run `Deliver GC Items.lua` on the alt account when you're picked up all the items from the previous step and it'll go to the GC and deliver all the items
 
 ## Easy mistakes
