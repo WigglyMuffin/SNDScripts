@@ -711,11 +711,7 @@ function Target(target)
     repeat
         yield('/target "' .. target .. '"')
         Sleep(0.1)
-<<<<<<< HEAD
     until GetTargetName() == target
-=======
-    until string.len(GetTargetName()) ~= 0
->>>>>>> 4843fb5db0afbfb5ceeb9d184b1c82d70f7bd405
 end
 
 -- Usage: OpenGcSupplyWindow(1)  
