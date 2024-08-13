@@ -26,6 +26,16 @@ local character_list_options = {
     {"First Last@Server", 0, 2}
 }
 
+-- Usage: First Last@Server
+-- This is where you can skip characters, either by choice or something went wrong
+local character_list_skip = {
+    "First Last@Server",
+    "First Last@Server",
+    "First Last@Server",
+    "First Last@Server",
+    "First Last@Server"
+}
+
 -- #####################################
 -- #  DON'T TOUCH ANYTHING BELOW HERE  #
 -- # UNLESS YOU KNOW WHAT YOU'RE DOING #
@@ -33,5 +43,6 @@ local character_list_options = {
 
 return {
     character_list = character_list,
-    character_list_options = character_list_options
+    character_list_options = character_list_options,
+    character_list_skip = character_list_skip
 }
