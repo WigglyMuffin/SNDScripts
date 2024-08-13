@@ -47,8 +47,35 @@ for index, item in ipairs(ProvisioningList) do
         goto skip
     end
     Echo("############################")
+<<<<<<< HEAD
     Echo("Waiting for " .. item["CharName"])
+=======
+    Echo("Waiting for "..item["CharName"])
+    Echo("And preparing dropbox items")
+>>>>>>> 25113c4ce43c30d1d5abf5a59b02f534acea3d24
     Echo("############################")
+    Sleep(1)
+    if item["Row1ItemName"] then
+        DropboxSetItemQuantity(tonumber(item["Row1ItemID"]), false, tonumber(item["Row1ItemAmount"]))
+        Sleep(0.35)
+        DropboxSetItemQuantity(tonumber(item["Row1ItemID"]), false, tonumber(item["Row1ItemAmount"]))
+    end
+    Sleep(0.2)
+    if item["Row2ItemName"] then
+        DropboxSetItemQuantity(tonumber(item["Row2ItemID"]), false, tonumber(item["Row2ItemAmount"]))
+        Sleep(0.35)
+        DropboxSetItemQuantity(tonumber(item["Row2ItemID"]), false, tonumber(item["Row2ItemAmount"]))
+    end
+    Sleep(0.2)
+    if item["Row3ItemName"] then
+        DropboxSetItemQuantity(tonumber(item["Row3ItemID"]), false, tonumber(item["Row3ItemAmount"]))
+        Sleep(0.35)
+        DropboxSetItemQuantity(tonumber(item["Row3ItemID"]), false, tonumber(item["Row3ItemAmount"]))
+    end
+    DropboxSetItemQuantity(1, false, 1)
+    Sleep(1)
+    DropboxSetItemQuantity(1, false, 1)
+    Sleep(0.35)
     WaitUntilObjectExists(tostring(item["CharName"]))
     while string.len(GetTargetName()) == 0 do
         Target(item["CharName"])
@@ -72,6 +99,7 @@ for index, item in ipairs(ProvisioningList) do
     Target(item["CharName"])
     yield("/focustarget <t>")
     yield("/dropbox")
+<<<<<<< HEAD
     Sleep(1.0)
     if item["Row1ItemName"] then
         DropboxSetItemQuantity(tonumber(item["Row1ItemID"]), false, tonumber(item["Row1ItemAmount"]))
@@ -93,6 +121,8 @@ for index, item in ipairs(ProvisioningList) do
     DropboxSetItemQuantity(1, false, 1)
     Sleep(1.0)
     DropboxSetItemQuantity(1, false, 1)
+=======
+>>>>>>> 25113c4ce43c30d1d5abf5a59b02f534acea3d24
     Sleep(0.35)
     Echo("############################")
     Echo("Starting trade!")
