@@ -711,7 +711,7 @@ function Target(target)
     repeat
         yield('/target "' .. target .. '"')
         Sleep(0.1)
-    until IsAddonVisible("_TargetInfo")
+    until string.len(GetTargetName()) ~= 0
 end
 
 -- Usage: OpenGcSupplyWindow(1)  
