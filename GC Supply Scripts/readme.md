@@ -8,7 +8,7 @@ They are designed to automatically scan what GC turnins you need for your DoL jo
 5. Finally, you run `Deliver GC Items.lua` on the alt account when you have picked up all the items from the previous step, and it will go to the Maelstrom GC and turn them in.
 
 ## Easy mistakes
-Make sure you have `CharList.lua` configured in the following format or some of the scripts will not work.
+Make sure you have `CharList.lua` configured in the following format or some of the scripts will not work. A detailed description is inside of the included file, this is just to show the format required.
 ```
 local character_list = {
     "First Last@Server",
@@ -25,13 +25,21 @@ local character_list_options = {
     {"First Last@Server", 0, 2},
     {"First Last@Server", 0, 2}
 }
+
+local character_list_skip = {
+    "First Last@Server",
+    "First Last@Server",
+    "First Last@Server",
+    "First Last@Server",
+    "First Last@Server"
+}
 ```
 
-Also in the script `Deliver to alts.lua` make sure that `SNDAltConfigFolder` near the top is pointing to your alts SND %appdata% config folder in the case that you have your alt running under a different user account.
+Make sure in the `Deliver to alts.lua` file the `SNDAltConfigFolder` near the top is pointing to your alts SND %appdata% config folder in the case that you have your alt running under a different user account.
 Or at the very least pointing to a folder that has a copy of the generated `ProvisioningList.lua` from the `Auto Gen Provisioning List.lua` script.
 
 ## File and Folder Structure
-Make sure you roughly follow this structure for these scripts to work.
+Make sure you roughly follow this file tree structure for these scripts to work. If you run from a single %appdata% then it would be closer to the Alt Account file tree.
 `List_to_gather.txt` and `ProvisioningList.lua` will be automatically generated once you run the scripts.
 ```bash
 C:\Users\Main Account\AppData\Roaming\XIVLauncher\pluginConfigs\SomethingNeedDoing\/
