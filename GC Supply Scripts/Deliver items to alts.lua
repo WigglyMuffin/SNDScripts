@@ -49,9 +49,7 @@ for index, item in ipairs(ProvisioningList) do
     Echo("############################")
     Echo("Waiting for "..item["CharName"])
     Echo("############################")
-    repeat 
-        Sleep(0.1)
-    until GetObjectRawXPos(tostring(item["CharName"])) ~= 0
+    WaitUntilObjectExists(tostring(item["CharName"]))
     while string.len(GetTargetName()) == 0 do
         yield('/target "' ..item["CharName"]..'"')
         Sleep(1)
