@@ -1,4 +1,6 @@
 # Using these scripts
+These scripts are for levelling your DoL jobs on an alt account, they are made for two accounts and are not compatible with a single account.
+They are designed to automatically scan what GC turnins you need for your DoL jobs, give you an items list and then distribute them from your main account to your alt account.
 1. Configure the `CharList.lua` file to include all of your chosen alt account characters following the format specified inside of the file, place this into your `%appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\` of the user account your alt account is located.
 2. Run `Auto gen Provisioning List.lua` on your alt account to generate a `ProvisioningList.lua` file which is used for the later scripts, it will be located with everything it found in `%appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\`, this will be your relevant user account %appdata%.
 3. When the above finishes you can run `Generate List of items to gather.lua` to find out what items you need to obtain in an organised list called `List_to_gather.txt`, it will be located in `%appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\`, once again your relevant user account %appdata%.
