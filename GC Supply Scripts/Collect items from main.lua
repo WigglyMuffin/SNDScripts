@@ -12,6 +12,7 @@ local destination_zone_id = 129           -- Zone ID characters need to travel f
 local destination_house = 0               -- Options: 0 = FC, 1 = Personal, 2 = Apartment
 local destination_type = 0                -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
 local path_home = true                    -- Options: true = Paths home from destination, false = does nothing and logs out
+local do_movement = true                  -- Options: true = Paths to chosen character, false = does nothing and waits for chosen character to come to you
 
 -- Usage: First Last
 -- This is your main character name
@@ -89,8 +90,13 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
         if destination_type == 0 or destination_type == 1 then
             -- Waits until main char is present
             WaitUntilObjectExists(main_char_name)
-            -- Path to main char
-            PathToObject(main_char_name)
+            
+            -- Paths to main char only if you have do_movement set to true
+            if do_movement then
+                -- Path to main char
+                PathToObject(main_char_name)
+            end
+            
             -- Invite main char to party, needs a target
             PartyInvite(main_char_name)
             
@@ -106,8 +112,13 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
             
             -- Waits until main char is present
             WaitUntilObjectExists(main_char_name)
-            -- Path to main char
-            PathToObject(main_char_name)
+            
+            -- Paths to main char only if you have do_movement set to true
+            if do_movement then
+                -- Path to main char
+                PathToObject(main_char_name)
+            end
+            
             -- Invite main char to party, needs a target
             PartyInvite(main_char_name)
         end
@@ -117,7 +128,7 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
         
         -- Notify when all characters are finished
         if i == #character_list_options then
-        Echo("Finished all" .. #character_list_options .. " characters <se.6><se.6><se.6>")
+            Echo("Finished all" .. #character_list_options .. " characters <se.6><se.6><se.6>")
         end
         
         -- Disband party once gil trigger has happened
