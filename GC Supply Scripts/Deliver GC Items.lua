@@ -88,7 +88,7 @@ if MULTICHAR then
             -- continue, no relogging needed
         else
             RelogCharacter(char)
-            Sleep(10.0)
+            Sleep(7.5)
             LoginCheck()
         end
         repeat

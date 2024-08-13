@@ -635,15 +635,17 @@ function GetAndSaveProvisioningToTable()
             LogInfo("[APL] Already on the right character: "..char)
         else 
             LogInfo("[APL] Logging into: "..char)
-            yield("/ays relog " ..char)
-            Sleep(10) -- This is enough time to log out completely and not too long to cut into new logins
-            yield("/waitaddon NamePlate <maxwait.6000><wait.5>")
+            RelogCharacter(char)
+            Sleep(7.5) -- This is enough time to log out completely and not too long to cut into new logins
+            LoginCheck()
         end
+        
         repeat
             Sleep(0.1)
         until IsPlayerAvailable()
+        
         OpenTimers()
-        Sleep(1)
+        Sleep(1.0)
 
         function ContainsLetters(input)
             if input:match("%a") then
@@ -656,6 +658,7 @@ function GetAndSaveProvisioningToTable()
         Row1Found = false
         Row2Found = false
         Row3Found = false
+        
         local Row1ItemName = GetNodeText("ContentsInfoDetail", 101, 5)
         LogInfo("[APL] "..tostring(Row1ItemName))
         LogInfo("[APL] "..tostring(ContainsLetters(Row1ItemName)))

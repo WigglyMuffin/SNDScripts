@@ -47,19 +47,19 @@ for index, item in ipairs(ProvisioningList) do
         goto skip
     end
     Echo("############################")
-    Echo("Waiting for "..item["CharName"])
+    Echo("Waiting for " .. item["CharName"])
     Echo("############################")
     WaitUntilObjectExists(tostring(item["CharName"]))
     while string.len(GetTargetName()) == 0 do
-        yield('/target "' ..item["CharName"]..'"')
-        Sleep(1)
+        Target(item["CharName"])
+        Sleep(1.0)
     end
     repeat 
         Sleep(0.1)
     until IsAddonReady("SelectYesno")
     repeat 
         yield("/pcall SelectYesno true 0")
-        Sleep(1)
+        Sleep(1.0)
     until not IsAddonVisible("SelectYesno")
     repeat 
         Sleep(0.1)
@@ -69,10 +69,10 @@ for index, item in ipairs(ProvisioningList) do
     Echo("Getting Ready to trade")
     Echo("############################")
     Sleep(0.35)
-    yield('/target "' ..item["CharName"]..'"')
+    Target(item["CharName"])
     yield("/focustarget <t>")
     yield("/dropbox")
-    Sleep(1)
+    Sleep(1.0)
     if item["Row1ItemName"] then
         DropboxSetItemQuantity(tonumber(item["Row1ItemID"]), false, tonumber(item["Row1ItemAmount"]))
         Sleep(0.35)
@@ -91,19 +91,19 @@ for index, item in ipairs(ProvisioningList) do
         DropboxSetItemQuantity(tonumber(item["Row3ItemID"]), false, tonumber(item["Row3ItemAmount"]))
     end
     DropboxSetItemQuantity(1, false, 1)
-    Sleep(1)
+    Sleep(1.0)
     DropboxSetItemQuantity(1, false, 1)
     Sleep(0.35)
     Echo("############################")
     Echo("Starting trade!")
     Echo("############################")
     DropboxStart()
-    Sleep(2)
+    Sleep(2.0)
     tradestatus = DropboxIsBusy()
     while tradestatus == true do
         tradestatus = DropboxIsBusy()
         LogInfo("[GCID] Currently trading...")
-        Sleep(2)
+        Sleep(2.0)
     end
     Echo("############################")
     Echo("Trading done")
@@ -133,6 +133,6 @@ for index, item in ipairs(ProvisioningList) do
     ::skip::
 end
 DropboxSetItemQuantity(1, false, 0)
-yield("/echo ############################")
-yield("/echo Script finished")
-yield("/echo ############################")
+Echo("############################")
+Echo("Script finished")
+Echo("############################")
