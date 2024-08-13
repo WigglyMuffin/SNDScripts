@@ -33,9 +33,9 @@ LogInfo("[APL] ##############################")
 
 local ProvisioningList = {}
 
-dofile(SNDConfigFolder .. CharList)
+local char_data = dofile(SNDConfigFolder .. CharList)
 
-yield("/echo " .. character_list[1])
+local character_list = char_data.character_list
 
 ItemList = {
     ["Copper Ore"] = {ID = 5106},

@@ -30,6 +30,7 @@ Or at the very least pointing to a folder that has a copy of the generated `Prov
 
 ## File and Folder Structure
 Make sure you roughly follow this structure for these scripts to work.
+`List_to_gather.txt` and `ProvisioningList.lua` will be automatically generated once you run the scripts.
 ```bash
 C:\Users\Main Account\AppData\Roaming\XIVLauncher\pluginConfigs\SomethingNeedDoing\/
 └── vac_functions.lua

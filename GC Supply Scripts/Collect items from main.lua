@@ -17,9 +17,6 @@ local path_home = true                    -- Options: true = Paths home from des
 -- This is your main character name
 local main_char_name = "First Last"
 
--- This is a placeholder for alt character names, you do not set this and will be overwritten later
-local alt_char_name = "Don't edit"
-
 -- #####################################
 -- #  DON'T TOUCH ANYTHING BELOW HERE  #
 -- # UNLESS YOU KNOW WHAT YOU'RE DOING #
@@ -37,7 +34,7 @@ LoadFunctionsFileLocation = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfig
 LoadFunctions = loadfile(LoadFunctionsFileLocation)
 LoadFunctions()
 LoadFileCheck()
-
+local alt_char_name = "Don't edit"
 local char_data = dofile(SNDConfigFolder .. CharList)
 
 local character_list_options = char_data.character_list_options
