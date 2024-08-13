@@ -711,7 +711,7 @@ function Target(target)
     repeat
         yield('/target "' .. target .. '"')
         Sleep(0.1)
-    until IsAddonVisible("_TargetInfo")
+    until GetTargetName() == target
 end
 
 -- Usage: OpenGcSupplyWindow(1)  
@@ -967,6 +967,21 @@ function PartyDisband()
         until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
         
         yield("/partycmd disband")
+        
+        repeat
+            yield("/pcall SelectYesno true 0")
+            Sleep(0.1)
+        until not IsAddonVisible("SelectYesno")
+    end
+end
+
+-- Usage: PartyAccept()
+-- Will accept party invite if not in party
+function PartyAccept()
+    if not IsInParty() then
+        repeat
+            Sleep(0.1)
+        until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
         
         repeat
             yield("/pcall SelectYesno true 0")
