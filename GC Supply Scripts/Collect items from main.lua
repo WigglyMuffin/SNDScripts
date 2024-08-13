@@ -1,18 +1,10 @@
--- stuff could go here
+-- Stuff could go here
 
---###################
---# FUNCTION LOADER #
---###################
+-- ###########
+-- # CONFIGS #
+-- ###########
 
-SNDConfigFolder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
-LoadFunctionsFileLocation = SNDConfigFolder .. "vac_functions.lua"
-LoadFunctions = loadfile(LoadFunctionsFileLocation)
-LoadFunctions()
-LoadFileCheck()
-
---###########
---# CONFIGS #
---###########
+-- Edit CharList.lua file for configuring characters
 
 local destination_server = "Louisoix"     -- Server characters need to travel for collecting items
 local destination_zone = "Limsa Lominsa"  -- Zone characters need to travel for collecting items
@@ -26,38 +18,48 @@ local path_home = true                    -- Options: true = Paths home from des
 local main_char_name = "First Last"
 
 -- This is a placeholder for alt character names, you do not set this and will be overwritten later
-local alt_char_name = "First Last"
+local alt_char_name = "Don't edit"
 
--- Usage: First Last@Server, return_home, return_location
--- return_home options: 0 = no, 1 = yes
--- return_location options: 0 = fc entrance, 1 nearby bell, 2 limsa bell
--- This is where your alts that need items are listed
-local alt_char_name_list = {
-    --{"First Last@Server", 0, 2},
-    --{"First Last@Server", 0, 2},
-    --{"First Last@Server", 0, 2},
-    --{"First Last@Server", 0, 2},
-    --{"First Last@Server", 0, 2}
-}
+-- #####################################
+-- #  DON'T TOUCH ANYTHING BELOW HERE  #
+-- # UNLESS YOU KNOW WHAT YOU'RE DOING #
+-- #####################################
 
---###############
---# MAIN SCRIPT #
---###############
+-- ###################
+-- # FUNCTION LOADER #
+-- ###################
 
-local function ProcessAltCharacters(alt_char_name_list, destination_server, destination_zone, destination_zone_id, destination_type, destination_house, path_home)
-    for i = 1, #alt_char_name_list do
+-- Edit CharList.lua file for configuring characters
+CharList = "CharList.lua"
+
+SNDConfigFolder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
+LoadFunctionsFileLocation = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
+LoadFunctions = loadfile(LoadFunctionsFileLocation)
+LoadFunctions()
+LoadFileCheck()
+
+local char_data = dofile(SNDConfigFolder .. CharList)
+
+local character_list_options = char_data.character_list_options
+
+-- ###############
+-- # MAIN SCRIPT #
+-- ###############
+
+local function ProcessAltCharacters(character_list_options, destination_server, destination_zone, destination_zone_id, destination_type, destination_house, path_home)
+    for i = 1, #character_list_options do
         -- Update alt character name
-        local alt_char_name = alt_char_name_list[i][1]
+        local alt_char_name = character_list_options[i][1]
         
         -- Switch characters if required, looks up current character and compares
-        if GetCharacterName(true) ~= alt_char_name_list[i][1] then
-            RelogCharacter(alt_char_name_list[i][1])
+        if GetCharacterName(true) ~= character_list_options[i][1] then
+            RelogCharacter(character_list_options[i][1])
             Sleep(2.0)
             LoginCheck()
         end
         
         Echo("Picking up items from: " .. main_char_name)
-        Echo("Processing " .. i .. "/" .. #alt_char_name_list .. ", current character: " .. alt_char_name)
+        Echo("Processing " .. i .. "/" .. #character_list_options .. ", current character: " .. alt_char_name)
         
         -- Check if alt character on correct server
         -- Teleporter(destination_server, "li")
@@ -88,6 +90,8 @@ local function ProcessAltCharacters(alt_char_name_list, destination_server, dest
         -- Handle different destination types
         -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
         if destination_type == 0 or destination_type == 1 then
+            -- Waits until main char is present
+            WaitUntilObjectExists(main_char_name)
             -- Path to main char
             PathToObject(main_char_name)
             -- Invite main char to party, needs a target
@@ -103,6 +107,8 @@ local function ProcessAltCharacters(alt_char_name_list, destination_server, dest
                 yield("/pcall SelectYesno true 0")
             until not IsAddonVisible("SelectYesno")
             
+            -- Waits until main char is present
+            WaitUntilObjectExists(main_char_name)
             -- Path to main char
             PathToObject(main_char_name)
             -- Invite main char to party, needs a target
@@ -113,8 +119,8 @@ local function ProcessAltCharacters(alt_char_name_list, destination_server, dest
         WaitForGilIncrease(1)
         
         -- Notify when all characters are finished
-        if i == #alt_char_name_list then
-        Echo("Finished all" .. #alt_char_name_list .. " characters <se.6><se.6><se.6>")
+        if i == #character_list_options then
+        Echo("Finished all" .. #character_list_options .. " characters <se.6><se.6><se.6>")
         end
         
         -- Disband party once gil trigger has happened
@@ -124,7 +130,7 @@ local function ProcessAltCharacters(alt_char_name_list, destination_server, dest
         if path_home then
             -- [2] return_home options: 0 = no, 1 = yes
             -- [3] return_location options: 0 = fc entrance, 1 nearby bell, 2 limsa bell
-            if alt_char_name_list[i][2] == 1 then
+            if character_list_options[i][2] == 1 then
                 Echo("Attempting to return to " .. GetHomeWorld())
                 
                 -- GetCurrentWorld() == 0 and GetHomeWorld() == 0
@@ -138,7 +144,7 @@ local function ProcessAltCharacters(alt_char_name_list, destination_server, dest
                 until GetCurrentWorld() == GetHomeWorld() and IsPlayerAvailable()
                 
                 -- FC Entrance stuff
-                if alt_char_name_list[i][3] == 0 then
+                if character_list_options[i][3] == 0 then
                     Echo("Attempting to go to FC Entrance")
                     Teleporter("Estate Hall", "tp")
                     ZoneTransitions()
@@ -147,14 +153,14 @@ local function ProcessAltCharacters(alt_char_name_list, destination_server, dest
                 end
                 
                 -- Nearby Retainer Bell Stuff
-                if alt_char_name_list[i][3] == 1 then
+                if character_list_options[i][3] == 1 then
                     Echo("Attempting to go to nearest retainer bell")
                     Target("Summoning Bell")
                     Movement(GetObjectRawXPos("Summoning Bell"), GetObjectRawYPos("Summoning Bell"), GetObjectRawZPos("Summoning Bell"))
                 end
                 
                 -- Limsa Retainer Bell Stuff
-                if alt_char_name_list[i][3] == 2 then
+                if character_list_options[i][3] == 2 then
                     Echo("Attempting to go to Limsa retainer bell")
                     PathToLimsaBell()
                 end
@@ -163,4 +169,4 @@ local function ProcessAltCharacters(alt_char_name_list, destination_server, dest
     end
 end
 
-ProcessAltCharacters(alt_char_name_list, destination_server, destination_zone, destination_zone_id, destination_type, destination_house, path_home)
+ProcessAltCharacters(character_list_options, destination_server, destination_zone, destination_zone_id, destination_type, destination_house, path_home)

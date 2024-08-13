@@ -1,27 +1,21 @@
 -- This script will rotate through your characters and generate a list of items needed for gc supply and output that file to the snd config folder
 -- This file can then be used in other scripts to automate other tasks
---
 
+-- ###########
+-- # CONFIGS #
+-- ###########
+
+-- Configuration is not required for this file
+-- Edit CharList.lua file for configuring characters
+
+-- #####################################
+-- #  DON'T TOUCH ANYTHING BELOW HERE  #
+-- # UNLESS YOU KNOW WHAT YOU'RE DOING #
+-- #####################################
 
 ProvisioningListSaveName = "ProvisioningList.lua"
-CharList = "CharList.lua"
--- you need to use the following format in your CharList.lua
--- place it in your snd config folder
--- located in %appdata%\xivlauncher\pluginConfigs\SomethingNeedDoing
--- usually anyway
--- i do it this way so you can share the same character list between scripts
--- character_list = {
---     "EXAMPLE EXAMPLE@WORLD",
---     "EXAMPLE EXAMPLE@WORLD",
---     "EXAMPLE EXAMPLE@WORLD",
---     "EXAMPLE EXAMPLE@WORLD",
---     "EXAMPLE EXAMPLE@WORLD"
--- }
 
---##################################
---##################################
---##################################
---##################################
+CharList = "CharList.lua"
 
 SNDConfigFolder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
 LoadFunctionsFileLocation = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
@@ -30,16 +24,19 @@ LoadFunctions()
 LoadFileCheck()
 LogInfo("[APL] ##############################")
 LogInfo("[APL] Starting script...")
-LogInfo("[APL] SNDConfigFolder: "..SNDConfigFolder)
-LogInfo("[APL] ProvisioningListSaveName: "..ProvisioningListSaveName)
-LogInfo("[APL] SNDC+PROV: "..SNDConfigFolder..""..ProvisioningListSaveName)
-LogInfo("[APL] CharList: "..CharList)
-LogInfo("[APL] SNDC+Char: "..SNDConfigFolder..""..CharList)
+LogInfo("[APL] SNDConfigFolder: " .. SNDConfigFolder)
+LogInfo("[APL] ProvisioningListSaveName: " .. ProvisioningListSaveName)
+LogInfo("[APL] SNDC+PROV: " .. SNDConfigFolder .. "" .. ProvisioningListSaveName)
+LogInfo("[APL] CharList: " .. CharList)
+LogInfo("[APL] SNDC+Char: " .. SNDConfigFolder .. "" .. CharList)
 LogInfo("[APL] ##############################")
+
 local ProvisioningList = {}
 
-dofile(SNDConfigFolder..""..CharList)
-yield("/echo "..character_list[1])
+dofile(SNDConfigFolder .. CharList)
+
+yield("/echo " .. character_list[1])
+
 ItemList = {
     ["Copper Ore"] = {ID = 5106},
     ["Muddy Water"] = {ID = 5488},
@@ -639,7 +636,7 @@ function GetAndSaveProvisioningToTable()
         else 
             LogInfo("[APL] Logging into: "..char)
             yield("/ays relog " ..char)
-            Sleep(15)
+            Sleep(10) -- This is enough time to log out completely and not too long to cut into new logins
             yield("/waitaddon NamePlate <maxwait.6000><wait.5>")
         end
         repeat

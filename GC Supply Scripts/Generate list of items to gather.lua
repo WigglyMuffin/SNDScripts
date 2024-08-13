@@ -4,15 +4,19 @@
 -- by default uses the output from the script that generates a provisioninglist
 -- probably don't touch this
 
+-- ###########
+-- # CONFIGS #
+-- ###########
+
+-- Configuration is not required for this file
+
+-- #####################################
+-- #  DON'T TOUCH ANYTHING BELOW HERE  #
+-- # UNLESS YOU KNOW WHAT YOU'RE DOING #
+-- #####################################
+
 ProvisioningListNameToLoad = "ProvisioningList.lua"
 
-
-
-
---########################################
---########################################
---########################################
---########################################
 SNDConfigFolder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
 dofile(SNDConfigFolder..""..ProvisioningListNameToLoad)
 
@@ -53,6 +57,6 @@ end
 
 local combinedItems = combineItems(ProvisioningList)
 
-local outputFilename = "List_to_gather.txt"
+local outputFilename = "Lists/List_to_gather.txt"
 writeToFile(combinedItems, outputFilename)
 

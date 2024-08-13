@@ -2,41 +2,35 @@
 -- This is a fully automated script
 -- You should use the Yes Already plugin to bypass the capped seals warning or it will break the script
 
---###########
---# CONFIGS #
---###########
+-- ###########
+-- # CONFIGS #
+-- ###########
 
--- this toggle allows you to run the script on as many characters as you'd like, it'll rotate between them
+-- Configuration is not required for this file
+-- Edit CharList.lua file for configuring characters
+
+-- #####################################
+-- #  DON'T TOUCH ANYTHING BELOW HERE  #
+-- # UNLESS YOU KNOW WHAT YOU'RE DOING #
+-- #####################################
+
 MULTICHAR = true
 
 CharList = "CharList.lua"
--- you need to use the following format in your CharList.lua
--- i do it this way so you can share the same character list between scripts
--- character_list = {
---     "EXAMPLE EXAMPLE@WORLD",
---     "EXAMPLE EXAMPLE@WORLD",
---     "EXAMPLE EXAMPLE@WORLD",
---     "EXAMPLE EXAMPLE@WORLD",
---     "EXAMPLE EXAMPLE@WORLD"
--- }
 
-
---#####################################
---#  DON'T TOUCH ANYTHING BELOW HERE  #
---# UNLESS YOU KNOW WHAT YOU'RE DOING #
---#####################################
 SNDConfigFolder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
-LoadFunctionsFileLocation = SNDConfigFolder.."vac_functions.lua"
+LoadFunctionsFileLocation = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
 LoadFunctions = loadfile(LoadFunctionsFileLocation)
 LoadFunctions()
 LoadFileCheck()
 
--- load character list from file
-dofile(SNDConfigFolder..""..CharList)
+local char_data = dofile(SNDConfigFolder .. CharList)
 
---##############
---  DOL STUFF
---##############
+local character_list = char_data.character_list
+
+-- #############
+-- # DOL STUFF #
+-- #############
 
 function DOL()
     local home = false
@@ -56,7 +50,7 @@ function DOL()
         if GetCurrentWorld() == GetHomeWorld() then
             if GetCurrentWorld() == 0 and GetHomeWorld() == 0 then
             else
-                local home = true
+                home = true
             end
         end
     until home
@@ -80,9 +74,9 @@ function DOL()
     LogOut()
 end
 
---###############
---# MAIN SCRIPT #
---###############
+-- ###############
+-- # MAIN SCRIPT #
+-- ###############
 
 function Main()
     DOL()
@@ -94,7 +88,7 @@ if MULTICHAR then
             -- continue, no relogging needed
         else
             RelogCharacter(char)
-            Sleep(15.0)
+            Sleep(10.0)
             LoginCheck()
         end
         repeat

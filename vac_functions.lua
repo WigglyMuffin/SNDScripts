@@ -1033,3 +1033,11 @@ function EquipRecommendedGear()
         Sleep(0.1)
     until not IsAddonVisible("RecommendEquip")
 end
+
+-- Usage: WaitUntilObjectExists("First Last") or WaitUntilObjectExists("Aetheryte")
+-- Checks if specified object exists near to your character
+function WaitUntilObjectExists(object_name)
+    repeat
+        Sleep(0.1)
+    until DoesObjectExist(object_name)
+end
