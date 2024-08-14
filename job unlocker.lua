@@ -34,7 +34,7 @@ DO_THE_GOBLET = false                -- The Goblet Housing          Where the He
 DO_MIST = false                      -- Mist Housing                Where the Heart Is (Mist)
 
 
-use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being CharList.lua, false uses the list you put in this file 
+local use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being CharList.lua, false uses the list you put in this file 
 
 -- This is where you put your character list if you choose to not use the external one
 -- If us_external_character_list is set to true then this list is completely skipped
@@ -42,10 +42,9 @@ use_external_character_list = true  -- Options: true = uses the external charact
 -- return_home options: 0 = no, 1 = yes
 -- return_location options: 0 = fc entrance, 1 nearby bell, 2 limsa bell
 -- This is where your alts that need items are listed
-local character_list_options = {
-    {"First Last@Server", 0, 2},
-    {"First Last@Server", 0, 2}
-
+local character_list = {
+    "First Last@Server",
+    "First Last@Server"
 }
 
 -- #####################################
