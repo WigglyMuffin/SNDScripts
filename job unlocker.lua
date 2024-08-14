@@ -16,7 +16,7 @@
 DO_ARCANIST_QUESTS = false
 DO_ARCHER_QUESTS = false
 
-DO_DOL_QUESTS = true
+DO_DOL_QUESTS = false
 
 -- Maelstrom Hunt logs
 DO_MAELSTROM_LOG_1 = false
@@ -131,6 +131,11 @@ local QuestID = {
     {questNumber = 19, id = 65582, questName = "A Matter of Perspective"}                 -- Archer Quest 03
 }
 
+-- #####################################
+-- #  DON'T TOUCH ANYTHING BELOW HERE  #
+-- # UNLESS YOU KNOW WHAT YOU'RE DOING #
+-- #####################################
+
 -- Edit CharList.lua file for configuring characters
 CharList = "CharList.lua"
 
@@ -161,7 +166,7 @@ MULTICHAR = false
 -- limsa arcanists' first quest level 1 "Way of the Arcanist"
 function Arcanist1()
     if IsQuestComplete(QuestID[14].id) then
-        Echo("You have already completed the "' .. QuestID[14].questName .. '" quest.')
+        Echo('You have already completed the "' .. QuestID[14].questName .. '" quest.')
         Echo("Skipping unlock.")
         return
     end
@@ -194,7 +199,7 @@ end
 -- limsa arcanists' second quest level 5 "What's in the Box"
 function Arcanist2()
     if IsQuestComplete(QuestID[15].id) then
-        Echo("You have already completed the "' .. QuestID[15].questName .. '" quest.')
+        Echo('You have already completed the "' .. QuestID[15].questName .. '" quest.')
         Echo("Skipping unlock.")
         return
     end
@@ -262,7 +267,7 @@ end
 -- limsa arcanists' third quest level 10 "Tactical Planning"
 function Arcanist3()
     if IsQuestComplete(QuestID[16].id) then
-        Echo("You have already completed the "' .. QuestID[16].questName .. '" quest.')
+        Echo('You have already completed the "' .. QuestID[16].questName .. '" quest.')
         Echo("Skipping unlock.")
         return
     end
@@ -321,7 +326,7 @@ end
 -- gridania archer first quest level 1 "Way of the Archer"
 function Archer1()
     if IsQuestComplete(QuestID[17].id) then
-        Echo("You have already completed the "' .. QuestID[17].questName .. '" quest.')
+        Echo('You have already completed the "' .. QuestID[17].questName .. '" quest.')
         Echo("Skipping unlock.")
         return
     end
@@ -333,7 +338,7 @@ end
 -- gridania archer second quest level 5 "A Matter of Perspective"
 function Archer2()
     if IsQuestComplete(QuestID[18].id) then
-        Echo("You have already completed the "' .. QuestID[18].questName .. '" quest.')
+        Echo('You have already completed the "' .. QuestID[18].questName .. '" quest.')
         Echo("Skipping unlock.")
         return
     end
@@ -388,7 +393,7 @@ end
 -- gridania archer third quest level 10 "Training with Leih"
 function Archer3()
     if IsQuestComplete(QuestID[19].id) then
-        Echo("You have already completed the "' .. QuestID[19].questName .. '" quest.')
+        Echo('You have already completed the "' .. QuestID[19].questName .. '" quest.')
         Echo("Skipping unlock.")
         return
     end
@@ -498,7 +503,7 @@ end
 -- NEEDS fixing
 function MinerUnlock()
     if IsQuestComplete(QuestID[8].id) then
-        Echo("You have already completed the "' .. QuestID[8].questName .. '" quest.')
+        Echo('You have already completed the "' .. QuestID[8].questName .. '" quest.')
         Echo("Skipping unlock.")
         return
     end
@@ -522,7 +527,7 @@ end
 -- NEEDS fixing
 function BotanistUnlock()
     if IsQuestComplete(QuestID[9].id) then
-        Echo("You have already completed the "' .. QuestID[9].questName .. '" quest.')
+        Echo('You have already completed the "' .. QuestID[9].questName .. '" quest.')
         Echo("Skipping unlock.")
         return
     end
@@ -547,7 +552,7 @@ end
 -- NEEDS fixing
 function FisherUnlock()
     if IsQuestComplete(QuestID[10].id) then
-        Echo("You have already completed the "' .. QuestID[10].questName .. '" quest.')
+        Echo('You have already completed the "' .. QuestID[10].questName .. '" quest.')
         Echo("Skipping unlock.")
         return
     end
@@ -667,7 +672,7 @@ end
 -- needs updating once nodescanner works
 function HalataliUnlock()
     if IsQuestComplete(QuestID[1].id) then
-        Echo("You have already completed the "' .. QuestID[1].questName .. '" quest.')
+        Echo('You have already completed the "' .. QuestID[1].questName .. '" quest.')
         Echo("Skipping unlock.")
         return
     end
@@ -687,7 +692,7 @@ end
 
 function TheSunkenTempleOfQarnUnlock()
     if IsQuestComplete(QuestID[2].id) then
-        Echo("You have already completed the "' .. QuestID[2].questName .. '" quest.')
+        Echo('You have already completed the "' .. QuestID[2].questName .. '" quest.')
         Echo("Skipping unlock.")
         return
     end
@@ -697,7 +702,7 @@ end
 
 function DzemaelDarkholdUnlock()
     if IsQuestComplete(QuestID[3].id) then
-        Echo("You have already completed the "' .. QuestID[3].questName .. '" quest.')
+        Echo('You have already completed the "' .. QuestID[3].questName .. '" quest.')
         Echo("Skipping unlock.")
         return
     end
@@ -707,7 +712,7 @@ end
 
 function TheAurumValeUnlock()
     if IsQuestComplete(QuestID[4].id) then
-        Echo("You have already completed the "' .. QuestID[4].questName .. '" quest.')
+        Echo('You have already completed the "' .. QuestID[4].questName .. '" quest.')
         Echo("Skipping unlock.")
         return
     end
@@ -721,7 +726,7 @@ end
 
 function TheLavenderBedsUnlock()
     if IsQuestComplete(QuestID[5].id) then
-        Echo("You have already completed the "' .. QuestID[5].questName .. '" quest.')
+        Echo('You have already completed the "' .. QuestID[5].questName .. '" quest.')
         Echo("Skipping unlock.")
         return
     end
@@ -731,7 +736,7 @@ end
 
 function TheGobletUnlock()
     if IsQuestComplete(QuestID[6].id) then
-        Echo("You have already completed the "' .. QuestID[6].questName .. '" quest.')
+        Echo('You have already completed the "' .. QuestID[6].questName .. '" quest.')
         Echo("Skipping unlock.")
         return
     end
@@ -741,7 +746,7 @@ end
 
 function MistUnlock()
     if IsQuestComplete(QuestID[7].id) then
-        Echo("You have already completed the "' .. QuestID[7].questName .. '" quest.')
+        Echo('You have already completed the "' .. QuestID[7].questName .. '" quest.')
         Echo("Skipping unlock.")
         return
     end
