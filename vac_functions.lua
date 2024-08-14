@@ -321,10 +321,11 @@ function GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get
     yield("/echo uh GetNodeTextLookupUpdate fucked up")
 end
 
--- Usage: QuestChecker(ArcanistEnemies[3], 50, "_ToDoList", "Slay little ladybugs.")
+-- Usage: QuestChecker(ArcanistEnemies[3], 50, "_ToDoList", "Slay little ladybugs.", extra)
 --
 -- needs a rewrite to deal with hunting logs, for now it works with _ToDoList
-function QuestChecker(target_name, target_distance, get_node_text_type, get_node_text_match)
+-- extra can be a string or a variable it depends on the node text type
+function QuestChecker(target_name, target_distance, get_node_text_type, get_node_text_match, extra)
     local target = target_name
     local enemy_max_dist = target_distance
     local get_node_text_location, get_node_text_location_1, get_node_text_location_2 = NodeScanner(get_node_text_type, get_node_text_match)
@@ -333,7 +334,6 @@ function QuestChecker(target_name, target_distance, get_node_text_type, get_node
         return task or text
     end
     while true do
-        --UiCheck(get_node_text_type)
         updated_node_text = GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get_node_text_location_1, get_node_text_location_2)
         LogInfo("[JU] updated_node_text: "..updated_node_text)
         LogInfo("[JU] Extract: "..extractTask(updated_node_text))
@@ -341,8 +341,6 @@ function QuestChecker(target_name, target_distance, get_node_text_type, get_node
         LogInfo("[JU] last char: "..updated_node_text)
         Sleep(2.0)
         if updated_node_text == get_node_text_match or not string.match(last_char, "%d") then
-            --UiCheck(get_node_text_type, true)
-            LogInfo("GUUUUUUUUUUUH")
             break
         end
         QuestCombat(target_name, enemy_max_dist)
@@ -357,7 +355,7 @@ end
 --
 -- scans provided node type for node that has provided text and returns minimum 2 but up to 3 variables with the location which you can use with GetNodeText()
 --
--- this will fail if the node is too nested and scanning deeper than i am currently is just not a good idea i think, nor do i know how to improve this
+-- this will fail if the node is too nested and scanning deeper than i am currently is just not a good idea i think
 function NodeScanner(get_node_text_type, get_node_text_match)
     node_type_count = tonumber(GetNodeListCount(get_node_text_type))
     local function extractTask(text)
@@ -399,24 +397,61 @@ function NodeScanner(get_node_text_type, get_node_text_match)
     return
 end
 
--- Usage: Uicheck("MonsterNote", true)
+-- Usage: SpecialUiCheck("MonsterNote", true)
 --
--- Closes or opens supported ui's, true is close and false is open. Probably will be changed into individual functions like i've already done for some
-function UiCheck(get_node_text_type, close_ui)
+-- Closes or opens supported ui's, true is close and false or leaving it empty is open. Probably will be changed into individual functions like i've already done for some
+-- or probably will be deprecated
+function SpecialUiCheck(get_node_text_type, close_ui, extra)
     -- hunting log checks
     if get_node_text_type == "MonsterNote" then
         if close_ui() then
-            repeat
-                yield("/huntinglog")
-                Sleep(0.1)
-            until not IsAddonVisible("MonsterNote")
+            OpenGCHuntLog(extra)
         else
-            repeat
-                yield("/huntinglog")
-                Sleep(0.1)
-            until IsAddonVisible("MonsterNote")
+            CloseGCHuntLog()
         end
+    else
+        -- do nothing
     end
+end
+
+-- Usage: OpenHuntLog(class, rank) // OpenHuntLog(9, 1)
+-- the first variable is the class to open, the second is the page to open
+-- defaults to page 1 if page isn't passed  
+-- Valid pages are 0-4, with gc only having 0-2
+--
+-- List of valid classes
+-- Gladiator = 0, Pugilist = 1, Marauder = 2, Lancer = 3
+-- Archer  = 4, Rogue = 5, Conjurer = 6, Thaumaturge = 7, Arcanist 8
+-- grand company = 9
+function OpenHuntLog(class,rank)
+    local defaultrank = 1 --
+    local defaultclass = 9 -- this is the gc log
+    rank = rank or defaultrank
+    class = class or defaultclass
+    -- 1 Maelstrom
+    -- 2 Twin adders
+    -- 3 Immortal flames
+    repeat
+        yield("/huntinglog")
+        Sleep(0.5)
+    until IsAddonVisible("MonsterNote")
+    local gc_id = GetPlayerGC()
+    if class == 9 then
+        yield("/pcall MonsterNote false 3 9 "..tostring(gc_id))
+    else 
+        yield("/pcall MonsterNote false 0 "..tostring(rank))
+    end
+    Sleep(0.2)
+    yield("/pcall MonsterNote false 1 "..rank)
+end
+
+-- Usage: CloseHuntLog()  
+-- Just closes the hunting log window if it's open
+function CloseHuntLog()
+    repeat
+        yield("/huntinglog")
+        Sleep(0.5)
+    until not IsAddonVisible("MonsterNote")
 end
 
 -- Usage: Teleporter("Limsa", "tp") or Teleporter("gc", "li")  
