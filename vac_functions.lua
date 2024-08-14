@@ -974,9 +974,6 @@ function PartyInvite(party_invite_name)
     -- stuff could go here
 end
 
-/search first lise en jp de fr
-
-
 -- Usage: PartyInviteMenu("First", "First Last")
 -- Will invite player to a party through the social menu, and retrying if the invite timeout happens
 -- Can be used from anywhere
