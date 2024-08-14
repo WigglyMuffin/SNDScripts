@@ -33,6 +33,21 @@ DO_THE_LAVENDER_BEDS = false         -- The Lavender Beds Housing   Where the He
 DO_THE_GOBLET = false                -- The Goblet Housing          Where the Heart Is (The Goblet)
 DO_MIST = false                      -- Mist Housing                Where the Heart Is (Mist)
 
+
+use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being CharList.lua, false uses the list you put in this file 
+
+-- This is where you put your character list if you choose to not use the external one
+-- If us_external_character_list is set to true then this list is completely skipped
+-- Usage: First Last@Server, return_home, return_location
+-- return_home options: 0 = no, 1 = yes
+-- return_location options: 0 = fc entrance, 1 nearby bell, 2 limsa bell
+-- This is where your alts that need items are listed
+local character_list_options = {
+    {"First Last@Server", 0, 2},
+    {"First Last@Server", 0, 2}
+
+}
+
 -- #####################################
 -- #  DON'T TOUCH ANYTHING BELOW HERE  #
 -- # UNLESS YOU KNOW WHAT YOU'RE DOING #
@@ -131,8 +146,10 @@ LogInfo("[JU] CharList: " .. CharList)
 LogInfo("[JU] SNDC+Char: " .. SNDConfigFolder .. "" .. CharList)
 LogInfo("[JU] ##############################")
 
-local char_data = dofile(SNDConfigFolder .. CharList)
-local character_list = char_data.character_list
+if use_external_character_list then
+    local char_data = dofile(SNDConfigFolder .. CharList)
+    character_list = char_data.character_list
+end
 
 MULTICHAR = false
 

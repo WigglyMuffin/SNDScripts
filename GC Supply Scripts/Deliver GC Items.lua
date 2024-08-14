@@ -6,7 +6,15 @@
 -- # CONFIGS #
 -- ###########
 
--- Configuration is not required for this file
+local use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being CharList.lua, false uses the list you put in this file 
+
+-- This is where you put your character list if you choose to not use the external one
+-- If us_external_character_list is set to true then this list is completely skipped
+local character_list = {
+    "First Last@Server",
+    "First Last@Server"
+}
+
 -- Edit CharList.lua file for configuring characters
 
 -- #####################################
@@ -27,9 +35,10 @@ LogInfo("[DGCI] SNDConfigFolder: " .. SNDConfigFolder)
 LogInfo("[DGCI] CharList: " .. CharList)
 LogInfo("[DGCI] SNDC+Char: " .. SNDConfigFolder .. "" .. CharList)
 LogInfo("[DGCI] ##############################")
-
-local char_data = dofile(SNDConfigFolder .. CharList)
-local character_list = char_data.character_list
+if use_external_character_list then
+    local char_data = dofile(SNDConfigFolder .. CharList)
+    character_list = char_data.character_list
+end
 
 MULTICHAR = true
 

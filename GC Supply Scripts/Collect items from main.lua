@@ -13,10 +13,23 @@ local destination_house = 0               -- Options: 0 = FC, 1 = Personal, 2 = 
 local destination_type = 0                -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
 local path_home = true                    -- Options: true = Paths home from destination, false = does nothing and logs out
 local do_movement = true                  -- Options: true = Paths to chosen character, false = does nothing and waits for chosen character to come to you
+local use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being CharList.lua, false uses the list you put in this file 
 
 -- Usage: First Last
 -- This is your main character name
 local main_char_name = "First Last"
+
+-- This is where you put your character list if you choose to not use the external one
+-- If us_external_character_list is set to true then this list is completely skipped
+-- Usage: First Last@Server, return_home, return_location
+-- return_home options: 0 = no, 1 = yes
+-- return_location options: 0 = fc entrance, 1 nearby bell, 2 limsa bell
+-- This is where your alts that need items are listed
+local character_list_options = {
+    {"First Last@Server", 0, 2},
+    {"First Last@Server", 0, 2}
+
+}
 
 -- #####################################
 -- #  DON'T TOUCH ANYTHING BELOW HERE  #
@@ -42,8 +55,10 @@ LogInfo("[CIFM] CharList: " .. CharList)
 LogInfo("[CIFM] SNDC+Char: " .. SNDConfigFolder .. "" .. CharList)
 LogInfo("[CIFM] ##############################")
 
-local char_data = dofile(SNDConfigFolder .. CharList)
-local character_list_options = char_data.character_list_options
+if use_external_character_list then
+    local char_data = dofile(SNDConfigFolder .. CharList)
+    character_list_options = char_data.character_list_options
+end
 
 local alt_char_name = "Don't edit"
 
