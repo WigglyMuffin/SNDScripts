@@ -6,21 +6,9 @@
 -- Maelstrom log rank 2 should be used after you have a combat 47 as Aurum Vale requires level 47
 -- The quest unlocks will unlock the optional quests required for each stage of the Maelstrom progression, see the comments below for what they are for
 
---###########
---# CONFIGS #
---###########
-
--- make this a read from JSON or some other type of file
--- this toggle allows you to run the script on as many characters as you'd like, it'll rotate between them
-MULTICHAR = false
-
-local character_list = {
---     "EXAMPLE EXAMPLE@WORLD",
---     "EXAMPLE EXAMPLE@WORLD",
---     "EXAMPLE EXAMPLE@WORLD",
---     "EXAMPLE EXAMPLE@WORLD",
---     "EXAMPLE EXAMPLE@WORLD"
-}
+-- ###########
+-- # CONFIGS #
+-- ###########
 
 -- Only set one of these
 -- Should really change to a DO_JOB_QUESTS = "Arcanist" or something
@@ -45,10 +33,10 @@ DO_THE_LAVENDER_BEDS = false         -- The Lavender Beds Housing   Where the He
 DO_THE_GOBLET = false                -- The Goblet Housing          Where the Heart Is (The Goblet)
 DO_MIST = false                      -- Mist Housing                Where the Heart Is (Mist)
 
---#####################################
---#  DON'T TOUCH ANYTHING BELOW HERE  #
---# UNLESS YOU KNOW WHAT YOU'RE DOING #
---#####################################
+-- #####################################
+-- #  DON'T TOUCH ANYTHING BELOW HERE  #
+-- # UNLESS YOU KNOW WHAT YOU'RE DOING #
+-- #####################################
 
 -- Enemy names for Arcanist quests
 local ArcanistEnemies = {
@@ -100,7 +88,7 @@ local MaelstromEnemiesLog2 = {
     "Amalj'aa Pugilist"    -- maelstrom_20
 }
 
--- usage: QuestID[1].questNumber or QuestID[1].id or QuestID[1].questName
+-- Usage: QuestID[1].questNumber or QuestID[1].id or QuestID[1].questName
 local QuestID = {
     -- Dungeons
     {questNumber = 1,  id = 66233, questName = "Hallo Halatali"},                         -- Halatali
@@ -128,21 +116,36 @@ local QuestID = {
     {questNumber = 19, id = 65582, questName = "A Matter of Perspective"}                 -- Archer Quest 03
 }
 
+-- Edit CharList.lua file for configuring characters
+CharList = "CharList.lua"
+
+SNDConfigFolder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
 LoadFunctionsFileLocation = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
 LoadFunctions = loadfile(LoadFunctionsFileLocation)
 LoadFunctions()
 LoadFileCheck()
+LogInfo("[JU] ##############################")
+LogInfo("[JU] Starting script...")
+LogInfo("[JU] SNDConfigFolder: " .. SNDConfigFolder)
+LogInfo("[JU] CharList: " .. CharList)
+LogInfo("[JU] SNDC+Char: " .. SNDConfigFolder .. "" .. CharList)
+LogInfo("[JU] ##############################")
 
---############
---# ARCANIST #
---############
+local char_data = dofile(SNDConfigFolder .. CharList)
+local character_list = char_data.character_list
+
+MULTICHAR = false
+
+-- ############
+-- # ARCANIST #
+-- ############
 
 -- NEEDS fixing
 -- limsa arcanists' first quest level 1 "Way of the Arcanist"
 function Arcanist1()
     if IsQuestComplete(QuestID[14].id) then
-        yield('/e You have already completed the "' .. QuestID[14].questName .. '" quest.')
-        yield("/e Skipping unlock.")
+        Echo("You have already completed the "' .. QuestID[14].questName .. '" quest.')
+        Echo("Skipping unlock.")
         return
     end
     
@@ -151,26 +154,22 @@ function Arcanist1()
     Teleporter("Arcanist", "li")
     ZoneTransitions()
     Movement(-327.86, 12.89, 9.79)
-    yield("/target Thubyrgeim")
-    -- yield("/pinteract")
-    -- yield("/waitaddon SelectYesno <maxwait.15><wait.9.5>")
-    -- yield("/pcall SelectYesno true 0")
+    Target("Thubyrgeim")
     QuestNPC("SelectYesno", true, 0)
     Movement(-335.29, 11.99, 54.45)
     Teleporter("Tempest", "li")
     ZoneTransitions()
     Movement(14.71, 64.52, 87.16)
-    QuestChecker(ArcanistEnemies[1], 25, "_ToDoList", 13, 3, x, x, x, "Slay wharf rats.")
-    QuestChecker(ArcanistEnemies[3], 25, "_ToDoList", 15, 3, x, x, x, "Slay little ladybugs.")
+    --QuestChecker(ArcanistEnemies[1], 25, "_ToDoList", 13, 3, x, x, x, "Slay wharf rats.")
+    --QuestChecker(ArcanistEnemies[3], 25, "_ToDoList", 15, 3, x, x, x, "Slay little ladybugs.")
     Movement(232.67, 40.64, 57.39)
-    QuestChecker(ArcanistEnemies[2], 25, "_ToDoList", 13, 3, x, x, x, "Report to Thubyrgeim at the Arcanists' Guild.")
-    --yield("/wait 1.6")
+    --QuestChecker(ArcanistEnemies[2], 25, "_ToDoList", 13, 3, x, x, x, "Report to Thubyrgeim at the Arcanists' Guild.")
     Teleporter("Limsa", "tp")
     ZoneTransitions()
     Teleporter("Arcanist", "li")
     ZoneTransitions()
     Movement(-327.86, 12.89, 9.79)
-    yield("/target Thubyrgeim")
+    Target("Thubyrgeim")
     QuestNPC()
 end
 
@@ -178,13 +177,13 @@ end
 -- limsa arcanists' second quest level 5 "What's in the Box"
 function Arcanist2()
     if IsQuestComplete(QuestID[15].id) then
-        yield('/e You have already completed the "' .. QuestID[15].questName .. '" quest.')
-        yield("/e Skipping unlock.")
+        Echo("You have already completed the "' .. QuestID[15].questName .. '" quest.')
+        Echo("Skipping unlock.")
         return
     end
     
     Movement(-327.86, 12.89, 9.79)
-    yield("/target Thubyrgeim")
+    Target("Thubyrgeim")
     QuestNPC()
     Movement(-335.29, 11.99, 54.45)
     Teleporter("Zephyr", "li")
@@ -192,58 +191,53 @@ function Arcanist2()
     Movement(219.94, 66.81, 287.77)
     ZoneTransitions()
     Movement(381.76, 71.93, -256.04)
-    QuestChecker(ArcanistEnemies[4], 25, "_ToDoList", 13, 3, x, x, x, "Slay wild dodos.")
+    --QuestChecker(ArcanistEnemies[4], 25, "_ToDoList", 13, 3, x, x, x, "Slay wild dodos.")
     Movement(418.06, 65.90, -160.37)
-    QuestChecker(ArcanistEnemies[5], 25, "_ToDoList", 13, 3, x, x, x, "Report to Thubyrgeim at the Arcanists' Guild.")
-    --yield("/wait 1.6")
+    --QuestChecker(ArcanistEnemies[5], 25, "_ToDoList", 13, 3, x, x, x, "Report to Thubyrgeim at the Arcanists' Guild.")
     Teleporter("Limsa", "tp")
     ZoneTransitions()
     Teleporter("Arcanist", "li")
     ZoneTransitions()
     Movement(-327.86, 12.89, 9.79)
-    yield("/target Thubyrgeim")
+    Target("Thubyrgeim")
     QuestNPC()
     Movement(-335.29, 11.99, 54.45)
     Teleporter("Zephyr", "li")
     ZoneTransitions()
-    Movement(-0.007, 24.5, 194.68)
-    yield("/target Practice Crates")
+    Movement(-0.01, 24.5, 194.68)
+    Target("Practice Crates") -- Crates with the s
     QuestNPC()
     yield("/rotation auto")
+    
     repeat 
-        yield("/wait 0.1")
+        Sleep(0.1)
     until GetCharacterCondition(26)
+    
     repeat 
-        yield("/wait 0.1")
+        Sleep(0.1)
     until not GetCharacterCondition(26)
+    
     yield("/rotation off")
-    Movement(-0.007, 24.5, 194.68)
-    yield("/wait 1.6")
-    -- probably should make this a function for future stuff...
-    while true do
-        if DoesObjectExist("Practice Crate") then
-            yield("/target Practice Crate")
-            break
-        else
-            yield("/wait 0.1")
-        end
-    end
-    -- yield("/pint")
-    -- yield("/waitaddon CutSceneSelectString <maxwait.30><wait.6>")
-    -- yield("/pcall CutSceneSelectString True 0")
+    Movement(-0.01, 24.5, 194.68)
+    Sleep(1.6)
+    WaitUntilObjectExists("Practice Crate") -- Crate without the s
+    Target("Practice Crates")
     QuestNPC("CutSceneSelectString", true, 0)
+    
     repeat
         yield("/wait 0.1")
     until not GetCharacterCondition(35)
+    
     repeat
         yield("/wait 0.1")
     until IsPlayerAvailable()
+    
     Teleporter("Limsa", "tp")
     ZoneTransitions()
     Teleporter("Arcanist", "li")
     ZoneTransitions()
     Movement(-327.86, 12.89, 9.79)
-    yield("/target Thubyrgeim")
+    Target("Thubyrgeim")
     QuestNPC()
 end
 
@@ -251,69 +245,67 @@ end
 -- limsa arcanists' third quest level 10 "Tactical Planning"
 function Arcanist3()
     if IsQuestComplete(QuestID[16].id) then
-        yield('/e You have already completed the "' .. QuestID[16].questName .. '" quest.')
-        yield("/e Skipping unlock.")
+        Echo("You have already completed the "' .. QuestID[16].questName .. '" quest.')
+        Echo("Skipping unlock.")
         return
     end
     
     Movement(-327.86, 12.89, 9.79)
-    yield("/target Thubyrgeim")
+    Target("Thubyrgeim")
     QuestNPC()
     Teleporter("Swiftperch", "tp")
     ZoneTransitions()
     Movement(674.92, 19.37, 436.02)
-    QuestChecker(ArcanistEnemies[6], 25, "_ToDoList", 13, 3, x, x, x, "Slay roselings.")
-    --yield("/wait 1.6")
+    --QuestChecker(ArcanistEnemies[6], 25, "_ToDoList", 13, 3, x, x, x, "Slay roselings.")
     Teleporter("Moraby", "tp")
     ZoneTransitions()
     Movement(30.84, 46.18, 831.01)
-    QuestChecker(ArcanistEnemies[7], 40, "_ToDoList", 13, 3, x, x, x, "Report to Thubyrgeim at the Arcanists' Guild.")
-    --yield("/wait 1.6")
+    --QuestChecker(ArcanistEnemies[7], 40, "_ToDoList", 13, 3, x, x, x, "Report to Thubyrgeim at the Arcanists' Guild.")
     Teleporter("Limsa", "tp")
     ZoneTransitions()
     Teleporter("Arcanist", "li")
     ZoneTransitions()
     Movement(-327.86, 12.89, 9.79)
-    yield("/target Thubyrgeim")
+    Target("Thubyrgeim")
     QuestNPC()
     Movement(-347.72, -2.37, 12.88)
-    yield("/target K'lyhia")
-    yield("/lockon")
+    Target("K'lyhia")
+    DoTargetLockon()
     QuestNPC()
     Teleporter("Summerford", "tp")
     ZoneTransitions()
     Movement(-103.76, 46.15, -253.17)
-    yield("/target K'lyhia")
-    yield("/pinteract")
+    Target("K'lyhia")
+    Interact()
     yield("/waitaddon SelectYesno <maxwait.10><wait.0.5>")
     yield("/pcall SelectYesno true 0")
     ZoneTransitions()
     yield("/rotation auto")
     QuestInstance()
     ZoneTransitions()
-    yield("/wait 1.6")
+    Sleep(1.6)
     yield("/rotation off")
-    yield("/target K'lyhia")
-    yield("/lockon")
+    Target("K'lyhia")
+    DoTargetLockon()
     QuestNPC()
     Teleporter("Limsa", "tp")
     ZoneTransitions()
     Teleporter("Arcanist", "li")
     ZoneTransitions()
     Movement(-327.86, 12.89, 9.79)
-    yield("/target Thubyrgeim")
+    Target("Thubyrgeim")
     QuestNPC()
 end
 
---##########
---# ARCHER #
---##########
+-- ##########
+-- # ARCHER #
+-- ##########
 
 -- gridania archer first quest level 1 "Way of the Archer"
 function Archer1()
     if IsQuestComplete(QuestID[17].id) then
-        yield('/e You have already completed the "' .. QuestID[17].questName .. '" quest.')
-        yield("/e Skipping unlock.")
+        Echo("You have already completed the "' .. QuestID[17].questName .. '" quest.')
+        Echo("Skipping unlock.")
         return
     end
     
@@ -324,8 +316,8 @@ end
 -- gridania archer second quest level 5 "A Matter of Perspective"
 function Archer2()
     if IsQuestComplete(QuestID[18].id) then
-        yield('/e You have already completed the "' .. QuestID[18].questName .. '" quest.')
-        yield("/e Skipping unlock.")
+        Echo("You have already completed the "' .. QuestID[18].questName .. '" quest.')
+        Echo("Skipping unlock.")
         return
     end
     
@@ -334,33 +326,33 @@ function Archer2()
     Teleporter("Archers' Guild", "li")
     ZoneTransitions()
     Movement(207.80, 0.10, 35.06)
-    yield("/target Luciane")
+    Target("Luciane")
     QuestNPC()
     Movement(187.65, -1.25, 63.54)
-    yield("/target Archery Butt")
-    yield('/ac "Heavy Shot"')
+    Target("Archery Butt")
+    DoAction("Heavy Shot")
     Movement(109.31, 0.12, 59.86)
-    yield("/target Archery Butt")
-    yield('/ac "Heavy Shot"')
+    Target("Archery Butt")
+    DoAction("Heavy Shot")
     Movement(50.87, 0.93, 25.88)
-    yield("/target Archery Butt")
-    yield('/ac "Heavy Shot"')
+    Target("Archery Butt")
+    DoAction("Heavy Shot")
     Movement(51.35, -1.52, 61.06)
-    yield("/target Archery Butt")
-    yield('/ac "Heavy Shot"')
+    Target("Archery Butt")
+    DoAction("Heavy Shot")
     Movement(66.11, -4.96, 91.91)
-    yield("/target Archery Butt")
-    yield('/ac "Heavy Shot"')
+    Target("Archery Butt")
+    DoAction("Heavy Shot")
     Movement(57.20, -8.56, 105.41)
-    yield("/target Archery Butt")
-    yield('/ac "Heavy Shot"')
+    Target("Archery Butt")
+    DoAction("Heavy Shot")
     Movement(34.93, 1.92, 34.09)
     Teleporter("Archers' Guild", "li")
     ZoneTransitions()
     Movement(207.80, 0.10, 35.06)
-    yield("/target Luciane")
+    Target("Luciane")
     QuestNPC()
-    Teleporter("Fallgourd","tp")
+    Teleporter("Fallgourd", "tp")
     ZoneTransitions()
     Movement(307.65, -19.79, 171.31)
     QuestChecker(ArcherEnemies[4], 60, "_ToDoList", "Slay opo-opos.")
@@ -371,7 +363,7 @@ function Archer2()
     Teleporter("Archers' Guild", "li")
     ZoneTransitions()
     Movement(207.80, 0.10, 35.06)
-    yield("/target Luciane")
+    Target("Luciane")
     QuestNPC()
 end
 
@@ -379,74 +371,79 @@ end
 -- gridania archer third quest level 10 "Training with Leih"
 function Archer3()
     if IsQuestComplete(QuestID[19].id) then
-        yield('/e You have already completed the "' .. QuestID[19].questName .. '" quest.')
-        yield("/e Skipping unlock.")
+        Echo("You have already completed the "' .. QuestID[19].questName .. '" quest.')
+        Echo("Skipping unlock.")
         return
     end
     
-    yield("/wait 1")
-    yield("/target Luciane")
+    Sleep(1.0)
+    Target("Luciane")
     QuestNPC()
     Movement(208.91, 0.00, 29.65)
-    yield("/target Leih Aliapoh")
+    Target("Leih Aliapoh")
     QuestNPC()
     Teleporter("Bentbranch", "tp")
     ZoneTransitions()
     --First zone
     Movement(-88.03, -4.58, -73.39)
-    yield("/target Archery Butt")
-    yield('/ac "Heavy Shot"')
-    yield("/wait 0.2")
+    Target("Archery Butt")
+    DoAction("Heavy Shot")
+    Sleep(0.2)
     Movement(-112.35, -3.95, -64.35)
-    yield("/target Archery Butt")
-    yield('/ac "Heavy Shot"')
-    yield("/wait 0.2")
+    Target("Archery Butt")
+    DoAction("Heavy Shot")
+    Sleep(0.2)
     Movement(-135.89, -1.61, -71.04)
-    yield("/target Archery Butt")
-    yield('/ac "Heavy Shot"')
-    yield("/wait 0.2")
+    Target("Archery Butt")
+    DoAction("Heavy Shot")
+    Sleep(0.2)
     --Second zone
     Movement(-146.34, 3.64, -129.18)
-    yield("/target Archery Butt")
-    yield('/ac "Heavy Shot"')
-    yield("/wait 0.2")
+    Target("Archery Butt")
+    DoAction("Heavy Shot")
+    Sleep(0.2)
     Movement(-111.04, 7.75, -164.70)
-    yield("/target Archery Butt")
-    yield('/ac "Heavy Shot"')
-    yield("/wait 0.2")
+    Target("Archery Butt")
+    DoAction("Heavy Shot")
+    Sleep(0.2)
     -- Third zone
     Movement(-80.48, 0.53, -176.20)
-    yield("/target Archery Butt")
-    yield('/ac "Heavy Shot"')
-    yield("/wait 0.2")
+    Target("Archery Butt")
+    DoAction("Heavy Shot")
+    Sleep(0.2)
     -- Report to Leih Aliapoh
     Teleporter("New Gridania", "tp")
     ZoneTransitions()
     Teleporter("Archers' Guild", "li")
     ZoneTransitions()
     Movement(208.91, 0.00, 29.65)
-    yield("/target Leih Aliapoh")
+    Target("Leih Aliapoh")
     QuestNPC()
     -- Kill some enemies
+    -- Probably needs handling or validation adding
     Movement(147.35, -0.24, 84.22)
     Movement(115.20, -0.14, 74.28)
     Movement(94.11, 3.91, 24.27)
     Movement(99.57, 4.77, 17.09)
-    yield("/vnav moveto 101.94 5.31 13.12")
-    yield("/wait 2")
+    Movement(101.94, 5.31, 13.12)
+    Sleep(2.0)
     ZoneTransitions()
     Movement(179.43, -2.16, -242.84)
-    yield("/target Romarique")
-    yield("/wait 0.5")
-    yield("/pint")
+    Target("Romarique")
+    Sleep(0.5)
+    Interact()
+    
     repeat 
-        yield("/wait 0.1")
+        Sleep(0.1)
     until IsAddonReady("SelectIconString")
+    
     yield("/pcall SelectIconString true 0")
-    yield("/wait 1")
+    Sleep(1.0)
+    
     repeat 
-        yield("/wait 0.1")
+        Sleep(0.1)
     until IsAddonReady("SelectYesno")
+    
     yield("/pcall SelectYesno true 0")
     ZoneTransitions()
     Movement(-496.79, 8.99, 89.93)
@@ -459,35 +456,39 @@ function Archer3()
     Teleporter("Archers' Guild", "li")
     ZoneTransitions()
     Movement(208.91, 0.00, 29.65)
-    yield("/target Leih Aliapoh")
+    Target("Leih Aliapoh")
     QuestNPC()
     -- report to Luciane
     Movement(207.80, 0.10, 35.06)
-    yield("/target Luciane")
-    yield("/pint")
+    Target("Luciane")
+    Interact()
+    
     repeat 
-        yield("/wait 0.1")
+        Sleep(0.1)
     until IsAddonReady("SelectYesno")
+    
     yield("/pcall SelectYesno true 0")
+    
     repeat 
-        yield("/wait 0.1")
+        Sleep(0.1)
     until IsPlayerAvailable()
 end
 
---###############
---# JOB UNLOCKS #
---###############
+-- ###############
+-- # JOB UNLOCKS #
+-- ###############
 
 -- NEEDS fixing
 function MinerUnlock()
     if IsQuestComplete(QuestID[8].id) then
-        yield('/e You have already completed the "' .. QuestID[8].questName .. '" quest.')
-        yield("/e Skipping unlock.")
+        Echo("You have already completed the "' .. QuestID[8].questName .. '" quest.')
+        Echo("Skipping unlock.")
         return
     end
     
     Teleporter("Ul'dah", "tp")
     ZoneTransitions()
+    -- Teleporter("Weaver", "li")
     yield("/li weaver")
     ZoneTransitions()
     Movement(1.54, 7.6, 153.55)
@@ -504,13 +505,14 @@ end
 -- NEEDS fixing
 function BotanistUnlock()
     if IsQuestComplete(QuestID[9].id) then
-        yield('/e You have already completed the "' .. QuestID[9].questName .. '" quest.')
-        yield("/e Skipping unlock.")
+        Echo("You have already completed the "' .. QuestID[9].questName .. '" quest.')
+        Echo("Skipping unlock.")
         return
     end
     
     Teleporter("Gridania", "tp")
     ZoneTransitions()
+    -- Teleporter("Mih", "li")
     yield("/li mih")
     ZoneTransitions()
     Movement(-170.48, 10.39, -161.96)
@@ -528,13 +530,14 @@ end
 -- NEEDS fixing
 function FisherUnlock()
     if IsQuestComplete(QuestID[10].id) then
-        yield('/e You have already completed the "' .. QuestID[10].questName .. '" quest.')
-        yield("/e Skipping unlock.")
+        Echo("You have already completed the "' .. QuestID[10].questName .. '" quest.')
+        Echo("Skipping unlock.")
         return
     end
     
     Teleporter("Limsa", "tp")
     ZoneTransitions()
+    -- Teleporter("Fish", "li")
     yield("/li fish")
     ZoneTransitions()
     Movement(-167.30, 4.55, 152.46)
@@ -549,9 +552,9 @@ function FisherUnlock()
     QuestNPC("SelectYesno", true, 0)
 end
 
---################
---# HUNT UNLOCKS #
---################
+-- ################
+-- # HUNT UNLOCKS #
+-- ################
 
 -- NEEDS fixing
 --needs nodescanner adding and the matching text adjusting
@@ -569,7 +572,7 @@ function MaelstromRank1()
     Movement(-169.97, -46.71, 493.46)
     ZoneTransitions()
     Movement(-157.06, 26.13, -410.14)
-    yield("/target Aetheryte")
+    Target("Aetheryte")
     Interact()
     Movement(-32.69, 15.53, -277.9)
     -- QuestChecker(MaelstromEnemiesLog1[8], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
@@ -582,7 +585,7 @@ function MaelstromRank1()
     Movement(389.27, -3.36, -186.45)
     ZoneTransitions()
     Movement(-189.88, 4.43, 294.46)
-    yield("/target Aetheryte")
+    Target("Aetheryte")
     Interact()
     Movement(-135.26, 15.12, -1.46)
     -- QuestChecker(MaelstromEnemiesLog1[5], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
@@ -606,7 +609,7 @@ function MaelstromRank1()
     -- Ixali Straightbeak
     Teleporter("New Gridania", "tp")
     ZoneTransitions()
-    yield("/target Aetheryte")
+    Target("Aetheryte")
     Interact()
     QuestNPCSingle("SelectString", true, "0")
     yield("/pcall TelepotTown true 11 4u <wait.1>")
@@ -622,7 +625,7 @@ function MaelstromRank1()
     -- QuestChecker(MaelstromEnemiesLog1[9], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     -- Ixali Wildtalon
     Movement(-36.96, -39.16, 232.40)
-    yield("/target Aetheryte")
+    Target("Aetheryte")
     Interact()
     Movement(-405, 9.5, 128)
     ZoneTransitions()
@@ -630,7 +633,7 @@ function MaelstromRank1()
     -- QuestChecker(MaelstromEnemiesLog1[10], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(224.32, 301.51, -142.16)
     Movement(229.20, 312.91, -235.02)
-    yield("/target Aetheryte")
+    Target("Aetheryte")
     Interact()
     Teleport("Limsa", "tp")
 end
@@ -639,36 +642,36 @@ function MaelstromRank2()
     -- stuff goes here
 end
 
---###################
---# DUNGEON UNLOCKS #
---###################
+-- ###################
+-- # DUNGEON UNLOCKS #
+-- ###################
 
 -- can also probably use questionable once commands or ipc work better
 -- needs updating once nodescanner works
 function HalataliUnlock()
     if IsQuestComplete(QuestID[1].id) then
-        yield('/e You have already completed the "' .. QuestID[1].questName .. '" quest.')
-        yield("/e Skipping unlock.")
+        Echo("You have already completed the "' .. QuestID[1].questName .. '" quest.')
+        Echo("Skipping unlock.")
         return
     end
 
     Teleporter("Horizon", "tp") -- could also use vesper bay ticket but needs the teleporter function adjusting
     ZoneTransitions()
     Movement(-471.37, 23.01, -355.12)
-    yield("/target Nedrick Ironheart")
+    Target("Nedrick Ironheart")
     QuestNPC()
     -- once accepted quest
     Teleporter("Camp Drybone", "tp")
     ZoneTransitions()
     Movement(-330.92, -22.48, 434.14)
-    yield("/target Fafajoni")
+    Target("Fafajoni")
     QuestNPC()
 end
 
 function TheSunkenTempleOfQarnUnlock()
     if IsQuestComplete(QuestID[2].id) then
-        yield('/e You have already completed the "' .. QuestID[2].questName .. '" quest.')
-        yield("/e Skipping unlock.")
+        Echo("You have already completed the "' .. QuestID[2].questName .. '" quest.')
+        Echo("Skipping unlock.")
         return
     end
     
@@ -677,8 +680,8 @@ end
 
 function DzemaelDarkholdUnlock()
     if IsQuestComplete(QuestID[3].id) then
-        yield('/e You have already completed the "' .. QuestID[3].questName .. '" quest.')
-        yield("/e Skipping unlock.")
+        Echo("You have already completed the "' .. QuestID[3].questName .. '" quest.')
+        Echo("Skipping unlock.")
         return
     end
     
@@ -687,22 +690,22 @@ end
 
 function TheAurumValeUnlock()
     if IsQuestComplete(QuestID[4].id) then
-        yield('/e You have already completed the "' .. QuestID[4].questName .. '" quest.')
-        yield("/e Skipping unlock.")
+        Echo("You have already completed the "' .. QuestID[4].questName .. '" quest.')
+        Echo("Skipping unlock.")
         return
     end
     
     -- stuff goes here
 end
 
---###################
---# HOUSING UNLOCKS #
---###################
+-- ###################
+-- # HOUSING UNLOCKS #
+-- ###################
 
 function TheLavenderBedsUnlock()
     if IsQuestComplete(QuestID[5].id) then
-        yield('/e You have already completed the "' .. QuestID[5].questName .. '" quest.')
-        yield("/e Skipping unlock.")
+        Echo("You have already completed the "' .. QuestID[5].questName .. '" quest.')
+        Echo("Skipping unlock.")
         return
     end
     
@@ -711,8 +714,8 @@ end
 
 function TheGobletUnlock()
     if IsQuestComplete(QuestID[6].id) then
-        yield('/e You have already completed the "' .. QuestID[6].questName .. '" quest.')
-        yield("/e Skipping unlock.")
+        Echo("You have already completed the "' .. QuestID[6].questName .. '" quest.')
+        Echo("Skipping unlock.")
         return
     end
     
@@ -721,17 +724,17 @@ end
 
 function MistUnlock()
     if IsQuestComplete(QuestID[7].id) then
-        yield('/e You have already completed the "' .. QuestID[7].questName .. '" quest.')
-        yield("/e Skipping unlock.")
+        Echo("You have already completed the "' .. QuestID[7].questName .. '" quest.')
+        Echo("Skipping unlock.")
         return
     end
     
     -- stuff goes here
 end
 
---###############
---# MAIN SCRIPT #
---###############
+-- ###############
+-- # MAIN SCRIPT #
+-- ###############
 
 function Main()
     yield("/at e")
@@ -801,7 +804,7 @@ if MULTICHAR then
             -- continue, no relogging needed
         else
             RelogCharacter(char)
-            Sleep(15.0)
+            Sleep(7.5)
             LoginCheck()
         end
         repeat

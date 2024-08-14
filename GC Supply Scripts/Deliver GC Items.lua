@@ -14,8 +14,6 @@
 -- # UNLESS YOU KNOW WHAT YOU'RE DOING #
 -- #####################################
 
-MULTICHAR = true
-
 CharList = "CharList.lua"
 
 SNDConfigFolder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
@@ -23,10 +21,17 @@ LoadFunctionsFileLocation = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfig
 LoadFunctions = loadfile(LoadFunctionsFileLocation)
 LoadFunctions()
 LoadFileCheck()
+LogInfo("[DGCI] ##############################")
+LogInfo("[DGCI] Starting script...")
+LogInfo("[DGCI] SNDConfigFolder: " .. SNDConfigFolder)
+LogInfo("[DGCI] CharList: " .. CharList)
+LogInfo("[DGCI] SNDC+Char: " .. SNDConfigFolder .. "" .. CharList)
+LogInfo("[DGCI] ##############################")
 
 local char_data = dofile(SNDConfigFolder .. CharList)
-
 local character_list = char_data.character_list
+
+MULTICHAR = true
 
 -- #############
 -- # DOL STUFF #

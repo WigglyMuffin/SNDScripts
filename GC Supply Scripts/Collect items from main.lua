@@ -35,10 +35,17 @@ LoadFunctionsFileLocation = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfig
 LoadFunctions = loadfile(LoadFunctionsFileLocation)
 LoadFunctions()
 LoadFileCheck()
-local alt_char_name = "Don't edit"
-local char_data = dofile(SNDConfigFolder .. CharList)
+LogInfo("[CIFM] ##############################")
+LogInfo("[CIFM] Starting script...")
+LogInfo("[CIFM] SNDConfigFolder: " .. SNDConfigFolder)
+LogInfo("[CIFM] CharList: " .. CharList)
+LogInfo("[CIFM] SNDC+Char: " .. SNDConfigFolder .. "" .. CharList)
+LogInfo("[CIFM] ##############################")
 
+local char_data = dofile(SNDConfigFolder .. CharList)
 local character_list_options = char_data.character_list_options
+
+local alt_char_name = "Don't edit"
 
 -- ###############
 -- # MAIN SCRIPT #

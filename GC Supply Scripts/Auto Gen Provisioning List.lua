@@ -13,9 +13,8 @@
 -- # UNLESS YOU KNOW WHAT YOU'RE DOING #
 -- #####################################
 
-ProvisioningListSaveName = "ProvisioningList.lua"
-
 CharList = "CharList.lua"
+ProvisioningListSaveName = "ProvisioningList.lua"
 
 SNDConfigFolder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
 LoadFunctionsFileLocation = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
@@ -25,17 +24,16 @@ LoadFileCheck()
 LogInfo("[APL] ##############################")
 LogInfo("[APL] Starting script...")
 LogInfo("[APL] SNDConfigFolder: " .. SNDConfigFolder)
-LogInfo("[APL] ProvisioningListSaveName: " .. ProvisioningListSaveName)
-LogInfo("[APL] SNDC+PROV: " .. SNDConfigFolder .. "" .. ProvisioningListSaveName)
 LogInfo("[APL] CharList: " .. CharList)
 LogInfo("[APL] SNDC+Char: " .. SNDConfigFolder .. "" .. CharList)
+LogInfo("[APL] ProvisioningListSaveName: " .. ProvisioningListSaveName)
+LogInfo("[APL] SNDC+PROV: " .. SNDConfigFolder .. "" .. ProvisioningListSaveName)
 LogInfo("[APL] ##############################")
 
-local ProvisioningList = {}
-
 local char_data = dofile(SNDConfigFolder .. CharList)
-
 local character_list = char_data.character_list
+
+local ProvisioningList = {}
 
 ItemList = {
     ["Copper Ore"] = {ID = 5106},

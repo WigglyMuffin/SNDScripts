@@ -1201,3 +1201,14 @@ function GetJob()
     return job_names[job_id] or "Unknown job"
 end
 
+-- Usage: DoAction("Heavy Shot")
+-- Uses specified action
+function DoAction(action_name)
+    yield('/ac "' .. action_name .. '"')
+end
+
+-- Usage: DoTargetLockon()
+-- Locks on to current target
+function DoTargetLockon(target_lockon_name)
+    yield("/lockon")
+end
