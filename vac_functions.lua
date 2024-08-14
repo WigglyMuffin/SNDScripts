@@ -725,14 +725,28 @@ function OpenGcSupplyWindow(tab)
         if (tab <= 0 or tab >= 3) then
             Echo("Invalid tab number")
         else
-            yield("/pcall GrandCompanySupplyList true 0 "..tab)
+            yield("/pcall GrandCompanySupplyList true 0 " .. tab)
         end
     elseif not IsAddonVisible("GrandCompanySupplyList") then
-        -- need to add more robust checks so you know which one to target right away, no waiting needed, only supports maelstrom right now
-        Target("Storm Personnel Officer")
-        --Target("Serpent Personnel Officer")
-        --Target("Flame Personnel Officer")
+        -- Mapping for GetPlayerGC()
+        local gc_officer_names = {
+            [1] = "Storm Personnel Officer",
+            [2] = "Serpent Personnel Officer",
+            [3] = "Flame Personnel Officer"
+        }
+        
+        local gc_id = GetPlayerGC()
+        local gc_target = gc_officer_names[gc_id]
+        
+        if gc_target then
+            -- Target the correct GC officer
+            Target(gc_target)
+        else
+            Echo("Unknown Grand Company ID: " .. tostring(gc_id))
+        end
+        
         Interact()
+        
         repeat
             Sleep(0.1)
         until IsAddonReady("SelectString")
@@ -740,9 +754,10 @@ function OpenGcSupplyWindow(tab)
         repeat
             Sleep(0.1)
         until IsAddonReady("GrandCompanySupplyList")
-        yield("/pcall GrandCompanySupplyList true 0 "..tab)
+        yield("/pcall GrandCompanySupplyList true 0 " .. tab)
     end
 end
+
 -- Usage: CloseGcSupplyWindow()  
 -- literally just closes the gc supply window  
 -- probably is due some small consistency changes but it should be fine where it is now
