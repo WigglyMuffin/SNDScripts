@@ -325,9 +325,7 @@ end
 --
 -- needs a rewrite to deal with hunting logs, for now it works with _ToDoList
 -- extra can be a string or a variable it depends on the node text type
-function QuestChecker(target_name, target_distance, get_node_text_type, get_node_text_match, extra)
-    local target = target_name
-    local enemy_max_dist = target_distance
+function QuestChecker(target_name, target_distance, get_node_text_type, get_node_text_match)
     local get_node_text_location, get_node_text_location_1, get_node_text_location_2 = NodeScanner(get_node_text_type, get_node_text_match)
     local function extractTask(text)
         local task = string.match(text, "^(.-)%s%d+/%d+$")
@@ -343,7 +341,7 @@ function QuestChecker(target_name, target_distance, get_node_text_type, get_node
         if updated_node_text == get_node_text_match or not string.match(last_char, "%d") then
             break
         end
-        QuestCombat(target_name, enemy_max_dist)
+        QuestCombat(target_name, target_distance)
     end
     -- checks if player in combat before ending rotation solver
     if not GetCharacterCondition(26) then
@@ -452,6 +450,57 @@ function CloseHuntLog()
         yield("/huntinglog")
         Sleep(0.5)
     until not IsAddonVisible("MonsterNote")
+end
+
+-- Usage: HuntingLogChecker("Amalj'aa Hunter", 40, 9, 1)
+-- Valid pages are 0-4, with gc only having 0-2
+--
+-- List of valid classes
+-- Gladiator = 0, Pugilist = 1, Marauder = 2, Lancer = 3
+-- Archer  = 4, Rogue = 5, Conjurer = 6, Thaumaturge = 7, Arcanist 8
+-- grand company = 9
+function HuntingLogChecker(target_name, target_distance, class, rank)
+    OpenHuntLog(class,rank)
+    local node_text = ""
+    local target_amount_needed_node = 0
+
+    local function CheckTargetAmountNeeded(sub_node)
+        local target_amount = GetNodeText("MonsterNote", 2, sub_node, 3)
+        local first_number = tonumber(target_amount:sub(1, 1))
+        local last_number = tonumber(target_amount:sub(-1))
+        if first_number == last_number then
+            target_amount_needed = 0
+        else
+            target_amount_needed = last_number - first_number
+        end
+    end
+
+    local function FindTargetNode()
+        for sub_node = 5, 60 do
+            Sleep(0.01)
+            node_text = tostring(GetNodeText("MonsterNote", 2, sub_node, 4))
+            if node_text == target_name then
+                return sub_node
+            end
+        end
+        Echo("HuntingLogChecker failed to find "..target_name)
+    end
+
+    FindTargetNode()
+    local target_amount_needed = CheckTargetAmountNeeded(target_amount_needed_node)
+    local finished = false
+    while not finished do 
+        target_amount_needed = CheckTargetAmountNeeded(target_amount_needed_node)
+        if target_amount_needed == 0 then
+            finished = true
+        else
+            QuestCombat(target_name, target_distance)
+        end
+    end
+    if not GetCharacterCondition(26) then
+        yield("/rotation off")
+    end
+    CloseHuntLog()
 end
 
 -- Usage: Teleporter("Limsa", "tp") or Teleporter("gc", "li")  
