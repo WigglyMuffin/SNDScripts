@@ -770,12 +770,11 @@ function CloseGcSupplyWindow()
     end
 end
 
--- Usage: GcProvisioningDeliver(3)
+-- Usage: GcProvisioningDeliver(true,true,false) // GcProvisioningDeliver()
 --
--- Clicks and delivers the top option X amount of times  
--- Works because when you deliver one the others move up
+-- first argument is if you want it to deliver miner items, second is for botanist, third is for fisher
+-- if you do not pass an argument it will default to true
 function GcProvisioningDeliver()
-    local amount = 4
     local function ContainsLetters(input)
         input = tostring(input)
         if input:match("%a") then
@@ -785,17 +784,21 @@ function GcProvisioningDeliver()
         end
     end
     Sleep(1)
-    repeat
-        Sleep(0.1)
-    until IsAddonReady("GrandCompanySupplyList")
-    for i = 1, amount do
-        local RowChecker = GetNodeText("GrandCompanySupplyList", 6, 2, 10)
-        if ContainsLetters(RowChecker) then
-            yield("/pcall GrandCompanySupplyList true 1 0")
+    for i = 4, 2, -1 do
+        repeat
+            Sleep(0.1)
+        until IsAddonReady("GrandCompanySupplyList")
+        local item_name = GetNodeText("GrandCompanySupplyList", 6, i, 10)
+        local item_qty = tonumber(GetNodeText("GrandCompanySupplyList", 6, i, 6))
+        local item_requested_amount = tonumber(GetNodeText("GrandCompanySupplyList", 6, i, 9))
+        if ContainsLetters(item_name) and item_qty >= item_requested_amount then
+            -- continue
         else
-            yield("/echo Nothing left to deliver, moving on")
+            yield("/echo Nothing here, moving on")
             goto skip
         end
+        local row_to_call = i - 2
+        yield("/pcall GrandCompanySupplyList true 1 "..row_to_call)
         local err_counter_request = 0
         local err_counter_supply = 0
         repeat
