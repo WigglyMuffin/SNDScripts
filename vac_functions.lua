@@ -946,8 +946,8 @@ end
 
 -- Usage: PartyInvite("First Last")
 -- Will target and invite player to a party, and retrying if the invite timeout happens
--- Probably think of a way to invite without needing a placeholder aka <t>
-function PartyInvite(player_invite_name)
+-- Can only be used if target is in range
+function PartyInvite(party_invite_name)
     local invite_timeout = 305 -- 300 Seconds is the invite timeout, adding 5 seconds for good measure
     local start_time = os.time() -- Stores the invite time
     
@@ -956,7 +956,7 @@ function PartyInvite(player_invite_name)
             Sleep(0.1)
         until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
         
-        Target(player_invite_name)
+        Target(party_invite_name)
         yield("/invite")
         
         -- Wait for the target player to accept the invite or the timeout to expire
@@ -965,7 +965,60 @@ function PartyInvite(player_invite_name)
             
             -- Check if the invite has expired
             if os.time() - start_time >= invite_timeout then
-                Echo("Invite expired. Reinviting " .. player_invite_name)
+                Echo("Invite expired. Reinviting " .. party_invite_name)
+                start_time = os.time() -- Reset the start time for the new invite
+                break -- Break the loop to resend the invite
+            end
+        end
+    end
+    -- stuff could go here
+end
+
+/search first lise en jp de fr
+
+
+-- Usage: PartyInviteMenu("First", "First Last")
+-- Will invite player to a party through the social menu, and retrying if the invite timeout happens
+-- Can be used from anywhere
+-- Semi broken at the moment
+function PartyInviteMenu(party_invite_menu_first, party_invite_menu_full)
+    local invite_timeout = 305 -- 300 Seconds is the invite timeout, adding 5 seconds for good measure
+    local start_time = os.time() -- Stores the invite time
+    
+    while not IsInParty() do
+        repeat
+            Sleep(0.1)
+        until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
+        
+        repeat
+            yield('/search first "' .. party_invite_menu_first .. '" en jp de fr')
+            Sleep(0.5)
+        until IsAddonVisible("SocialList")
+        
+        -- Probably needs the node scanner here to match the name, otherwise it will invite whoever was previously searched, will probably mess up for multiple matches too
+        
+        repeat
+            yield('/pcall SocialList true 1 0 "' .. party_invite_menu_full .. '"')
+            Sleep(0.5)
+        until IsAddonVisible("ContextMenu")
+        
+        repeat
+            yield("/pcall ContextMenu true 0 3 0")
+            Sleep(0.1)
+        until not IsAddonVisible("ContextMenu")
+        
+        repeat
+            yield("/pcall Social true -1")
+            Sleep(0.1)
+        until not IsAddonVisible("Social")
+        
+        -- Wait for the target player to accept the invite or the timeout to expire
+        while not IsInParty() do
+            Sleep(0.1)
+            
+            -- Check if the invite has expired
+            if os.time() - start_time >= invite_timeout then
+                Echo("Invite expired. Reinviting " .. party_invite_menu_full)
                 start_time = os.time() -- Reset the start time for the new invite
                 break -- Break the loop to resend the invite
             end
