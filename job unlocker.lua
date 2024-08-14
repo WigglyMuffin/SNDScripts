@@ -25,8 +25,8 @@ DO_MAELSTROM_LOG_2 = false
 -- Dungeon unlocks
 DO_HALATALI = false                  -- Maelstrom hunt log 1 hunt enemies       Hallo Halatali
 DO_THE_SUNKEN_TEMPLE_OF_QARN = false -- Maelstrom hunt log 2 hunt enemies       Braving New Depths
-DO_DZEMAEL_DARKHOLD = false          -- Chief Storm Sergeant requirement        Shadows Uncast (Maelstrom)
-DO_THE_AURUM_VALE = false            -- Second Storm Lieutenant requirement     Going for Gold
+DO_DZEMAEL_DARKHOLD = false          -- Requires Storm Sergeant First Class
+DO_THE_AURUM_VALE = false            -- Requires Chief Storm Sergeant
 
 -- Housing unlocks
 DO_THE_LAVENDER_BEDS = false         -- The Lavender Beds Housing   Where the Heart Is (The Lavender Beds)
@@ -35,6 +35,8 @@ DO_MIST = false                      -- Mist Housing                Where the He
 
 
 local use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being CharList.lua, false uses the list you put in this file 
+
+MULTICHAR = false
 
 -- This is where you put your character list if you choose to not use the external one
 -- If us_external_character_list is set to true then this list is completely skipped
@@ -102,32 +104,33 @@ local MaelstromEnemiesLog2 = {
     "Amalj'aa Pugilist"    -- maelstrom_20
 }
 
--- Usage: QuestID[1].questNumber or QuestID[1].id or QuestID[1].questName
-local QuestID = {
+-- Will eventually be made into an excel browser function and put into functions
+-- Only these quests work, all will work once excel browser integration is done
+QuestNameList = {
     -- Dungeons
-    {questNumber = 1,  id = 66233, questName = "Hallo Halatali"},                         -- Halatali
-    {questNumber = 2,  id = 66300, questName = "Braving New Depths"},                     -- The Sunken Temple of Qarn
-    {questNumber = 3,  id = 66664, questName = "Shadows Uncast (Maelstrom)"},             -- Dzemael Darkhold
-    {questNumber = 4,  id = 66667, questName = "Gilding the Bilious (Maelstrom)"},        -- The Aurum Vale
+    ["Hallo Halatali"]                         = {quest_id =  697, quest_key = 66233}, -- Halatali
+    ["Braving New Depths"]                     = {quest_id =  764, quest_key = 66300}, -- The Sunken Temple of Qarn
+    ["Shadows Uncast (Maelstrom)"]             = {quest_id = 1128, quest_key = 66664}, -- Dzemael Darkhold
+    ["Gilding the Bilious (Maelstrom)"]        = {quest_id = 1131, quest_key = 66667}, -- The Aurum Vale
     -- Housing
-    {questNumber = 5,  id = 66748, questName = "Where the Heart Is (The Lavender Beds)"}, -- The Lavender Beds
-    {questNumber = 6,  id = 66749, questName = "Where the Heart Is (The Goblet)"},        -- The Goblet
-    {questNumber = 7,  id = 66750, questName = "Where the Heart Is (Mist)"},              -- Mist
-    -- DoL
-    {questNumber = 8,  id = 66133, questName = "Way of the Miner"},                       -- Miner
-    {questNumber = 9,  id = 65539, questName = "Way of the Botanist"},                    -- Botanist
-    {questNumber = 10, id = 66643, questName = "Way of the Fisher"},                      -- Fisher
+    ["Where the Heart Is (The Lavender Beds)"] = {quest_id = 1212, quest_key = 66748}, -- The Lavender Beds
+    ["Where the Heart Is (The Goblet)"]        = {quest_id = 1213, quest_key = 66749}, -- The Goblet
+    ["Where the Heart Is (Mist)"]              = {quest_id = 1214, quest_key = 66750}, -- Mist
+    -- DoL (Disciples of the Land)
+    ["Way of the Miner"]                       = {quest_id =  597, quest_key = 66133}, -- Miner
+    ["Way of the Botanist"]                    = {quest_id =    3, quest_key = 65539}, -- Botanist
+    ["Way of the Fisher"]                      = {quest_id = 1107, quest_key = 66643}, -- Fisher
     -- Mount
-    {questNumber = 11, id = 66236, questName = "My Little Chocobo (Twin Adder)"},         -- Twin Adder Chocobo
-    {questNumber = 12, id = 66237, questName = "My Little Chocobo (Maelstrom)"},          -- Maelstrom Chocobo
-    {questNumber = 13, id = 66238, questName = "My Little Chocobo (Immortal Flames)"},    -- Immortal Flames Chocobo
+    ["My Little Chocobo (Twin Adder)"]         = {quest_id =  700, quest_key = 66236}, -- Twin Adder Chocobo
+    ["My Little Chocobo (Maelstrom)"]          = {quest_id =  701, quest_key = 66237}, -- Maelstrom Chocobo
+    ["My Little Chocobo (Immortal Flames)"]    = {quest_id =  702, quest_key = 66238}, -- Immortal Flames Chocobo
     -- Job Quests
-    {questNumber = 14, id = 65988, questName = "Way of the Arcanist"},                    -- Arcanist Quest 01
-    {questNumber = 15, id = 65990, questName = "My First Grimoire"},                      -- Arcanist Quest 02
-    {questNumber = 16, id = 65991, questName = "What's in the Box"},                      -- Arcanist Quest 03
-    {questNumber = 17, id = 65667, questName = "Way of the Archer"},                      -- Archer Quest 01
-    {questNumber = 18, id = 65755, questName = "My First Bow"},                           -- Archer Quest 02
-    {questNumber = 19, id = 65582, questName = "A Matter of Perspective"}                 -- Archer Quest 03
+    ["Way of the Arcanist"]                    = {quest_id =  452, quest_key = 65988}, -- Arcanist Quest 01
+    ["My First Grimoire"]                      = {quest_id =  454, quest_key = 65990}, -- Arcanist Quest 02
+    ["What's in the Box"]                      = {quest_id =  455, quest_key = 65991}, -- Arcanist Quest 03
+    ["Way of the Archer"]                      = {quest_id =  131, quest_key = 65667}, -- Archer Quest 01
+    ["My First Bow"]                           = {quest_id =  219, quest_key = 65755}, -- Archer Quest 02
+    ["A Matter of Perspective"]                = {quest_id =   46, quest_key = 65582}  -- Archer Quest 03
 }
 
 -- #####################################
@@ -154,8 +157,6 @@ if use_external_character_list then
     local char_data = dofile(SNDConfigFolder .. CharList)
     character_list = char_data.character_list
 end
-
-MULTICHAR = false
 
 -- ############
 -- # ARCANIST #
@@ -524,6 +525,7 @@ function MinerUnlock()
 end
 
 -- NEEDS fixing
+-- Questionable does not support this yet, using alternative method
 function BotanistUnlock()
     if IsQuestComplete(QuestID[9].id) then
         Echo('You have already completed the "' .. QuestID[9].questName .. '" quest.')
@@ -549,6 +551,7 @@ function BotanistUnlock()
 end
 
 -- NEEDS fixing
+-- Questionable does not support this yet, using alternative method
 function FisherUnlock()
     if IsQuestComplete(QuestID[10].id) then
         Echo('You have already completed the "' .. QuestID[10].questName .. '" quest.')
@@ -670,53 +673,95 @@ end
 -- can also probably use questionable once commands or ipc work better
 -- needs updating once nodescanner works
 function HalataliUnlock()
-    if IsQuestComplete(QuestID[1].id) then
-        Echo('You have already completed the "' .. QuestID[1].questName .. '" quest.')
+    if GetLevel() < 20 then
+        Echo("You do not have the level 20 requirement.")
         Echo("Skipping unlock.")
         return
     end
 
-    Teleporter("Horizon", "tp") -- could also use vesper bay ticket but needs the teleporter function adjusting
-    ZoneTransitions()
-    Movement(-471.37, 23.01, -355.12)
-    Target("Nedrick Ironheart")
-    QuestNPC()
-    -- once accepted quest
-    Teleporter("Camp Drybone", "tp")
-    ZoneTransitions()
-    Movement(-330.92, -22.48, 434.14)
-    Target("Fafajoni")
-    QuestNPC()
+    if not IsQuestDone("Hallo Halatali") then
+        Teleporter("Horizon", "tp") -- could also use vesper bay ticket but needs the teleporter function adjusting
+        ZoneTransitions()
+        Movement(-280.59, 15.26, -316.75) -- It gets stuck otherwise
+        Movement(-308.26, 21.15, -343.13) -- It gets stuck otherwise
+        Movement(-399.64, 23.00, -351.08) -- It gets stuck otherwise
+        DoQuest("Hallo Halatali")
+    else
+        DoQuest("Hallo Halatali") -- This has the echo text inside
+    end
 end
 
+-- Questionable does not support this yet, using alternative method
 function TheSunkenTempleOfQarnUnlock()
-    if IsQuestComplete(QuestID[2].id) then
-        Echo('You have already completed the "' .. QuestID[2].questName .. '" quest.')
+    if GetLevel() < 35 then
+        Echo("You do not have the level 35 requirement.")
         Echo("Skipping unlock.")
         return
     end
-    
-    -- stuff goes here
+
+    if not IsQuestDone("Braving New Depths") then
+        Teleporter("Horizon", "tp") -- could also use vesper bay ticket but needs the teleporter function adjusting
+        ZoneTransitions()
+        Movement(-280.59, 15.26, -316.75) -- It gets stuck otherwise
+        Movement(-308.26, 21.15, -343.13) -- It gets stuck otherwise
+        Movement(-399.64, 23.00, -351.08) -- It gets stuck otherwise
+        Movement(-471.06, 23.01, -354.81)
+        Target("Nedrick Ironheart")
+        Interact()
+        yield("/pcall SelectIconString true 0")
+        Sleep(0.5)
+        yield("/pcall JournalAccept true 0")
+        Sleep(0.5)
+        Teleporter("Little Ala Mhigo", "tp")
+        Movement(184.26, 13.79, -444.12)
+        Target("Bibimu")
+        Interact()
+        --DoQuest("Braving New Depths")
+    else
+        DoQuest("Braving New Depths") -- This has the echo text inside
+    end
 end
 
+-- Requires Storm Sergeant First Class
 function DzemaelDarkholdUnlock()
-    if IsQuestComplete(QuestID[3].id) then
-        Echo('You have already completed the "' .. QuestID[3].questName .. '" quest.')
+    if GetMaelstromGCRank() < 7 or GetLevel() < 44 then
+        Echo("You do not have the Storm Sergeant First Class rank or the level 44 requirements.")
         Echo("Skipping unlock.")
         return
     end
     
-    -- stuff goes here
+    if not IsQuestDone("Shadows Uncast (Maelstrom)") then
+        Teleporter("Limsa", "tp")
+        ZoneTransitions()
+        --Teleporter("Aftcastle", "li")
+        yield("/li aftcastle")
+        ZoneTransitions()
+        DoQuest("Shadows Uncast (Maelstrom)")
+    else
+        DoQuest("Shadows Uncast (Maelstrom)") -- This has the echo text inside
+    end
 end
 
+-- Questionable does not support this yet, using alternative method
+-- Requires Chief Storm Sergeant
+-- NEEDS doing
 function TheAurumValeUnlock()
-    if IsQuestComplete(QuestID[4].id) then
-        Echo('You have already completed the "' .. QuestID[4].questName .. '" quest.')
+    if GetMaelstromGCRank() < 8 or GetLevel() < 47 then
+        Echo("You do not have the Chief Storm Sergeant rank or the level 47 requirements.")
         Echo("Skipping unlock.")
         return
     end
-    
-    -- stuff goes here
+
+    if not IsQuestDone("Gilding the Bilious (Maelstrom)") then
+        Teleporter("Limsa", "tp")
+        ZoneTransitions()
+        --Teleporter("Aftcastle", "li")
+        yield("/li aftcastle")
+        ZoneTransitions()
+        DoQuest("Gilding the Bilious (Maelstrom)")
+    else
+        DoQuest("Gilding the Bilious (Maelstrom)") -- This has the echo text inside
+    end
 end
 
 -- ###################
@@ -724,32 +769,14 @@ end
 -- ###################
 
 function TheLavenderBedsUnlock()
-    if IsQuestComplete(QuestID[5].id) then
-        Echo('You have already completed the "' .. QuestID[5].questName .. '" quest.')
-        Echo("Skipping unlock.")
-        return
-    end
-    
     -- stuff goes here
 end
 
 function TheGobletUnlock()
-    if IsQuestComplete(QuestID[6].id) then
-        Echo('You have already completed the "' .. QuestID[6].questName .. '" quest.')
-        Echo("Skipping unlock.")
-        return
-    end
-    
     -- stuff goes here
 end
 
 function MistUnlock()
-    if IsQuestComplete(QuestID[7].id) then
-        Echo('You have already completed the "' .. QuestID[7].questName .. '" quest.')
-        Echo("Skipping unlock.")
-        return
-    end
-    
     -- stuff goes here
 end
 

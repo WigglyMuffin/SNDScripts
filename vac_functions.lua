@@ -1244,3 +1244,48 @@ end
 function DoTargetLockon(target_lockon_name)
     yield("/lockon")
 end
+
+-- Usage: IsQuestDone("Hallo Halatali")
+-- Checks if you have completed the specified quest
+function IsQuestDone(quest_done_name)
+    -- Look up the quest by name
+    local quest = QuestNameList[quest_done_name]
+
+    -- Check if the quest exists
+    if quest then
+        return IsQuestComplete(quest.quest_key)
+    else
+        return false
+    end
+end
+
+-- Usage: DoQuest("Hallo Halatali")
+-- Checks if you have completed the specified quest and starts if you have not
+function DoQuest(quest_do_name)
+    -- Look up the quest by name
+    local quest = QuestNameList[quest_do_name]
+
+    -- Check if the quest exists
+    if quest then
+        -- Check if the quest is already completed
+        if IsQuestComplete(quest.quest_key) then
+            Echo('You have already completed the "' .. quest_do_name .. '" quest.')
+            Echo("Skipping unlock.")
+            return
+        end
+        
+        yield("/qst next " .. quest.quest_id)
+        Sleep(0.5)
+        yield("/qst start")
+    else
+        Echo('Quest "' .. quest_do_name .. '" not found.')
+    end
+end
+
+-- Usage: IsPlayerLowerThanLevel(100)
+-- Checks if player level lower than specified amount, returns true if so
+function IsPlayerLowerThanLevel(player_level)
+    if GetLevel() < player_level then
+        return true
+    end
+end
