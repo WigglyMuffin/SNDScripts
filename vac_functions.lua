@@ -1125,3 +1125,79 @@ function WaitUntilObjectExists(object_name)
         Sleep(0.1)
     until DoesObjectExist(object_name)
 end
+
+-- Usage: GetRandomNumber(1.5, 3.5) or GetRandomNumber(2, 4)
+-- Allows for variance in values such as differing Sleep() wait times
+function GetRandomNumber(min, max)
+    -- Reseed the random number
+    math.randomseed(os.time() + os.clock() * 100000)
+    
+    -- Generate and return a random number from the min and max values
+    return min + (max - min) * math.random()
+end
+
+-- Usage: GetPlayerPos()
+-- Finds and returns player x, y, z pos
+function GetPlayerPos()
+    -- Find and format player pos
+    local x, y, z = GetPlayerRawXPos(), GetPlayerRawYPos(), GetPlayerRawZPos()
+    local pos = string.format("%.2f, %.2f, %.2f", x, y, z)
+    
+    return pos
+end
+
+-- Usage: GetJob()
+-- Returns the current player job abbreviation
+function GetJob()
+    -- Mapping for GetClassJobId()
+    local job_names = {
+        [0]  = "ADV", -- Adventurer
+        [1]  = "GLA", -- Gladiator
+        [2]  = "PGL", -- Pugilist
+        [3]  = "MRD", -- Marauder
+        [4]  = "LNC", -- Lancer
+        [5]  = "ARC", -- Archer
+        [6]  = "CNJ", -- Conjurer
+        [7]  = "THM", -- Thaumaturge
+        [8]  = "CRP", -- Carpenter
+        [9]  = "BSM", -- Blacksmith
+        [10] = "ARM", -- Armorer
+        [11] = "GSM", -- Goldsmith
+        [12] = "LTW", -- Leatherworker
+        [13] = "WVR", -- Weaver
+        [14] = "ALC", -- Alchemist
+        [15] = "CUL", -- Culinarian
+        [16] = "MIN", -- Miner
+        [17] = "BTN", -- Botanist
+        [18] = "FSH", -- Fisher
+        [19] = "PLD", -- Paladin
+        [20] = "MNK", -- Monk
+        [21] = "WAR", -- Warrior
+        [22] = "DRG", -- Dragoon
+        [23] = "BRD", -- Bard
+        [24] = "WHM", -- White Mage
+        [25] = "BLM", -- Black Mage
+        [26] = "ACN", -- Arcanist
+        [27] = "SMN", -- Summoner
+        [28] = "SCH", -- Scholar
+        [29] = "ROG", -- Rogue
+        [30] = "NIN", -- Ninja
+        [31] = "MCH", -- Machinist
+        [32] = "DRK", -- Dark Knight
+        [33] = "AST", -- Astrologian
+        [34] = "SAM", -- Samurai
+        [35] = "RDM", -- Red Mage
+        [36] = "BLU", -- Blue Mage
+        [37] = "GNB", -- Gunbreaker
+        [38] = "DNC", -- Dancer
+        [39] = "RPR", -- Reaper
+        [40] = "SGE", -- Sage
+        [41] = "VPR", -- Viper
+        [42] = "PCT"  -- Pictomancer
+    }
+    
+    -- Find and return job ID
+    local job_id = GetClassJobId()
+    return job_names[job_id] or "Unknown job"
+end
+
