@@ -728,11 +728,10 @@ function OpenGcSupplyWindow(tab)
             yield("/pcall GrandCompanySupplyList true 0 "..tab)
         end
     elseif not IsAddonVisible("GrandCompanySupplyList") then
-        -- attempt to target any of the 3 gc Officers
-        -- could add more robust checks so you know which one to target right away, no waiting needed
+        -- need to add more robust checks so you know which one to target right away, no waiting needed, only supports maelstrom right now
         Target("Storm Personnel Officer")
-        Target("Serpent Personnel Officer")
-        Target("Flame Personnel Officer")
+        --Target("Serpent Personnel Officer")
+        --Target("Flame Personnel Officer")
         Interact()
         repeat
             Sleep(0.1)
@@ -770,10 +769,9 @@ function CloseGcSupplyWindow()
     end
 end
 
--- Usage: GcProvisioningDeliver(true,true,false) // GcProvisioningDeliver()
+-- Usage: GcProvisioningDeliver()
 --
--- first argument is if you want it to deliver miner items, second is for botanist, third is for fisher
--- if you do not pass an argument it will default to true
+-- Attempts to deliver everything under the provisioning window, skipping over what it can't
 function GcProvisioningDeliver()
     local function ContainsLetters(input)
         input = tostring(input)
@@ -806,7 +804,7 @@ function GcProvisioningDeliver()
             Sleep(0.1)
         until IsAddonReady("GrandCompanySupplyReward") or err_counter_request >= 50
         if err_counter_request >= 50 then
-            Echo("Something went wrong or request window was auto skipped, continuing")
+            Echo("Something might have gone wrong")
             err_counter_request = 0
         else 
             yield("/pcall GrandCompanySupplyReward true 0")
