@@ -57,6 +57,10 @@ end
 -- Checks player against zone, and optionally teleports if player not in zone
 -- ZoneTransitions() not required
 function ZoneCheck(zone_id, location, tp_kind)
+    repeat
+        Sleep(0.1)
+    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
+
     if GetZoneID() ~= zone_id then
         if location and tp_kind then
             Teleporter(location, tp_kind)
@@ -1332,7 +1336,9 @@ function DoQuest(quest_do_name)
     -- Wait until the quest is complete, with condition checking since some NPCs talk too long
     repeat
         Sleep(0.1)
-    until IsQuestComplete(quest.quest_key) and IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
+    until IsQuestComplete(quest.quest_key) and IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32)
+    
+    Sleep(0.5)
     
     return true
 end
