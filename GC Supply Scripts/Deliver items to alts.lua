@@ -47,8 +47,8 @@ for index, item in ipairs(ProvisioningList) do
         goto skip
     end
     Echo("############################")
-    Echo("Waiting for " .. item["CharName"])
-    Echo("and preparing dropbox items")
+    Echo("Preparing dropbox items while")
+    Echo("waiting for " .. item["CharName"])
     Echo("############################")
     Sleep(1.0)
     if item["Row1ItemName"] then
