@@ -10,6 +10,9 @@
 -- # CONFIGS #
 -- ###########
 
+-- We definitely need some kind of config saving functionality, this currently logs into everything even if the character has completed the stuff
+-- Loading a config would mean only the chars we need to do are actually done than wasting time
+
 -- Only set one of these
 -- Should really change to a DO_JOB_QUESTS = "Arcanist" or something
 --DO_JOB_QUESTS = "Arcanist"
@@ -23,8 +26,8 @@ DO_MAELSTROM_LOG_1 = false
 DO_MAELSTROM_LOG_2 = false
 
 -- Dungeon unlocks
-DO_HALATALI = false                       -- Maelstrom hunt log 1 hunt enemies       Hallo Halatali
-DO_THE_SUNKEN_TEMPLE_OF_QARN = false      -- Maelstrom hunt log 2 hunt enemies       Braving New Depths
+DO_HALATALI = true                       -- Maelstrom hunt log 1 hunt enemies       Hallo Halatali
+DO_THE_SUNKEN_TEMPLE_OF_QARN = true      -- Maelstrom hunt log 2 hunt enemies       Braving New Depths
 DO_DZEMAEL_DARKHOLD = false               -- Requires Storm Sergeant First Class, and for you to complete the dungeon for quest completion
 DO_THE_AURUM_VALE = false                 -- Requires Chief Storm Sergeant, and for you to complete the dungeon for quest completion
 
@@ -683,6 +686,7 @@ function HalataliUnlock()
         Movement(-280.59, 15.26, -316.75) -- It gets stuck otherwise
         Movement(-308.26, 21.15, -343.13) -- It gets stuck otherwise
         Movement(-399.64, 23.00, -351.08) -- It gets stuck otherwise
+        Movement(-471.06, 23.01, -354.81)
         DoQuest("Hallo Halatali")
     else
         DoQuest("Hallo Halatali") -- This has the echo text inside
@@ -862,6 +866,7 @@ if MULTICHAR then
         if GetCharacterName(true) == char then
             -- continue, no relogging needed
         else
+            ZoneCheck(129, "Limsa", "tp")
             RelogCharacter(char)
             Sleep(7.5)
             LoginCheck()
