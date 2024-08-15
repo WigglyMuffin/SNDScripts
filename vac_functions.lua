@@ -491,10 +491,10 @@ function HuntingLogChecker(target_name, target_distance, class, rank)
         Echo("HuntingLogChecker failed to find "..target_name)
         failed = true
     end
+    FindTargetNode()
     if failed then
         goto skip
     end
-    FindTargetNode()
     local target_amount_needed = CheckTargetAmountNeeded(target_amount_needed_node)
     local finished = false
     while not finished do 
