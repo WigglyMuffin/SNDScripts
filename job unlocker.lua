@@ -706,9 +706,18 @@ function TheSunkenTempleOfQarnUnlock()
         Movement(-471.06, 23.01, -354.81)
         Target("Nedrick Ironheart")
         Interact()
-        yield("/pcall SelectIconString true 0")
+        
+        repeat
+            yield("/pcall SelectIconString true 0")
+            Sleep(0.1)
+        until IsAddonVisible("SelectIconString")
+        
         Sleep(0.5)
-        yield("/pcall JournalAccept true 0")
+        
+        repeat
+            yield("/pcall JournalAccept true 0")
+        until not IsAddonVisible("SelectIconString")
+        
         Sleep(0.5)
         Teleporter("Little Ala Mhigo", "tp")
         Movement(184.26, 13.79, -444.12)
