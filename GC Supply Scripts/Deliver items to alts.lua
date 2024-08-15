@@ -99,9 +99,7 @@ for index, item in ipairs(ProvisioningList) do
         Sleep(2.0)
     end
     Echo("############################")
-    Echo("Trading done")
-    Echo("############################")
-    Echo("############################")
+    Echo("Trading done!")
     Echo("Cleaning up Dropbox")
     Echo("############################")
     DropboxSetItemQuantity(1, false, 0)
@@ -120,7 +118,7 @@ for index, item in ipairs(ProvisioningList) do
     Sleep(1.0)
     DropboxSetItemQuantity(1, false, 0)
     Echo("############################")
-    Echo("Done!" .. index .. "/" .. #ProvisioningList .. " characters processed.")
+    Echo("Done! " .. index .. "/" .. #ProvisioningList .. " characters processed")
     Echo("############################")
     Sleep(5.0)
     ::skip::
