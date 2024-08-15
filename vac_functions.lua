@@ -59,7 +59,7 @@ end
 function ZoneCheck(zone_id, location, tp_kind)
     repeat
         Sleep(0.1)
-    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
+    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32)
 
     if GetZoneID() ~= zone_id then
         if location and tp_kind then
@@ -521,7 +521,7 @@ function Teleporter(location, tp_kind) -- Teleporter handler
     -- Initial check to ensure player can teleport
     repeat
         Sleep(0.1)
-    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) -- 26 is combat
+    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32) -- 26 is combat, 32 is quest event
     
     -- Try teleport, retry until max_retries is reached
     while retries < max_retries do

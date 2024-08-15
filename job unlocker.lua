@@ -730,6 +730,7 @@ function TheSunkenTempleOfQarnUnlock()
         
         repeat
             yield("/pcall JournalResult true 0 0")
+            Sleep(0.1)
         until IsQuestComplete(66300)
         
         --DoQuest("Braving New Depths")
