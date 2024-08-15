@@ -464,6 +464,7 @@ function HuntingLogChecker(target_name, target_distance, class, rank)
     local node_text = ""
     local target_amount_needed_node = 0
 
+    local failed = false
     local function CheckTargetAmountNeeded(sub_node)
         local target_amount = GetNodeText("MonsterNote", 2, sub_node, 3)
         local first_number = tonumber(target_amount:sub(1, 1))
@@ -484,8 +485,11 @@ function HuntingLogChecker(target_name, target_distance, class, rank)
             end
         end
         Echo("HuntingLogChecker failed to find "..target_name)
+        failed = true
     end
-
+    if failed then
+        goto skip
+    end
     FindTargetNode()
     local target_amount_needed = CheckTargetAmountNeeded(target_amount_needed_node)
     local finished = false
@@ -500,6 +504,7 @@ function HuntingLogChecker(target_name, target_distance, class, rank)
     if not GetCharacterCondition(26) then
         yield("/rotation off")
     end
+    ::skip::
     CloseHuntLog()
 end
 
