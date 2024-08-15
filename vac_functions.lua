@@ -193,8 +193,8 @@ function QuestCombat(target, enemy_max_dist)
         if GetTargetHP() > 0 and dist_to_enemy <= enemy_max_dist then
             if GetCharacterCondition(4) then
                 repeat
-                    Sleep(0.1)
                     yield("/mount")
+                    Sleep(0.1)
                 until not GetCharacterCondition(4)
             end
             Sleep(1)
@@ -464,11 +464,49 @@ function CloseHuntLog()
     until not IsAddonVisible("MonsterNote")
 end
 
--- Usage: HuntingLogChecker("Amalj'aa Hunter", 40, 9, 0)
+-- Usage: HuntLogCheck("Amalj'aa Hunter", 40, 9, 0)
+-- Valid classes: 0 = GLA, 1 = PGL, 2 = MRD, 3 = LNC, 4 = ARC, 5 = ROG, 6 = CNJ, 7 = THM, 8 = ACN, 9 = GC
+-- Valid ranks/pages: 0-4 for jobs, 0-2 for GC
+-- Opens and checks current progress and returns a true if finished or a false if not
+function HuntLogCheck(class,rank)
+    local node_text = ""
+    local function CheckTargetAmountNeeded(sub_node)
+        local target_amount = tostring(GetNodeText("MonsterNote", 2, sub_node, 3))
+        local first_number = tonumber(target_amount:sub(1, 1))
+        local last_number = tonumber(target_amount:sub(-1))
+        if first_number == last_number then
+            target_amount_needed = 0
+        else
+            target_amount_needed = last_number - first_number
+        end
+    end
+    local function FindTargetNode()
+        for sub_node = 5, 60 do
+            Sleep(0.001)
+            node_text = tostring(GetNodeText("MonsterNote", 2, sub_node, 4))
+            if node_text == target_name then
+                return sub_node
+            end
+        end
+        Echo("HuntingLogChecker failed to find "..target_name)
+    end
+    local target_amount_needed_node = FindTargetNode()
+    if not target_amount_needed_node then
+        Echo("Something went wrong, target node not found")
+    else
+        local target_amount_needed = CheckTargetAmountNeeded(target_amount_needed_node)
+        if target_amount_needed == 0 then
+            return true
+        else
+            return false
+        end
+    end
+end
+-- Usage: DoHuntLog("Amalj'aa Hunter", 40, 9, 0)
 -- Valid classes: 0 = GLA, 1 = PGL, 2 = MRD, 3 = LNC, 4 = ARC, 5 = ROG, 6 = CNJ, 7 = THM, 8 = ACN, 9 = GC
 -- Valid ranks/pages: 0-4 for jobs, 0-2 for GC
 -- Opens and checks current progress of Hunting Log for automated killing
-function HuntingLogChecker(target_name, target_distance, class, rank)
+function DoHuntLog(target_name, target_distance, class, rank)
     OpenHuntLog(class,rank)
     local node_text = ""
     local target_amount_needed_node = 0
@@ -485,10 +523,9 @@ function HuntingLogChecker(target_name, target_distance, class, rank)
             target_amount_needed = last_number - first_number
         end
     end
-
     local function FindTargetNode()
         for sub_node = 5, 60 do
-            Sleep(0.01)
+            Sleep(0.001)
             node_text = tostring(GetNodeText("MonsterNote", 2, sub_node, 4))
             if node_text == target_name then
                 return sub_node
@@ -497,11 +534,15 @@ function HuntingLogChecker(target_name, target_distance, class, rank)
         Echo("HuntingLogChecker failed to find "..target_name)
         failed = true
     end
-    FindTargetNode()
+    target_amount_needed_node = FindTargetNode()
     if failed then
         goto skip
     end
     while not finished do 
+        if not IsAddonVisible("MonsterNote") then
+            OpenHuntLog(class,rank)
+        else
+        end
         local target_amount_needed = CheckTargetAmountNeeded(target_amount_needed_node)
         if target_amount_needed == 0 then
             finished = true
@@ -515,6 +556,7 @@ function HuntingLogChecker(target_name, target_distance, class, rank)
     ::skip::
     CloseHuntLog()
 end
+
 
 -- Usage: Teleporter("Limsa", "tp") or Teleporter("gc", "li")  
 -- add support for item tp Teleporter("Vesper", "item")  
