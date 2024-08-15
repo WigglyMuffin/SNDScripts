@@ -194,7 +194,7 @@ function QuestCombat(target, enemy_max_dist)
             if GetCharacterCondition(4) then
                 repeat
                     yield("/mount")
-                not GetCharacterCondition(4)
+                until not GetCharacterCondition(4)
             end
             repeat
                 yield("/rotation auto")
