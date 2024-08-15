@@ -191,21 +191,31 @@ function QuestCombat(target, enemy_max_dist)
         local dist_to_enemy = GetDistanceToTarget()
 
         if GetTargetHP() > 0 and dist_to_enemy <= enemy_max_dist then
+            if GetCharacterCondition(4) then
+                repeat
+                    yield("/mount")
+                not GetCharacterCondition(4)
+            end
             repeat
                 yield("/rotation auto")
                 yield("/vnavmesh movetarget")
                 yield('/ac "Auto-attack"')
                 Sleep(0.2)
             until GetDistanceToTarget() <= 3
-            yield('/ac "Auto-attack"')
             yield("/vnavmesh stop")
         end
     end
+    if not GetCharacterCondition(26) then
+        repeat
+            yield('/ac "Auto-attack"')
+            Sleep(0.1)
+        until GetCharacterCondition(26)
+    end
+    
     repeat
-        yield('/ac "Auto-attack"')
         Sleep(0.1)
     until GetTargetHP() == 0
-        Sleep(0.5)
+    Sleep(0.5)
 end
 
 -- Usage: QuestInstance()
