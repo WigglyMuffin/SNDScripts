@@ -706,23 +706,29 @@ function TheSunkenTempleOfQarnUnlock()
         Movement(-471.06, 23.01, -354.81)
         Target("Nedrick Ironheart")
         Interact()
+        Sleep(0.5)
         
         repeat
             yield("/pcall SelectIconString true 0")
             Sleep(0.1)
-        until IsAddonVisible("SelectIconString")
+        until IsAddonVisible("JournalAccept")
         
-        Sleep(0.5)
+        Sleep(1.5)
         
         repeat
-            yield("/pcall JournalAccept true 0")
-        until not IsAddonVisible("SelectIconString")
+            yield("/pcall JournalAccept true 3 764")
+        until IsQuestAccepted(66300)
         
         Sleep(0.5)
         Teleporter("Little Ala Mhigo", "tp")
         Movement(184.26, 13.79, -444.12)
         Target("Bibimu")
         Interact()
+        
+        repeat
+            yield("/pcall JournalResult true 0 0")
+        until IsQuestComplete(66300)
+        
         --DoQuest("Braving New Depths")
     else
         DoQuest("Braving New Depths") -- This has the echo text inside

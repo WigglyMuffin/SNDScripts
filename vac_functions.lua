@@ -632,7 +632,7 @@ function LogOut()
         Sleep(0.1)
     until IsAddonVisible("SelectYesno")
     repeat
-        yield("/pcall SelectYesno true 0")
+        yield("/pcall SelectYesno true 4")
         Sleep(0.1)
     until not IsAddonVisible("SelectYesno")
 end
@@ -1319,12 +1319,13 @@ function DoQuest(quest_do_name)
         -- Check if the quest is already completed
         if IsQuestComplete(quest.quest_key) then
             Echo('You have already completed the "' .. quest_do_name .. '" quest.')
-            return
+            return true
+        else
+            yield("/qst next " .. quest.quest_id)
+            Sleep(0.5)
+            yield("/qst start")
         end
         
-        yield("/qst next " .. quest.quest_id)
-        Sleep(0.5)
-        yield("/qst start")
     else
         Echo('Quest "' .. quest_do_name .. '" not found.')
     end
