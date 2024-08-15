@@ -47,8 +47,8 @@ for index, item in ipairs(ProvisioningList) do
         goto skip
     end
     Echo("############################")
-    Echo("Waiting for " .. item["CharName"])
-    Echo("and preparing dropbox items")
+    Echo("Preparing dropbox items while")
+    Echo("waiting for " .. item["CharName"])
     Echo("############################")
     Sleep(1.0)
     if item["Row1ItemName"] then
@@ -74,9 +74,8 @@ for index, item in ipairs(ProvisioningList) do
     Sleep(1.0)
     WaitUntilObjectExists(tostring(item["CharName"]))
     Target(item["CharName"])
-    PartyAccept()
-    
     repeat 
+        PartyAccept()
         Sleep(0.1)
     until IsInParty()
 
@@ -100,9 +99,7 @@ for index, item in ipairs(ProvisioningList) do
         Sleep(2.0)
     end
     Echo("############################")
-    Echo("Trading done")
-    Echo("############################")
-    Echo("############################")
+    Echo("Trading done!")
     Echo("Cleaning up Dropbox")
     Echo("############################")
     DropboxSetItemQuantity(1, false, 0)
@@ -121,7 +118,7 @@ for index, item in ipairs(ProvisioningList) do
     Sleep(1.0)
     DropboxSetItemQuantity(1, false, 0)
     Echo("############################")
-    Echo("Done!" .. index .. "/" .. #ProvisioningList .. " characters processed.")
+    Echo("Done! " .. index .. "/" .. #ProvisioningList .. " characters processed")
     Echo("############################")
     Sleep(5.0)
     ::skip::
