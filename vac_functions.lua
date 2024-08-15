@@ -1303,8 +1303,6 @@ function IsQuestDone(quest_done_name)
     -- Check if the quest exists
     if quest then
         return IsQuestComplete(quest.quest_key)
-    else
-        return false
     end
 end
 
@@ -1313,22 +1311,30 @@ end
 function DoQuest(quest_do_name)
     -- Look up the quest by name
     local quest = QuestNameList[quest_do_name]
-
-    -- Check if the quest exists
-    if quest then
-        -- Check if the quest is already completed
-        if IsQuestComplete(quest.quest_key) then
-            Echo('You have already completed the "' .. quest_do_name .. '" quest.')
-            return true
-        else
-            yield("/qst next " .. quest.quest_id)
-            Sleep(0.5)
-            yield("/qst start")
-        end
-        
-    else
+    
+    -- If the quest not found, echo and return false
+    if not quest then
         Echo('Quest "' .. quest_do_name .. '" not found.')
+        return false
     end
+    
+    -- Check if the quest is already completed
+    if IsQuestComplete(quest.quest_key) then
+        Echo('You have already completed the "' .. quest_do_name .. '" quest.')
+        return true
+    end
+    
+    -- Start the quest
+    yield("/qst next " .. quest.quest_id)
+    Sleep(0.5)
+    yield("/qst start")
+    
+    -- Wait until the quest is complete
+    repeat
+        Sleep(0.1)
+    until IsQuestComplete(quest.quest_key)
+    
+    return true
 end
 
 -- Usage: IsPlayerLowerThanLevel(100)
