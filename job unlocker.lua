@@ -10,6 +10,9 @@
 -- # CONFIGS #
 -- ###########
 
+-- We definitely need some kind of config saving functionality, this currently logs into everything even if the character has completed the stuff
+-- Loading a config would mean only the chars we need to do are actually done than wasting time
+
 -- Only set one of these
 -- Should really change to a DO_JOB_QUESTS = "Arcanist" or something
 --DO_JOB_QUESTS = "Arcanist"
@@ -23,20 +26,19 @@ DO_MAELSTROM_LOG_1 = false
 DO_MAELSTROM_LOG_2 = false
 
 -- Dungeon unlocks
-DO_HALATALI = false                  -- Maelstrom hunt log 1 hunt enemies       Hallo Halatali
-DO_THE_SUNKEN_TEMPLE_OF_QARN = false -- Maelstrom hunt log 2 hunt enemies       Braving New Depths
-DO_DZEMAEL_DARKHOLD = false          -- Requires Storm Sergeant First Class
-DO_THE_AURUM_VALE = false            -- Requires Chief Storm Sergeant
+DO_HALATALI = true                       -- Maelstrom hunt log 1 hunt enemies       Hallo Halatali
+DO_THE_SUNKEN_TEMPLE_OF_QARN = true      -- Maelstrom hunt log 2 hunt enemies       Braving New Depths
+DO_DZEMAEL_DARKHOLD = false               -- Requires Storm Sergeant First Class, and for you to complete the dungeon for quest completion
+DO_THE_AURUM_VALE = false                 -- Requires Chief Storm Sergeant, and for you to complete the dungeon for quest completion
 
 -- Housing unlocks
-DO_THE_LAVENDER_BEDS = false         -- The Lavender Beds Housing   Where the Heart Is (The Lavender Beds)
-DO_THE_GOBLET = false                -- The Goblet Housing          Where the Heart Is (The Goblet)
-DO_MIST = false                      -- Mist Housing                Where the Heart Is (Mist)
+DO_THE_LAVENDER_BEDS = false              -- The Lavender Beds Housing   Where the Heart Is (The Lavender Beds)
+DO_THE_GOBLET = false                     -- The Goblet Housing          Where the Heart Is (The Goblet)
+DO_MIST = false                           -- Mist Housing                Where the Heart Is (Mist)
 
+local use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being CharList.lua, false = use the list you put in this file 
 
-local use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being CharList.lua, false uses the list you put in this file 
-
-MULTICHAR = false
+MULTICHAR = true                          -- Options: true = cycles through character list, false = single character
 
 -- This is where you put your character list if you choose to not use the external one
 -- If us_external_character_list is set to true then this list is completely skipped
@@ -684,6 +686,7 @@ function HalataliUnlock()
         Movement(-280.59, 15.26, -316.75) -- It gets stuck otherwise
         Movement(-308.26, 21.15, -343.13) -- It gets stuck otherwise
         Movement(-399.64, 23.00, -351.08) -- It gets stuck otherwise
+        Movement(-471.06, 23.01, -354.81)
         DoQuest("Hallo Halatali")
     else
         DoQuest("Hallo Halatali") -- This has the echo text inside
@@ -727,6 +730,7 @@ function TheSunkenTempleOfQarnUnlock()
         
         repeat
             yield("/pcall JournalResult true 0 0")
+            Sleep(0.1)
         until IsQuestComplete(66300)
         
         --DoQuest("Braving New Depths")
@@ -736,6 +740,7 @@ function TheSunkenTempleOfQarnUnlock()
 end
 
 -- Requires Storm Sergeant First Class
+-- Requires you to complete the dungeon for quest completion
 function DzemaelDarkholdUnlock()
     if GetMaelstromGCRank() < 7 or GetLevel() < 44 then
         Echo("You do not have the Storm Sergeant First Class rank or the level 44 requirements.")
@@ -754,9 +759,9 @@ function DzemaelDarkholdUnlock()
     end
 end
 
+-- NEEDS doing
 -- Questionable does not support this yet, using alternative method
 -- Requires Chief Storm Sergeant
--- NEEDS doing
 function TheAurumValeUnlock()
     if GetMaelstromGCRank() < 8 or GetLevel() < 47 then
         Echo("You do not have the Chief Storm Sergeant rank or the level 47 requirements.")
@@ -862,6 +867,7 @@ if MULTICHAR then
         if GetCharacterName(true) == char then
             -- continue, no relogging needed
         else
+            ZoneCheck(129, "Limsa", "tp")
             RelogCharacter(char)
             Sleep(7.5)
             LoginCheck()
