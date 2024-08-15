@@ -468,7 +468,8 @@ end
 -- Valid classes: 0 = GLA, 1 = PGL, 2 = MRD, 3 = LNC, 4 = ARC, 5 = ROG, 6 = CNJ, 7 = THM, 8 = ACN, 9 = GC
 -- Valid ranks/pages: 0-4 for jobs, 0-2 for GC
 -- Opens and checks current progress and returns a true if finished or a false if not
-function HuntLogCheck(class,rank)
+function HuntLogCheck(target_name,class,rank)
+    OpenHuntLog(class,rank)
     local node_text = ""
     local function CheckTargetAmountNeeded(sub_node)
         local target_amount = tostring(GetNodeText("MonsterNote", 2, sub_node, 3))
@@ -496,11 +497,14 @@ function HuntLogCheck(class,rank)
     else
         local target_amount_needed = CheckTargetAmountNeeded(target_amount_needed_node)
         if target_amount_needed == 0 then
+            CloseHuntLog()
             return true
         else
+            CloseHuntLog()
             return false
         end
     end
+    CloseHuntLog()
 end
 -- Usage: DoHuntLog("Amalj'aa Hunter", 40, 9, 0)
 -- Valid classes: 0 = GLA, 1 = PGL, 2 = MRD, 3 = LNC, 4 = ARC, 5 = ROG, 6 = CNJ, 7 = THM, 8 = ACN, 9 = GC
