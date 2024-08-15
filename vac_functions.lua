@@ -470,7 +470,7 @@ function HuntingLogChecker(target_name, target_distance, class, rank)
 
     local failed = false
     local function CheckTargetAmountNeeded(sub_node)
-        local target_amount = GetNodeText("MonsterNote", 2, sub_node, 3)
+        local target_amount = tostring(GetNodeText("MonsterNote", 2, sub_node, 3))
         local first_number = tonumber(target_amount:sub(1, 1))
         local last_number = tonumber(target_amount:sub(-1))
         if first_number == last_number then
