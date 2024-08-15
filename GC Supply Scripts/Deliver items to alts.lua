@@ -35,7 +35,6 @@ dofile(SNDAltConfigFolder .. ProvisioningListNameToLoad)
 DropboxSetItemQuantity(1, false, 0)
 
 for index, item in ipairs(ProvisioningList) do
-    Echo(index .. "/" .. #ProvisioningList .. " characters processed.")
     if index <= CharsToSkip then
         goto skip
     end
@@ -122,7 +121,7 @@ for index, item in ipairs(ProvisioningList) do
     Sleep(1.0)
     DropboxSetItemQuantity(1, false, 0)
     Echo("############################")
-    Echo("Done!")
+    Echo("Done!" .. index .. "/" .. #ProvisioningList .. " characters processed.")
     Echo("############################")
     Sleep(5.0)
     ::skip::
