@@ -586,51 +586,47 @@ end
 -- NEEDS fixing
 --needs nodescanner adding and the matching text adjusting
 function MaelstromRank1()
+    -- Amalj'aa Hunter
     if not HuntLogCheck(MaelstromEnemiesLog1[1], 9, 0) then
-        -- Amalj'aa Hunter
-        Teleporter("Camp Drybone", "tp")
-        ZoneTransitions()
+        ZoneCheck(145, "Camp Drybone", "tp")
         Movement(-112.60, -27.88, 343.99)
         DoHuntLog(MaelstromEnemiesLog1[1], 40, 9, 0)
     end
     
+    -- Amalj'aa Bruiser
     if not HuntLogCheck(MaelstromEnemiesLog1[8], 9, 0) then
-        -- Amalj'aa Bruiser
-        Teleporter("Little Ala Mhigo", "tp")
-        ZoneTransitions()
+        ZoneCheck(146, "Little Ala Mhigo", "tp")
         Movement(-9.38, 15.62, -291.08)
         DoHuntLog(MaelstromEnemiesLog1[8], 40, 9, 0)
     end
     
+    -- Sylvan Groan + Sylvan Sough
     if not HuntLogCheck(MaelstromEnemiesLog1[5], 9, 0) and not HuntLogCheck(MaelstromEnemiesLog1[6], 9, 0)  then
-        -- Sylvan Groan + Sylvan Sough
-        Teleporter("The Hawthorne Hut", "tp")
-        ZoneTransitions()
+        ZoneCheck(152, "The Hawthorne Hut", "tp")
         Movement(-135.26, 15.12, -1.46)
         DoHuntLog(MaelstromEnemiesLog1[5], 40, 9, 0)
         DoHuntLog(MaelstromEnemiesLog1[6], 40, 9, 0)
     end
     
+    -- Kobold Pickman
     if not HuntLogCheck(MaelstromEnemiesLog1[7], 9, 0) then
-        -- Kobold Pickman
-        Teleporter("Aleport", "tp")
-        ZoneTransitions()
+        ZoneCheck(138, "Aleport", "tp")
         Movement(417.30, 35.15, -17.66)
         ZoneTransitions()
         Movement(-477.30, 26.29, 61.12)
         DoHuntLog(MaelstromEnemiesLog1[7], 40, 9, 0)
     end
     
+    -- Ixali Straightbeak
     if not HuntLogCheck(MaelstromEnemiesLog1[9], 9, 0) then
-        -- Ixali Straightbeak
-        Teleporter("Fallgourd Float", "tp")
-        ZoneTransitions()
+        ZoneCheck(154, "Fallgourd Float", "tp")
         Movement(53.52, -37.91, 312.72)
         DoHuntLog(MaelstromEnemiesLog1[9], 40, 9, 0)
     end
     
+    -- Ixali Wildtalon
     if not HuntLogCheck(MaelstromEnemiesLog1[10], 9, 0) then
-        -- Ixali Wildtalon
+        ZoneCheck(154, "Fallgourd Float", "tp")
         Movement(-405, 9.5, 128)
         ZoneTransitions()
         Movement(468.13, 232.79, 321.85)
