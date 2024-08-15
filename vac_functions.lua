@@ -193,9 +193,11 @@ function QuestCombat(target, enemy_max_dist)
         if GetTargetHP() > 0 and dist_to_enemy <= enemy_max_dist then
             if GetCharacterCondition(4) then
                 repeat
+                    Sleep(0.1)
                     yield("/mount")
                 until not GetCharacterCondition(4)
             end
+            Sleep(1)
             repeat
                 yield("/rotation auto")
                 yield("/vnavmesh movetarget")
