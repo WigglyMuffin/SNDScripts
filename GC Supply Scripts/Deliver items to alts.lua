@@ -74,9 +74,8 @@ for index, item in ipairs(ProvisioningList) do
     Sleep(1.0)
     WaitUntilObjectExists(tostring(item["CharName"]))
     Target(item["CharName"])
-    PartyAccept()
-    
     repeat 
+        PartyAccept()
         Sleep(0.1)
     until IsInParty()
 
