@@ -459,6 +459,7 @@ function HuntingLogChecker(target_name, target_distance, class, rank)
     OpenHuntLog(class,rank)
     local node_text = ""
     local target_amount_needed_node = 0
+    local finished = false
 
     local failed = false
     local function CheckTargetAmountNeeded(sub_node)
@@ -487,10 +488,8 @@ function HuntingLogChecker(target_name, target_distance, class, rank)
     if failed then
         goto skip
     end
-    local target_amount_needed = CheckTargetAmountNeeded(target_amount_needed_node)
-    local finished = false
     while not finished do 
-        target_amount_needed = CheckTargetAmountNeeded(target_amount_needed_node)
+        local target_amount_needed = CheckTargetAmountNeeded(target_amount_needed_node)
         if target_amount_needed == 0 then
             finished = true
         else
