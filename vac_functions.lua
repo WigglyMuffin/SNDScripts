@@ -457,7 +457,7 @@ function CloseHuntLog()
 end
 
 -- Usage: HuntingLogChecker("Amalj'aa Hunter", 40, 9, 1)
--- Valid pages are 0-4, with gc only having 0-2
+-- Valid ranks/pages are 0-4, with gc only having 0-2
 --
 -- List of valid classes
 -- Gladiator = 0, Pugilist = 1, Marauder = 2, Lancer = 3
