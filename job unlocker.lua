@@ -19,26 +19,27 @@
 DO_ARCANIST_QUESTS = false
 DO_ARCHER_QUESTS = false
 
+-- DoL job unlocks
 DO_DOL_QUESTS = false
 
 -- Maelstrom Hunt logs
-DO_MAELSTROM_LOG_1 = false
-DO_MAELSTROM_LOG_2 = false
+DO_MAELSTROM_LOG_1 = true                -- This is for unlocking Storm Sergeant First Class
+DO_MAELSTROM_LOG_2 = false                -- This is for unlocking Chief Storm Sergeant
 
 -- Dungeon unlocks
-DO_HALATALI = true                       -- Maelstrom hunt log 1 hunt enemies       Hallo Halatali
-DO_THE_SUNKEN_TEMPLE_OF_QARN = true      -- Maelstrom hunt log 2 hunt enemies       Braving New Depths
-DO_DZEMAEL_DARKHOLD = false               -- Requires Storm Sergeant First Class, and for you to complete the dungeon for quest completion
-DO_THE_AURUM_VALE = false                 -- Requires Chief Storm Sergeant, and for you to complete the dungeon for quest completion
+DO_HALATALI = false                       -- Requires level 20. This is for unlocking GC rank by killing Maelstrom hunt log rank 1 enemies.
+DO_THE_SUNKEN_TEMPLE_OF_QARN = false      -- Requires level 35. This is for unlocking GC rank by killing Maelstrom hunt log rank 2 enemies.
+DO_DZEMAEL_DARKHOLD = false               -- Requires level 44, Storm Sergeant First Class. This is for unlocking GC rank by completing the dungeon.
+DO_THE_AURUM_VALE = false                 -- Requires level 47, Chief Storm Sergeant. This is for unlocking GC rank by completing the dungeon.
 
 -- Housing unlocks
-DO_THE_LAVENDER_BEDS = false              -- The Lavender Beds Housing   Where the Heart Is (The Lavender Beds)
-DO_THE_GOBLET = false                     -- The Goblet Housing          Where the Heart Is (The Goblet)
-DO_MIST = false                           -- Mist Housing                Where the Heart Is (Mist)
+DO_THE_LAVENDER_BEDS = false              -- This is for unlocking The Lavender Beds Housing
+DO_THE_GOBLET = false                     -- This is for unlocking The Goblet Housing
+DO_MIST = false                           -- This is for unlocking Mist Housing
 
 local use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being CharList.lua, false = use the list you put in this file 
 
-MULTICHAR = true                          -- Options: true = cycles through character list, false = single character
+MULTICHAR = false                          -- Options: true = cycles through character list, false = single character
 
 -- This is where you put your character list if you choose to not use the external one
 -- If us_external_character_list is set to true then this list is completely skipped
@@ -589,79 +590,39 @@ function MaelstromRank1()
     Teleporter("Camp Drybone", "tp")
     ZoneTransitions()
     Movement(-112.60, -27.88, 343.99)
-    -- QuestChecker(MaelstromEnemiesLog1[1], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
-    Movement(-122.43, -30.10, 297.20)
-    -- QuestChecker(MaelstromEnemiesLog1[1], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
-    Movement(-122.43, -30.10, 297.20)
-    -- QuestChecker(MaelstromEnemiesLog1[1], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    HuntingLogChecker(MaelstromEnemiesLog1[1], 40, 9, 0)
     -- Amalj'aa Bruiser
-    Movement(-169.97, -46.71, 493.46)
+    Teleporter("Little Ala Mhigo", "tp")
     ZoneTransitions()
-    Movement(-157.06, 26.13, -410.14)
-    Target("Aetheryte")
-    Interact()
-    Movement(-32.69, 15.53, -277.9)
-    -- QuestChecker(MaelstromEnemiesLog1[8], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
     Movement(-9.38, 15.62, -291.08)
-    -- QuestChecker(MaelstromEnemiesLog1[8], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
-    -- QuestChecker(MaelstromEnemiesLog1[8], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    HuntingLogChecker(MaelstromEnemiesLog1[8], 40, 9, 0)
     -- Sylvan Groan + Sylvan Sough
-    Teleporter("Bentbranch Meadows", "tp")
+    Teleporter("The Hawthorne Hut", "tp")
     ZoneTransitions()
-    Movement(389.27, -3.36, -186.45)
-    ZoneTransitions()
-    Movement(-189.88, 4.43, 294.46)
-    Target("Aetheryte")
-    Interact()
     Movement(-135.26, 15.12, -1.46)
-    -- QuestChecker(MaelstromEnemiesLog1[5], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
-    -- QuestChecker(MaelstromEnemiesLog1[6], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
-    Movement(-104.98, 18.52, 14.46)
-    -- QuestChecker(MaelstromEnemiesLog1[5], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
-    -- QuestChecker(MaelstromEnemiesLog1[6], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
-    Movement(-71.64, 17.58, 7.27)
-    -- QuestChecker(MaelstromEnemiesLog1[5], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
-    -- QuestChecker(MaelstromEnemiesLog1[6], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    HuntingLogChecker(MaelstromEnemiesLog1[5], 40, 9, 0)
+    HuntingLogChecker(MaelstromEnemiesLog1[6], 40, 9, 0)
     -- Kobold Pickman
     Teleporter("Aleport", "tp")
     ZoneTransitions()
     Movement(417.30, 35.15, -17.66)
     ZoneTransitions()
     Movement(-477.30, 26.29, 61.12)
-    -- QuestChecker(MaelstromEnemiesLog1[7], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
-    -- QuestChecker(MaelstromEnemiesLog1[7], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
-    Movement(-432.12, 38.29, 19.78)
-    -- QuestChecker(MaelstromEnemiesLog1[7], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    HuntingLogChecker(MaelstromEnemiesLog1[7], 40, 9, 0)
     -- Ixali Straightbeak
-    Teleporter("New Gridania", "tp")
-    ZoneTransitions()
-    Target("Aetheryte")
-    Interact()
-    QuestNPCSingle("SelectString", true, "0")
-    yield("/pcall TelepotTown true 11 4u <wait.1>")
-    yield("/pcall TelepotTown true 11 4u")
-    ZoneTransitions()
-    Movement(-231, 15.75, -89.25)
+    Teleporter("Fallgourd Float", "tp")
     ZoneTransitions()
     Movement(53.52, -37.91, 312.72)
-    -- QuestChecker(MaelstromEnemiesLog1[9], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
-    Movement(75.32, -38.07, 331.25)
-    -- QuestChecker(MaelstromEnemiesLog1[9], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
-    Movement(75.83, -41.24, 352.80)
-    -- QuestChecker(MaelstromEnemiesLog1[9], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    HuntingLogChecker(MaelstromEnemiesLog1[9], 40, 9, 0)
     -- Ixali Wildtalon
-    Movement(-36.96, -39.16, 232.40)
-    Target("Aetheryte")
-    Interact()
     Movement(-405, 9.5, 128)
     ZoneTransitions()
     Movement(468.13, 232.79, 321.85)
-    -- QuestChecker(MaelstromEnemiesLog1[10], 40, "MonsterNote", "Report to Thubyrgeim at the Arcanists' Guild.")
+    HuntingLogChecker(MaelstromEnemiesLog1[10], 40, 9, 0)
     Movement(224.32, 301.51, -142.16)
     Movement(229.20, 312.91, -235.02)
     Target("Aetheryte")
     Interact()
-    Teleport("Limsa", "tp")
 end
 
 function MaelstromRank2()

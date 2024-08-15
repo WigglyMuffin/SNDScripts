@@ -13,7 +13,7 @@ function InteractAndWait()
     repeat
         Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
-    yield("/pint")
+    yield("/interact")
     repeat
         Sleep(0.1)
     until IsPlayerAvailable()
@@ -43,7 +43,7 @@ function Interact()
     repeat
         Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
-    yield("/pint")
+    yield("/interact")
 end
 
 -- Usage: IsInParty()
@@ -106,7 +106,7 @@ end
 -- NPC interaction handler, only supports one dialogue option for now. DialogueOption optional.
 function QuestNPC(DialogueType, DialogueConfirm, DialogueOption)
     while not GetCharacterCondition(32) do
-        yield("/pint")
+        yield("/interact")
         Sleep(0.1)
     end
     if DialogueConfirm then
@@ -135,7 +135,7 @@ end
 -- NPC interaction handler. dialogue_option optional.
 function QuestNPCSingle(dialogue_type, dialogue_confirm, dialogue_option)
     while not GetCharacterCondition(32) do
-        yield("/pint")
+        yield("/interact")
         Sleep(0.5)
     end
     if dialogue_confirm then
@@ -222,7 +222,7 @@ function QuestInstance()
             Sleep(1.0)
             yield("/pcall SelectYesno true 0")
         elseif GetCharacterCondition(1) then
-            yield("/pint")
+            yield("/interact")
             Sleep(1.0)
             while IsPlayerCasting() do 
                 Sleep(0.5)
@@ -412,21 +412,16 @@ function SpecialUiCheck(get_node_text_type, close_ui, extra)
             CloseGCHuntLog()
         end
     else
-        -- do nothing
+        return
     end
 end
 
--- Usage: OpenHuntLog(class, rank) // OpenHuntLog(9, 1)
--- the first variable is the class to open, the second is the page to open
--- defaults to page 1 if page isn't passed  
--- Valid pages are 0-4, with gc only having 0-2
---
--- List of valid classes
--- Gladiator = 0, Pugilist = 1, Marauder = 2, Lancer = 3
--- Archer  = 4, Rogue = 5, Conjurer = 6, Thaumaturge = 7, Arcanist 8
--- grand company = 9
-function OpenHuntLog(class,rank)
-    local defaultrank = 1 --
+-- Usage: OpenHuntLog(9, 0), Defaults to rank 0 if empty
+-- Valid classes: 0 = GLA, 1 = PGL, 2 = MRD, 3 = LNC, 4 = ARC, 5 = ROG, 6 = CNJ, 7 = THM, 8 = ACN, 9 = GC
+-- Valid ranks/pages: 0-4 for jobs, 0-2 for GC
+-- The first variable is the class to open, the second is the rank to open
+function OpenHuntLog(class, rank)
+    local defaultrank = 0 --
     local defaultclass = 9 -- this is the gc log
     rank = rank or defaultrank
     class = class or defaultclass
@@ -448,7 +443,7 @@ function OpenHuntLog(class,rank)
 end
 
 -- Usage: CloseHuntLog()  
--- Just closes the hunting log window if it's open
+-- Closes the Hunting Log if open
 function CloseHuntLog()
     repeat
         yield("/huntinglog")
@@ -456,13 +451,10 @@ function CloseHuntLog()
     until not IsAddonVisible("MonsterNote")
 end
 
--- Usage: HuntingLogChecker("Amalj'aa Hunter", 40, 9, 1)
--- Valid ranks/pages are 0-4, with gc only having 0-2
---
--- List of valid classes
--- Gladiator = 0, Pugilist = 1, Marauder = 2, Lancer = 3
--- Archer  = 4, Rogue = 5, Conjurer = 6, Thaumaturge = 7, Arcanist 8
--- grand company = 9
+-- Usage: HuntingLogChecker("Amalj'aa Hunter", 40, 9, 0)
+-- Valid classes: 0 = GLA, 1 = PGL, 2 = MRD, 3 = LNC, 4 = ARC, 5 = ROG, 6 = CNJ, 7 = THM, 8 = ACN, 9 = GC
+-- Valid ranks/pages: 0-4 for jobs, 0-2 for GC
+-- Opens and checks current progress of Hunting Log for automated killing
 function HuntingLogChecker(target_name, target_distance, class, rank)
     OpenHuntLog(class,rank)
     local node_text = ""
@@ -1236,6 +1228,7 @@ function GetPlayerPos()
     return pos
 end
 
+-- NEEDS excel browser adding
 -- Usage: GetJob()
 -- Returns the current player job abbreviation
 function GetJob()
@@ -1297,12 +1290,19 @@ function DoAction(action_name)
     yield('/ac "' .. action_name .. '"')
 end
 
+-- Usage: DoGeneralAction("Jump")
+-- Uses specified general action
+function DoGeneralAction(general_action_name)
+    yield('/gaction "' .. general_action_name .. '"')
+end
+
 -- Usage: DoTargetLockon()
 -- Locks on to current target
 function DoTargetLockon(target_lockon_name)
     yield("/lockon")
 end
 
+-- NEEDS excel browser adding
 -- Usage: IsQuestDone("Hallo Halatali")
 -- Checks if you have completed the specified quest
 function IsQuestDone(quest_done_name)
@@ -1315,6 +1315,7 @@ function IsQuestDone(quest_done_name)
     end
 end
 
+-- NEEDS excel browser adding
 -- Usage: DoQuest("Hallo Halatali")
 -- Checks if you have completed the specified quest and starts if you have not
 function DoQuest(quest_do_name)
@@ -1350,8 +1351,16 @@ end
 
 -- Usage: IsPlayerLowerThanLevel(100)
 -- Checks if player level lower than specified amount, returns true if so
-function IsPlayerLowerThanLevel(player_level)
-    if GetLevel() < player_level then
+function IsPlayerLowerThanLevel(player_lower_level)
+    if GetLevel() < player_lower_level then
+        return true
+    end
+end
+
+-- Usage: IsPlayerHigherThanLevel(1)
+-- Checks if player level higher than specified amount, returns true if so
+function IsPlayerHigherThanLevel(player_higher_level)
+    if GetLevel() > player_higher_level then
         return true
     end
 end
