@@ -194,10 +194,9 @@ function QuestCombat(target, enemy_max_dist)
             repeat
                 yield("/rotation auto")
                 yield("/vnavmesh movetarget")
-                
+                yield('/ac "Auto-attack"')
                 Sleep(0.2)
             until GetDistanceToTarget() <= 3
-            yield('/ac "Auto-attack"')
             yield("/vnavmesh stop")
         end
     end
