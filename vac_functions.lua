@@ -1319,7 +1319,6 @@ function DoQuest(quest_do_name)
         -- Check if the quest is already completed
         if IsQuestComplete(quest.quest_key) then
             Echo('You have already completed the "' .. quest_do_name .. '" quest.')
-            Echo("Skipping unlock.")
             return
         end
         

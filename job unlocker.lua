@@ -675,7 +675,6 @@ end
 function HalataliUnlock()
     if GetLevel() < 20 then
         Echo("You do not have the level 20 requirement.")
-        Echo("Skipping unlock.")
         return
     end
 
@@ -695,7 +694,6 @@ end
 function TheSunkenTempleOfQarnUnlock()
     if GetLevel() < 35 then
         Echo("You do not have the level 35 requirement.")
-        Echo("Skipping unlock.")
         return
     end
 
@@ -726,7 +724,6 @@ end
 function DzemaelDarkholdUnlock()
     if GetMaelstromGCRank() < 7 or GetLevel() < 44 then
         Echo("You do not have the Storm Sergeant First Class rank or the level 44 requirements.")
-        Echo("Skipping unlock.")
         return
     end
     
@@ -748,7 +745,6 @@ end
 function TheAurumValeUnlock()
     if GetMaelstromGCRank() < 8 or GetLevel() < 47 then
         Echo("You do not have the Chief Storm Sergeant rank or the level 47 requirements.")
-        Echo("Skipping unlock.")
         return
     end
 
