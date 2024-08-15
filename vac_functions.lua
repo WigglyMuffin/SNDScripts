@@ -197,13 +197,15 @@ function QuestCombat(target, enemy_max_dist)
                 yield('/ac "Auto-attack"')
                 Sleep(0.2)
             until GetDistanceToTarget() <= 3
+            yield('/ac "Auto-attack"')
             yield("/vnavmesh stop")
         end
     end
     repeat
-      Sleep(0.1)
+        yield('/ac "Auto-attack"')
+        Sleep(0.1)
     until GetTargetHP() == 0
-      Sleep(0.5)
+        Sleep(0.5)
 end
 
 -- Usage: QuestInstance()
