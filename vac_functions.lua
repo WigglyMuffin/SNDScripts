@@ -1205,6 +1205,7 @@ end
 
 -- Usage: PartyAccept()
 -- Will accept party invite if not in party
+-- NEEDS a name arg
 function PartyAccept()
     if not IsInParty() then
         repeat
