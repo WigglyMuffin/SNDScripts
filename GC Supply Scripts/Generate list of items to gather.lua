@@ -65,15 +65,23 @@ local function contains(table, val)
 end
 
 local function write_category(file, category_name, category_list)
+    -- Sort category_list a-z by item name
+    table.sort(category_list, function(a, b)
+        return a[1]:lower() < b[1]:lower() -- Compare item names
+    end)
+
     file:write(category_name .. ":\n")
     file:write("------\n")
+    
     for _, item in ipairs(category_list) do
         local itemName = item[1]
         local itemAmount = item[2]
         file:write("- " .. itemName .. " x" .. itemAmount .. "\n")
     end
+    
     file:write("\n")
 end
+
 
 for itemName, itemAmount in pairs(combinedItems) do
     if contains(GC_FSH or {}, itemName) then
