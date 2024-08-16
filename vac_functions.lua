@@ -958,7 +958,7 @@ function GcProvisioningDeliver()
             return false
         end
     end
-    Sleep(1)
+    Sleep(0.5)
     for i = 4, 2, -1 do
         repeat
             Sleep(0.1)
