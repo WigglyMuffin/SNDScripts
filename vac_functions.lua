@@ -6,6 +6,24 @@ function LoadFileCheck()
 	yield("/e Successfully loaded the functions file")
 end
 
+-- ###############
+-- # TO DO STUFF #
+-- ###############
+
+-- Full quest list with both quest IDs and key IDs
+-- Full zone ID list
+-- Maybe convert job IDs to csv
+-- Dungeon ID list
+-- Distance stuff
+-- Redo Teleporter()
+-- Redo Movement()
+-- Add better unstuck for worsening vnavmesh
+
+-- #####################################
+-- #####################################
+-- #####################################
+-- #####################################
+
 -- InteractAndWait()
 --
 -- Interacts with the current target and waits until the player is available again before proceeding
@@ -55,6 +73,7 @@ end
 -- Usage: ZoneCheck(129) or ZoneCheck(129, "Limsa", "tp")
 -- This will need updating once we have an idea on what to do with matching zones IDs to zone names
 -- Checks player against zone, and optionally teleports if player not in zone
+-- TP location and TP kind not required
 -- ZoneTransitions() not required
 function ZoneCheck(zone_id, location, tp_kind)
     repeat
