@@ -513,12 +513,9 @@ function HuntLogCheck(target_name,class,rank)
     end
     local target_amount_needed_node = FindTargetNode()
     if not target_amount_needed_node then
-        Echo("Something went wrong, target node not found")
         return "failed"
     else
-        yield("/echo dd "..tostring(target_amount_needed_node))
         local target_amount_needed = CheckTargetAmountNeeded(target_amount_needed_node)
-        yield("/echo "..tostring(target_amount_needed))
         if target_amount_needed == 0 then
             CloseHuntLog()
             return true, target_amount_needed
