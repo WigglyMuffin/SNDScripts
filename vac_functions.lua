@@ -1509,3 +1509,77 @@ function QueueDuty(queue_tab_number, queue_duty_number)
         until current_zone_id == GetZoneID()
     end
 end
+
+-- NEEDS loot rules and language fixing
+-- Usage: QueueDutySettings(0, 1, 2, 6) or QueueDutySettings(0, 1)
+-- Options: 0-8 for duty settings
+-- 0 = Join Party in progress
+-- 1 = Unrestricted Party
+-- 2 = Level Sync (Requires Unrestricted Party)
+-- 3 = Minimum IL
+-- 4 = Silence Echo
+-- 5 = Explorer Mode
+-- 6 = Limited Leveling Roulette
+-- 7 = Loot Rules (Normal, Greed Only, Lootmaster)
+-- 8 = Language (Jp, En, De, Fr)
+-- Automatically sets specified duty finder settings
+function QueueDutySettings(...)
+    local queue_duty_settings = {...}
+
+    -- Open duty finder
+    repeat
+        yield("/dutyfinder")
+        Sleep(0.1)
+    until IsAddonVisible("ContentsFinder")
+    
+    -- Open duty finder settings
+    repeat
+        yield("/pcall ContentsFinder true 15")
+        Sleep(0.1)
+    until IsAddonVisible("ContentsFinderSetting")
+
+    -- Loop through each setting and apply it
+    for _, setting_number in ipairs(queue_duty_settings) do
+        repeat
+            yield("/pcall ContentsFinderSetting true 1 " .. setting_number .. " 1")
+            Sleep(0.1)
+        until IsAddonVisible("ContentsFinderSetting")
+    end
+    
+    -- Close duty finder settings
+    repeat
+        yield("/pcall ContentsFinderSetting true 0")
+        Sleep(0.1)
+    until not IsAddonVisible("ContentsFinderSetting")
+end
+
+-- NEEDS loot rules and language fixing
+-- Usage: QueueDutySettingsClear()
+-- Clear duty finder settings
+function QueueDutySettingsClear()
+    -- Open duty finder
+    repeat
+        yield("/dutyfinder")
+        Sleep(0.1)
+    until IsAddonVisible("ContentsFinder")
+    
+    -- Open duty finder settings
+    repeat
+        yield("/pcall ContentsFinder true 15")
+        Sleep(0.1)
+    until IsAddonVisible("ContentsFinderSetting")
+
+    -- Iterate through all settings (0-8) and clear them
+    for setting_number = 0, 8 do
+        repeat
+            yield("/pcall ContentsFinderSetting true 1 " .. setting_number .. " 0")
+            Sleep(0.1)
+        until IsAddonVisible("ContentsFinderSetting")
+    end
+    
+    -- Close duty finder settings
+    repeat
+        yield("/pcall ContentsFinderSetting true 0")
+        Sleep(0.1)
+    until not IsAddonVisible("ContentsFinderSetting")
+end
