@@ -10,15 +10,13 @@
 -- Set your alt accounts %appdata% config location otherwise it will not work
 SNDAltConfigFolder = "C:\\Users\\ff14lowres\\AppData\\Roaming\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
 
--- This can be used to skip forward x amount of characters in case something somehow went wrong
-CharsToSkip = 0
 
 -- #####################################
 -- #  DON'T TOUCH ANYTHING BELOW HERE  #
 -- # UNLESS YOU KNOW WHAT YOU'RE DOING #
 -- #####################################
 
-ProvisioningListNameToLoad = "ProvisioningList.lua"
+ProvisioningListNameToLoad = "Provisioning_List.lua"
 
 SNDConfigFolder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
 LoadFunctionsFileLocation = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
@@ -33,95 +31,162 @@ dofile(SNDAltConfigFolder .. ProvisioningListNameToLoad)
 -- ###############
 
 DropboxSetItemQuantity(1, false, 0)
+local chars_processed = #ProvisioningList - #ProvisioningList
+for indexName, item in pairs(ProvisioningList) do
+    local party_member = ""
+    local onlist = false
+    local item_1_succeded = false
+    local item_2_succeded = false
+    local item_3_succeded = false
+    local item_trades_succeded = false
+    local gil_trade_succeded = false
+    local Row1Item_inv_amount = 0
+    local Row2Item_inv_amount = 0
+    local Row3Item_inv_amount = 0
+    local gil_inv_amount = 0
+    function ClearTrades()
+        -- it's like this just to make sure it cleans the trades properly
+        DropboxSetItemQuantity(1, false, 0)
+        DropboxSetItemQuantity(1, false, 0)
+        DropboxSetItemQuantity(tonumber(item["Row1ItemID"]), false, 0)
+        DropboxSetItemQuantity(tonumber(item["Row1ItemID"]), false, 0)
+        DropboxSetItemQuantity(tonumber(item["Row1ItemID"]), false, 0)
+        DropboxSetItemQuantity(tonumber(item["Row1ItemID"]), false, 0)
+        DropboxSetItemQuantity(tonumber(item["Row2ItemID"]), false, 0)
+        DropboxSetItemQuantity(tonumber(item["Row2ItemID"]), false, 0)
+        DropboxSetItemQuantity(tonumber(item["Row2ItemID"]), false, 0)
+        DropboxSetItemQuantity(tonumber(item["Row2ItemID"]), false, 0)
+        DropboxSetItemQuantity(tonumber(item["Row3ItemID"]), false, 0)
+        DropboxSetItemQuantity(tonumber(item["Row3ItemID"]), false, 0)
+        DropboxSetItemQuantity(tonumber(item["Row3ItemID"]), false, 0)
+        DropboxSetItemQuantity(tonumber(item["Row3ItemID"]), false, 0)
+        DropboxSetItemQuantity(1, false, 0)
+        DropboxSetItemQuantity(1, false, 0)
+        Sleep(0.5)
+    end
+    function RefreshInv()
+        Row1Item_inv_amount = GetItemCount(tonumber(item["Row1ItemID"]))
+        Row2Item_inv_amount = GetItemCount(tonumber(item["Row2ItemID"]))
+        Row3Item_inv_amount = GetItemCount(tonumber(item["Row3ItemID"]))
+        gil_inv_amount = tonumber(GetGil())
+    end
+    function TradeItems()
+        while not item_trades_succeded do
+            RefreshInv()
+            if item["Row1ItemName"] and not item_1_succeded then
+                DropboxSetItemQuantity(tonumber(item["Row1ItemID"]), false, tonumber(item["Row1ItemAmount"]))
+            end
+            Sleep(0.5)
+            if item["Row2ItemName"] and not item_2_succeded then
+                DropboxSetItemQuantity(tonumber(item["Row2ItemID"]), false, tonumber(item["Row2ItemAmount"]))
+            end
+            Sleep(0.5)
+            if item["Row3ItemName"] and not item_3_succeded then
+                DropboxSetItemQuantity(tonumber(item["Row3ItemID"]), false, tonumber(item["Row3ItemAmount"]))
+            end
 
-for index, item in ipairs(ProvisioningList) do
-    if index <= CharsToSkip then
-        goto skip
-    end
-    if item["CharHomeWorld"] == nil then
-        LogInfo("Item doesn't exist, skipping")
-        goto skip
-    end
-    if not FindDCWorldIsOn(item["CharHomeWorld"]) == FindDCWorldIsOn(FindWorldByID(GetCurrentWorld())) then
-        LogInfo(""..item["CharName"].." is on a different DC, skipping")
-        goto skip
-    end
-    Echo("############################")
-    Echo("Preparing dropbox items while")
-    Echo("waiting for " .. item["CharName"])
-    Echo("############################")
-    Sleep(1.0)
-    if item["Row1ItemName"] then
-        DropboxSetItemQuantity(tonumber(item["Row1ItemID"]), false, tonumber(item["Row1ItemAmount"]))
-        Sleep(1.0)
-        DropboxSetItemQuantity(tonumber(item["Row1ItemID"]), false, tonumber(item["Row1ItemAmount"]))
-    end
-    Sleep(0.2)
-    if item["Row2ItemName"] then
-        DropboxSetItemQuantity(tonumber(item["Row2ItemID"]), false, tonumber(item["Row2ItemAmount"]))
-        Sleep(1.0)
-        DropboxSetItemQuantity(tonumber(item["Row2ItemID"]), false, tonumber(item["Row2ItemAmount"]))
-    end
-    Sleep(0.2)
-    if item["Row3ItemName"] then
-        DropboxSetItemQuantity(tonumber(item["Row3ItemID"]), false, tonumber(item["Row3ItemAmount"]))
-        Sleep(1.0)
-        DropboxSetItemQuantity(tonumber(item["Row3ItemID"]), false, tonumber(item["Row3ItemAmount"]))
-    end
-    DropboxSetItemQuantity(1, false, 1)
-    Sleep(1.0)
-    DropboxSetItemQuantity(1, false, 1)
-    Sleep(1.0)
-    WaitUntilObjectExists(tostring(item["CharName"]))
-    Target(item["CharName"])
-    repeat 
-        PartyAccept()
-        Sleep(0.1)
-    until IsInParty()
+            DropboxStart()
+            Sleep(2.0)
+            tradestatus = DropboxIsBusy()
+            while tradestatus == true do
+                tradestatus = DropboxIsBusy()
+                LogInfo("[GCID] Currently trading...")
+                Sleep(2.0)
+            end
 
-    Echo("############################")
-    Echo("Getting Ready to trade")
-    Echo("############################")
-    Sleep(1.0)
-    Target(item["CharName"])
-    yield("/focustarget <t>")
-    yield("/dropbox")
-    Sleep(1.0)
-    Echo("############################")
-    Echo("Starting trade!")
-    Echo("############################")
-    DropboxStart()
-    Sleep(2.0)
-    tradestatus = DropboxIsBusy()
-    while tradestatus == true do
-        tradestatus = DropboxIsBusy()
-        LogInfo("[GCID] Currently trading...")
-        Sleep(2.0)
+            if GetItemCount(tonumber(item["Row1ItemID"])) == Row1Item_inv_amount then
+                Echo("Trading "..item["Row1ItemName"].." failed, will try again")
+            else
+                item_1_succeded = true
+            end
+            if GetItemCount(tonumber(item["Row2ItemID"])) == Row2Item_inv_amount then
+                Echo("Trading "..item["Row2ItemName"].." failed, will try again")
+            else
+                item_2_succeded = true
+            end
+            if GetItemCount(tonumber(item["Row3ItemID"])) == Row3Item_inv_amount then
+                Echo("Trading "..item["Row3ItemName"].." failed, will try again")
+            else
+                item_3_succeded = true
+            end
+            if item_1_succeded and item_2_succeded and item_3_succeded then
+                item_trades_succeded = true
+            end
+            Sleep(0.1)
+            ClearTrades()
+        end
+        while not gil_trade_succeded do
+            RefreshInv()
+            Sleep(0.3)
+            DropboxSetItemQuantity(1, false, 1)
+            Sleep(0.3)
+            DropboxSetItemQuantity(1, false, 1)
+            Sleep(0.5)
+            DropboxStart()
+            Sleep(2.0)
+            while tradestatus == true do
+                tradestatus = DropboxIsBusy()
+                LogInfo("[GCID] Currently trading...")
+                Sleep(2.0)
+            end
+            if GetGil() == (gil_inv_amount - 1) then
+                gil_trade_succeded = true
+            end
+            ClearTrades()
+        end
     end
-    Echo("############################")
-    Echo("Trading done!")
-    Echo("Cleaning up Dropbox")
-    Echo("############################")
-    DropboxSetItemQuantity(1, false, 0)
-    Sleep(1.0)
-    DropboxSetItemQuantity(tonumber(item["Row1ItemID"]), false, 0)
-    Sleep(1.0)
-    DropboxSetItemQuantity(tonumber(item["Row1ItemID"]), false, 0)
-    Sleep(1.0)
-    DropboxSetItemQuantity(tonumber(item["Row2ItemID"]), false, 0)
-    Sleep(1.0)
-    DropboxSetItemQuantity(tonumber(item["Row2ItemID"]), false, 0)
-    Sleep(1.0)
-    DropboxSetItemQuantity(tonumber(item["Row3ItemID"]), false, 0)
-    Sleep(1.0)
-    DropboxSetItemQuantity(tonumber(item["Row3ItemID"]), false, 0)
-    Sleep(1.0)
-    DropboxSetItemQuantity(1, false, 0)
-    Echo("############################")
-    Echo("Done! " .. index .. "/" .. #ProvisioningList .. " characters processed")
-    Echo("############################")
-    Sleep(5.0)
-    ::skip::
+    while not onlist do
+        Echo("############################")
+        Echo("Waiting for party invite")
+        Echo("############################")
+        repeat 
+            PartyAccept()
+            Sleep(0.1)
+        until IsInParty()
+        party_member = GetPartyMemberName(0)
+        for index1, item1 in pairs(ProvisioningList) do
+            if party_member == indexName then
+                Echo("############################")
+                Echo("Found "..party_member.." in trade list")
+                Echo("############################")
+                onlist = true
+                break
+            else
+            end
+        end
+        if not onlist then
+            Echo("############################")
+            Echo("Did not find "..party_member.." in trade list.")
+            Echo("Disbanding party and starting again")
+            Echo("############################")
+            PartyLeave()
+            Sleep(1)
+        end
+    end
+    if onlist then
+        Echo("############################")
+        Echo("Getting Ready to trade")
+        Echo("############################")
+        Sleep(0.5)
+        Target(indexName)
+        yield("/focustarget <t>")
+        yield("/dropbox")
+        Sleep(1.0)
+        Echo("############################")
+        Echo("Starting trades!")
+        Echo("############################")
+        TradeItems()
+        Echo("############################")
+        Echo("Trading done!")
+        Echo("Cleaning up Dropbox")
+        Echo("############################")
+        ClearTrades()
+        chars_processed = chars_processed + 1
+        Echo("############################")
+        Echo("Done! " .. item .. "/" .. #ProvisioningList .. " characters processed")
+        Echo("############################")
+        Sleep(5.0)
+    end
 end
 DropboxSetItemQuantity(1, false, 0)
 Echo("############################")

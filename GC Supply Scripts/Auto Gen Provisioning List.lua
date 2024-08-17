@@ -647,7 +647,7 @@ function GetAndSaveProvisioningToTable()
             Sleep(7.5) -- This is enough time to log out completely and not too long to cut into new logins
             LoginCheck()
         end
-        
+        local charname = GetCharacterName()
         repeat
             Sleep(0.1)
         until IsPlayerAvailable()
@@ -693,35 +693,33 @@ function GetAndSaveProvisioningToTable()
             LogInfo("[APL] Third row text not found")
         end
         if Row1Found then
-            ProvisioningList[_] = {}
+            ProvisioningList[charname] = {}
             LogInfo("[APL] Inserting from first row")
             local Row1ItemID = ItemList[Row1ItemName].ID
             local Row1ItemAmount = GetNodeText("ContentsInfoDetail", 101, 2)
-            ProvisioningList[_]["Row1ItemName"] = Row1ItemName
-            ProvisioningList[_]["Row1ItemID"] = Row1ItemID
-            ProvisioningList[_]["Row1ItemAmount"] = Row1ItemAmount
+            ProvisioningList[charname]["Row1ItemName"] = Row1ItemName
+            ProvisioningList[charname]["Row1ItemID"] = Row1ItemID
+            ProvisioningList[charname]["Row1ItemAmount"] = Row1ItemAmount
         end
         if Row2Found then
             LogInfo("[APL] Inserting from second row")
             local Row2ItemID = ItemList[Row2ItemName].ID
             local Row2ItemAmount = GetNodeText("ContentsInfoDetail", 100, 2)
-            ProvisioningList[_]["Row2ItemName"] = Row2ItemName
-            ProvisioningList[_]["Row2ItemID"] = Row2ItemID
-            ProvisioningList[_]["Row2ItemAmount"] = Row2ItemAmount
+            ProvisioningList[charname]["Row2ItemName"] = Row2ItemName
+            ProvisioningList[charname]["Row2ItemID"] = Row2ItemID
+            ProvisioningList[charname]["Row2ItemAmount"] = Row2ItemAmount
         end
         if Row3Found then
             LogInfo("[APL] Inserting from third row")
             local Row3ItemID = ItemList[Row3ItemName].ID
             local Row3ItemAmount = GetNodeText("ContentsInfoDetail", 99, 2)
-            ProvisioningList[_]["Row3ItemName"] = Row3ItemName
-            ProvisioningList[_]["Row3ItemID"] = Row3ItemID
-            ProvisioningList[_]["Row3ItemAmount"] = Row3ItemAmount
+            ProvisioningList[charname]["Row3ItemName"] = Row3ItemName
+            ProvisioningList[charname]["Row3ItemID"] = Row3ItemID
+            ProvisioningList[charname]["Row3ItemAmount"] = Row3ItemAmount
         end
         if Row1Found or Row2Found or Row3Found then
             local CharHomeWorld = FindWorldByID(GetHomeWorld())
-            local CharNameClean = GetCharacterName()
-            ProvisioningList[_]["CharName"] = CharNameClean
-            ProvisioningList[_]["CharHomeWorld"] = CharHomeWorld
+            ProvisioningList[charname]["CharHomeWorld"] = CharHomeWorld
         end
         local ProvisioningListStrings = "ProvisioningList = " .. SerializeTable(ProvisioningList)
         local Files = io.open(SNDConfigFolder..""..ProvisioningListSaveName, "w")
