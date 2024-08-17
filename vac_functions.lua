@@ -172,167 +172,64 @@ function QuestNPCSingle(dialogue_type, dialogue_confirm, dialogue_option)
     end
 end
 
--- not explicitly used
-function QuestCombat(target, enemy_max_dist)
-    local all_targets = {target}
-    local combined_list = {}
-    local best_target = 0
-    local lowest_distance = 0
-    for _, current_target in ipairs(all_targets) do
-        local current_list = {} 
-        for i = 0, 10 do
-            --yield("/echo <list." .. i .. ">")
-            yield("/target " .. current_target .. " <list." .. i .. ">")
-            Sleep(0.1)
-            if (GetTargetName() == target) and GetTargetHP() > 0 and GetDistanceToTarget() <= enemy_max_dist then
-                local distance = GetDistanceToTarget()
-                table.insert(current_list, {target = current_target, index = i, distance = distance})
-            end
+-- Usage: TargetNearestEnemy("Heckler Imp", 20)
+-- 
+-- Targets the nearest enemy of the name you supply, within the radius
+function TargetNearestEnemy(target_name, radius)
+    local smallest_distance = 10000000000000.0
+    local closest_target
+    local objectKind = 0 -- Set objectkind to 0 so GetNearbyObjectNames pulls everything nearby
+    local radius = radius or 0
+    local nearby_objects = GetNearbyObjectNames(radius^2,objectKind) -- Pull all nearby objects/enemies into a list
+    if nearby_objects.Count > 0 then -- Starts a loop if there's more than 0 nearby objects
+      for i = 0, nearby_objects.Count - 1 do  -- loops until no more objects 
+        yield("/target "..nearby_objects[i])
+        if not GetTargetName() or nearby_objects[i] ~= GetTargetName() then -- If target name is nil, skip it
+        elseif GetDistanceToTarget() < smallest_distance and GetTargetName() == target_name then -- if object matches the target_name and the distance to target is smaller than the current smallest_distance, proceed
+          smallest_distance = GetDistanceToTarget()
+          closest_target = GetTargetName()
         end
-        table.sort(current_list, function(a, b) return a.distance < b.distance end)
-        if #current_list > 0 and (best_target == 0 or current_list[1].distance < lowest_distance) then
-            best_target = #combined_list + 1
-            lowest_distance = current_list[1].distance
-        end
-        for _, entry in ipairs(current_list) do
-            table.insert(combined_list, entry)
-        end
+      end
+      ClearTarget()
+      if closest_target then yield("/target "..closest_target) end -- after the loop ends it targets the closest enemy
     end
-    if best_target > 0 then
-        local best_entry = combined_list[best_target]
-        yield("/target " .. best_entry.target .. " <list." .. best_entry.index .. ">")
-        --yield("/echo =====================")
-        --yield("/echo best_entry.target = " .. tostring(best_entry.target))
-        --yield("/echo best_entry.index = " .. tostring(best_entry.index))
-        --yield("/echo =====================")
-        Sleep(0.5)
+    return closest_target
+end
 
-        local dist_to_enemy = GetDistanceToTarget()
-
-        if GetTargetHP() > 0 and dist_to_enemy <= enemy_max_dist then
-            if GetCharacterCondition(4) then
-                repeat
-                    yield("/mount")
-                    Sleep(0.1)
-                until not GetCharacterCondition(4)
-            end
-            Sleep(1)
+-- Usage: FindAndKillTarget("Heckler Imp", 20)
+-- 
+-- Utilizes TargetNearestEnemy() to find and kill the provided target within the radius
+function FindAndKillTarget(target_name, radius)
+    TargetNearestEnemy(target_name, radius)
+    local dist_to_target = GetDistanceToTarget()
+    if GetTargetHP() > 0 and dist_to_target <= radius then
+        if GetCharacterCondition(4) then
             repeat
-                yield("/rotation auto")
-                yield("/vnavmesh movetarget")
-                yield('/ac "Auto-attack"')
-                Sleep(0.2)
-            until GetDistanceToTarget() <= 3
-            yield("/vnavmesh stop")
+                yield("/mount")
+                Sleep(0.1)
+            until not GetCharacterCondition(4)
         end
-    end
-    if not GetCharacterCondition(26) then
         repeat
+            yield("/rotation auto")
+            if not PathIsRunning() then
+                yield("/vnavmesh movetarget")
+            end
             yield('/ac "Auto-attack"')
-            Sleep(0.1)
-        until GetCharacterCondition(26)
+            Sleep(0.2)
+        until GetDistanceToTarget() <= 2
+        yield('/ac "Auto-attack"')
+        yield("/vnavmesh stop")
     end
     
     repeat
         Sleep(0.1)
-    until GetTargetHP() == 0
+    until GetTargetHP() == 0 or not GetTargetHP() and not GetCharacterCondition(26) 
     Sleep(0.5)
-end
-
--- Usage: QuestInstance()
---
--- Targetting/Movement Logic for Solo Duties. Pretty sure this is broken atm
--- Needs rewriting
-function QuestInstance()
-    while true do
-        -- Check if GetCharacterCondition(34) is false and exit if so
-        if not GetCharacterCondition(34) then
-            break
-        end
-
-        if not IsPlayerAvailable() then
-            Sleep(1.0)
-            yield("/pcall SelectYesno true 0")
-        elseif GetCharacterCondition(1) then
-            yield("/interact")
-            Sleep(1.0)
-            while IsPlayerCasting() do 
-                Sleep(0.5)
-            end
-            repeat 
-                Sleep(0.1)
-                -- Check condition in the middle of the loop
-                if not GetCharacterCondition(34) then
-                    break
-                end
-            until not IsAddonVisible("SelectYesno")
-        elseif not IsPlayerAvailable() and not GetCharacterCondition(26) then
-            repeat
-                Sleep(0.1)
-                -- Check condition in the middle of the loop
-                if not GetCharacterCondition(34) then
-                    break
-                end
-            until GetCharacterCondition(34)
-        else
-            local paused = false
-            while GetCharacterCondition(34) do
-                if paused then
-                    repeat
-                        Sleep(0.1)
-                        -- Check condition in the middle of the loop
-                        if not GetCharacterCondition(34) then
-                            break
-                        end
-                    until GetCharacterCondition(26, false)
-                    paused = false
-                else
-                    Sleep(1.0)
-                    yield("/rotation auto")
-
-                    local current_target = GetTargetName()
-
-                    if not current_target or current_target == "" then
-                        yield("/targetenemy") 
-                        current_target = GetTargetName()
-                        if current_target == "" then
-                            Sleep(1.0)
-                        end
-                    end
-
-                    local enemy_max_dist = 100
-                    local dist_to_enemy = GetDistanceToTarget()
-
-                    if dist_to_enemy and dist_to_enemy > 0 and dist_to_enemy <= enemy_max_dist then
-                        local enemy_x, enemy_y, enemy_z = GetTargetRawXPos(), GetTargetRawYPos(), GetTargetRawZPos()
-                        yield("/vnavmesh moveto " .. enemy_x .. " " .. enemy_y .. " " .. enemy_z)
-                        Sleep(3.0)
-                        yield("/vnavmesh stop")  
-                    end
-
-                    -- Check condition to pause
-                    if not IsPlayerAvailable() or not GetCharacterCondition(26, true) then
-                        paused = true
-                    end
-                end
-
-                -- Check condition at the end of the loop iteration
-                if not GetCharacterCondition(34) then
-                    break
-                end
-            end
-        end
-
-        -- Check condition at the end of the loop iteration
-        if not GetCharacterCondition(34) then
-            break
-        end
-    end
 end
 
 -- Usage: GetNodeTextLookupUpdate("_ToDolist",16,3,4) // GetNodeTextLookupUpdate("_ToDolist",16,3)
 --
--- function i really don't like the existence of, is only called by Questchecker and Nodescanner, could be called manually.
+-- function that's honestly nothing but tragic, is only called by Questchecker and Nodescanner, could be called manually.
 function GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get_node_text_location_1, get_node_text_location_2)
     bypass = "next task"
     if get_node_text_location_2 == nil then 
@@ -357,10 +254,9 @@ function GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get
     yield("/echo uh GetNodeTextLookupUpdate fucked up")
 end
 
--- Usage: QuestChecker(ArcanistEnemies[3], 50, "_ToDoList", "Slay little ladybugs.", extra)
+-- Usage: QuestChecker(ArcanistEnemies[3], 50, "_ToDoList", "Slay little ladybugs.")
 --
--- needs a rewrite to deal with hunting logs, for now it works with _ToDoList
--- extra can be a string or a variable it depends on the node text type
+-- This is used to find the provided target in the _ToDolist node and kill them until no more targets are needed
 function QuestChecker(target_name, target_distance, get_node_text_type, get_node_text_match)
     local get_node_text_location, get_node_text_location_1, get_node_text_location_2 = NodeScanner(get_node_text_type, get_node_text_match)
     local function extractTask(text)
@@ -377,7 +273,7 @@ function QuestChecker(target_name, target_distance, get_node_text_type, get_node
         if updated_node_text == get_node_text_match or not string.match(last_char, "%d") then
             break
         end
-        QuestCombat(target_name, target_distance)
+        FindAndKillTarget(target_name, target_distance)
     end
     -- checks if player in combat before ending rotation solver
     if not GetCharacterCondition(26) then
@@ -451,12 +347,15 @@ end
 -- Usage: OpenHuntLog(9, 0), Defaults to rank 0 if empty
 -- Valid classes: 0 = GLA, 1 = PGL, 2 = MRD, 3 = LNC, 4 = ARC, 5 = ROG, 6 = CNJ, 7 = THM, 8 = ACN, 9 = GC
 -- Valid ranks/pages: 0-4 for jobs, 0-2 for GC
+-- Valid show: 0 = show all, 1 = show complete, 2 = show incomplete
 -- The first variable is the class to open, the second is the rank to open
-function OpenHuntLog(class, rank)
+function OpenHuntLog(class, rank, show)
+    local defaultshow = 2
     local defaultrank = 0 --
     local defaultclass = 9 -- this is the gc log
     rank = rank or defaultrank
     class = class or defaultclass
+    show = show or defaultshow
     -- 1 Maelstrom
     -- 2 Twin adders
     -- 3 Immortal flames
@@ -468,10 +367,12 @@ function OpenHuntLog(class, rank)
     if class == 9 then
         yield("/pcall MonsterNote false 3 9 "..tostring(gc_id))
     else 
-        yield("/pcall MonsterNote false 0 "..tostring(rank))
+        yield("/pcall MonsterNote false 0 "..tostring(class))
     end
-    Sleep(0.2)
+    Sleep(0.3)
     yield("/pcall MonsterNote false 1 "..rank)
+    Sleep(0.3)
+    yield("/pcall MonsterNote false 2 "..show)
 end
 
 -- Usage: CloseHuntLog()  
@@ -488,11 +389,10 @@ end
 -- Valid ranks/pages: 0-4 for jobs, 0-2 for GC
 -- Opens and checks current progress and returns a true if finished or a false if not
 function HuntLogCheck(target_name,class,rank)
-    OpenHuntLog(class,rank)
+    OpenHuntLog(class,rank, 2)
     local node_text = ""
     local function CheckTargetAmountNeeded(sub_node)
         local target_amount = tostring(GetNodeText("MonsterNote", 2, sub_node, 3))
-        yield("/echo "..target_amount)
         local first_number = tonumber(target_amount:sub(1, 1))
         local last_number = tonumber(target_amount:sub(-1))
         if first_number == last_number then
@@ -509,19 +409,20 @@ function HuntLogCheck(target_name,class,rank)
                 return sub_node
             end
         end
-        Echo("HuntingLogChecker failed to find "..target_name)
     end
     local target_amount_needed_node = FindTargetNode()
     if not target_amount_needed_node then
-        return "failed"
+        LogInfo("Couldn't find "..target_name.." in hunting log, likely already finished")
+        return false, 0
     else
+        LogInfo("Found "..target_name.." in hunting log, time to hunt")
         local target_amount_needed = CheckTargetAmountNeeded(target_amount_needed_node)
         if target_amount_needed == 0 then
             CloseHuntLog()
-            return true, target_amount_needed
+            return false, target_amount_needed
         else
             CloseHuntLog()
-            return false, target_amount_needed
+            return true, target_amount_needed
         end
     end
 end
@@ -532,21 +433,18 @@ end
 function DoHuntLog(target_name, target_distance, class, rank)
     local finished = false
     local TargetsLeft, AmountLeft = HuntLogCheck(target_name,class,rank)
-    if TargetsLeft == "failed" then
-        AmountLeft = 0
-    else
-        if AmountLeft ~= 0 and TargetsLeft then
-            while not finished do 
-                TargetsLeft, AmountLeft = HuntLogCheck(target_name,class,rank)
-                if AmountLeft == 0 then
-                    finished = true
-                else
-                    QuestCombat(target_name, target_distance)
-                end
+    if AmountLeft > 0 and TargetsLeft then
+        while not finished do 
+            TargetsLeft, AmountLeft = HuntLogCheck(target_name,class,rank)
+            if AmountLeft == 0 then
+                finished = true
+            else
+                FindAndKillTarget(target_name, target_distance)
             end
-            if not GetCharacterCondition(26) then
-                yield("/rotation off")
-            end
+            Sleep(3)
+        end
+        if not GetCharacterCondition(26) then
+            yield("/rotation off")
         end
     end
 end
@@ -690,7 +588,6 @@ end
 -- the first three are x y z coordinates and the last one is how far away it's allowed to stop from the target
 -- deals with vnav movement, kind of has some stuck checks but it's probably not as reliable as it can be, you do not have to include range
 function Movement(x_position, y_position, z_position, range)
-
     range = range or 2
     local max_retries = 100
     local stuck_check_interval = 0.1
@@ -750,39 +647,43 @@ function Movement(x_position, y_position, z_position, range)
     local stuck_timer = 0
     local previous_distance_to_target = nil
     while true do
-        local xpos = floor_position(GetPlayerRawXPos())
-        local ypos = floor_position(GetPlayerRawYPos())
-        local zpos = floor_position(GetPlayerRawZPos())
+        if not GetCharacterCondition(45) then
+            local xpos = floor_position(GetPlayerRawXPos())
+            local ypos = floor_position(GetPlayerRawYPos())
+            local zpos = floor_position(GetPlayerRawZPos())
+            Sleep(0.1)
+            
+            local current_distance_to_target = GetDistanceToTarget(xpos, ypos, zpos)
 
-        Sleep(0.1)
+            if IsWithinRange(xpos, ypos, zpos) and not GetCharacterCondition(45) then
+                yield("/vnav stop")
+                break
+            end
 
-        local current_distance_to_target = GetDistanceToTarget(xpos, ypos, zpos)
+            if previous_distance_to_target and not GetCharacterCondition(45) then
+                if current_distance_to_target >= previous_distance_to_target - min_progress_distance then
+                    stuck_timer = stuck_timer + stuck_check_interval
+                else
+                    stuck_timer = 0
+                end
+            end
+            previous_distance_to_target = current_distance_to_target
 
-        if IsWithinRange(xpos, ypos, zpos) then
-            yield("/vnav stop")
-            break
-        end
-
-        if previous_distance_to_target then
-            if current_distance_to_target >= previous_distance_to_target - min_progress_distance then
-                stuck_timer = stuck_timer + stuck_check_interval
-            else
+            if stuck_timer >= stuck_threshold_seconds and not GetCharacterCondition(45) then
+                yield('/gaction "Jump"')
+                Sleep(0.1)
+                yield('/gaction "Jump"')
+                NavReload()
+                Sleep(0.5)
+                NavToDestination()
                 stuck_timer = 0
             end
-        end
-        previous_distance_to_target = current_distance_to_target
 
-        if stuck_timer >= stuck_threshold_seconds then
-            yield('/gaction "Jump"')
             Sleep(0.1)
-            yield('/gaction "Jump"')
-            NavReload()
-            Sleep(0.5)
-            NavToDestination()
-            stuck_timer = 0
         end
-
-        Sleep(0.1)
+        if GetCharacterCondition(45) then
+            break
+        end
     end
 end
 

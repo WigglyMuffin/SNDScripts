@@ -89,7 +89,7 @@ local MaelstromEnemiesLog1 = {
     "Sylvan Sough",        -- maelstrom_06
     "Kobold Pickman",      -- maelstrom_07
     "Amalj'aa Bruiser",    -- maelstrom_08
-    "Ixali Straightbreak", -- maelstrom_09
+    "Ixali Straightbeak",  -- maelstrom_09
     "Ixali Wildtalon"      -- maelstrom_10
 }
 
@@ -596,62 +596,116 @@ end
 -- ##################
 
 function MaelstromRank1()
+    local Rank1Finished = false
     if GetLevel() < 37 then
         Echo("Warning: You are lower than level 37")
         Echo("It is advised to be higher level, proceed with caution.")
     end
+    while not Rank1Finished do
+        if not PandoraGetFeatureEnabled("Auto-Sync FATEs") then
+            PandoraSetFeatureState("Auto-Sync FATEs", true)
+        end
+        local Rank1TargetsFinishedCounter = 0
+        
+        -- Amalj'aa Hunter
+        if HuntLogCheck(MaelstromEnemiesLog1[1], 9, 0) then
+            ZoneCheck(145, "Camp Drybone", "tp")
+            Movement(-112.60, -27.88, 343.99)
+            DoHuntLog(MaelstromEnemiesLog1[1], 80, 9, 0)
+            Rank1TargetsFinishedCounter = Rank1TargetsFinishedCounter + 1
+        else
+            Rank1TargetsFinishedCounter = Rank1TargetsFinishedCounter + 1
+        end
+        -- Sylvan Groan
+        if HuntLogCheck(MaelstromEnemiesLog1[5], 9, 0)  then
+            ZoneCheck(152, "The Hawthorne Hut", "tp")
+            Movement(-135.26, 15.12, -1.46)
+            DoHuntLog(MaelstromEnemiesLog1[5], 60, 9, 0)
+            Rank1TargetsFinishedCounter = Rank1TargetsFinishedCounter + 1
+        else
+            Rank1TargetsFinishedCounter = Rank1TargetsFinishedCounter + 1
+        end
 
-    -- Amalj'aa Hunter
-    if not HuntLogCheck(MaelstromEnemiesLog1[1], 9, 0) then
-        ZoneCheck(145, "Camp Drybone", "tp")
-        Movement(-112.60, -27.88, 343.99)
-        DoHuntLog(MaelstromEnemiesLog1[1], 40, 9, 0)
+        -- Sylvan Sough
+        if HuntLogCheck(MaelstromEnemiesLog1[6], 9, 0) then
+            ZoneCheck(152, "The Hawthorne Hut", "tp")
+            Movement(-135.26, 15.12, -1.46)
+            DoHuntLog(MaelstromEnemiesLog1[6], 60, 9, 0)
+            Rank1TargetsFinishedCounter = Rank1TargetsFinishedCounter + 1
+        else
+            Rank1TargetsFinishedCounter = Rank1TargetsFinishedCounter + 1
+        end
+
+        -- Kobold Pickman
+        if HuntLogCheck(MaelstromEnemiesLog1[7], 9, 0) then
+            ZoneCheck(138, "Aleport", "tp")
+            Movement(417.30, 35.15, -17.66)
+            ZoneTransitions()
+            Movement(-477.30, 26.29, 61.12)
+            DoHuntLog(MaelstromEnemiesLog1[7], 60, 9, 0)
+            Rank1TargetsFinishedCounter = Rank1TargetsFinishedCounter + 1
+        else
+            Rank1TargetsFinishedCounter = Rank1TargetsFinishedCounter + 1
+        end
+
+        -- Amalj'aa Bruiser 
+        if HuntLogCheck(MaelstromEnemiesLog1[8], 9, 0) then
+            ZoneCheck(146, "Little Ala Mhigo", "tp")
+            Movement(-9.38, 15.62, -291.08)
+            DoHuntLog(MaelstromEnemiesLog1[8], 60, 9, 0)
+            Rank1TargetsFinishedCounter = Rank1TargetsFinishedCounter + 1
+        else
+            Rank1TargetsFinishedCounter = Rank1TargetsFinishedCounter + 1
+        end
+
+        -- Ixali Straightbeak
+        if HuntLogCheck(MaelstromEnemiesLog1[9], 9, 0) then
+            ZoneCheck(154, "Fallgourd Float", "tp")
+            Movement(53.52, -37.91, 312.72)
+            DoHuntLog(MaelstromEnemiesLog1[9], 60, 9, 0)
+            Rank1TargetsFinishedCounter = Rank1TargetsFinishedCounter + 1
+        else
+            Rank1TargetsFinishedCounter = Rank1TargetsFinishedCounter + 1
+        end
+
+        -- Ixali Wildtalon
+        if HuntLogCheck(MaelstromEnemiesLog1[10], 9, 0) then
+            ZoneCheck(154, "Fallgourd Float", "tp")
+            Movement(-405, 9.5, 128)
+            ZoneTransitions()
+            Movement(468.13, 232.79, 321.85)
+            DoHuntLog(MaelstromEnemiesLog1[10], 60, 9, 0)
+            Movement(224.32, 301.51, -142.16)
+            Movement(229.20, 312.91, -235.02)
+            if GetCharacterCondition(4) then
+                repeat
+                    yield("/mount")
+                    Sleep(0.1)
+                until not GetCharacterCondition(4)
+            end
+            Target("Aetheryte")
+            Sleep(0.1)
+            Interact()
+            Sleep(1)
+            repeat
+                Sleep(0.1)
+                if IsAddonVisible("SelectString") then
+                    yield("/pcall SelectString true 3")
+                    Sleep(0.1)
+                end
+            until IsPlayerAvailable()
+            Rank1TargetsFinishedCounter = Rank1TargetsFinishedCounter + 1
+        else
+            Rank1TargetsFinishedCounter = Rank1TargetsFinishedCounter + 1
+        end
+
+        if Rank1TargetsFinishedCounter >= 7 then
+            Rank1Finished = true
+        end
     end
-    
-    -- Amalj'aa Bruiser
-    if not HuntLogCheck(MaelstromEnemiesLog1[8], 9, 0) then
-        ZoneCheck(146, "Little Ala Mhigo", "tp")
-        Movement(-9.38, 15.62, -291.08)
-        DoHuntLog(MaelstromEnemiesLog1[8], 40, 9, 0)
+    if not PandoraGetFeatureEnabled("Auto-Sync FATEs") then
+        PandoraSetFeatureState("Auto-Sync FATEs", false)
     end
-    
-    -- Sylvan Groan + Sylvan Sough
-    if not HuntLogCheck(MaelstromEnemiesLog1[5], 9, 0) and not HuntLogCheck(MaelstromEnemiesLog1[6], 9, 0)  then
-        ZoneCheck(152, "The Hawthorne Hut", "tp")
-        Movement(-135.26, 15.12, -1.46)
-        DoHuntLog(MaelstromEnemiesLog1[5], 40, 9, 0)
-        DoHuntLog(MaelstromEnemiesLog1[6], 40, 9, 0)
-    end
-    
-    -- Kobold Pickman
-    if not HuntLogCheck(MaelstromEnemiesLog1[7], 9, 0) then
-        ZoneCheck(138, "Aleport", "tp")
-        Movement(417.30, 35.15, -17.66)
-        ZoneTransitions()
-        Movement(-477.30, 26.29, 61.12)
-        DoHuntLog(MaelstromEnemiesLog1[7], 40, 9, 0)
-    end
-    
-    -- Ixali Straightbeak
-    if not HuntLogCheck(MaelstromEnemiesLog1[9], 9, 0) then
-        ZoneCheck(154, "Fallgourd Float", "tp")
-        Movement(53.52, -37.91, 312.72)
-        DoHuntLog(MaelstromEnemiesLog1[9], 40, 9, 0)
-    end
-    
-    -- Ixali Wildtalon
-    if not HuntLogCheck(MaelstromEnemiesLog1[10], 9, 0) then
-        ZoneCheck(154, "Fallgourd Float", "tp")
-        Movement(-405, 9.5, 128)
-        ZoneTransitions()
-        Movement(468.13, 232.79, 321.85)
-        DoHuntLog(MaelstromEnemiesLog1[10], 40, 9, 0)
-        Movement(224.32, 301.51, -142.16)
-        Movement(229.20, 312.91, -235.02)
-        Target("Aetheryte")
-        Interact()
-    end
-    
     Teleporter("Limsa", "tp")
     ZoneTransitions()
 end
