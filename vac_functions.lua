@@ -1457,7 +1457,7 @@ end
 
 -- NEEDS some kind of translation so you can just do "Sastasha" than needing to do 1
 -- NEEDS fixing as character with fewer dungeons have different duty_finder_number
--- Usage: DutyFinderQueue(1, 1) for "Sastasha"
+-- Usage: DutyFinderQueue for "Sastasha"
 -- Options: 0-9 for duty tab, 1-999 for duty number
 -- Automatically queues for specified duty, waits until player has exited duty
 function DutyFinderQueue(duty_finder_tab_number, duty_finder_number)
@@ -1510,6 +1510,59 @@ function DutyFinderQueue(duty_finder_tab_number, duty_finder_number)
         until current_zone_id == GetZoneID()
     end
 end
+
+-- NEEDS some kind of translation so you can just do "Sastasha" than needing to do 1
+-- NEEDS fixing as character with fewer dungeons have different duty_finder_number
+-- Usage: DutyFinderQueue(5) for "The Aurum Vale" OpenRegularDuty(5)
+-- Options: 0-9 for duty tab, 1-999 for duty number
+-- Automatically queues for specified duty, waits until player has exited duty
+
+-- will return to this later
+
+-- function DutyFinderQueue(duty_finder_number, duty_finder_name)
+    -- -- Open duty finder
+    -- repeat
+        -- yield("/dutyfinder")
+        -- Sleep(0.1)
+    -- until IsAddonVisible("ContentsFinder")
+    
+    -- -- Clear the duty selection
+    -- repeat
+        -- yield("/pcall ContentsFinder true 12 1")
+        -- Sleep(0.1)
+    -- until IsAddonVisible("ContentsFinder")
+    
+    -- -- Pick the duty
+    -- repeat
+        -- OpenRegularDuty(duty_finder_number)
+        -- Sleep(0.1)
+    -- until IsAddonVisible("ContentsFinder")
+    
+    -- -- Take note of current ZoneID to know when duty is over later
+    -- Sleep(0.1)
+    -- local current_zone_id = GetZoneID()
+    
+    -- -- Queue the duty
+    -- repeat
+        -- yield("/pcall ContentsFinder true 12 0")
+        -- Sleep(0.1)
+    -- until IsAddonVisible("ContentsFinderConfirm")
+    
+    -- -- Accept the duty
+    -- repeat
+        -- yield("/pcall ContentsFinderConfirm true 8")
+        -- Sleep(0.1)
+    -- until not IsAddonVisible("ContentsFinderConfirm")
+    
+    -- -- Compare ZoneID to know when duty is over
+    -- Sleep(5.0)
+    -- if GetZoneID() ~= current_zone_id then
+        -- repeat
+            -- ZoneCheck(GetZoneID())
+            -- Sleep(0.1)
+        -- until current_zone_id == GetZoneID()
+    -- end
+-- end
 
 -- NEEDS loot rules and language fixing
 -- Usage: DutyFinderSettings(0, 1, 2, 6) or DutyFinderSettings(0, 1)
