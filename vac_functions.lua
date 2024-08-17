@@ -719,6 +719,14 @@ end
 --
 -- deals with vnav movement, kind of has some stuck checks but it's probably not as reliable as it can be
 function Movement(x_position, y_position, z_position)
+
+    local range = 2
+    local max_retries = 100
+    local stuck_check_interval = 0.1
+    local stuck_threshold_seconds = 3
+    local min_progress_distance = 1
+    local min_distance_for_mounting = 20
+
     local function floor_position(pos)
         return math.floor(pos + 0.49999999999999994)
     end
@@ -727,7 +735,19 @@ function Movement(x_position, y_position, z_position)
     local y_position_floored = floor_position(y_position)
     local z_position_floored = floor_position(z_position)
 
-    local range = 3
+    local function IsWithinRange(xpos, ypos, zpos)
+        return math.abs(xpos - x_position_floored) <= range and
+               math.abs(ypos - y_position_floored) <= range and
+               math.abs(zpos - z_position_floored) <= range
+    end
+
+    local function GetDistanceToTarget(xpos, ypos, zpos)
+        return math.sqrt(
+            (xpos - x_position_floored)^2 +
+            (ypos - y_position_floored)^2 +
+            (zpos - z_position_floored)^2
+        )
+    end
 
     local function NavToDestination()
         NavReload()
@@ -736,23 +756,28 @@ function Movement(x_position, y_position, z_position)
         until NavIsReady()
 
         local retries = 0
-        local max_retries = 100
         repeat
             Sleep(0.1)
-            
-            -- add mount vs running time to destination logic
-            if TerritorySupportsMounting() then
+            local xpos = floor_position(GetPlayerRawXPos())
+            local ypos = floor_position(GetPlayerRawYPos())
+            local zpos = floor_position(GetPlayerRawZPos())
+            local distance_to_target = GetDistanceToTarget(xpos, ypos, zpos)
+
+            if distance_to_target > min_distance_for_mounting and TerritorySupportsMounting() then
                 Mount()
             end
             
             yield("/vnav moveto " .. x_position .. " " .. y_position .. " " .. z_position)
             retries = retries + 1
         until PathIsRunning() or retries >= max_retries
-        Sleep(1.0)
+
+        Sleep(0.1)
     end
 
     NavToDestination()
 
+    local stuck_timer = 0
+    local previous_distance_to_target = nil
     while true do
         local xpos = floor_position(GetPlayerRawXPos())
         local ypos = floor_position(GetPlayerRawYPos())
@@ -760,35 +785,38 @@ function Movement(x_position, y_position, z_position)
 
         Sleep(0.1)
 
-        -- Check if within 3 numbers of each pos
-        if math.abs(xpos - x_position_floored) <= range and
-           math.abs(ypos - y_position_floored) <= range and
-           math.abs(zpos - z_position_floored) <= range then
-            if PathIsRunning() then
-                --nothing
-            else 
+        local current_distance_to_target = GetDistanceToTarget(xpos, ypos, zpos)
+
+        if IsWithinRange(xpos, ypos, zpos) then
+            if not PathIsRunning() then
                 break
             end
         end
 
-        Sleep(0.5)
-        
-        local xpos2 = floor_position(GetPlayerRawXPos())
-        local ypos2 = floor_position(GetPlayerRawYPos())
-        local zpos2 = floor_position(GetPlayerRawZPos())
-
-        if xpos == xpos2 and ypos == ypos2 and zpos == zpos2 then
-            if math.abs(xpos - x_position_floored) > range or
-               math.abs(ypos - y_position_floored) > range or
-               math.abs(zpos - z_position_floored) > range then
-                NavToDestination()
-                yield('/gaction "Jump"')
-                Sleep(0.5)
-                yield('/gaction "Jump"')
+        -- stuck detection
+        if previous_distance_to_target then
+            if current_distance_to_target >= previous_distance_to_target - min_progress_distance then
+                stuck_timer = stuck_timer + stuck_check_interval
+            else
+                stuck_timer = 0
             end
         end
+        previous_distance_to_target = current_distance_to_target
+
+        if stuck_timer >= stuck_threshold_seconds then
+            yield('/gaction "Jump"')
+            Sleep(0.1)
+            yield('/gaction "Jump"')
+            NavReload()
+            Sleep(0.5)
+            NavToDestination()
+            stuck_timer = 0
+        end
+
+        Sleep(0.1)
     end
 end
+
 
 -- Usage: OpenTimers()
 --
