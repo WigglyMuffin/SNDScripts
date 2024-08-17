@@ -32,7 +32,7 @@ local outputFilename = "Lists/List_to_gather.txt"
 
 function combineItems(list)
     local combinedItems = {}
-    for _, entry in ipairs(list) do
+    for _, entry in pairs(list) do
         if entry["Row1ItemName"] and entry["Row1ItemAmount"] then
             local itemName = entry["Row1ItemName"]
             local itemAmount = tonumber(entry["Row1ItemAmount"])
