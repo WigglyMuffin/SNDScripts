@@ -463,7 +463,7 @@ function OpenHuntLog(class, rank)
     repeat
         yield("/huntinglog")
         Sleep(0.5)
-    until IsAddonVisible("MonsterNote")
+    until IsAddonReady("MonsterNote")
     local gc_id = GetPlayerGC()
     if class == 9 then
         yield("/pcall MonsterNote false 3 9 "..tostring(gc_id))
@@ -483,7 +483,7 @@ function CloseHuntLog()
     until not IsAddonVisible("MonsterNote")
 end
 
--- Usage: HuntLogCheck("Amalj'aa Hunter", 40, 9, 0)
+-- Usage: HuntLogCheck("Amalj'aa Hunter", 9, 0)
 -- Valid classes: 0 = GLA, 1 = PGL, 2 = MRD, 3 = LNC, 4 = ARC, 5 = ROG, 6 = CNJ, 7 = THM, 8 = ACN, 9 = GC
 -- Valid ranks/pages: 0-4 for jobs, 0-2 for GC
 -- Opens and checks current progress and returns a true if finished or a false if not
@@ -492,12 +492,13 @@ function HuntLogCheck(target_name,class,rank)
     local node_text = ""
     local function CheckTargetAmountNeeded(sub_node)
         local target_amount = tostring(GetNodeText("MonsterNote", 2, sub_node, 3))
+        yield("/echo "..target_amount)
         local first_number = tonumber(target_amount:sub(1, 1))
         local last_number = tonumber(target_amount:sub(-1))
         if first_number == last_number then
-            target_amount_needed = 0
+            return 0
         else
-            target_amount_needed = last_number - first_number
+            return last_number - first_number
         end
     end
     local function FindTargetNode()
@@ -513,14 +514,17 @@ function HuntLogCheck(target_name,class,rank)
     local target_amount_needed_node = FindTargetNode()
     if not target_amount_needed_node then
         Echo("Something went wrong, target node not found")
+        return "failed"
     else
+        yield("/echo dd "..tostring(target_amount_needed_node))
         local target_amount_needed = CheckTargetAmountNeeded(target_amount_needed_node)
+        yield("/echo "..tostring(target_amount_needed))
         if target_amount_needed == 0 then
             CloseHuntLog()
-            return true
+            return true, target_amount_needed
         else
             CloseHuntLog()
-            return false
+            return false, target_amount_needed
         end
     end
     CloseHuntLog()
@@ -530,54 +534,25 @@ end
 -- Valid ranks/pages: 0-4 for jobs, 0-2 for GC
 -- Opens and checks current progress of Hunting Log for automated killing
 function DoHuntLog(target_name, target_distance, class, rank)
-    OpenHuntLog(class,rank)
-    local node_text = ""
-    local target_amount_needed_node = 0
     local finished = false
-
-    local failed = false
-    local function CheckTargetAmountNeeded(sub_node)
-        local target_amount = tostring(GetNodeText("MonsterNote", 2, sub_node, 3))
-        local first_number = tonumber(target_amount:sub(1, 1))
-        local last_number = tonumber(target_amount:sub(-1))
-        if first_number == last_number then
-            target_amount_needed = 0
-        else
-            target_amount_needed = last_number - first_number
-        end
-    end
-    local function FindTargetNode()
-        for sub_node = 5, 60 do
-            Sleep(0.001)
-            node_text = tostring(GetNodeText("MonsterNote", 2, sub_node, 4))
-            if node_text == target_name then
-                return sub_node
+    local TargetsLeft, AmountLeft = HuntLogCheck(target_name,class,rank)
+    if TargetsLeft == "failed" then
+        AmountLeft = 0
+    else
+        if AmountLeft ~= 0 and TargetsLeft then
+            while not finished do 
+                TargetsLeft, AmountLeft = HuntLogCheck(target_name,class,rank)
+                if AmountLeft == 0 then
+                    finished = true
+                else
+                    QuestCombat(target_name, target_distance)
+                end
+            end
+            if not GetCharacterCondition(26) then
+                yield("/rotation off")
             end
         end
-        Echo("HuntingLogChecker failed to find "..target_name)
-        failed = true
     end
-    target_amount_needed_node = FindTargetNode()
-    if failed then
-        goto skip
-    end
-    while not finished do 
-        if not IsAddonVisible("MonsterNote") then
-            OpenHuntLog(class,rank)
-        else
-        end
-        local target_amount_needed = CheckTargetAmountNeeded(target_amount_needed_node)
-        if target_amount_needed == 0 then
-            finished = true
-        else
-            QuestCombat(target_name, target_distance)
-        end
-    end
-    if not GetCharacterCondition(26) then
-        yield("/rotation off")
-    end
-    ::skip::
-    CloseHuntLog()
 end
 
 
