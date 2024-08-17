@@ -1357,10 +1357,11 @@ function IsPlayerHigherThanLevel(player_higher_level)
 end
 
 -- NEEDS some kind of translation so you can just do "Sastasha" than needing to do 1
--- Usage: QueueDuty(1, 1) for "Sastasha"
+-- NEEDS fixing as character with fewer dungeons have different duty_finder_number
+-- Usage: DutyFinderQueue for "Sastasha"
 -- Options: 0-9 for duty tab, 1-999 for duty number
 -- Automatically queues for specified duty, waits until player has exited duty
-function QueueDuty(queue_tab_number, queue_duty_number)
+function DutyFinderQueue(duty_finder_tab_number, duty_finder_number)
     -- Open duty finder
     repeat
         yield("/dutyfinder")
@@ -1369,7 +1370,7 @@ function QueueDuty(queue_tab_number, queue_duty_number)
     
     -- Pick the duty tab
     repeat
-        yield("/pcall ContentsFinder true 1 " .. queue_tab_number)
+        yield("/pcall ContentsFinder true 1 " .. duty_finder_tab_number)
         Sleep(0.1)
     until IsAddonVisible("JournalDetail")
     
@@ -1381,7 +1382,7 @@ function QueueDuty(queue_tab_number, queue_duty_number)
     
     -- Pick the duty
     repeat
-        yield("/pcall ContentsFinder true 3 " .. queue_duty_number)
+        yield("/pcall ContentsFinder true 3 " .. duty_finder_number)
         Sleep(0.1)
     until IsAddonVisible("ContentsFinder")
     
@@ -1409,4 +1410,131 @@ function QueueDuty(queue_tab_number, queue_duty_number)
             Sleep(0.1)
         until current_zone_id == GetZoneID()
     end
+end
+
+-- NEEDS some kind of translation so you can just do "Sastasha" than needing to do 1
+-- NEEDS fixing as character with fewer dungeons have different duty_finder_number
+-- Usage: DutyFinderQueue(5) for "The Aurum Vale" OpenRegularDuty(5)
+-- Options: 0-9 for duty tab, 1-999 for duty number
+-- Automatically queues for specified duty, waits until player has exited duty
+
+-- will return to this later
+
+-- function DutyFinderQueue(duty_finder_number, duty_finder_name)
+    -- -- Open duty finder
+    -- repeat
+        -- yield("/dutyfinder")
+        -- Sleep(0.1)
+    -- until IsAddonVisible("ContentsFinder")
+    
+    -- -- Clear the duty selection
+    -- repeat
+        -- yield("/pcall ContentsFinder true 12 1")
+        -- Sleep(0.1)
+    -- until IsAddonVisible("ContentsFinder")
+    
+    -- -- Pick the duty
+    -- repeat
+        -- OpenRegularDuty(duty_finder_number)
+        -- Sleep(0.1)
+    -- until IsAddonVisible("ContentsFinder")
+    
+    -- -- Take note of current ZoneID to know when duty is over later
+    -- Sleep(0.1)
+    -- local current_zone_id = GetZoneID()
+    
+    -- -- Queue the duty
+    -- repeat
+        -- yield("/pcall ContentsFinder true 12 0")
+        -- Sleep(0.1)
+    -- until IsAddonVisible("ContentsFinderConfirm")
+    
+    -- -- Accept the duty
+    -- repeat
+        -- yield("/pcall ContentsFinderConfirm true 8")
+        -- Sleep(0.1)
+    -- until not IsAddonVisible("ContentsFinderConfirm")
+    
+    -- -- Compare ZoneID to know when duty is over
+    -- Sleep(5.0)
+    -- if GetZoneID() ~= current_zone_id then
+        -- repeat
+            -- ZoneCheck(GetZoneID())
+            -- Sleep(0.1)
+        -- until current_zone_id == GetZoneID()
+    -- end
+-- end
+
+-- NEEDS loot rules and language fixing
+-- Usage: DutyFinderSettings(0, 1, 2, 6) or DutyFinderSettings(0, 1)
+-- Options: 0-8 for duty settings
+-- 0 = Join Party in progress
+-- 1 = Unrestricted Party
+-- 2 = Level Sync (Requires Unrestricted Party)
+-- 3 = Minimum IL
+-- 4 = Silence Echo
+-- 5 = Explorer Mode
+-- 6 = Limited Leveling Roulette
+-- 7 = Loot Rules (Normal, Greed Only, Lootmaster)
+-- 8 = Language (Jp, En, De, Fr)
+-- Automatically sets specified duty finder settings
+function DutyFinderSettings(...)
+    local duty_finder_settings = {...}
+
+    -- Open duty finder
+    repeat
+        yield("/dutyfinder")
+        Sleep(0.1)
+    until IsAddonVisible("ContentsFinder")
+    
+    -- Open duty finder settings
+    repeat
+        yield("/pcall ContentsFinder true 15")
+        Sleep(0.1)
+    until IsAddonVisible("ContentsFinderSetting")
+
+    -- Loop through each setting and apply it
+    for _, setting_number in ipairs(duty_finder_settings) do
+        repeat
+            yield("/pcall ContentsFinderSetting true 1 " .. setting_number .. " 1")
+            Sleep(0.1)
+        until IsAddonVisible("ContentsFinderSetting")
+    end
+    
+    -- Close duty finder settings
+    repeat
+        yield("/pcall ContentsFinderSetting true 0")
+        Sleep(0.1)
+    until not IsAddonVisible("ContentsFinderSetting")
+end
+
+-- NEEDS loot rules and language fixing
+-- Usage: DutyFinderSettingsClear()
+-- Clear duty finder settings
+function DutyFinderSettingsClear()
+    -- Open duty finder
+    repeat
+        yield("/dutyfinder")
+        Sleep(0.1)
+    until IsAddonVisible("ContentsFinder")
+    
+    -- Open duty finder settings
+    repeat
+        yield("/pcall ContentsFinder true 15")
+        Sleep(0.1)
+    until IsAddonVisible("ContentsFinderSetting")
+
+    -- Iterate through all settings (0-8) and clear them
+    for setting_number = 0, 8 do
+        repeat
+            yield("/pcall ContentsFinderSetting true 1 " .. setting_number .. " 0")
+            Sleep(0.1)
+        until IsAddonVisible("ContentsFinderSetting")
+    end
+    
+    -- Close duty finder settings
+    repeat
+        yield("/pcall ContentsFinderSetting true 0")
+        Sleep(0.1)
+    until not IsAddonVisible("ContentsFinderSetting")
 end
