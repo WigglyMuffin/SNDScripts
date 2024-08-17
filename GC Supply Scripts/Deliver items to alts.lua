@@ -16,7 +16,7 @@ SNDAltConfigFolder = "C:\\Users\\ff14lowres\\AppData\\Roaming\\XIVLauncher\\plug
 -- # UNLESS YOU KNOW WHAT YOU'RE DOING #
 -- #####################################
 
-ProvisioningListNameToLoad = "Provisioning_List.lua"
+ProvisioningListNameToLoad = "ProvisioningList.lua"
 
 SNDConfigFolder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
 LoadFunctionsFileLocation = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
