@@ -774,6 +774,8 @@ function DzemaelDarkholdUnlock()
         yield("/li aftcastle")
         ZoneTransitions()
         DoQuest("Shadows Uncast (Maelstrom)")
+        DutyFinderQueue(1,9) -- Will need updating once function updated
+        DoQuest("Shadows Uncast (Maelstrom)")
     else
         DoQuest("Shadows Uncast (Maelstrom)") -- This has the echo text inside
     end
@@ -795,6 +797,8 @@ function TheAurumValeUnlock()
         yield("/li aftcastle")
         ZoneTransitions()
         DoQuest("Gilding the Bilious (Maelstrom)")
+        DutyFinderQueue(1,10) -- Will need updating once function updated
+        DoQuest("Shadows Uncast (Maelstrom)")
     else
         DoQuest("Gilding the Bilious (Maelstrom)") -- This has the echo text inside
     end
