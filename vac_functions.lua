@@ -715,10 +715,10 @@ function LogOut()
     until not IsAddonVisible("SelectYesno")
 end
 
--- Usage: Movement(674.92, 19.37, 436.02)
---
--- deals with vnav movement, kind of has some stuck checks but it's probably not as reliable as it can be
-function Movement(x_position, y_position, z_position)
+-- Usage: Movement(674.92, 19.37, 436.02) // Movement(674.92, 19.37, 436.02, 15)  
+-- the first three are x y z coordinates and the last one is how far away it's allowed to stop from the target
+-- deals with vnav movement, kind of has some stuck checks but it's probably not as reliable as it can be, you do not have to include range
+function Movement(x_position, y_position, z_position, range)
 
     local range = 2
     local max_retries = 100
