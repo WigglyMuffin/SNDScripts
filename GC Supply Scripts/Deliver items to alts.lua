@@ -31,7 +31,13 @@ dofile(SNDAltConfigFolder .. ProvisioningListNameToLoad)
 -- ###############
 
 DropboxSetItemQuantity(1, false, 0)
-local chars_processed = #ProvisioningList - #ProvisioningList
+local listlength = 0
+local chars_processed = 0
+
+for _ in pairs(ProvisioningList) do
+    listlength = listlength + 1
+end
+
 for indexName, item in pairs(ProvisioningList) do
     local party_member = ""
     local onlist = false
@@ -44,6 +50,7 @@ for indexName, item in pairs(ProvisioningList) do
     local Row2Item_inv_amount = 0
     local Row3Item_inv_amount = 0
     local gil_inv_amount = 0
+    local party_member = ""
     function ClearTrades()
         -- it's like this just to make sure it cleans the trades properly
         DropboxSetItemQuantity(1, false, 0)
@@ -74,15 +81,27 @@ for indexName, item in pairs(ProvisioningList) do
         while not item_trades_succeded do
             RefreshInv()
             if item["Row1ItemName"] and not item_1_succeded then
-                DropboxSetItemQuantity(tonumber(item["Row1ItemID"]), false, tonumber(item["Row1ItemAmount"]))
+                if GetItemCount(tonumber(item["Row1ItemID"])) ~= 0 then
+                    DropboxSetItemQuantity(tonumber(item["Row1ItemID"]), false, tonumber(item["Row1ItemAmount"]))
+                else
+                    item_1_succeded = true
+                end
             end
             Sleep(0.5)
             if item["Row2ItemName"] and not item_2_succeded then
-                DropboxSetItemQuantity(tonumber(item["Row2ItemID"]), false, tonumber(item["Row2ItemAmount"]))
+                if GetItemCount(tonumber(item["Row2ItemID"])) ~= 0 then
+                    DropboxSetItemQuantity(tonumber(item["Row2ItemID"]), false, tonumber(item["Row2ItemAmount"]))
+                else
+                    item_2_succeded = true
+                end
             end
             Sleep(0.5)
             if item["Row3ItemName"] and not item_3_succeded then
-                DropboxSetItemQuantity(tonumber(item["Row3ItemID"]), false, tonumber(item["Row3ItemAmount"]))
+                if GetItemCount(tonumber(item["Row3ItemID"])) ~= 0 then
+                    DropboxSetItemQuantity(tonumber(item["Row3ItemID"]), false, tonumber(item["Row3ItemAmount"]))
+                else
+                    item_3_succeded = true
+                end
             end
 
             DropboxStart()
@@ -94,17 +113,17 @@ for indexName, item in pairs(ProvisioningList) do
                 Sleep(2.0)
             end
 
-            if GetItemCount(tonumber(item["Row1ItemID"])) == Row1Item_inv_amount then
+            if GetItemCount(tonumber(item["Row1ItemID"])) == Row1Item_inv_amount and not item_1_succeded then
                 Echo("Trading "..item["Row1ItemName"].." failed, will try again")
             else
                 item_1_succeded = true
             end
-            if GetItemCount(tonumber(item["Row2ItemID"])) == Row2Item_inv_amount then
+            if GetItemCount(tonumber(item["Row2ItemID"])) == Row2Item_inv_amount and not item_2_succeded then
                 Echo("Trading "..item["Row2ItemName"].." failed, will try again")
             else
                 item_2_succeded = true
             end
-            if GetItemCount(tonumber(item["Row3ItemID"])) == Row3Item_inv_amount then
+            if GetItemCount(tonumber(item["Row3ItemID"])) == Row3Item_inv_amount and not item_3_succeded then
                 Echo("Trading "..item["Row3ItemName"].." failed, will try again")
             else
                 item_3_succeded = true
@@ -145,7 +164,7 @@ for indexName, item in pairs(ProvisioningList) do
         until IsInParty()
         party_member = GetPartyMemberName(0)
         for index1, item1 in pairs(ProvisioningList) do
-            if party_member == indexName then
+            if party_member == index1 then
                 Echo("############################")
                 Echo("Found "..party_member.." in trade list")
                 Echo("############################")
@@ -168,7 +187,7 @@ for indexName, item in pairs(ProvisioningList) do
         Echo("Getting Ready to trade")
         Echo("############################")
         Sleep(0.5)
-        Target(indexName)
+        Target(party_member)
         yield("/focustarget <t>")
         yield("/dropbox")
         Sleep(1.0)
@@ -183,7 +202,7 @@ for indexName, item in pairs(ProvisioningList) do
         ClearTrades()
         chars_processed = chars_processed + 1
         Echo("############################")
-        Echo("Done! " .. item .. "/" .. #ProvisioningList .. " characters processed")
+        Echo("Done! " .. chars_processed .. "/" .. listlength .. " characters processed")
         Echo("############################")
         Sleep(5.0)
     end
