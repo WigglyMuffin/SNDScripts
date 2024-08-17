@@ -527,7 +527,6 @@ function HuntLogCheck(target_name,class,rank)
             return false, target_amount_needed
         end
     end
-    CloseHuntLog()
 end
 -- Usage: DoHuntLog("Amalj'aa Hunter", 40, 9, 0)
 -- Valid classes: 0 = GLA, 1 = PGL, 2 = MRD, 3 = LNC, 4 = ARC, 5 = ROG, 6 = CNJ, 7 = THM, 8 = ACN, 9 = GC

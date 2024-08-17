@@ -668,19 +668,19 @@ function MaelstromRank2()
     end
 
     -- 
-    if not HuntLogCheck(MaelstromEnemiesLog2[1], 9, 0) then
-        ZoneCheck(, "", "tp")
-        Movement()
-        DoHuntLog(MaelstromEnemiesLog2[1], 40, 9, 1)
-    end
-    
-    -- 
-    if not HuntLogCheck(MaelstromEnemiesLog2[1], 9, 0) then
-        ZoneCheck(, "", "tp")
-        Movement()
-        DoHuntLog(MaelstromEnemiesLog2[1], 40, 9, 1)
-    end
-    
+    --if not HuntLogCheck(MaelstromEnemiesLog2[1], 9, 0) then
+    --    ZoneCheck(, "", "tp")
+    --    Movement()
+    --    DoHuntLog(MaelstromEnemiesLog2[1], 40, 9, 1)
+    --end
+    --
+    ---- 
+    --if not HuntLogCheck(MaelstromEnemiesLog2[1], 9, 0) then
+    --    ZoneCheck(, "", "tp")
+    --    Movement()
+    --    DoHuntLog(MaelstromEnemiesLog2[1], 40, 9, 1)
+    --end
+    --
     Teleporter("Limsa", "tp")
     ZoneTransitions()
 end
