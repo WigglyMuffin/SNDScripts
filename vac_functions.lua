@@ -720,7 +720,7 @@ end
 -- deals with vnav movement, kind of has some stuck checks but it's probably not as reliable as it can be, you do not have to include range
 function Movement(x_position, y_position, z_position, range)
 
-    local range = 2
+    range = range or 2
     local max_retries = 100
     local stuck_check_interval = 0.1
     local stuck_threshold_seconds = 3
@@ -788,12 +788,10 @@ function Movement(x_position, y_position, z_position, range)
         local current_distance_to_target = GetDistanceToTarget(xpos, ypos, zpos)
 
         if IsWithinRange(xpos, ypos, zpos) then
-            if not PathIsRunning() then
-                break
-            end
+            yield("/vnav stop")
+            break
         end
 
-        -- stuck detection
         if previous_distance_to_target then
             if current_distance_to_target >= previous_distance_to_target - min_progress_distance then
                 stuck_timer = stuck_timer + stuck_check_interval
