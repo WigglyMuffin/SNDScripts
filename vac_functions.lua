@@ -1456,6 +1456,7 @@ function IsPlayerHigherThanLevel(player_higher_level)
 end
 
 -- NEEDS some kind of translation so you can just do "Sastasha" than needing to do 1
+-- NEEDS fixing as character with fewer dungeons have different queue_duty_number
 -- Usage: QueueDuty(1, 1) for "Sastasha"
 -- Options: 0-9 for duty tab, 1-999 for duty number
 -- Automatically queues for specified duty, waits until player has exited duty
