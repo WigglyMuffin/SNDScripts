@@ -117,11 +117,11 @@ for indexName, item in pairs(ProvisioningList) do
         end
         while not gil_trade_succeded do
             RefreshInv()
-            Sleep(0.3)
             DropboxSetItemQuantity(1, false, 1)
-            Sleep(0.3)
             DropboxSetItemQuantity(1, false, 1)
-            Sleep(0.5)
+            DropboxSetItemQuantity(1, false, 1)
+            DropboxSetItemQuantity(1, false, 1)
+            Sleep(0.2)
             DropboxStart()
             Sleep(2.0)
             while tradestatus == true do
