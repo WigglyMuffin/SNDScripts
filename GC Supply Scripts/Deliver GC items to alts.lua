@@ -78,28 +78,36 @@ for indexName, item in pairs(ProvisioningList) do
         Row3Item_inv_amount = GetItemCount(tonumber(item["Row3ItemID"]))
         gil_inv_amount = tonumber(GetGil())
     end
-    function TradeItems()
+    function TradeItems(item1)
+        Sleep(0.5)
+        Target(party_member)
+        yield("/focustarget <t>")
+        yield("/dropbox")
+        Sleep(1.0)
+        Echo("############################")
+        Echo("Starting trades!")
+        Echo("############################")
         while not item_trades_succeded do
             RefreshInv()
-            if item["Row1ItemName"] and not item_1_succeded then
-                if GetItemCount(tonumber(item["Row1ItemID"])) ~= 0 then
-                    DropboxSetItemQuantity(tonumber(item["Row1ItemID"]), false, tonumber(item["Row1ItemAmount"]))
+            if item1["Row1ItemName"] and not item_1_succeded then
+                if GetItemCount(tonumber(item1["Row1ItemID"])) ~= 0 then
+                    DropboxSetItemQuantity(tonumber(item1["Row1ItemID"]), false, tonumber(item1["Row1ItemAmount"]))
                 else
                     item_1_succeded = true
                 end
             end
             Sleep(0.5)
-            if item["Row2ItemName"] and not item_2_succeded then
-                if GetItemCount(tonumber(item["Row2ItemID"])) ~= 0 then
-                    DropboxSetItemQuantity(tonumber(item["Row2ItemID"]), false, tonumber(item["Row2ItemAmount"]))
+            if item1["Row2ItemName"] and not item_2_succeded then
+                if GetItemCount(tonumber(item1["Row2ItemID"])) ~= 0 then
+                    DropboxSetItemQuantity(tonumber(item1["Row2ItemID"]), false, tonumber(item1["Row2ItemAmount"]))
                 else
                     item_2_succeded = true
                 end
             end
             Sleep(0.5)
-            if item["Row3ItemName"] and not item_3_succeded then
-                if GetItemCount(tonumber(item["Row3ItemID"])) ~= 0 then
-                    DropboxSetItemQuantity(tonumber(item["Row3ItemID"]), false, tonumber(item["Row3ItemAmount"]))
+            if item1["Row3ItemName"] and not item_3_succeded then
+                if GetItemCount(tonumber(item1["Row3ItemID"])) ~= 0 then
+                    DropboxSetItemQuantity(tonumber(item1["Row3ItemID"]), false, tonumber(item1["Row3ItemAmount"]))
                 else
                     item_3_succeded = true
                 end
@@ -114,18 +122,18 @@ for indexName, item in pairs(ProvisioningList) do
                 Sleep(2.0)
             end
 
-            if GetItemCount(tonumber(item["Row1ItemID"])) == Row1Item_inv_amount and not item_1_succeded then
-                Echo("Trading "..item["Row1ItemName"].." failed, will try again")
+            if GetItemCount(tonumber(item1["Row1ItemID"])) == Row1Item_inv_amount and not item_1_succeded then
+                Echo("Trading "..item1["Row1ItemName"].." failed, will try again")
             else
                 item_1_succeded = true
             end
-            if GetItemCount(tonumber(item["Row2ItemID"])) == Row2Item_inv_amount and not item_2_succeded then
-                Echo("Trading "..item["Row2ItemName"].." failed, will try again")
+            if GetItemCount(tonumber(item1["Row2ItemID"])) == Row2Item_inv_amount and not item_2_succeded then
+                Echo("Trading "..item1["Row2ItemName"].." failed, will try again")
             else
                 item_2_succeded = true
             end
-            if GetItemCount(tonumber(item["Row3ItemID"])) == Row3Item_inv_amount and not item_3_succeded then
-                Echo("Trading "..item["Row3ItemName"].." failed, will try again")
+            if GetItemCount(tonumber(item1["Row3ItemID"])) == Row3Item_inv_amount and not item_3_succeded then
+                Echo("Trading "..item1["Row3ItemName"].." failed, will try again")
             else
                 item_3_succeded = true
             end
@@ -168,7 +176,9 @@ for indexName, item in pairs(ProvisioningList) do
             if party_member == index1 then
                 Echo("############################")
                 Echo("Found "..party_member.." in trade list")
+                Echo("Getting Ready to trade")
                 Echo("############################")
+                TradeItems(item1)
                 onlist = true
                 break
             else
@@ -184,22 +194,6 @@ for indexName, item in pairs(ProvisioningList) do
         end
     end
     if onlist then
-        Echo("############################")
-        Echo("Getting Ready to trade")
-        Echo("############################")
-        Sleep(0.5)
-        Target(party_member)
-        yield("/focustarget <t>")
-        yield("/dropbox")
-        Sleep(1.0)
-        Echo("############################")
-        Echo("Starting trades!")
-        Echo("############################")
-        TradeItems()
-        Echo("############################")
-        Echo("Trading done!")
-        Echo("Cleaning up Dropbox")
-        Echo("############################")
         ClearTrades()
         chars_processed = chars_processed + 1
         Echo("############################")
