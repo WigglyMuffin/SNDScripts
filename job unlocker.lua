@@ -1,4 +1,8 @@
 --[[
+#####################
+# Job unlocker info #
+#####################
+
 You should have used Questionable plugin (https://git.carvel.li/liza/Questionable/) or equivalent for MSQ completion up to certain points listed below, but at the very least up until you can select your GC
 All options are better used when a mount is unlocked, mounts are not required as it has fallback but will slow the speed of completion
 Job quests are completed so you can unlock other jobs which are required for min/btn/fsh unlocks, only the first 3 job quests are included here
@@ -10,22 +14,32 @@ The quest unlocks will unlock the optional quests required for each stage of the
 ################
 # Requirements #
 ################
-Pandora 
-Vnavmesh
-Textadvance
-Bossmod
-Rotation solver
+Plugins:
+-- Pandora 
+-- Vnavmesh
+-- Textadvance
+-- Bossmod
+-- Rotation solver
+
+Other:
+-- vac_functions.lua placed in the snd config folder
+-- a CharList.lua file in the snd config folder with your characters configured properly unless you disable the external character list
+
+######################################################
+#   Stuff that doesn't work or is being worked on    #
+######################################################
+
+-- The entire arcanist line doesn't work atm
+-- The lvl 1 archer quest isn't implemented yet, the two others work fine
+-- Aurum vale unlock
+-- possible that there's more dungeon ones broken
+-- Job quests for marauder are likely to be implemented in some way soon, but none others are planned
 
 ###########
 # CONFIGS #
-###########
+#########]]
 
-We definitely need some kind of config saving functionality, this currently logs into everything even if the character has completed the stuff
-Loading a config would mean only the chars we need to do are actually done than wasting time
-
-Only set one of these
-Should really change to a DO_JOB_QUESTS = "Arcanist" or something
---DO_JOB_QUESTS = "Arcanist"    ]]
+-- Only set one of these
 DO_ARCANIST_QUESTS = false
 DO_ARCHER_QUESTS = false
 
@@ -35,7 +49,6 @@ DO_DOL_QUESTS = false
 -- Maelstrom Hunt logs, only does overworld enemies
 DO_MAELSTROM_LOG_1 = false                -- Requires level 20 (for the dungeon). This is for unlocking Storm Sergeant First Class
 DO_MAELSTROM_LOG_2 = false                -- Requires level 35 (for the dungeon), Storm Sergeant Third Class. This is for unlocking Chief Storm Sergeant
-DO_MAELSTROM_LOG_3 = false
 
 -- Dungeon unlocks, queues dungeons after unlock
 DO_HALATALI = false                       -- Requires level 20. This is for unlocking GC rank by killing Maelstrom hunt log rank 1 enemies
@@ -53,11 +66,8 @@ local use_external_character_list = true  -- Options: true = uses the external c
 MULTICHAR = false                         -- Options: true = cycles through character list, false = single character
 
 -- This is where you put your character list if you choose to not use the external one
--- If us_external_character_list is set to true then this list is completely skipped
--- Usage: First Last@Server, return_home, return_location
--- return_home options: 0 = no, 1 = yes
--- return_location options: 0 = fc entrance, 1 nearby bell, 2 limsa bell
--- This is where your alts that need items are listed
+-- If use_external_character_list or MULTICHAR is set to false then this list is completely skipped
+-- Usage: First Last@Server
 local character_list = {
     "First Last@Server",
     "First Last@Server"
@@ -120,16 +130,16 @@ local MaelstromEnemiesLog2 = {
 
 -- Enemy names for Maelstrom hunting log 3
 local MaelstromEnemiesLog3 = {
-    "",  -- maelstrom_21
-    "",       -- maelstrom_22
-    "",          -- maelstrom_23
-    "",       -- maelstrom_24
-    "",          -- maelstrom_25
-    "",     -- maelstrom_26
-    "",       -- maelstrom_27
-    "",         -- maelstrom_28
-    "",  -- maelstrom_29
-    ""    -- maelstrom_30
+    "Ixali Boldwing",      -- maelstrom_21
+    "Sylpheed Screech",    -- maelstrom_22
+    "U'Ghamaro Bedesman",  -- maelstrom_23
+    "Trenchtooth Sahagin", -- maelstrom_24
+    "Sapsa Shelfclaw",     -- maelstrom_25
+    "Zahar'ak Archer",     -- maelstrom_26
+    "Natalan Fogcaller",   -- maelstrom_27
+    "Natalan Boldwing",    -- maelstrom_28
+    "Tonberry",            -- maelstrom_29 "The Wanderer's Palace"
+    "Giant Bavarois"       -- maelstrom_30 "The Wanderer's Palace"
 }
 
 -- Will eventually be made into an excel browser function and put into functions
@@ -771,7 +781,6 @@ function MaelstromRank2()
     Teleporter("Limsa", "tp")
     ZoneTransitions()
 end
-
 -- ###################
 -- # DUNGEON UNLOCKS #
 -- ###################

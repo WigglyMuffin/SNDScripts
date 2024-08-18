@@ -7,12 +7,12 @@
  |_|    \___/ |___/ \__||_|  |_| \___/  \___/  \__, ||_| \___|
                                                 __/ |         
                                                |___/          
-                                               
 ##################################################################
 ##                   What does this script do?                  ##
 ##################################################################
-This script allows you to configure a delivery list to deliver all items configured to x characters, 
-it also allows for swapping delivery character and continue deliveries from them
+This script allows you to send out a configurable post moogle to deliver items to the character of your choice. 
+it allows you to configure what you deliver on a per character basis and it allows you to use an always_include list to forcibly add items in that to all deliveries
+it also allows for swapping delivery character and continue deliveries from them, it's all configurable in the Delivery_List.lua
 
 ##################################################################
 ##                  Explanations and how to use                 ##
@@ -34,14 +34,12 @@ Here's what each option does:
     {5268, 50}                           || and this will deliver 50 copper sand
 }
 
-]]
-
--- ###########
--- # CONFIGS #
--- ###########
+##################################################################
+##                          CONFIGS                             ##
+################################################################]]
 
 
--- anything put here will be forced on every character, this is useful if you for example want to force every character to change where stuff is being delivered
+-- anything put here will be forced on every character, this is useful if you for example want to force every character to change where things is being delivered
 local config_overrides = {
     --["Trading From"] = "Meow Meow@Cerberus",
     --["Trading To"] = "guh guh",
@@ -63,10 +61,12 @@ local always_include = {
 -- here you can adjust how many characters forward in the list you'd like to skip, in case something breaks
 charstoskip = 0
 
--- #####################################
--- #  DON'T TOUCH ANYTHING BELOW HERE  #
--- # UNLESS YOU KNOW WHAT YOU'RE DOING #
--- #####################################
+
+
+--[[##############################################################
+##               DON'T TOUCH ANYTHING BELOW HERE                ##
+##              UNLESS YOU KNOW WHAT YOU'RE DOING               ##
+################################################################]]
 
 DeliveryListToLoad = "Delivery_List.lua"
 

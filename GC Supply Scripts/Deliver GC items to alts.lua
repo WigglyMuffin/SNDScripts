@@ -1,15 +1,4 @@
 --[[
-  _  __                      ____              
- | |/ /                     |  _ \             
- | ' / _   _  _ __    ___   | |_) |  ___ __  __
- |  < | | | || '_ \  / _ \  |  _ <  / _ \\ \/ /
- | . \| |_| || |_) || (_) | | |_) || (_) |>  < 
- |_|\_\\__,_|| .__/  \___/  |____/  \___//_/\_\
-             | |                               
-             |_|                               
-##################################################################
-##                     What does this script do?                ##
-##################################################################
 This script is to be used on your main to automatically trade the right items to your alts as they show up
 The alts should be running the improved tony script to come and pick stuff up at the location you've set in that script
 It bases the trades off the order the character list was in so make sure it's all consistent
