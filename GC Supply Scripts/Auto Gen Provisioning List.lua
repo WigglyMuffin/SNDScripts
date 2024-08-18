@@ -643,6 +643,7 @@ function GetAndSaveProvisioningToTable()
             LogInfo("[APL] Already on the right character: "..char)
         else 
             LogInfo("[APL] Logging into: "..char)
+            ZoneCheck(129, "Limsa", "tp")
             RelogCharacter(char)
             Sleep(7.5) -- This is enough time to log out completely and not too long to cut into new logins
             LoginCheck()

@@ -50,7 +50,7 @@ function DOL()
     local home = false
     
     if GetCurrentWorld() == GetHomeWorld() then
-        local home = true
+        home = true
     else
         if ZoneCheck(129, "Limsa", "tp") then
             -- stuff could go here

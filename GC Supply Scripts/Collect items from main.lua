@@ -73,6 +73,7 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
         
         -- Switch characters if required, looks up current character and compares
         if GetCharacterName(true) ~= character_list_options[i][1] then
+            ZoneCheck(129, "Limsa", "tp")
             RelogCharacter(character_list_options[i][1])
             Sleep(7.5)
             LoginCheck()
