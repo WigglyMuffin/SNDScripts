@@ -771,7 +771,7 @@ function Target(target)
     repeat
         yield('/target "' .. target .. '"')
         Sleep(0.1)
-    until GetTargetName() == target
+    until string.lower(GetTargetName()) == string.lower(target)
 end
 
 -- Usage: OpenGcSupplyWindow(1)  
