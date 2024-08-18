@@ -525,8 +525,7 @@ function Mount(mount_name)
     -- Check if the player has unlocked mounts by checking the quest completion
     if not (IsQuestComplete(66236) or IsQuestComplete(66237) or IsQuestComplete(66238)) then
         if not mount_message then
-            yield('/e You do not have a mount unlocked, please consider completing the "My Little Chocobo" quest.')
-            yield("/e Skipping mount.")
+            Echo('You do not have a mount unlocked, please consider completing the "My Little Chocobo" quest.')
         else
             mount_message = true
         end
@@ -582,6 +581,7 @@ function LogOut()
         yield("/logout")
         Sleep(0.1)
     until IsAddonVisible("SelectYesno")
+    
     repeat
         yield("/pcall SelectYesno true 4")
         Sleep(0.1)
@@ -592,7 +592,7 @@ end
 -- the first three are x y z coordinates and the last one is how far away it's allowed to stop from the target
 -- deals with vnav movement, kind of has some stuck checks but it's probably not as reliable as it can be, you do not have to include range
 function Movement(x_position, y_position, z_position, range)
-    range = range or 2
+    local range = range or 2.8284272 -- 2, 2.8284272, 3.464101 = 4, 8, 12
     local max_retries = 100
     local stuck_check_interval = 0.1
     local stuck_threshold_seconds = 3
@@ -623,6 +623,7 @@ function Movement(x_position, y_position, z_position, range)
 
     local function NavToDestination()
         NavReload()
+        
         repeat
             Sleep(0.1)
         until NavIsReady()
@@ -674,9 +675,9 @@ function Movement(x_position, y_position, z_position, range)
             previous_distance_to_target = current_distance_to_target
 
             if stuck_timer >= stuck_threshold_seconds and not GetCharacterCondition(45) then
-                yield('/gaction "Jump"')
+                DoGeneralAction("Jump")
                 Sleep(0.1)
-                yield('/gaction "Jump"')
+                DoGeneralAction("Jump")
                 NavReload()
                 Sleep(0.5)
                 NavToDestination()

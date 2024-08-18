@@ -11,7 +11,7 @@
 ##                     What does this script do?                ##
 ##################################################################
 
-
+-- You need to have Auto Retainer know who your characters are otherwise it will not work, to fix you will need to log into each missing character manually
 
 ]]
 
