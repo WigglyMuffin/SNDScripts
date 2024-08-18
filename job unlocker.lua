@@ -229,7 +229,7 @@ function Arcanist2()
         Teleporter("Zephyr", "li")
         ZoneTransitions()
         Movement(-0.01, 24.5, 194.68)
-        Target("Practice Crates") -- Crates with the s
+        Target("Practice Crates")
         QuestNPC()
         yield("/rotation auto")
         
@@ -244,7 +244,7 @@ function Arcanist2()
         yield("/rotation off")
         Movement(-0.01, 24.5, 194.68)
         Sleep(1.6)
-        WaitUntilObjectExists("Practice Crate") -- Crate without the s
+        WaitUntilObjectExists("Practice Crate")
         Target("Practice Crates")
         QuestNPC("CutSceneSelectString", true, 0)
         
