@@ -89,7 +89,7 @@ function ZoneCheck(zone_id, location, tp_kind)
             Teleporter(location, tp_kind)
             ZoneTransitions()
         end
-        return true -- Returns true once teleport has happened
+        return true -- Returns true, and once teleport has happened if teleport args were passed
     else
         return false -- Returns false if zone doesn't match
     end
@@ -1245,9 +1245,9 @@ function GetPlayerPos()
 end
 
 -- NEEDS excel browser adding
--- Usage: GetJob()
+-- Usage: GetPlayerJob()
 -- Returns the current player job abbreviation
-function GetJob()
+function GetPlayerJob()
     -- Mapping for GetClassJobId()
     local job_names = {
         [0]  = "ADV", -- Adventurer
