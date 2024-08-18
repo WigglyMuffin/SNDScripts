@@ -30,10 +30,13 @@ function InteractAndWait()
     repeat
         Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
+    
+    Dismount()
     yield("/interact")
+    
     repeat
         Sleep(0.1)
-    until IsPlayerAvailable()
+    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
 end
 
 -- Usage: LoginCheck()
@@ -60,6 +63,8 @@ function Interact()
     repeat
         Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
+    
+    Dismount()
     yield("/interact")
 end
 
@@ -1551,4 +1556,15 @@ function DutyFinderSettingsClear()
         yield("/pcall ContentsFinderSetting true 0")
         Sleep(0.1)
     until not IsAddonVisible("ContentsFinderSetting")
+end
+
+-- Usage: Dismount()
+-- Checks if player is mounted, dismounts if true
+function Dismount()
+    if GetCharacterCondition(4) then
+        repeat
+            yield("/mount")
+            Sleep(0.1)
+        until not GetCharacterCondition(4)
+    end
 end
