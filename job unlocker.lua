@@ -1,31 +1,39 @@
 --[[
-You should have used Questionable plugin (https://git.carvel.li/liza/Questionable/) or equivalent for MSQ completion up to certain points listed below, but at the very least up until you can select your GC
-All options are better used when a mount is unlocked, mounts are not required as it has fallback but will slow the speed of completion
-Job quests are completed so you can unlock other jobs which are required for min/btn/fsh unlocks, only the first 3 job quests are included here
-DoL unlocks are for use with the dol leveller script, but mainly for ability to bulk level up retainers so they can be min/btn/fsh jobs
-Maelstrom log rank 1 should be used after you have selected your GC and ideally have gotten your mount (not required but speeds everything up)
-Maelstrom log rank 2 should be used after you have a combat 47 as Aurum Vale requires level 47
-The quest unlocks will unlock the optional quests required for each stage of the Maelstrom progression, see the comments below for what they are for
+To use this script correctly, you will need different stages of MSQ completed up to certain point which are listed below, either using Questionable plugin or equivalent
+While there are no minimum MSQ needing to be completed, it is recommended having a GC so you can access most of these options
+All options are better used when a mount is unlocked, but are not required as it has fallback, however this will slow the speed of completion since you will spend more time moving around
+
+Job quests (Arcanist and Archer) are completed so you have access to the armoury which allows you to unlock other jobs, only the first 3 job quests are included here
+DoL unlocks are for use with the GC Supply Scripts, so you can bulk level DoL jobs for use with retainers, as they can be used for other purposes such as Quick Ventures
+Maelstrom hunt log rank 1 should be used after you have selected your GC and ideally have gotten your mount, this requires Halatali to be completed
+Maelstrom hunt log rank 2 should be used after you have a combat at level 47, this requires The Sunken Temple of Qarn to be completed
+Dungeon unlocks are for GC related tasks, with the aforementioned being required for the GC hunt logs, Dzemael Darkhold and The Aurum Vale to be completed for higher GC ranks
+Housing unlocks will unlock the first three housing areas as specified
+
+More information on what everything does will be listed near the toggle
 
 ################
 # Requirements #
 ################
-Pandora 
-Vnavmesh
-Textadvance
-Bossmod
-Rotation solver
+
+Boss Mod - https://puni.sh/api/repository/veyn OR BossMod Reborn - https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
+Lifestream - https://raw.githubusercontent.com/NightmareXIV/MyDalamudPlugins/main/pluginmaster.json
+Pandora - https://love.puni.sh/ment.json
+Questionable - https://plugins.carvel.li/
+Rotation Solver Reborn - https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
+Something Need Doing (Expanded Edition) - https://puni.sh/api/repository/croizat
+Teleporter - Base Dalamud
+Textadvance - https://raw.githubusercontent.com/NightmareXIV/MyDalamudPlugins/main/pluginmaster.json
+Vnavmesh - https://puni.sh/api/repository/veyn
 
 ###########
 # CONFIGS #
 ###########
 
 We definitely need some kind of config saving functionality, this currently logs into everything even if the character has completed the stuff
-Loading a config would mean only the chars we need to do are actually done than wasting time
+Loading a config would mean only the chars we need to do are actually done than wasting time --]]
 
-Only set one of these
-Should really change to a DO_JOB_QUESTS = "Arcanist" or something
---DO_JOB_QUESTS = "Arcanist"    ]]
+-- Only set one of these
 DO_ARCANIST_QUESTS = false
 DO_ARCHER_QUESTS = false
 
@@ -35,7 +43,7 @@ DO_DOL_QUESTS = false
 -- Maelstrom Hunt logs, only does overworld enemies
 DO_MAELSTROM_LOG_1 = false                -- Requires level 20 (for the dungeon). This is for unlocking Storm Sergeant First Class
 DO_MAELSTROM_LOG_2 = false                -- Requires level 35 (for the dungeon), Storm Sergeant Third Class. This is for unlocking Chief Storm Sergeant
-DO_MAELSTROM_LOG_3 = false
+DO_MAELSTROM_LOG_3 = false                -- Requires level 50 (for the dungeon). This does not unlock anything.
 
 -- Dungeon unlocks, queues dungeons after unlock
 DO_HALATALI = false                       -- Requires level 20. This is for unlocking GC rank by killing Maelstrom hunt log rank 1 enemies
@@ -132,8 +140,8 @@ local MaelstromEnemiesLog3 = {
     ""    -- maelstrom_30
 }
 
--- Will eventually be made into an excel browser function and put into functions
--- Only these quests work, all will work once excel browser integration is done
+-- Will eventually be made into an excel function and put into functions
+-- Only these quests work, all will work once excel integration is done
 QuestNameList = {
     -- Dungeons
     ["Hallo Halatali"]                         = {quest_id =  697, quest_key = 66233}, -- Halatali
@@ -161,11 +169,6 @@ QuestNameList = {
     ["Training with Leih"]                     = {quest_id =  134, quest_key = 65670}  -- Archer Quest 03
 }
 
--- #####################################
--- #  DON'T TOUCH ANYTHING BELOW HERE  #
--- # UNLESS YOU KNOW WHAT YOU'RE DOING #
--- #####################################
-
 -- Edit CharList.lua file for configuring characters
 CharList = "CharList.lua"
 
@@ -191,7 +194,7 @@ end
 -- ############
 
 -- NEEDS fixing
--- limsa arcanists' first quest level 1 "Way of the Arcanist"
+-- Limsa Arcanists' First Quest Level 1 "Way of the Arcanist"
 function Arcanist1()
     if not IsQuestDone("My First Grimoire") then
         Teleporter("Limsa", "tp")
@@ -223,7 +226,7 @@ function Arcanist1()
 end
 
 -- NEEDS fixing
--- limsa arcanists' second quest level 5 "What's in the Box"
+-- Limsa Arcanists' Second Quest Level 5 "What's in the Box"
 function Arcanist2()
     if GetLevel() < 5 then
         Echo("You do not have the level 5 requirement.")
@@ -295,7 +298,7 @@ function Arcanist2()
 end
 
 -- NEEDS fixing
--- limsa arcanists' third quest level 10 "Tactical Planning"
+-- Limsa Arcanists' Third Quest Level 10 "Tactical Planning"
 function Arcanist3()
     if GetLevel() < 10 then
         Echo("You do not have the level 10 requirement.")
@@ -358,7 +361,7 @@ end
 -- # ARCHER #
 -- ##########
 
--- gridania archer first quest level 1 "Way of the Archer"
+-- Gridania Archer First Quest Level 1 "Way of the Archer"
 function Archer1()
     if not IsQuestDone("My First Bow") then
         -- forgot to do this one, probs will later.
@@ -369,7 +372,7 @@ function Archer1()
 end
 
 -- NEEDS adjusting
--- gridania archer second quest level 5 "A Matter of Perspective"
+-- Gridania Archer Second Quest Level 5 "A Matter of Perspective"
 function Archer2()
     if GetLevel() < 5 then
         Echo("You do not have the level 5 requirement.")
@@ -428,7 +431,7 @@ function Archer2()
 end
 
 -- NEEDS adjusting
--- gridania archer third quest level 10 "Training with Leih"
+-- Gridania Archer Third Quest Level 10 "Training with Leih"
 function Archer3()
     if GetLevel() < 10 then
         Echo("You do not have the level 10 requirement.")
@@ -620,36 +623,39 @@ end
 -- # GC HUNTING LOG #
 -- ##################
 
+-- Requires GC
 function MaelstromRank1()
     if GetLevel() < 37 then
         Echo("Warning: You are lower than level 37")
         Echo("It is advised to be higher level, proceed with caution.")
     end
+    
     if not PandoraGetFeatureEnabled("Auto-Sync FATEs") then
         PandoraSetFeatureState("Auto-Sync FATEs", true)
     end
-
+    
     -- Amalj'aa Hunter
     if HuntLogCheck(MaelstromEnemiesLog1[1], 9, 0) then
         ZoneCheck(145, "Camp Drybone", "tp")
         Movement(-112.60, -27.88, 343.99)
         DoHuntLog(MaelstromEnemiesLog1[1], 80, 9, 0)
     end
-
-    -- Sylvan Groan
-    if HuntLogCheck(MaelstromEnemiesLog1[5], 9, 0)  then
+    
+    -- Sylvan Groan and Sylvan Sough
+    if HuntLogCheck(MaelstromEnemiesLog1[5], 9, 0) or HuntLogCheck(MaelstromEnemiesLog1[6], 9, 0) then
         ZoneCheck(152, "The Hawthorne Hut", "tp")
         Movement(-135.26, 15.12, -1.46)
-        DoHuntLog(MaelstromEnemiesLog1[5], 60, 9, 0)
+        
+        if HuntLogCheck(MaelstromEnemiesLog1[5], 9, 0) then
+            DoHuntLog(MaelstromEnemiesLog1[5], 60, 9, 0)
+        end
+        
+        if HuntLogCheck(MaelstromEnemiesLog1[6], 9, 0) then
+            Movement(39.38, 48.42, -381.98)
+            DoHuntLog(MaelstromEnemiesLog1[6], 60, 9, 0)
+        end
     end
-
-    -- Sylvan Sough
-    if HuntLogCheck(MaelstromEnemiesLog1[6], 9, 0) then
-        ZoneCheck(152, "The Hawthorne Hut", "tp")
-        Movement(-135.26, 15.12, -1.46)
-        DoHuntLog(MaelstromEnemiesLog1[6], 60, 9, 0)
-    end
-
+    
     -- Kobold Pickman
     if HuntLogCheck(MaelstromEnemiesLog1[7], 9, 0) then
         ZoneCheck(138, "Aleport", "tp")
@@ -665,14 +671,14 @@ function MaelstromRank1()
         Movement(-9.38, 15.62, -291.08)
         DoHuntLog(MaelstromEnemiesLog1[8], 60, 9, 0)
     end
-
+    
     -- Ixali Straightbeak
     if HuntLogCheck(MaelstromEnemiesLog1[9], 9, 0) then
         ZoneCheck(154, "Fallgourd Float", "tp")
         Movement(53.52, -37.91, 312.72)
         DoHuntLog(MaelstromEnemiesLog1[9], 60, 9, 0)
     end
-
+    
     -- Ixali Wildtalon
     if HuntLogCheck(MaelstromEnemiesLog1[10], 9, 0) then
         ZoneCheck(154, "Fallgourd Float", "tp")
@@ -682,31 +688,32 @@ function MaelstromRank1()
         DoHuntLog(MaelstromEnemiesLog1[10], 60, 9, 0)
         Movement(224.32, 301.51, -142.16)
         Movement(229.20, 312.91, -235.02)
-        if GetCharacterCondition(4) then
-            repeat
-                yield("/mount")
-                Sleep(0.1)
-            until not GetCharacterCondition(4)
-        end
+        Dismount()
         Target("Aetheryte")
         Sleep(0.1)
         Interact()
         Sleep(1)
+        
+        -- If aetheryte was already attuned, exits out of the menu
         repeat
-            Sleep(0.1)
             if IsAddonVisible("SelectString") then
                 yield("/pcall SelectString true 3")
                 Sleep(0.1)
             end
+            
+            Sleep(0.1)
         until IsPlayerAvailable()
     end
+    
     if not PandoraGetFeatureEnabled("Auto-Sync FATEs") then
         PandoraSetFeatureState("Auto-Sync FATEs", false)
     end
+    
     Teleporter("Limsa", "tp")
     ZoneTransitions()
 end
 
+-- Requires Storm Sergeant Third Class rank
 function MaelstromRank2()
     if GetMaelstromGCRank() < 5 then
         Echo("You do not have the Storm Sergeant Third Class rank requirement.")
@@ -717,59 +724,76 @@ function MaelstromRank2()
         Echo("Warning: You are lower than level 48")
         Echo("It is advised to be higher level, proceed with caution.")
     end
-
+    
     -- Amalj'aa Divinator
-    if HuntLogCheck(MaelstromEnemiesLog1[1], 9, 0) then
+    if HuntLogCheck(MaelstromEnemiesLog2[1], 9, 0) then
         ZoneCheck(146, "Forgotten Springs", "tp")
         Movement(195.52, 10.28, 649.43)
         DoHuntLog(MaelstromEnemiesLog2[1], 80, 9, 0)
     end
-
+    
     -- Kobold Pitman
-    if HuntLogCheck(MaelstromEnemiesLog1[2], 9, 0) then
+    if HuntLogCheck(MaelstromEnemiesLog2[2], 9, 0) then
         ZoneCheck(137, "Costa del Sol", "tp")
         Movement(340.18, 34.70, 227.85)
-        DoHuntLog(MaelstromEnemiesLog1[2], 80, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog2[2], 80, 9, 0)
     end
-
+    
     -- Kobold Bedesman and Kobold Priest
-    if HuntLogCheck(MaelstromEnemiesLog1[6], 9, 0) or HuntLogCheck(MaelstromEnemiesLog1[7], 9, 0) then
+    if HuntLogCheck(MaelstromEnemiesLog2[6], 9, 0) or HuntLogCheck(MaelstromEnemiesLog2[7], 9, 0) then
         ZoneCheck(139, "Camp Bronze Lake", "tp")
         Movement(284.54, 42.55, -204.27)
         ZoneTransitions()
         Movement(191.80, 63.95, -273.12)
-        if HuntLogCheck(MaelstromEnemiesLog1[6], 9, 0) then
-            DoHuntLog(MaelstromEnemiesLog1[6], 80, 9, 0)
+        
+        if HuntLogCheck(MaelstromEnemiesLog2[6], 9, 0) then
+            DoHuntLog(MaelstromEnemiesLog2[6], 80, 9, 0)
         end
-        if HuntLogCheck(MaelstromEnemiesLog1[7], 9, 0) then
+        
+        if HuntLogCheck(MaelstromEnemiesLog2[7], 9, 0) then
             Movement(39.38, 48.42, -381.98)
-            DoHuntLog(MaelstromEnemiesLog1[7], 80, 9, 0)
+            DoHuntLog(MaelstromEnemiesLog2[7], 80, 9, 0)
         end
     end
-
+    
     -- Sylvan Sigh
-    if HuntLogCheck(MaelstromEnemiesLog1[8], 9, 0) then
+    if HuntLogCheck(MaelstromEnemiesLog2[8], 9, 0) then
         ZoneCheck(152, "The Hawthorne Hut", "tp")
         Movement(69.56, 11.01, -3.68)
-        DoHuntLog(MaelstromEnemiesLog1[8], 80, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog2[8], 80, 9, 0)
     end
-
+    
     -- Shelfscale Sahagin
-    if HuntLogCheck(MaelstromEnemiesLog1[9], 9, 0) then
+    if HuntLogCheck(MaelstromEnemiesLog2[9], 9, 0) then
         ZoneCheck(138, "Aleport", "tp")
         Movement(-180.78, -39.74, -70.99)
-        DoHuntLog(MaelstromEnemiesLog1[9], 80, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog2[9], 80, 9, 0)
     end
-
+    
     -- Amalj'aa Pugilist
-    if HuntLogCheck(MaelstromEnemiesLog1[10], 9, 0) then
-        ZoneCheck(145, "Little ala mhigo", "tp")
+    if HuntLogCheck(MaelstromEnemiesLog2[10], 9, 0) then
+        ZoneCheck(145, "Little Ala Mhigo", "tp")
         Movement(-133.02, 15.68, 104.79)
-        DoHuntLog(MaelstromEnemiesLog1[10], 80, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog2[10], 80, 9, 0)
     end
-
+    
     Teleporter("Limsa", "tp")
     ZoneTransitions()
+end
+
+-- Requires Second Storm Lieutenant rank
+function MaelstromRank3()
+    if GetMaelstromGCRank() < 9 then
+        Echo("You do not have the Second Storm Lieutenant rank requirement.")
+        return
+    end
+    
+    if GetLevel() < 50 then
+        Echo("Warning: You are lower than level 50")
+        Echo("It is advised to be higher level, proceed with caution.")
+    end
+    
+    -- stuff can go here
 end
 
 -- ###################
@@ -777,8 +801,6 @@ end
 -- ###################
 
 -- need to do a dungeon queue function
-
-
 
 function HalataliUnlock()
     if GetLevel() < 20 then
@@ -945,6 +967,7 @@ function Main()
     yield("/p")
     yield("/vbm cfg AI Enabled true")
     yield("/vbmai on")
+    
     if DO_ARCANIST_QUESTS then
         Echo("Arcanist quests currently do not work")
         --Arcanist1()
