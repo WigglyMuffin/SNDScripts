@@ -592,7 +592,7 @@ end
 -- the first three are x y z coordinates and the last one is how far away it's allowed to stop from the target
 -- deals with vnav movement, kind of has some stuck checks but it's probably not as reliable as it can be, you do not have to include range
 function Movement(x_position, y_position, z_position, range)
-    local range = range or 2.8284272 -- 2, 2.8284272, 3.464101 = 4, 8, 12
+    local range = range or 2.4494898 -- 2, 2.4494898, 2.8284272, 3.464101 = 4, 6, 8, 12
     local max_retries = 100
     local stuck_check_interval = 0.1
     local stuck_threshold_seconds = 3
