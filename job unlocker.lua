@@ -31,8 +31,8 @@ Textadvance - https://raw.githubusercontent.com/NightmareXIV/MyDalamudPlugins/ma
 Vnavmesh - https://puni.sh/api/repository/veyn
 
 Other:
+CharList.lua file in the snd config folder with your characters configured properly unless you disable the external character list
 vac_functions.lua placed in the snd config folder
-a CharList.lua file in the snd config folder with your characters configured properly unless you disable the external character list
 
 ######################################################
 #   Stuff that doesn't work or is being worked on    #
