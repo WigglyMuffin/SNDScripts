@@ -52,8 +52,8 @@ function DOL()
     if GetCurrentWorld() == GetHomeWorld() then
         home = true
     else
-        if ZoneCheck(129, "Limsa", "tp") then
-            -- stuff could go here
+        if not (ZoneCheck(128) or ZoneCheck(129)) then
+            Teleporter("Limsa", "tp")
         end
         
         yield("/li")
@@ -73,10 +73,11 @@ function DOL()
         Sleep(0.1)
     until IsPlayerAvailable()
     
-    if ZoneCheck(129, "Limsa", "tp") then
-        -- stuff could go here
+    if not (ZoneCheck(128) or ZoneCheck(129)) then
+        Teleporter("Limsa", "tp")
     else
         Movement(-89.36, 18.80, 1.78) -- this will need rethinking but it's a failsafe if you are already in limsa since /li Aftcastle will break if you are not near a crystal
+        PathToObject("Aetheryte", 2.8284272)
     end
     
     yield("/li Aftcastle")
@@ -101,6 +102,10 @@ if MULTICHAR then
         if GetCharacterName(true) == char then
             -- continue, no relogging needed
         else
+            if not (ZoneCheck(128) or ZoneCheck(129)) then
+                Teleporter("Limsa", "tp")
+            end
+            
             RelogCharacter(char)
             Sleep(7.5)
             LoginCheck()

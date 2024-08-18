@@ -615,13 +615,16 @@ function SerializeTable(val, name, depth)
 
     if type(val) == "table" then
         result = result .. "{\n"
+        
         for k, v in pairs(val) do
             local key
+            
             if type(k) == "string" then
                 key = string.format("[%q]", k)
             else
                 key = "[" .. k .. "]"
             end
+            
             result = result .. SerializeTable(v, key, depth + 1) .. ",\n"
         end
         result = result .. indent .. "}"
@@ -639,16 +642,23 @@ end
 function GetAndSaveProvisioningToTable()
     for _, char in ipairs(character_list) do
         LogInfo("[APL] Processing char number ".._)
+        
         if GetCharacterName(true) == char then
             LogInfo("[APL] Already on the right character: "..char)
         else 
             LogInfo("[APL] Logging into: "..char)
-            ZoneCheck(129, "Limsa", "tp")
+            
+            if not (ZoneCheck(128) or ZoneCheck(129)) then
+                Teleporter("Limsa", "tp")
+            end
+            
             RelogCharacter(char)
             Sleep(7.5) -- This is enough time to log out completely and not too long to cut into new logins
             LoginCheck()
         end
+        
         local charname = GetCharacterName()
+        
         repeat
             Sleep(0.1)
         until IsPlayerAvailable()
@@ -671,21 +681,23 @@ function GetAndSaveProvisioningToTable()
         local Row1ItemName = GetNodeText("ContentsInfoDetail", 101, 5)
         LogInfo("[APL] "..tostring(Row1ItemName))
         LogInfo("[APL] "..tostring(ContainsLetters(Row1ItemName)))
+        
         if ContainsLetters(Row1ItemName) then
             LogInfo("[APL] First row text found, continuing")
             Row1Found = true
         else
             LogInfo("[APL] First row text not found")
         end
-        --
+        
         local Row2ItemName = GetNodeText("ContentsInfoDetail", 100, 5)
+        
         if ContainsLetters(Row2ItemName) then
             LogInfo("[APL] Second row text found")
             Row2Found = true
         else
             LogInfo("[APL] Second row text not found")
         end
-        --
+        
         local Row3ItemName = GetNodeText("ContentsInfoDetail", 99, 5)
         if ContainsLetters(Row3ItemName) then
             LogInfo("[APL] Third row text found")
@@ -693,6 +705,7 @@ function GetAndSaveProvisioningToTable()
         else
             LogInfo("[APL] Third row text not found")
         end
+        
         if Row1Found then
             ProvisioningList[charname] = {}
             LogInfo("[APL] Inserting from first row")
@@ -702,6 +715,7 @@ function GetAndSaveProvisioningToTable()
             ProvisioningList[charname]["Row1ItemID"] = Row1ItemID
             ProvisioningList[charname]["Row1ItemAmount"] = Row1ItemAmount
         end
+        
         if Row2Found then
             LogInfo("[APL] Inserting from second row")
             local Row2ItemID = ItemList[Row2ItemName].ID
@@ -710,6 +724,7 @@ function GetAndSaveProvisioningToTable()
             ProvisioningList[charname]["Row2ItemID"] = Row2ItemID
             ProvisioningList[charname]["Row2ItemAmount"] = Row2ItemAmount
         end
+        
         if Row3Found then
             LogInfo("[APL] Inserting from third row")
             local Row3ItemID = ItemList[Row3ItemName].ID
@@ -718,10 +733,12 @@ function GetAndSaveProvisioningToTable()
             ProvisioningList[charname]["Row3ItemID"] = Row3ItemID
             ProvisioningList[charname]["Row3ItemAmount"] = Row3ItemAmount
         end
+        
         if Row1Found or Row2Found or Row3Found then
             local CharHomeWorld = FindWorldByID(GetHomeWorld())
             ProvisioningList[charname]["CharHomeWorld"] = CharHomeWorld
         end
+        
         local ProvisioningListStrings = "ProvisioningList = " .. SerializeTable(ProvisioningList)
         local Files = io.open(SNDConfigFolder..""..ProvisioningListSaveName, "w")
         Files:write(ProvisioningListStrings)

@@ -982,10 +982,15 @@ function DistanceName(distance_char_name1, distance_char_name2)
     return math.sqrt(dx^2 + dy^2 + dz^2)
 end
 
--- Usage: PathToObject("First Last") or PathToObject("Aetheryte")
+-- Usage: PathToObject("First Last") or PathToObject("Aetheryte", 2)
 -- Finds specified object and paths to it
-function PathToObject(path_object_name)
-    Movement(GetObjectRawXPos(path_object_name), GetObjectRawYPos(path_object_name), GetObjectRawZPos(path_object_name))
+-- Optionally can include a range value to stop once distance between character and target has been reached
+function PathToObject(path_object_name, range)
+    if range == nil then
+        Movement(GetObjectRawXPos(path_object_name), GetObjectRawYPos(path_object_name), GetObjectRawZPos(path_object_name))
+    else
+        Movement(GetObjectRawXPos(path_object_name), GetObjectRawYPos(path_object_name), GetObjectRawZPos(path_object_name), range)
+    end
 end
 
 -- Finds where your estate entrance is and paths to it
