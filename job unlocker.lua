@@ -1,21 +1,31 @@
--- You should have used Questionable plugin (https://git.carvel.li/liza/Questionable/) or equivalent for MSQ completion up to certain points listed below, but at the very least up until you can select your GC
--- All options are better used when a mount is unlocked, mounts are not required as it has fallback but will slow the speed of completion
--- Job quests are completed so you can unlock other jobs which are required for min/btn/fsh unlocks, only the first 3 job quests are included here
--- DoL unlocks are for use with the dol leveller script, but mainly for ability to bulk level up retainers so they can be min/btn/fsh jobs
--- Maelstrom log rank 1 should be used after you have selected your GC and ideally have gotten your mount (not required but speeds everything up)
--- Maelstrom log rank 2 should be used after you have a combat 47 as Aurum Vale requires level 47
--- The quest unlocks will unlock the optional quests required for each stage of the Maelstrom progression, see the comments below for what they are for
+--[[
+You should have used Questionable plugin (https://git.carvel.li/liza/Questionable/) or equivalent for MSQ completion up to certain points listed below, but at the very least up until you can select your GC
+All options are better used when a mount is unlocked, mounts are not required as it has fallback but will slow the speed of completion
+Job quests are completed so you can unlock other jobs which are required for min/btn/fsh unlocks, only the first 3 job quests are included here
+DoL unlocks are for use with the dol leveller script, but mainly for ability to bulk level up retainers so they can be min/btn/fsh jobs
+Maelstrom log rank 1 should be used after you have selected your GC and ideally have gotten your mount (not required but speeds everything up)
+Maelstrom log rank 2 should be used after you have a combat 47 as Aurum Vale requires level 47
+The quest unlocks will unlock the optional quests required for each stage of the Maelstrom progression, see the comments below for what they are for
 
--- ###########
--- # CONFIGS #
--- ###########
+################
+# Requirements #
+################
+Pandora 
+Vnavmesh
+Textadvance
+Bossmod
+Rotation solver
 
--- We definitely need some kind of config saving functionality, this currently logs into everything even if the character has completed the stuff
--- Loading a config would mean only the chars we need to do are actually done than wasting time
+###########
+# CONFIGS #
+###########
 
--- Only set one of these
--- Should really change to a DO_JOB_QUESTS = "Arcanist" or something
---DO_JOB_QUESTS = "Arcanist"
+We definitely need some kind of config saving functionality, this currently logs into everything even if the character has completed the stuff
+Loading a config would mean only the chars we need to do are actually done than wasting time
+
+Only set one of these
+Should really change to a DO_JOB_QUESTS = "Arcanist" or something
+--DO_JOB_QUESTS = "Arcanist"    ]]
 DO_ARCANIST_QUESTS = false
 DO_ARCHER_QUESTS = false
 
@@ -23,8 +33,9 @@ DO_ARCHER_QUESTS = false
 DO_DOL_QUESTS = false
 
 -- Maelstrom Hunt logs, only does overworld enemies
-DO_MAELSTROM_LOG_1 = true                -- Requires level 20 (for the dungeon). This is for unlocking Storm Sergeant First Class
+DO_MAELSTROM_LOG_1 = false                -- Requires level 20 (for the dungeon). This is for unlocking Storm Sergeant First Class
 DO_MAELSTROM_LOG_2 = false                -- Requires level 35 (for the dungeon), Storm Sergeant Third Class. This is for unlocking Chief Storm Sergeant
+DO_MAELSTROM_LOG_3 = false
 
 -- Dungeon unlocks, queues dungeons after unlock
 DO_HALATALI = false                       -- Requires level 20. This is for unlocking GC rank by killing Maelstrom hunt log rank 1 enemies
@@ -39,7 +50,7 @@ DO_MIST = false                           -- This is for unlocking Mist Housing
 
 local use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being CharList.lua, false = use the list you put in this file 
 
-MULTICHAR = false                          -- Options: true = cycles through character list, false = single character
+MULTICHAR = false                         -- Options: true = cycles through character list, false = single character
 
 -- This is where you put your character list if you choose to not use the external one
 -- If us_external_character_list is set to true then this list is completely skipped
@@ -105,6 +116,20 @@ local MaelstromEnemiesLog2 = {
     "Sylvan Sigh",         -- maelstrom_18
     "Shelfscale Sahagin",  -- maelstrom_19
     "Amalj'aa Pugilist"    -- maelstrom_20
+}
+
+-- Enemy names for Maelstrom hunting log 3
+local MaelstromEnemiesLog3 = {
+    "",  -- maelstrom_21
+    "",       -- maelstrom_22
+    "",          -- maelstrom_23
+    "",       -- maelstrom_24
+    "",          -- maelstrom_25
+    "",     -- maelstrom_26
+    "",       -- maelstrom_27
+    "",         -- maelstrom_28
+    "",  -- maelstrom_29
+    ""    -- maelstrom_30
 }
 
 -- Will eventually be made into an excel browser function and put into functions
@@ -921,11 +946,13 @@ function Main()
     yield("/vbm cfg AI Enabled true")
     yield("/vbmai on")
     if DO_ARCANIST_QUESTS then
-        Arcanist1()
-        Arcanist2()
-        Arcanist3()
+        Echo("Arcanist quests currently do not work")
+        --Arcanist1()
+        --Arcanist2()
+        --Arcanist3()
     elseif DO_ARCHER_QUESTS then
-        Archer1()
+        Echo("Archer 1 quest is not finished")
+        --Archer1()
         Archer2()
         Archer3()
     end
