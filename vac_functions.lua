@@ -1575,21 +1575,21 @@ function Dismount()
     end
 end
 
--- Usage: DropboxSetAll() or DropboxSetAll(true)
+-- Usage: DropboxSetAll() or DropboxSetAll(123456)
 -- Sets all items in Dropbox plugin to max values
--- Optionally include true to exclude gil
-function DropboxSetAll(dropbox_gil_exclude)
+-- Optionally can include a numerical value to set gil transfer amount
+function DropboxSetAll(dropbox_gil)
     local gil = 999999999
 
-    if dropbox_gil_exclude then
-        gil = 0
+    if dropbox_gil then
+        gil = dropbox_gil
     else
         gil = 999999999
     end
     
     for id = 1, 60000 do
         if id == 1 then
-            -- Set gil to gil cap if dropbox_gil_exclude not true
+            -- Set gil to gil cap or specified gil amount
             DropboxSetItemQuantity(id, false, gil)
         elseif id < 2 or id > 19 then -- Excludes Shards, Crystals and Clusters
             -- Set all item ID except 2-19
