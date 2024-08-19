@@ -227,9 +227,9 @@ function FindAndKillTarget(target_name, radius)
             Sleep(0.2)
         until GetDistanceToTarget() <= 2
         repeat
-            yield('/ac "Auto-attack"')
+            DoAction("Auto-attack")
             Sleep(0.1)
-        until GetCharacterCondition(26) and IsTargetInCombat()
+        until (IsTargetInCombat() and GetCharacterCondition(26)) or (GetTargetHP() == 0 or not GetTargetHP())
         yield("/vnavmesh stop")
     end
     
