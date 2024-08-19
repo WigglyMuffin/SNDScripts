@@ -50,6 +50,7 @@ for indexName, item in pairs(ProvisioningList) do
     local Row2Item_inv_amount = 0
     local Row3Item_inv_amount = 0
     local gil_inv_amount = 0
+    local tradestatus = DropboxIsBusy()
     
     function ClearTrades()
         -- it's like this just to make sure it cleans the trades properly
@@ -123,13 +124,21 @@ for indexName, item in pairs(ProvisioningList) do
 
             DropboxStart()
             Sleep(0.5)
-            tradestatus = DropboxIsBusy()
             
-            while tradestatus == true do
+            -- while tradestatus == true do
+                -- tradestatus = DropboxIsBusy()
+                -- LogInfo("[GCID] Currently trading...")
+                -- Sleep(0.5) --2.0
+            -- end
+            
+            -- Wait for the item trade to complete
+            repeat
                 tradestatus = DropboxIsBusy()
-                LogInfo("[GCID] Currently trading...")
-                Sleep(0.5) --2.0
-            end
+                if tradestatus then
+                    LogInfo("[GCID] Currently trading...")
+                    Sleep(0.5) -- Wait a bit before checking again
+                end
+            until not tradestatus -- Exit loop when item trade is no longer busy
 
             if GetItemCount(tonumber(item1["Row1ItemID"])) == Row1Item_inv_amount and not item_1_succeeded then
                 Echo("Trading "..item1["Row1ItemName"].." failed, will try again")
@@ -153,7 +162,6 @@ for indexName, item in pairs(ProvisioningList) do
                 item_trades_succeeded = true
             end
             
-            Sleep(0.1)
             ClearTrades()
             Sleep(1.1)
         end
