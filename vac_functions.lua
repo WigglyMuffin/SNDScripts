@@ -1574,3 +1574,29 @@ function Dismount()
         until not GetCharacterCondition(4)
     end
 end
+
+-- Usage: DropboxSetAll()
+-- Sets all items in Dropbox plugin to max values
+function DropboxSetAll()
+    for id = 1, 60000 do
+        if id == 1 then
+            -- Set gil to gil cap
+            DropboxSetItemQuantity(id, false, 999999999)
+        else
+            -- Set all other item ID to 140*999=139,860
+            DropboxSetItemQuantity(id, false, 139860)
+        end
+        
+        Sleep(0.0001)
+    end
+end
+
+-- Usage: DropboxClearAll()
+-- Clears all items in Dropbox plugin
+function DropboxClearAll()
+    for id = 1, 60000 do
+        DropboxSetItemQuantity(id, false, 0)
+    end
+    
+    Sleep(0.0001)
+end
