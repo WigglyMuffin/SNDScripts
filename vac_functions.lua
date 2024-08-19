@@ -858,6 +858,8 @@ end
 -- Attempts to deliver everything under the provisioning window, skipping over what it can't
 function GcProvisioningDeliver()
     Sleep(0.5)
+    yield("/at d")
+    PauseYesAlready()
     for i = 4, 2, -1 do
         repeat
             Sleep(0.1)
@@ -882,7 +884,7 @@ function GcProvisioningDeliver()
         if IsAddonReady("SelectYesno") then
             repeat
                 yield("/pcall SelectYesno true 0")
-                Sleep(0.1)
+                Sleep(0.1)  
             until not IsAddonVisible("SelectYesno")
             repeat
                 Sleep(0.1)
@@ -901,6 +903,7 @@ function GcProvisioningDeliver()
         err_counter_supply = 0
         ::skip::
     end
+    RestoreYesAlready()
 end
 
 -- This is just a list holding the ids for all worlds
