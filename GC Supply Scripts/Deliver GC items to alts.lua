@@ -53,31 +53,13 @@ for indexName, item in pairs(ProvisioningList) do
     local tradestatus = DropboxIsBusy()
     
     function ClearTrades()
-        -- it's like this just to make sure it cleans the trades properly
-        -- DropboxSetItemQuantity(1, false, 0)
-        -- DropboxSetItemQuantity(1, false, 0)
-        -- DropboxSetItemQuantity(1, false, 0)
-        -- DropboxSetItemQuantity(1, false, 0)
-        -- DropboxSetItemQuantity(tonumber(item["Row1ItemID"]), false, 0)
-        -- DropboxSetItemQuantity(tonumber(item["Row1ItemID"]), false, 0)
-        -- DropboxSetItemQuantity(tonumber(item["Row1ItemID"]), false, 0)
-        -- DropboxSetItemQuantity(tonumber(item["Row1ItemID"]), false, 0)
-        -- DropboxSetItemQuantity(tonumber(item["Row2ItemID"]), false, 0)
-        -- DropboxSetItemQuantity(tonumber(item["Row2ItemID"]), false, 0)
-        -- DropboxSetItemQuantity(tonumber(item["Row2ItemID"]), false, 0)
-        -- DropboxSetItemQuantity(tonumber(item["Row2ItemID"]), false, 0)
-        -- DropboxSetItemQuantity(tonumber(item["Row3ItemID"]), false, 0)
-        -- DropboxSetItemQuantity(tonumber(item["Row3ItemID"]), false, 0)
-        -- DropboxSetItemQuantity(tonumber(item["Row3ItemID"]), false, 0)
-        -- DropboxSetItemQuantity(tonumber(item["Row3ItemID"]), false, 0)
         DropboxClearAll()
-        -- Sleep(0.5)
     end
     
-    function RefreshInv()
-        Row1Item_inv_amount = GetItemCount(tonumber(item["Row1ItemID"]))
-        Row2Item_inv_amount = GetItemCount(tonumber(item["Row2ItemID"]))
-        Row3Item_inv_amount = GetItemCount(tonumber(item["Row3ItemID"]))
+    function RefreshInv(item1)
+        Row1Item_inv_amount = GetItemCount(tonumber(item1["Row1ItemID"]))
+        Row2Item_inv_amount = GetItemCount(tonumber(item1["Row2ItemID"]))
+        Row3Item_inv_amount = GetItemCount(tonumber(item1["Row3ItemID"]))
         gil_inv_amount = tonumber(GetGil())
     end
     
@@ -92,7 +74,7 @@ for indexName, item in pairs(ProvisioningList) do
         Echo("############################")
         
         while not item_trades_succeeded do
-            RefreshInv()
+            RefreshInv(item1)
             
             if item1["Row1ItemName"] and not item_1_succeeded then
                 if GetItemCount(tonumber(item1["Row1ItemID"])) ~= 0 then
@@ -124,14 +106,6 @@ for indexName, item in pairs(ProvisioningList) do
 
             DropboxStart()
             Sleep(0.5)
-            
-            -- while tradestatus == true do
-                -- tradestatus = DropboxIsBusy()
-                -- LogInfo("[GCID] Currently trading...")
-                -- Sleep(0.5) --2.0
-            -- end
-            
-            -- Wait for the item trade to complete
             repeat
                 tradestatus = DropboxIsBusy()
                 if tradestatus then
@@ -167,7 +141,7 @@ for indexName, item in pairs(ProvisioningList) do
         end
         
         while not gil_trade_succeeded do
-            RefreshInv()
+            RefreshInv(item1)
             -- Set gil amount to 1
             DropboxSetItemQuantity(1, false, 1)
             
