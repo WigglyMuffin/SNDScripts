@@ -637,7 +637,10 @@ function Movement(x_position, y_position, z_position, range)
             local distance_to_target = GetDistanceToTarget(xpos, ypos, zpos)
 
             if distance_to_target > min_distance_for_mounting and TerritorySupportsMounting() then
-                Mount()
+                repeat
+                    Mount()
+                    Sleep(0.1)
+                until GetCharacterCondition(4)
             end
             
             yield("/vnav moveto " .. x_position .. " " .. y_position .. " " .. z_position)

@@ -76,8 +76,8 @@ function DOL()
     if not (ZoneCheck(128) or ZoneCheck(129)) then
         Teleporter("Limsa", "tp")
     else
-        Movement(-89.36, 18.80, 1.78) -- this will need rethinking but it's a failsafe if you are already in limsa since /li Aftcastle will break if you are not near a crystal
-        PathToObject("Aetheryte", 2.8284272)
+        --Movement(-89.36, 18.80, 1.78) -- this will need rethinking but it's a failsafe if you are already in limsa since /li Aftcastle will break if you are not near a crystal
+        PathToObject("Aetheryte", 3.464101)
     end
     
     yield("/li Aftcastle")
