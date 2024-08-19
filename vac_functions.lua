@@ -17,6 +17,7 @@ end
 -- Distance stuff
 -- Redo Teleporter()
 -- Redo Movement()
+-- Redo ZoneCheck()
 
 -- #####################################
 -- #####################################
@@ -89,7 +90,7 @@ function ZoneCheck(zone_id, location, tp_kind)
             Teleporter(location, tp_kind)
             ZoneTransitions()
         end
-        return true -- Returns true once teleport has happened
+        return true -- Returns true, and once teleport has happened if teleport args were passed
     else
         return false -- Returns false if zone doesn't match
     end
@@ -637,7 +638,10 @@ function Movement(x_position, y_position, z_position, range)
             local distance_to_target = GetDistanceToTarget(xpos, ypos, zpos)
 
             if distance_to_target > min_distance_for_mounting and TerritorySupportsMounting() then
-                Mount()
+                repeat
+                    Mount()
+                    Sleep(0.1)
+                until GetCharacterCondition(4)
             end
             
             yield("/vnav moveto " .. x_position .. " " .. y_position .. " " .. z_position)
@@ -983,10 +987,19 @@ function DistanceName(distance_char_name1, distance_char_name2)
     return math.sqrt(dx^2 + dy^2 + dz^2)
 end
 
--- Usage: PathToObject("First Last") or PathToObject("Aetheryte")
+-- Usage: PathToObject("First Last") or PathToObject("Aetheryte", 2)
 -- Finds specified object and paths to it
-function PathToObject(path_object_name)
-    Movement(GetObjectRawXPos(path_object_name), GetObjectRawYPos(path_object_name), GetObjectRawZPos(path_object_name))
+-- Optionally can include a range value to stop once distance between character and target has been reached
+function PathToObject(path_object_name, range)
+    if range == nil then
+        Movement(GetObjectRawXPos(path_object_name), GetObjectRawYPos(path_object_name), GetObjectRawZPos(path_object_name))
+    else
+        Movement(GetObjectRawXPos(path_object_name), GetObjectRawYPos(path_object_name), GetObjectRawZPos(path_object_name), range)
+    end
+    
+    repeat
+        Sleep(0.1)
+    until not PathIsRunning()
 end
 
 -- Finds where your estate entrance is and paths to it
@@ -1241,9 +1254,9 @@ function GetPlayerPos()
 end
 
 -- NEEDS excel browser adding
--- Usage: GetJob()
+-- Usage: GetPlayerJob()
 -- Returns the current player job abbreviation
-function GetJob()
+function GetPlayerJob()
     -- Mapping for GetClassJobId()
     local job_names = {
         [0]  = "ADV", -- Adventurer
@@ -1569,4 +1582,41 @@ function Dismount()
             Sleep(0.1)
         until not GetCharacterCondition(4)
     end
+end
+
+-- Usage: DropboxSetAll() or DropboxSetAll(123456)
+-- Sets all items in Dropbox plugin to max values
+-- Optionally can include a numerical value to set gil transfer amount
+function DropboxSetAll(dropbox_gil)
+    local gil = 999999999
+
+    if dropbox_gil then
+        gil = dropbox_gil
+    else
+        gil = 999999999
+    end
+    
+    for id = 1, 60000 do
+        if id == 1 then
+            -- Set gil to gil cap or specified gil amount
+            DropboxSetItemQuantity(id, false, gil)
+        elseif id < 2 or id > 19 then -- Excludes Shards, Crystals and Clusters
+            -- Set all item ID except 2-19
+            DropboxSetItemQuantity(id, false, 139860) -- NQ
+            DropboxSetItemQuantity(id, true, 139860)  -- HQ
+        end
+        
+        Sleep(0.0001)
+    end
+end
+
+-- Usage: DropboxClearAll()
+-- Clears all items in Dropbox plugin
+function DropboxClearAll()
+    for id = 1, 60000 do
+        DropboxSetItemQuantity(id, false, 0) -- NQ
+        DropboxSetItemQuantity(id, true, 0)  -- HQ
+    end
+    
+    Sleep(0.0001)
 end

@@ -58,7 +58,7 @@ DO_DOL_QUESTS = false
 -- Maelstrom Hunt logs, only does overworld enemies
 DO_MAELSTROM_LOG_1 = false                -- Requires level 20 (for the dungeon). This is for unlocking Storm Sergeant First Class
 DO_MAELSTROM_LOG_2 = false                -- Requires level 35 (for the dungeon), Storm Sergeant Third Class. This is for unlocking Chief Storm Sergeant
-DO_MAELSTROM_LOG_3 = false                -- Requires level 50 (for the dungeon). This does not unlock anything.
+--DO_MAELSTROM_LOG_3 = false                -- Requires level 50 (for the dungeon). This does not unlock anything.
 
 -- Dungeon unlocks, queues dungeons after unlock
 DO_HALATALI = false                       -- Requires level 20. This is for unlocking GC rank by killing Maelstrom hunt log rank 1 enemies
@@ -1008,6 +1008,10 @@ function Main()
         MaelstromRank2()
     end
     
+    if DO_MAELSTROM_LOG_3 then
+        MaelstromRank3()
+    end
+    
 -- Dungeons
     if DO_HALATALI then
         HalataliUnlock()
@@ -1044,7 +1048,10 @@ if MULTICHAR then
         if GetCharacterName(true) == char then
             -- continue, no relogging needed
         else
-            ZoneCheck(129, "Limsa", "tp")
+            if not (ZoneCheck(128) or ZoneCheck(129)) then
+                Teleporter("Limsa", "tp")
+            end
+            
             RelogCharacter(char)
             Sleep(7.5)
             LoginCheck()
