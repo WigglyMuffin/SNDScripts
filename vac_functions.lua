@@ -853,14 +853,6 @@ end
 --
 -- Attempts to deliver everything under the provisioning window, skipping over what it can't
 function GcProvisioningDeliver()
-    local function ContainsLetters(input)
-        input = tostring(input)
-        if input:match("%a") then
-            return true
-        else
-            return false
-        end
-    end
     Sleep(0.5)
     for i = 4, 2, -1 do
         repeat
@@ -872,7 +864,7 @@ function GcProvisioningDeliver()
         if ContainsLetters(item_name) and item_qty >= item_requested_amount then
             -- continue
         else
-            yield("/echo Nothing here, moving on")
+            LogInfo("/echo Nothing here, moving on")
             goto skip
         end
         local row_to_call = i - 2
@@ -882,11 +874,20 @@ function GcProvisioningDeliver()
         repeat
             err_counter_request = err_counter_request+1
             Sleep(0.1)
-        until IsAddonReady("GrandCompanySupplyReward") or err_counter_request >= 50
-        if err_counter_request >= 50 then
-            Echo("Something might have gone wrong")
+        until IsAddonReady("GrandCompanySupplyReward") or IsAddonReady("SelectYesno") or err_counter_request >= 70
+        if IsAddonReady("SelectYesno") then
+            repeat
+                yield("/pcall SelectYesno true 0")
+                Sleep(0.1)
+            until not IsAddonVisible("SelectYesno")
+            repeat
+                Sleep(0.1)
+            until IsAddonReady("GrandCompanySupplyReward")
+        end
+        if err_counter_request >= 70 then
+            LogInfo("Something might have gone wrong")
             err_counter_request = 0
-        else 
+        else
             yield("/pcall GrandCompanySupplyReward true 0")
         end
         repeat

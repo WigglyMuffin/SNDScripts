@@ -6,6 +6,7 @@
 -- ###########
 
 local use_external_character_list = true  -- Options true = uses the external character list in the same folder, default name being CharList.lua, false uses the list you put in this file 
+local skip_lvl_100_jobs = false
 
 -- This is where you put your character list if you choose to not use the external one
 -- If us_external_character_list is set to true then this list is completely skipped
