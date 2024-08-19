@@ -52,10 +52,6 @@ for indexName, item in pairs(ProvisioningList) do
     local gil_inv_amount = 0
     local tradestatus = DropboxIsBusy()
     
-    function ClearTrades()
-        DropboxClearAll()
-    end
-    
     function RefreshInv(item1)
         Row1Item_inv_amount = GetItemCount(tonumber(item1["Row1ItemID"]))
         Row2Item_inv_amount = GetItemCount(tonumber(item1["Row2ItemID"]))
@@ -104,13 +100,15 @@ for indexName, item in pairs(ProvisioningList) do
                 end
             end
 
+            Sleep(0.1)
             DropboxStart()
-            Sleep(0.5)
+            
+            -- Wait for the item trade to complete
             repeat
                 tradestatus = DropboxIsBusy()
                 if tradestatus then
                     LogInfo("[GCID] Currently trading...")
-                    Sleep(0.5) -- Wait a bit before checking again
+                    Sleep(0.5)
                 end
             until not tradestatus -- Exit loop when item trade is no longer busy
 
@@ -136,7 +134,7 @@ for indexName, item in pairs(ProvisioningList) do
                 item_trades_succeeded = true
             end
             
-            ClearTrades()
+            DropboxClearAll()
             Sleep(1.1)
         end
         
@@ -153,15 +151,9 @@ for indexName, item in pairs(ProvisioningList) do
                 tradestatus = DropboxIsBusy()
                 if tradestatus then
                     LogInfo("[GCID] Currently trading...")
-                    Sleep(0.5) -- Wait a bit before checking again
+                    Sleep(0.5)
                 end
             until not tradestatus -- Exit loop when gil trade is no longer busy
-            
-            -- while tradestatus == true do
-                -- tradestatus = DropboxIsBusy()
-                -- LogInfo("[GCID] Currently trading...")
-                -- Sleep(2.0) --2.0
-            -- end
             
             if GetGil() == (gil_inv_amount - 1) then
                 gil_trade_succeeded = true
@@ -169,7 +161,7 @@ for indexName, item in pairs(ProvisioningList) do
                 LogInfo("[GCID] Trade did not succeed, retrying...")
             end
             
-            ClearTrades()
+            DropboxClearAll()
             Sleep(1.1)
         end
     end

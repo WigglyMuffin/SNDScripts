@@ -642,6 +642,11 @@ function MaelstromRank1()
         Echo("It is advised to be higher level, proceed with caution.")
     end
     
+    if GetMaelstromGCRank() >= 5 then
+        Echo("You have already completed this hunting log.")
+        return
+    end
+    
     if not PandoraGetFeatureEnabled("Auto-Sync FATEs") then
         PandoraSetFeatureState("Auto-Sync FATEs", true)
     end
@@ -732,6 +737,11 @@ function MaelstromRank2()
         return
     end
     
+    if GetMaelstromGCRank() >= 9 then
+        Echo("You have already completed this hunting log.")
+        return
+    end
+    
     if GetLevel() < 48 then
         Echo("Warning: You are lower than level 48")
         Echo("It is advised to be higher level, proceed with caution.")
@@ -794,6 +804,7 @@ function MaelstromRank2()
 end
 
 -- Requires Second Storm Lieutenant rank
+-- NEEDS a return if done
 function MaelstromRank3()
     if GetMaelstromGCRank() < 9 then
         Echo("You do not have the Second Storm Lieutenant rank requirement.")

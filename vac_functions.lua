@@ -18,6 +18,10 @@ end
 -- Redo Teleporter()
 -- Redo Movement()
 -- Redo ZoneCheck()
+-- IsQuestNameAccepted() see below
+-- IsHuntLogComplete() see below
+-- Add to GetPlayerJob() to include job xp IDs
+-- GetPlayerJobLevel() see below
 
 -- #####################################
 -- #####################################
@@ -1622,4 +1626,29 @@ function DropboxClearAll()
     end
     
     Sleep(0.0001)
+end
+
+-- Usage: IsQuestNameAccepted()
+-- Checks if quest name is accepted
+-- NEEDS doing
+function IsQuestNameAccepted()
+    -- stuff can go here
+    -- check IsQuestDone() for example
+    -- do when have actual quest list from csv
+end
+
+-- Usage: IsHuntLogComplete("Arcanist1") or IsHuntLogComplete("Maelstrom2")
+-- Checks if player has the hunt log rank completed
+function IsHuntLogComplete()
+    -- stuff can go here
+    -- check if the entire rank is done
+end
+
+-- Usage: GetPlayerJobLevel() or GetPlayerJobLevel("WAR")
+-- Returns current player job level, can specify job to check
+function GetPlayerJobLevel()
+    -- stuff can go here
+    -- check what player job is from classjob xp ID
+    -- hook it with GetPlayerJob() for the actual jobs
+    -- do when have actual classjob list from csv
 end
