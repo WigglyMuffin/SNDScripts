@@ -47,40 +47,33 @@ MULTICHAR = true
 -- #############
 
 function DOL()
-    local home = false
+    local home = GetCurrentWorld() == GetHomeWorld()
     
-    if GetCurrentWorld() == GetHomeWorld() then
-        home = true
-    else
-        if not ZoneCheck(129) then
+    if not home then
+        if ZoneCheck(129) then
             Teleporter("Limsa", "tp")
         end
         
         yield("/li")
+        
+        -- Wait until the player is on the home world
+        repeat
+            Sleep(0.1)
+            home = GetCurrentWorld() == GetHomeWorld()
+        until home
     end
     
-    repeat
-        Sleep(0.1)
-        
-        if GetCurrentWorld() == GetHomeWorld() then
-            if GetCurrentWorld() == 0 and GetHomeWorld() == 0 then
-            else
-                home = true
-            end
-        end
-    until home
-    
+    -- Wait until the player is fully available
     repeat
         Sleep(0.1)
     until IsPlayerAvailable()
     
-    if not ZoneCheck(128) then
+    -- Ensure player is in Limsa
+    if ZoneCheck(129) then
         Teleporter("Limsa", "tp")
-    else
-        --Movement(-89.36, 18.80, 1.78) -- this will need rethinking but it's a failsafe if you are already in limsa since /li Aftcastle will break if you are not near a crystal
-        PathToObject("Aetheryte", 4)
     end
     
+    PathToObject("Aetheryte", 4)
     yield("/li Aftcastle")
     ZoneTransitions()
     Movement(93.00, 40.27, 75.60)
@@ -89,6 +82,7 @@ function DOL()
     CloseGcSupplyWindow()
     LogOut()
 end
+
 
 -- ###############
 -- # MAIN SCRIPT #
@@ -103,10 +97,6 @@ if MULTICHAR then
         if GetCharacterName(true) == char then
             -- continue, no relogging needed
         else
-            if not ZoneCheck(129) then
-                Teleporter("Limsa", "tp")
-            end
-            
             RelogCharacter(char)
             Sleep(7.5)
             LoginCheck()

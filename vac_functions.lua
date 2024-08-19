@@ -17,6 +17,7 @@ end
 -- Distance stuff
 -- Redo Teleporter()
 -- Redo Movement()
+-- Redo ZoneCheck()
 
 -- #####################################
 -- #####################################
@@ -994,6 +995,10 @@ function PathToObject(path_object_name, range)
     else
         Movement(GetObjectRawXPos(path_object_name), GetObjectRawYPos(path_object_name), GetObjectRawZPos(path_object_name), range)
     end
+    
+    repeat
+        Sleep(0.1)
+    until not PathIsRunning()
 end
 
 -- Finds where your estate entrance is and paths to it
