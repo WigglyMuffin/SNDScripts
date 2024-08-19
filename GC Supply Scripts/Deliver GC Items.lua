@@ -73,7 +73,7 @@ function DOL()
         Teleporter("Limsa", "tp")
     end
     
-    PathToObject("Aetheryte", 4)
+    PathToObject("Aetheryte", 4.5)
     yield("/li Aftcastle")
     ZoneTransitions()
     Movement(93.00, 40.27, 75.60)
