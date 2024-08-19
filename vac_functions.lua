@@ -219,21 +219,30 @@ function FindAndKillTarget(target_name, radius)
             until not GetCharacterCondition(4)
         end
         repeat
-            yield("/rotation auto")
+            yield("/rotation manual")
             if not PathIsRunning() then
                 yield("/vnavmesh movetarget")
             end
             yield('/ac "Auto-attack"')
             Sleep(0.2)
         until GetDistanceToTarget() <= 2
-        yield('/ac "Auto-attack"')
+        repeat
+            yield('/ac "Auto-attack"')
+            Sleep(0.1)
+        until GetCharacterCondition(26)
         yield("/vnavmesh stop")
     end
     
     repeat
         Sleep(0.1)
-    until GetTargetHP() == 0 or not GetTargetHP() and not GetCharacterCondition(26) 
+    until GetTargetHP() == 0 or not GetTargetHP()
     Sleep(0.5)
+    if GetCharacterCondition(26) then
+        yield("/rotation auto")
+        repeat
+            Sleep(0.1)
+        until not GetCharacterCondition(26)
+    end
 end
 
 -- Usage: GetNodeTextLookupUpdate("_ToDolist",16,3,4) // GetNodeTextLookupUpdate("_ToDolist",16,3)
