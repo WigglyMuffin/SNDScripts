@@ -1584,7 +1584,8 @@ function DropboxSetAll()
             DropboxSetItemQuantity(id, false, 999999999)
         else
             -- Set all other item ID to 140*999=139,860
-            DropboxSetItemQuantity(id, false, 139860)
+            DropboxSetItemQuantity(id, false, 139860) -- NQ
+            DropboxSetItemQuantity(id, true, 139860) -- HQ
         end
         
         Sleep(0.0001)
@@ -1595,7 +1596,8 @@ end
 -- Clears all items in Dropbox plugin
 function DropboxClearAll()
     for id = 1, 60000 do
-        DropboxSetItemQuantity(id, false, 0)
+        DropboxSetItemQuantity(id, false, 0) -- NQ
+        DropboxSetItemQuantity(id, true, 0) -- HQ
     end
     
     Sleep(0.0001)
