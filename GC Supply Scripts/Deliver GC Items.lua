@@ -52,6 +52,7 @@ function DOL()
     if not home then
         if ZoneCheck(129) then
             Teleporter("Limsa", "tp")
+            ZoneTransitions()
         end
         
         yield("/li")
@@ -71,6 +72,7 @@ function DOL()
     -- Ensure player is in Limsa
     if ZoneCheck(129) then
         Teleporter("Limsa", "tp")
+        ZoneTransitions()
     end
     
     Sleep(0.5)
