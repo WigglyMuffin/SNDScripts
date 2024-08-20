@@ -60,6 +60,7 @@ for indexName, item in pairs(ProvisioningList) do
     end
     
     function TradeItems(item1)
+        PartyLeave()
         Sleep(0.5)
         Target(party_member)
         yield("/focustarget <t>")
@@ -134,8 +135,9 @@ for indexName, item in pairs(ProvisioningList) do
                 item_trades_succeeded = true
             end
             
+            Sleep(0.1)
             DropboxClearAll()
-            Sleep(1.1)
+            --Sleep(1.1)
         end
         
         while not gil_trade_succeeded do
@@ -161,8 +163,9 @@ for indexName, item in pairs(ProvisioningList) do
                 LogInfo("[GCID] Trade did not succeed, retrying...")
             end
             
+            Sleep(0.1)
             DropboxClearAll()
-            Sleep(1.1)
+            --Sleep(1.1)
         end
     end
     
@@ -201,7 +204,8 @@ for indexName, item in pairs(ProvisioningList) do
     end
     
     if onlist then
-        ClearTrades()
+        Sleep(0.1)
+        DropboxClearAll()
         chars_processed = chars_processed + 1
         Echo("############################")
         Echo("Done! " .. chars_processed .. "/" .. listlength .. " characters processed")

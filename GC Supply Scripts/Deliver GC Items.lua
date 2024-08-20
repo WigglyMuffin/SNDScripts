@@ -52,6 +52,7 @@ function DOL()
     if not home then
         if ZoneCheck(129) then
             Teleporter("Limsa", "tp")
+            ZoneTransitions()
         end
         
         yield("/li")
@@ -71,8 +72,10 @@ function DOL()
     -- Ensure player is in Limsa
     if ZoneCheck(129) then
         Teleporter("Limsa", "tp")
+        ZoneTransitions()
     end
     
+    Sleep(0.5)
     PathToObject("Aetheryte", 4.5)
     yield("/li Aftcastle")
     ZoneTransitions()
@@ -80,7 +83,7 @@ function DOL()
     OpenGcSupplyWindow(1)
     GcProvisioningDeliver()
     CloseGcSupplyWindow()
-    LogOut()
+    --LogOut()
 end
 
 

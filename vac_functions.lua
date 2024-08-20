@@ -218,17 +218,18 @@ function FindAndKillTarget(target_name, radius)
                 Sleep(0.1)
             until not GetCharacterCondition(4)
         end
+        
         yield("/rotation manual")
-        if not PathIsRunning() and not GetCharacterCondition(26) or GetDistanceToTarget() >= 10 then
-            yield("/vnavmesh movetarget")
-            Sleep(0.3)
-        end
-        while GetDistanceToTarget() <= 3 do
-            if PathIsRunning() then
-                yield("/vnavmesh stop")
+        
+        repeat
+            if not PathIsRunning() then
+                yield("/vnavmesh movetarget")
             end
-            DoAction("Auto-attack")
-        end
+            yield('/ac "Auto-attack"')
+            Sleep(0.1)
+        until (GetDistanceToTarget() <= 2 and IsTargetInCombat() and GetCharacterCondition(26)) or GetTargetHP() <= 0
+        
+        yield("/vnavmesh stop")
     end
     Sleep(0.5)
     if GetCharacterCondition(26) then
@@ -865,8 +866,9 @@ end
 -- Attempts to deliver everything under the provisioning window, skipping over what it can't
 function GcProvisioningDeliver()
     Sleep(0.5)
-    yield("/at d")
+    --yield("/at n")
     PauseYesAlready()
+    
     for i = 4, 2, -1 do
         repeat
             Sleep(0.1)
@@ -874,42 +876,72 @@ function GcProvisioningDeliver()
         local item_name = GetNodeText("GrandCompanySupplyList", 6, i, 10)
         local item_qty = tonumber(GetNodeText("GrandCompanySupplyList", 6, i, 6))
         local item_requested_amount = tonumber(GetNodeText("GrandCompanySupplyList", 6, i, 9))
+        
         if ContainsLetters(item_name) and item_qty >= item_requested_amount then
             -- continue
         else
             LogInfo("/echo Nothing here, moving on")
             goto skip
         end
+        
         local row_to_call = i - 2
         yield("/pcall GrandCompanySupplyList true 1 "..row_to_call)
         local err_counter_request = 0
         local err_counter_supply = 0
+        
         repeat
             err_counter_request = err_counter_request+1
             Sleep(0.1)
-        until IsAddonReady("GrandCompanySupplyReward") or IsAddonReady("SelectYesno") or err_counter_request >= 70
-        if IsAddonReady("SelectYesno") then
-            repeat
-                yield("/pcall SelectYesno true 0")
-                Sleep(0.1)  
-            until not IsAddonVisible("SelectYesno")
-            repeat
-                Sleep(0.1)
-            until IsAddonReady("GrandCompanySupplyReward")
-        end
+        until IsAddonReady("GrandCompanySupplyReward") or err_counter_request >= 70
+        
         if err_counter_request >= 70 then
             LogInfo("Something might have gone wrong")
             err_counter_request = 0
         else
             yield("/pcall GrandCompanySupplyReward true 0")
         end
+        
+        Sleep(0.2)
+        
+        -- Wait for either SelectYesno or GrandCompanySupplyList
+        local wait_time = 0
+        local max_wait_time = 2.0 -- Max wait time
+        
+        while wait_time < max_wait_time do
+            if IsAddonReady("SelectYesno") then
+                -- SelectYesno appeared before GrandCompanySupplyList
+                local attempt_count = 0
+                local max_attempts = 10
+                
+                repeat
+                    yield("/pcall SelectYesno true 0")
+                    Sleep(0.05)
+                    
+                    if IsAddonVisible("SelectYesno") then
+                        attempt_count = attempt_count + 1
+                    else
+                        break
+                    end
+                until not IsAddonVisible("SelectYesno") or attempt_count >= max_attempts
+                break
+            elseif IsAddonReady("GrandCompanySupplyList") then
+                -- GrandCompanySupplyList appeared first instead, SelectYesno was skipped
+                break
+            end
+            
+            Sleep(0.1)
+            wait_time = wait_time + 0.1
+        end
+        
         repeat
             err_counter_supply = err_counter_supply+1
             Sleep(0.1)
         until IsAddonReady("GrandCompanySupplyList") or err_counter_supply >= 50
+        
         err_counter_supply = 0
         ::skip::
     end
+    
     RestoreYesAlready()
 end
 
@@ -1161,6 +1193,8 @@ function PartyAccept()
     end
 end
 
+-- Usage: PartyLeave()
+-- Will leave party if in a party
 function PartyLeave()
     if IsInParty() then
         repeat
@@ -1592,6 +1626,10 @@ function Dismount()
             Sleep(0.1)
         until not GetCharacterCondition(4)
     end
+    
+    repeat
+        Sleep(0.1)
+    until IsPlayerAvailable() and not IsPlayerCasting()
 end
 
 -- Usage: DropboxSetAll() or DropboxSetAll(123456)

@@ -1,5 +1,4 @@
---[[
-################
+--[[############
 # Job unlocker #
 ################
 
@@ -678,7 +677,7 @@ function MaelstromRank1()
         ZoneCheck(138, "Aleport", "tp")
         Movement(417.30, 35.15, -17.66)
         ZoneTransitions()
-        Movement(-477.30, 26.29, 61.12)
+        Movement(-399.78, 37.64, 16.40)
         DoHuntLog(MaelstromEnemiesLog1[7], 150, 9, 0)
     end
     
@@ -706,20 +705,24 @@ function MaelstromRank1()
         Movement(224.32, 301.51, -142.16)
         Movement(229.20, 312.91, -235.02)
         Dismount()
+        Sleep(0.5)
         Target("Aetheryte")
         Sleep(0.1)
         Interact()
-        Sleep(1)
         
-        -- If aetheryte was already attuned, exits out of the menu
-        repeat
-            if IsAddonVisible("SelectString") then
+        -- Checks if player is attuning otherwise exit menu
+        if GetCharacterCondition(27) then
+            repeat
+                Sleep(0.1)
+            until IsPlayerAvailable()
+            
+            Sleep(1.0)
+        else
+            repeat
                 yield("/pcall SelectString true 3")
                 Sleep(0.1)
-            end
-            
-            Sleep(0.1)
-        until IsPlayerAvailable()
+            until not IsAddonVisible("SelectString")
+        end
     end
     
     if not PandoraGetFeatureEnabled("Auto-Sync FATEs") then
@@ -839,6 +842,7 @@ function HalataliUnlock()
         Movement(-399.64, 23.00, -351.08) -- It gets stuck otherwise
         Movement(-471.06, 23.01, -354.81)
         DoQuest("Hallo Halatali")
+        EquipRecommendedGear()
     else
         DoQuest("Hallo Halatali") -- This has the echo text inside
     end
@@ -886,6 +890,7 @@ function TheSunkenTempleOfQarnUnlock()
         until IsQuestComplete(66300)
         
         --DoQuest("Braving New Depths")
+        EquipRecommendedGear()
     else
         DoQuest("Braving New Depths") -- This has the echo text inside
     end
@@ -908,6 +913,7 @@ function DzemaelDarkholdUnlock()
         DoQuest("Shadows Uncast (Maelstrom)")
         DutyFinderQueue(1,9) -- Will need updating once function updated
         DoQuest("Shadows Uncast (Maelstrom)")
+        EquipRecommendedGear()
     else
         DoQuest("Shadows Uncast (Maelstrom)") -- This has the echo text inside
     end
@@ -931,6 +937,7 @@ function TheAurumValeUnlock()
         DoQuest("Gilding the Bilious (Maelstrom)")
         DutyFinderQueue(1,10) -- Will need updating once function updated
         DoQuest("Shadows Uncast (Maelstrom)")
+        EquipRecommendedGear()
     else
         DoQuest("Gilding the Bilious (Maelstrom)") -- This has the echo text inside
     end
