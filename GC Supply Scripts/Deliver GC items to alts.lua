@@ -201,7 +201,7 @@ for indexName, item in pairs(ProvisioningList) do
     end
     
     if onlist then
-        ClearTrades()
+        DropboxClearAll()
         chars_processed = chars_processed + 1
         Echo("############################")
         Echo("Done! " .. chars_processed .. "/" .. listlength .. " characters processed")
