@@ -1598,6 +1598,10 @@ function Dismount()
             Sleep(0.1)
         until not GetCharacterCondition(4)
     end
+    
+    repeat
+        Sleep(0.1)
+    until IsPlayerAvailable() and not IsPlayerCasting()
 end
 
 -- Usage: DropboxSetAll() or DropboxSetAll(123456)
