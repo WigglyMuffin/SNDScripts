@@ -211,10 +211,12 @@ end
 function FindAndKillTarget(target_name, radius)
     TargetNearestEnemy(target_name, radius)
     local dist_to_target = GetDistanceToTarget()
-    if GetTargetHP() > 0 and dist_to_target <= radius then
+    local auto_attack_triggered = false
+    
+    while GetTargetHP() > 0 and dist_to_target <= radius do
         if GetCharacterCondition(4) then
             repeat
-                yield("/mount")
+                Dismount()
                 Sleep(0.1)
             until not GetCharacterCondition(4)
         end
@@ -222,19 +224,23 @@ function FindAndKillTarget(target_name, radius)
         yield("/rotation manual")
         
         repeat
-            if not PathIsRunning() then
+            if not (GetDistanceToTarget() <= 2) and not PathIsRunning() then  
                 yield("/vnavmesh movetarget")
             end
-            yield('/ac "Auto-attack"')
+            
+            if GetDistanceToTarget() <= 2 and not auto_attack_triggered then
+                DoAction("Auto-attack")
+                
+                if IsTargetInCombat() and GetCharacterCondition(26) then
+                    auto_attack_triggered = true
+                end
+            end
+            
             Sleep(0.1)
-        until (GetDistanceToTarget() <= 2 and IsTargetInCombat() and GetCharacterCondition(26)) or GetTargetHP() <= 0
+        until GetTargetHP() <= 0
         
         yield("/vnavmesh stop")
     end
-    
-    repeat
-        Sleep(0.1)
-    until GetTargetHP() == 0 or not GetTargetHP()
     Sleep(0.5)
     if GetCharacterCondition(26) then
         yield("/rotation auto")
@@ -1360,12 +1366,26 @@ end
 -- Usage: DoAction("Heavy Shot")
 -- Uses specified action
 function DoAction(action_name)
+    if GetCharacterCondition(4) then
+        repeat
+            Dismount()
+            Sleep(0.1)
+        until not GetCharacterCondition(4)
+    end
+    
     yield('/ac "' .. action_name .. '"')
 end
 
 -- Usage: DoGeneralAction("Jump")
 -- Uses specified general action
 function DoGeneralAction(general_action_name)
+    if GetCharacterCondition(4) then
+        repeat
+            Dismount()
+            Sleep(0.1)
+        until not GetCharacterCondition(4)
+    end
+    
     yield('/gaction "' .. general_action_name .. '"')
 end
 
