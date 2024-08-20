@@ -870,8 +870,9 @@ end
 -- Attempts to deliver everything under the provisioning window, skipping over what it can't
 function GcProvisioningDeliver()
     Sleep(0.5)
-    yield("/at d")
+    --yield("/at n")
     PauseYesAlready()
+    
     for i = 4, 2, -1 do
         repeat
             Sleep(0.1)
@@ -879,42 +880,49 @@ function GcProvisioningDeliver()
         local item_name = GetNodeText("GrandCompanySupplyList", 6, i, 10)
         local item_qty = tonumber(GetNodeText("GrandCompanySupplyList", 6, i, 6))
         local item_requested_amount = tonumber(GetNodeText("GrandCompanySupplyList", 6, i, 9))
+        
         if ContainsLetters(item_name) and item_qty >= item_requested_amount then
             -- continue
         else
             LogInfo("/echo Nothing here, moving on")
             goto skip
         end
+        
         local row_to_call = i - 2
         yield("/pcall GrandCompanySupplyList true 1 "..row_to_call)
         local err_counter_request = 0
         local err_counter_supply = 0
+        
         repeat
             err_counter_request = err_counter_request+1
             Sleep(0.1)
-        until IsAddonReady("GrandCompanySupplyReward") or IsAddonReady("SelectYesno") or err_counter_request >= 70
-        if IsAddonReady("SelectYesno") then
-            repeat
-                yield("/pcall SelectYesno true 0")
-                Sleep(0.1)  
-            until not IsAddonVisible("SelectYesno")
-            repeat
-                Sleep(0.1)
-            until IsAddonReady("GrandCompanySupplyReward")
-        end
+        until IsAddonReady("GrandCompanySupplyReward") or err_counter_request >= 70
+        
         if err_counter_request >= 70 then
             LogInfo("Something might have gone wrong")
             err_counter_request = 0
         else
             yield("/pcall GrandCompanySupplyReward true 0")
         end
+        
+        Sleep(0.1)
+        
+        if IsAddonReady("SelectYesno") then
+            repeat
+                yield("/pcall SelectYesno true 0")
+                Sleep(0.1)  
+            until not IsAddonVisible("SelectYesno")
+        end
+        
         repeat
             err_counter_supply = err_counter_supply+1
             Sleep(0.1)
         until IsAddonReady("GrandCompanySupplyList") or err_counter_supply >= 50
+        
         err_counter_supply = 0
         ::skip::
     end
+    
     RestoreYesAlready()
 end
 

@@ -73,6 +73,7 @@ function DOL()
         Teleporter("Limsa", "tp")
     end
     
+    Sleep(0.5)
     PathToObject("Aetheryte", 4.5)
     yield("/li Aftcastle")
     ZoneTransitions()
@@ -80,7 +81,7 @@ function DOL()
     OpenGcSupplyWindow(1)
     GcProvisioningDeliver()
     CloseGcSupplyWindow()
-    LogOut()
+    --LogOut()
 end
 
 
