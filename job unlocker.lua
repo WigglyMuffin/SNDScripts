@@ -842,6 +842,7 @@ function HalataliUnlock()
         Movement(-399.64, 23.00, -351.08) -- It gets stuck otherwise
         Movement(-471.06, 23.01, -354.81)
         DoQuest("Hallo Halatali")
+        EquipRecommendedGear()
     else
         DoQuest("Hallo Halatali") -- This has the echo text inside
     end
@@ -889,6 +890,7 @@ function TheSunkenTempleOfQarnUnlock()
         until IsQuestComplete(66300)
         
         --DoQuest("Braving New Depths")
+        EquipRecommendedGear()
     else
         DoQuest("Braving New Depths") -- This has the echo text inside
     end
@@ -911,6 +913,7 @@ function DzemaelDarkholdUnlock()
         DoQuest("Shadows Uncast (Maelstrom)")
         DutyFinderQueue(1,9) -- Will need updating once function updated
         DoQuest("Shadows Uncast (Maelstrom)")
+        EquipRecommendedGear()
     else
         DoQuest("Shadows Uncast (Maelstrom)") -- This has the echo text inside
     end
@@ -934,6 +937,7 @@ function TheAurumValeUnlock()
         DoQuest("Gilding the Bilious (Maelstrom)")
         DutyFinderQueue(1,10) -- Will need updating once function updated
         DoQuest("Shadows Uncast (Maelstrom)")
+        EquipRecommendedGear()
     else
         DoQuest("Gilding the Bilious (Maelstrom)") -- This has the echo text inside
     end

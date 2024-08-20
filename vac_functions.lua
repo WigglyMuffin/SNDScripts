@@ -905,13 +905,36 @@ function GcProvisioningDeliver()
             yield("/pcall GrandCompanySupplyReward true 0")
         end
         
-        Sleep(0.1)
+        Sleep(0.2)
         
-        if IsAddonReady("SelectYesno") then
-            repeat
-                yield("/pcall SelectYesno true 0")
-                Sleep(0.1)  
-            until not IsAddonVisible("SelectYesno")
+        -- Wait for either SelectYesno or GrandCompanySupplyList
+        local wait_time = 0
+        local max_wait_time = 2.0 -- Max wait time
+        
+        while wait_time < max_wait_time do
+            if IsAddonReady("SelectYesno") then
+                -- SelectYesno appeared before GrandCompanySupplyList
+                local attempt_count = 0
+                local max_attempts = 10
+                
+                repeat
+                    yield("/pcall SelectYesno true 0")
+                    Sleep(0.05)
+                    
+                    if IsAddonVisible("SelectYesno") then
+                        attempt_count = attempt_count + 1
+                    else
+                        break
+                    end
+                until not IsAddonVisible("SelectYesno") or attempt_count >= max_attempts
+                break
+            elseif IsAddonReady("GrandCompanySupplyList") then
+                -- GrandCompanySupplyList appeared first instead, SelectYesno was skipped
+                break
+            end
+            
+            Sleep(0.1)
+            wait_time = wait_time + 0.1
         end
         
         repeat
