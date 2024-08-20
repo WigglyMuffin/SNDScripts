@@ -211,31 +211,25 @@ end
 function FindAndKillTarget(target_name, radius)
     TargetNearestEnemy(target_name, radius)
     local dist_to_target = GetDistanceToTarget()
-    if GetTargetHP() > 0 and dist_to_target <= radius then
+    while GetTargetHP() > 0 and dist_to_target <= radius do
         if GetCharacterCondition(4) then
             repeat
                 yield("/mount")
                 Sleep(0.1)
             until not GetCharacterCondition(4)
         end
-        repeat
-            yield("/rotation manual")
-            if not PathIsRunning() then
-                yield("/vnavmesh movetarget")
+        yield("/rotation manual")
+        if not PathIsRunning() and not GetCharacterCondition(26) or GetDistanceToTarget() >= 10 then
+            yield("/vnavmesh movetarget")
+            Sleep(0.3)
+        end
+        while GetDistanceToTarget() <= 3 do
+            if PathIsRunning() then
+                yield("/vnavmesh stop")
             end
-            yield('/ac "Auto-attack"')
-            Sleep(0.2)
-        until GetDistanceToTarget() <= 2
-        repeat
             DoAction("Auto-attack")
-            Sleep(0.1)
-        until (IsTargetInCombat() and GetCharacterCondition(26)) or (GetTargetHP() == 0 or not GetTargetHP())
-        yield("/vnavmesh stop")
+        end
     end
-    
-    repeat
-        Sleep(0.1)
-    until GetTargetHP() == 0 or not GetTargetHP()
     Sleep(0.5)
     if GetCharacterCondition(26) then
         yield("/rotation auto")
