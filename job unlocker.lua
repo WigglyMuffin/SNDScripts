@@ -678,7 +678,7 @@ function MaelstromRank1()
         ZoneCheck(138, "Aleport", "tp")
         Movement(417.30, 35.15, -17.66)
         ZoneTransitions()
-        Movement(-477.30, 26.29, 61.12)
+        Movement(-399.78, 37.64, 16.40)
         DoHuntLog(MaelstromEnemiesLog1[7], 150, 9, 0)
     end
     
@@ -709,17 +709,20 @@ function MaelstromRank1()
         Target("Aetheryte")
         Sleep(0.1)
         Interact()
-        Sleep(1)
         
-        -- If aetheryte was already attuned, exits out of the menu
-        repeat
-            if IsAddonVisible("SelectString") then
+        -- Checks if player is attuning otherwise exit menu
+        if GetCharacterCondition(27) then
+            repeat
+                Sleep(0.1)
+            until IsPlayerAvailable()
+            
+            Sleep(1.0)
+        else
+            repeat
                 yield("/pcall SelectString true 3")
                 Sleep(0.1)
-            end
-            
-            Sleep(0.1)
-        until IsPlayerAvailable()
+            until not IsAddonVisible("SelectString")
+        end
     end
     
     if not PandoraGetFeatureEnabled("Auto-Sync FATEs") then
