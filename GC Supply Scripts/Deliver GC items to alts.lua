@@ -60,6 +60,7 @@ for indexName, item in pairs(ProvisioningList) do
     end
     
     function TradeItems(item1)
+        PartyLeave()
         Sleep(0.5)
         Target(party_member)
         yield("/focustarget <t>")

@@ -1166,6 +1166,8 @@ function PartyAccept()
     end
 end
 
+-- Usage: PartyLeave()
+-- Will leave party if in a party
 function PartyLeave()
     if IsInParty() then
         repeat
