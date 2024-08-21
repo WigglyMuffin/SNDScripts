@@ -50,12 +50,10 @@ function DOL()
     local home = GetCurrentWorld() == GetHomeWorld()
     
     if not home then
-        if ZoneCheck(129) then
-            Teleporter("Limsa", "tp")
-            ZoneTransitions()
-        end
-        
         yield("/li")
+        repeat
+            Sleep(0.1)
+        until not LifestreamIsBusy() and IsPlayerAvailable()
         
         -- Wait until the player is on the home world
         repeat
@@ -68,18 +66,10 @@ function DOL()
     repeat
         Sleep(0.1)
     until IsPlayerAvailable()
-    
-    -- Ensure player is in Limsa
-    if ZoneCheck(129) then
-        Teleporter("Limsa", "tp")
-        ZoneTransitions()
-    end
-    
-    Sleep(0.5)
-    PathToObject("Aetheryte", 4.5)
-    yield("/li Aftcastle")
-    ZoneTransitions()
-    Movement(93.00, 40.27, 75.60)
+    Teleporter("gc", "li")
+    repeat
+        Sleep(0.1)
+    until not LifestreamIsBusy()
     OpenGcSupplyWindow(1)
     GcProvisioningDeliver()
     CloseGcSupplyWindow()

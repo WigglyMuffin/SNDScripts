@@ -22,8 +22,7 @@
 -- Edit CharList.lua file for configuring characters
 
 local destination_server = "Louisoix"     -- Server characters need to travel for collecting items
-local destination_zone = "Limsa Lominsa"  -- Zone characters need to travel for collecting items
-local destination_zone_id = 129           -- Zone ID characters need to travel for collecting items, just match it to the zone above, can be found using GetZoneID()
+local destination_aetheryte = "Limsa"     -- Aetheryte characters need to travel to for collecting items, case insensitive and you can be vague
 local destination_house = 0               -- Options: 0 = FC, 1 = Personal, 2 = Apartment
 local destination_type = 0                -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
 local path_home = true                    -- Options: true = Paths home from destination, false = does nothing and logs out
@@ -81,14 +80,14 @@ local alt_char_name = "Don't edit"
 -- # MAIN SCRIPT #
 -- ###############
 
-local function ProcessAltCharacters(character_list_options, destination_server, destination_zone, destination_zone_id, destination_type, destination_house, path_home)
+local function ProcessAltCharacters(character_list_options, destination_server, destination_aetheryte, destination_type, destination_house, path_home)
     for i = 1, #character_list_options do
         -- Update alt character name
         local alt_char_name = character_list_options[i][1]
         
         -- Switch characters if required, looks up current character and compares
         if GetCharacterName(true) ~= character_list_options[i][1] then
-            if not (ZoneCheck(128) or ZoneCheck(129)) then
+            if not (ZoneCheck("Limsa Lominsa Lower") or ZoneCheck("Limsa Lominsa Upper")) then
                 Teleporter("Limsa", "tp")
             end
             
@@ -111,11 +110,13 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
         -- Alt character destination type, how alt char is travelling to the main
         -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
         if destination_type == 0 then
-            Echo("Teleporting to " .. destination_zone .. " to find " .. main_char_name)
-            
-            if destination_zone_id ~= GetZoneID() then
-                Teleporter(destination_zone, "tp")
+            dest_aetheryte, dest_aetheryte_fullname = FindZoneIDByAetheryte(destination_aetheryte)
+            if dest_aetheryte ~= GetZoneID() then
+                Echo("Teleporting to " .. dest_aetheryte_fullname .. " to find " .. main_char_name)
+                Teleporter(destination_aetheryte, "tp")
                 ZoneTransitions()
+            else
+                Echo("Already in the right zone to meet "..main_char_name)
             end
         end
         
@@ -169,7 +170,7 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
         
         -- Notify when all characters are finished
         if i == #character_list_options then
-            Echo("Finished all" .. #character_list_options .. " characters <se.6><se.6><se.6>")
+            Echo("Finished all" .. #character_list_options .. " characters")
         end
         
         -- Disband party once gil trigger has happened
@@ -218,4 +219,4 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
     end
 end
 
-ProcessAltCharacters(character_list_options, destination_server, destination_zone, destination_zone_id, destination_type, destination_house, path_home)
+ProcessAltCharacters(character_list_options, destination_server, destination_aetheryte, destination_type, destination_house, path_home)
