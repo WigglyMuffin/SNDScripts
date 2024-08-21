@@ -3,7 +3,7 @@
 -- It contains the functions required to make the scripts work
 
 function LoadFileCheck()
-	yield("/e Successfully loaded the functions file")
+	Echo("Successfully loaded the functions file")
 end
 
 -- ###############
@@ -265,7 +265,7 @@ function GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get
         end
     --- this function
     end
-    yield("/echo uh GetNodeTextLookupUpdate fucked up")
+    Echo("GetNodeTextLookupUpdate went wrong somewhere")
 end
 
 -- Usage: QuestChecker(ArcanistEnemies[3], 50, "_ToDoList", "Slay little ladybugs.")
@@ -337,7 +337,7 @@ function NodeScanner(get_node_text_type, get_node_text_match)
             end
         end
     end
-    yield("/echo Can't find the node text, everything will probably crash now since there's no proper handler yet")
+    Echo("Can't find the node text, everything will probably crash now since there's no proper handler yet")
     return
 end
 
@@ -497,7 +497,7 @@ function Teleporter(location, tp_kind) -- Teleporter handler
         -- Attempt teleport
         if not IsPlayerCasting() then
             yield("/" .. tp_kind .. " " .. location)
-            Sleep(2.0) -- Short wait to check if casting starts
+            Sleep(2.0) -- Wait to check if casting starts
             
             -- Check if the player started casting, indicating a successful attempt
             if IsPlayerCasting() then
@@ -529,8 +529,9 @@ function Teleporter(location, tp_kind) -- Teleporter handler
     
     -- Teleporter failed handling
     if retries >= max_retries then
-        LogInfo("Teleport failed after " .. max_retries .. " attempts.")
-        yield("/e Teleport failed after " .. max_retries .. " attempts.")
+        local attempt_word = (max_retries == 1) and "attempt" or "attempts"
+        LogInfo("Teleport failed after " .. max_retries .. " " .. attempt_word .. ".")
+        Echo("Teleport failed after " .. max_retries .. " " .. attempt_word .. ".")
         yield("/lifestream stop") -- Not always needed but removes lifestream ui
     end
 end
@@ -579,7 +580,8 @@ function Mount(mount_name)
         
         -- Exit loop if the player mounted
         if GetCharacterCondition(4) then
-            yield("/e Successfully mounted after " .. retries .. " retries.")
+            local attempt_word = (retries == 1) and "retry" or "retries"
+            Echo("Successfully mounted after " .. retries .. " " .. attempt_word .. ".")
             break
         end
         
@@ -589,7 +591,8 @@ function Mount(mount_name)
     
     -- Check if max retries were reached without success
     if retries >= max_retries then
-        yield("/e Failed to mount after max retries (" .. max_retries .. ").")
+        local attempt_word = (max_retries == 1) and "retry" or "retries"
+        Echo("Failed to mount after " .. max_retries .. " " .. attempt_word .. ".")
     end
     
     -- Check player is available and mounted
@@ -705,12 +708,16 @@ function Movement(x_position, y_position, z_position, range)
                 Sleep(0.1)
                 DoGeneralAction("Jump")
                 NavReload()
-                Sleep(0.5)
+                
+                repeat
+                    Sleep(0.1)
+                until NavIsReady()
+                
                 NavToDestination()
                 stuck_timer = 0
             end
 
-            Sleep(0.1)
+            Sleep(0.05)
         end
         if GetCharacterCondition(45) then
             break
@@ -880,7 +887,6 @@ end
 -- Attempts to deliver everything under the provisioning window, skipping over what it can't
 function GcProvisioningDeliver()
     Sleep(0.5)
-    --yield("/at n")
     PauseYesAlready()
     
     for i = 4, 2, -1 do
@@ -894,7 +900,8 @@ function GcProvisioningDeliver()
         if ContainsLetters(item_name) and item_qty >= item_requested_amount then
             -- continue
         else
-            LogInfo("/echo Nothing here, moving on")
+            LogInfo("Nothing here, moving on")
+            Echo("Nothing here, moving on")
             goto skip
         end
         
@@ -1084,7 +1091,7 @@ end
 -- I think this will break though since there will be multiple entrances around a housing area
 -- So maybe needs nearest logic
 function PathToEstateEntrance()
-    Movement(GetObjectRawXPos("Entrance"), GetObjectRawYPos("Entrance"), GetObjectRawZPos("Entrance"))
+    Movement(GetObjectRawXPos("Entrance"), GetObjectRawYPos("Entrance"), GetObjectRawZPos("Entrance"), 4)
 end
 
 -- Paths to Limsa bell

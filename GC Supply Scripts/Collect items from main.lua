@@ -19,18 +19,18 @@
 -- # CONFIGS #
 -- ###########
 
--- Edit CharList.lua file for configuring characters
+-- Edit char_list.lua file for configuring characters
 
 local destination_server = "Louisoix"     -- Server characters need to travel for collecting items
-local destination_aetheryte = "Limsa"     -- Aetheryte characters need to travel to for collecting items, case insensitive and you can be vague
+local destination_aetheryte = "Limsa"     -- Aetheryte that characters need to travel to for collecting items, case insensitive and you can be vague
 local destination_house = 0               -- Options: 0 = FC, 1 = Personal, 2 = Apartment
 local destination_type = 0                -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
 local path_home = true                    -- Options: true = Paths home from destination, false = does nothing and logs out
 local do_movement = true                  -- Options: true = Paths to chosen character, false = does nothing and waits for chosen character to come to you
-local use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being CharList.lua, false uses the list you put in this file 
+local use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being char_list.lua, false uses the list you put in this file 
 
 -- Usage: First Last
--- This is your main character name
+-- This is your main character name, do not include @Server
 local main_char_name = "First Last"
 
 -- This is where you put your character list if you choose to not use the external one
@@ -42,7 +42,6 @@ local main_char_name = "First Last"
 local character_list_options = {
     {"First Last@Server", 0, 2},
     {"First Last@Server", 0, 2}
-
 }
 
 -- #####################################
@@ -54,27 +53,28 @@ local character_list_options = {
 -- # FUNCTION LOADER #
 -- ###################
 
--- Edit CharList.lua file for configuring characters
-CharList = "CharList.lua"
+-- Edit char_list.lua file for configuring characters
+char_list = "char_list.lua"
 
-SNDConfigFolder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
-LoadFunctionsFileLocation = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
-LoadFunctions = loadfile(LoadFunctionsFileLocation)
+snd_config_folder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
+load_functions_file_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
+LoadFunctions = loadfile(load_functions_file_location)
 LoadFunctions()
 LoadFileCheck()
+
 LogInfo("[CIFM] ##############################")
 LogInfo("[CIFM] Starting script...")
-LogInfo("[CIFM] SNDConfigFolder: " .. SNDConfigFolder)
-LogInfo("[CIFM] CharList: " .. CharList)
-LogInfo("[CIFM] SNDC+Char: " .. SNDConfigFolder .. "" .. CharList)
+LogInfo("[CIFM] snd_config_folder: " .. snd_config_folder)
+LogInfo("[CIFM] char_list: " .. char_list)
+LogInfo("[CIFM] SNDConf+Char: " .. snd_config_folder .. "" .. char_list)
 LogInfo("[CIFM] ##############################")
 
 if use_external_character_list then
-    local char_data = dofile(SNDConfigFolder .. CharList)
+    local char_data = dofile(snd_config_folder .. char_list)
     character_list_options = char_data.character_list_options
 end
 
-local alt_char_name = "Don't edit"
+local alt_char_name = ""
 
 -- ###############
 -- # MAIN SCRIPT #
@@ -170,7 +170,7 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
         
         -- Notify when all characters are finished
         if i == #character_list_options then
-            Echo("Finished all" .. #character_list_options .. " characters")
+            Echo("Finished all " .. #character_list_options .. " characters")
         end
         
         -- Disband party once gil trigger has happened
@@ -183,7 +183,6 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
             if character_list_options[i][2] == 1 then
                 Echo("Attempting to return to " .. GetHomeWorld())
                 
-                -- GetCurrentWorld() == 0 and GetHomeWorld() == 0
                 if GetCurrentWorld() ~= GetHomeWorld() then
                     -- Teleporter(GetHomeWorld(), "li")
                     yield("/li")

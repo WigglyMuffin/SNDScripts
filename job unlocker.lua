@@ -30,7 +30,7 @@ Textadvance - https://raw.githubusercontent.com/NightmareXIV/MyDalamudPlugins/ma
 Vnavmesh - https://puni.sh/api/repository/veyn
 
 Other:
-CharList.lua file in the snd config folder with your characters configured properly unless you disable the external character list
+char_list.lua file in the snd config folder with your characters configured properly unless you disable the external character list
 vac_functions.lua placed in the snd config folder
 
 ######################################################
@@ -70,12 +70,12 @@ DO_THE_LAVENDER_BEDS = false              -- This is for unlocking The Lavender 
 DO_THE_GOBLET = false                     -- This is for unlocking The Goblet Housing
 DO_MIST = false                           -- This is for unlocking Mist Housing
 
-local use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being CharList.lua, false = use the list you put in this file 
+local use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being char_list.lua, false = use the list you put in this file 
 
-MULTICHAR = false                         -- Options: true = cycles through character list, false = single character
+local multi_char = false                  -- Options: true = cycles through character list, false = single character
 
 -- This is where you put your character list if you choose to not use the external one
--- If use_external_character_list or MULTICHAR is set to false then this list is completely skipped
+-- If use_external_character_list or multi_char is set to false then this list is completely skipped
 -- Usage: First Last@Server
 local character_list = {
     "First Last@Server",
@@ -180,23 +180,24 @@ QuestNameList = {
     ["Training with Leih"]                     = {quest_id =  134, quest_key = 65670}  -- Archer Quest 03
 }
 
--- Edit CharList.lua file for configuring characters
-CharList = "CharList.lua"
+-- Edit char_list.lua file for configuring characters
+char_list = "char_list.lua"
 
-SNDConfigFolder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
-LoadFunctionsFileLocation = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
-LoadFunctions = loadfile(LoadFunctionsFileLocation)
+snd_config_folder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
+load_functions_file_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
+LoadFunctions = loadfile(load_functions_file_location)
 LoadFunctions()
 LoadFileCheck()
+
 LogInfo("[JU] ##############################")
 LogInfo("[JU] Starting script...")
-LogInfo("[JU] SNDConfigFolder: " .. SNDConfigFolder)
-LogInfo("[JU] CharList: " .. CharList)
-LogInfo("[JU] SNDC+Char: " .. SNDConfigFolder .. "" .. CharList)
+LogInfo("[JU] snd_config_folder: " .. snd_config_folder)
+LogInfo("[JU] char_list: " .. char_list)
+LogInfo("[JU] SNDConf+Char: " .. snd_config_folder .. "" .. char_list)
 LogInfo("[JU] ##############################")
 
 if use_external_character_list then
-    local char_data = dofile(SNDConfigFolder .. CharList)
+    local char_data = dofile(snd_config_folder .. char_list)
     character_list = char_data.character_list
 end
 
@@ -1061,7 +1062,7 @@ function Main()
     end
 end
 
-if MULTICHAR then
+if multi_char then
     for _, char in ipairs(character_list) do
         if GetCharacterName(true) == char then
             -- continue, no relogging needed

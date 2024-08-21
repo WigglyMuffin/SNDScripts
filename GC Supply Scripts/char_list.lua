@@ -8,9 +8,6 @@
 -- This is where your alts are listed
 local character_list = {
     "First Last@Server",
-    "First Last@Server",
-    "First Last@Server",
-    "First Last@Server",
     "First Last@Server"
 }
 
@@ -20,18 +17,12 @@ local character_list = {
 -- This is where your alts that need items are listed
 local character_list_options = {
     {"First Last@Server", 0, 2},
-    {"First Last@Server", 0, 2},
-    {"First Last@Server", 0, 2},
-    {"First Last@Server", 0, 2},
     {"First Last@Server", 0, 2}
 }
 
 -- Usage: First Last@Server
 -- This is where you can skip characters, either by choice or something went wrong
 local character_list_skip = {
-    "First Last@Server",
-    "First Last@Server",
-    "First Last@Server",
     "First Last@Server",
     "First Last@Server"
 }

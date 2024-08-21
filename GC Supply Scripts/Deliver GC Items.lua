@@ -6,7 +6,7 @@
 -- # CONFIGS #
 -- ###########
 
-local use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being CharList.lua, false uses the list you put in this file 
+local use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being char_list.lua, false uses the list you put in this file 
 
 -- This is where you put your character list if you choose to not use the external one
 -- If us_external_character_list is set to true then this list is completely skipped
@@ -15,32 +15,34 @@ local character_list = {
     "First Last@Server"
 }
 
--- Edit CharList.lua file for configuring characters
+-- Edit char_list.lua file for configuring characters
+
+multi_char = true
 
 -- #####################################
 -- #  DON'T TOUCH ANYTHING BELOW HERE  #
 -- # UNLESS YOU KNOW WHAT YOU'RE DOING #
 -- #####################################
 
-CharList = "CharList.lua"
+char_list = "char_list.lua"
 
-SNDConfigFolder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
-LoadFunctionsFileLocation = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
-LoadFunctions = loadfile(LoadFunctionsFileLocation)
+snd_config_folder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
+load_functions_file_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
+LoadFunctions = loadfile(load_functions_file_location)
 LoadFunctions()
 LoadFileCheck()
+
 LogInfo("[DGCI] ##############################")
 LogInfo("[DGCI] Starting script...")
-LogInfo("[DGCI] SNDConfigFolder: " .. SNDConfigFolder)
-LogInfo("[DGCI] CharList: " .. CharList)
-LogInfo("[DGCI] SNDC+Char: " .. SNDConfigFolder .. "" .. CharList)
+LogInfo("[DGCI] snd_config_folder: " .. snd_config_folder)
+LogInfo("[DGCI] char_list: " .. char_list)
+LogInfo("[DGCI] SNDConf+Char: " .. snd_config_folder .. "" .. char_list)
 LogInfo("[DGCI] ##############################")
+
 if use_external_character_list then
-    local char_data = dofile(SNDConfigFolder .. CharList)
+    local char_data = dofile(snd_config_folder .. char_list)
     character_list = char_data.character_list
 end
-
-MULTICHAR = true
 
 -- #############
 -- # DOL STUFF #
@@ -51,6 +53,7 @@ function DOL()
     
     if not home then
         yield("/li")
+        
         repeat
             Sleep(0.1)
         until not LifestreamIsBusy() and IsPlayerAvailable()
@@ -66,14 +69,16 @@ function DOL()
     repeat
         Sleep(0.1)
     until IsPlayerAvailable()
+    
     Teleporter("gc", "li")
+    
     repeat
         Sleep(0.1)
     until not LifestreamIsBusy()
+    
     OpenGcSupplyWindow(1)
     GcProvisioningDeliver()
     CloseGcSupplyWindow()
-    --LogOut()
 end
 
 
@@ -85,7 +90,7 @@ function Main()
     DOL()
 end
 
-if MULTICHAR then
+if multi_char then
     for _, char in ipairs(character_list) do
         if GetCharacterName(true) == char then
             -- continue, no relogging needed
@@ -94,9 +99,11 @@ if MULTICHAR then
             Sleep(7.5)
             LoginCheck()
         end
+        
         repeat
             Sleep(0.1)
         until IsPlayerAvailable()
+        
         Main()
     end
 else

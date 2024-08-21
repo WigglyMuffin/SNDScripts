@@ -1,7 +1,7 @@
--- This script will generate a file in the SNDConfigFolder which lists all the items you need to get to make the Deliver items to alt script fully automatic
+-- This script will generate a file in the SND_CONFIG_FOLDER which lists all the items you need to get to make the Deliver items to alt script fully automatic
 -- as long as you make sure you have all the items this script tells you to get you should be able to proceed without issue
 
--- by default uses the output from the script that generates a provisioninglist
+-- by default uses the output from the script that generates a provisioning_list
 -- probably don't touch this
 
 -- ###########
@@ -15,79 +15,119 @@
 -- # UNLESS YOU KNOW WHAT YOU'RE DOING #
 -- #####################################
 
-ProvisioningListNameToLoad = "ProvisioningList.lua"
+provisioning_list_name_to_load = "provisioning_list.lua"
 
-SNDConfigFolder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
-dofile(SNDConfigFolder .. ProvisioningListNameToLoad)
+SND_CONFIG_FOLDER = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
+dofile(SND_CONFIG_FOLDER .. provisioning_list_name_to_load)
 
-local outputFilename = "List_to_gather.txt"
-local outputFolder = SNDConfigFolder .. "Lists\\"
+local output_filename = "list_to_gather.txt"
+local output_folder = SND_CONFIG_FOLDER .. "Lists\\"
 
-if not os.execute("cd " .. outputFolder) then
-    os.execute("mkdir " .. outputFolder)
+if not os.execute("cd " .. output_folder) then
+    os.execute("mkdir " .. output_folder)
 end
 
-local function combineItemsByCategory(ProvisioningList)
-    local categoryTotals = {}
+local function combine_items_by_category(provisioning_list)
+    local category_totals = {}
     
-    local categoryNames = {
+    local category_names = {
         MIN = "Miner",
         BTN = "Botanist",
         FSH = "Fisher"
     }
     
-    for _, data in pairs(ProvisioningList) do
-        for category, itemData in pairs(data) do
-            if type(itemData) == "table" and itemData["Item"] then
-                local itemName = itemData["Item"]
-                local itemQty = tonumber(itemData["QTY"])
-                local categoryName = categoryNames[category] or category
+    for _, data in pairs(provisioning_list) do
+        for category, item_data in pairs(data) do
+            if type(item_data) == "table" and item_data["Item"] then
+                local item_name = item_data["Item"]
+                local item_qty = tonumber(item_data["QTY"])
+                local category_name = category_names[category] or category
                 
-                if not categoryTotals[categoryName] then
-                    categoryTotals[categoryName] = {}
+                if not category_totals[category_name] then
+                    category_totals[category_name] = {}
                 end
                 
-                if not categoryTotals[categoryName][itemName] then
-                    categoryTotals[categoryName][itemName] = 0
+                if not category_totals[category_name][item_name] then
+                    category_totals[category_name][item_name] = 0
                 end
                 
-                categoryTotals[categoryName][itemName] = categoryTotals[categoryName][itemName] + itemQty
+                category_totals[category_name][item_name] = category_totals[category_name][item_name] + item_qty
             end
         end
     end
     
-    return categoryTotals
+    return category_totals
 end
 
-local function createCharacterSummary(ProvisioningList)
+local function create_character_summary(provisioning_list)
     local summaries = {}
     
-    for characterName, data in pairs(ProvisioningList) do
-        local characterSummary = {}
-        for category, itemData in pairs(data) do
-            if type(itemData) == "table" and itemData["Item"] then
-                table.insert(characterSummary, itemData["Item"] .. ": " .. itemData["QTY"])
+    for character_name, data in pairs(provisioning_list) do
+        local character_summary = {}
+        for category, item_data in pairs(data) do
+            if type(item_data) == "table" and item_data["Item"] then
+                table.insert(character_summary, item_data["Item"] .. ": " .. item_data["QTY"])
             end
         end
-        summaries[characterName] = characterSummary
+        summaries[character_name] = character_summary
     end
     
     return summaries
 end
 
-local function writeToFile(categoryTotals, characterSummaries, filename)
+local function write_to_file(category_totals, character_summaries, filename)
     local file = io.open(filename, "w")
     if not file then
         return
     end
+    
     file:write("************************\n")
     file:write("* Provisioning Summary *\n")
     file:write("************************\n\n")
+
+    -- Job ordering
+    local job_order = { "Miner", "Botanist", "Fisher" }
+    local remaining_categories = {}
+
+    -- Separate order categories and gather remaining ones
+    for category in pairs(category_totals) do
+        if not table.concat(job_order):find(category) then
+            table.insert(remaining_categories, category)
+        end
+    end
+
+    -- Sort remaining categories a-z
+    table.sort(remaining_categories)
+
+    -- Combine ordered categories with the sorted remaining ones
+    local sorted_categories = {}
     
-    for category, items in pairs(categoryTotals) do
+    for _, category in ipairs(job_order) do
+        if category_totals[category] then
+            table.insert(sorted_categories, category)
+        end
+    end
+    
+    for _, category in ipairs(remaining_categories) do
+        table.insert(sorted_categories, category)
+    end
+
+    -- Write categories to file
+    for _, category in ipairs(sorted_categories) do
+        local items = category_totals[category]
         file:write(category .. "\n")
         file:write(string.rep("=", #category + 4) .. "\n")
-        for item, qty in pairs(items) do
+        
+        -- Sort items a-z
+        local sorted_items = {}
+        
+        for item in pairs(items) do
+            table.insert(sorted_items, item)
+        end
+        table.sort(sorted_items)
+        
+        for _, item in ipairs(sorted_items) do
+            local qty = items[item]
             file:write(item .. ": " .. qty .. "\n")
         end
         file:write("\n")
@@ -97,11 +137,21 @@ local function writeToFile(categoryTotals, characterSummaries, filename)
     file:write("* Per Character Requirements *\n")
     file:write("******************************\n\n")
     
-    for characterName, summary in pairs(characterSummaries) do
-        file:write(characterName .. "\n")
-        file:write(string.rep("-", #characterName + 4) .. "\n")
-        for _, itemLine in ipairs(summary) do
-            file:write(itemLine .. "\n")
+    -- Sort character names a-z
+    local sorted_characters = {}
+    
+    for character_name in pairs(character_summaries) do
+        table.insert(sorted_characters, character_name)
+    end
+    table.sort(sorted_characters)
+
+    for _, character_name in ipairs(sorted_characters) do
+        local summary = character_summaries[character_name]
+        file:write(character_name .. "\n")
+        file:write(string.rep("-", #character_name + 4) .. "\n")
+        
+        for _, item_line in ipairs(summary) do
+            file:write(item_line .. "\n")
         end
         file:write("\n")
     end
@@ -109,9 +159,10 @@ local function writeToFile(categoryTotals, characterSummaries, filename)
     file:close()
 end
 
-local combinedItemsByCategory = combineItemsByCategory(ProvisioningList)
-local characterSummaries = createCharacterSummary(ProvisioningList)
 
-writeToFile(combinedItemsByCategory, characterSummaries, outputFolder..outputFilename)
+local combined_items_by_category = combine_items_by_category(provisioning_list)
+local character_summaries = create_character_summary(provisioning_list)
+
+write_to_file(combined_items_by_category, character_summaries, output_folder .. output_filename)
 
 
