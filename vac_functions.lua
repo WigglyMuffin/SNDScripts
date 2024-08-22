@@ -499,7 +499,7 @@ function Teleporter(location, tp_kind) -- Teleporter handler
             yield("/" .. tp_kind .. " " .. location)
             Sleep(2.0) -- Wait to check if casting starts
             
-            -- Check if the player started casting, indicating a successful attempt
+            -- Check if the player started casting
             if IsPlayerCasting() then
                 Sleep(cast_time_buffer) -- Wait for cast to complete
             end
@@ -1004,17 +1004,23 @@ ZoneList={["128"]={["Region"]="La Noscea",["Zone"]="Limsa Lominsa Upper Decks",[
 --
 -- returns the id of the zone you search for, if the search is vague enough it'll return any of the ones that it finds, so try to be specific
 function FindZoneID(zone)
-    local zone = zone or ZoneList[""..GetZoneID()..""]["Zone"]
+    zone = zone or ZoneList["" .. GetZoneID() .. ""]["Zone"]
+    
+    -- Check if zone is string
+    if type(zone) ~= "string" then
+        return nil -- return 0
+    end
+    
     local searchLower = zone:lower()
+    
     for id, entry in pairs(ZoneList) do
         local placeName = entry["Zone"]
-        if placeName then
-            if placeName:lower():find(searchLower) then
-                return tonumber(id)
-            end
+        if placeName and placeName:lower():find(searchLower) then
+            return tonumber(id)
         end
     end
-    return 0
+    
+    return nil -- return 0
 end
 
 -- Usage: FindZoneIDByAetheryte("Limsa Lominsa Lower Decks")
@@ -1099,7 +1105,7 @@ function PathToLimsaBell()
     if ZoneCheck("Limsa Lominsa lower decks") then
         -- stuff could go here
     else
-        Teleporter("Limsa Lominsa","tp")
+        Teleporter("Limsa Lominsa", "tp")
         Movement(-123.72, 18.00, 20.55)
     end
 end
