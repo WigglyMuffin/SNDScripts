@@ -63,7 +63,7 @@ end
 function Interact()
     repeat
         Sleep(0.1)
-    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
+    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not IsMoving() or GetCharacterCondition(32)
     
     Dismount()
     yield("/interact")
@@ -555,50 +555,56 @@ function Mount(mount_name)
         end
         return
     end
-    
-    -- Return if the player is already mounted
-    if GetCharacterCondition(4) then
+
+    if TerritorySupportsMounting() then -- Check if territory is mountable using the snd function
+
+        -- Return if the player is already mounted
+        if GetCharacterCondition(4) then
+            return
+        end
+
+        -- Initial check to ensure the player can mount
+        repeat
+            Sleep(0.1)
+        until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
+
+        -- Retry loop for mounting with a max retry limit (set above)
+        while retries < max_retries do
+            -- Attempt to mount using the chosen mount or Mount Roulette if none
+            if mount_name == nil then
+                yield('/mount "Company Chocobo"')
+            else
+                yield('/mount "' .. mount_name .. '"')
+            end
+
+            -- Wait for the retry interval
+            Sleep(retry_interval)
+
+            -- Exit loop if the player mounted
+            if GetCharacterCondition(4) then
+                local attempt_word = (retries == 1) and "retry" or "retries"
+                Echo("Successfully mounted after " .. retries .. " " .. attempt_word .. ".")
+                break
+            end
+
+            -- Increment the retry counter
+            retries = retries + 1
+        end
+
+        -- Check if max retries were reached without success
+        if retries >= max_retries then
+            local attempt_word = (max_retries == 1) and "retry" or "retries"
+            Echo("Failed to mount after " .. max_retries .. " " .. attempt_word .. ".")
+        end
+
+        -- Check player is available and mounted
+        repeat
+            Sleep(0.1)
+        until IsPlayerAvailable() and GetCharacterCondition(4)
+    else
+        Echo("Not possible to mount here")
         return
     end
-    
-    -- Initial check to ensure the player can mount
-    repeat
-        Sleep(0.1)
-    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
-    
-    -- Retry loop for mounting with a max retry limit (set above)
-    while retries < max_retries do
-        -- Attempt to mount using the chosen mount or Mount Roulette if none
-        if mount_name == nil then
-            yield('/mount "Company Chocobo"')
-        else
-            yield('/mount "' .. mount_name .. '"')
-        end
-        
-        -- Wait for the retry interval
-        Sleep(retry_interval)
-        
-        -- Exit loop if the player mounted
-        if GetCharacterCondition(4) then
-            local attempt_word = (retries == 1) and "retry" or "retries"
-            Echo("Successfully mounted after " .. retries .. " " .. attempt_word .. ".")
-            break
-        end
-        
-        -- Increment the retry counter
-        retries = retries + 1
-    end
-    
-    -- Check if max retries were reached without success
-    if retries >= max_retries then
-        local attempt_word = (max_retries == 1) and "retry" or "retries"
-        Echo("Failed to mount after " .. max_retries .. " " .. attempt_word .. ".")
-    end
-    
-    -- Check player is available and mounted
-    repeat
-        Sleep(0.1)
-    until IsPlayerAvailable() and GetCharacterCondition(4)
 end
 
 -- Usage: LogOut()
@@ -851,11 +857,12 @@ function OpenGcSupplyWindow(tab)
             Target(gc_target)
         else
             Echo("Unknown Grand Company ID: " .. tostring(gc_id))
+            return
         end
-        
-        Interact()
+
         
         repeat
+            yield("/pint")
             Sleep(0.1)
         until IsAddonReady("SelectString")
         yield("/pcall SelectString true 0")
@@ -1650,16 +1657,20 @@ end
 -- Usage: Dismount()
 -- Checks if player is mounted, dismounts if true
 function Dismount()
-    if GetCharacterCondition(4) then
+    if TerritorySupportsMounting() then
+        if GetCharacterCondition(4) then
+            repeat
+                yield("/mount")
+                Sleep(0.1)
+            until not GetCharacterCondition(4)
+        end
+
         repeat
-            yield("/mount")
             Sleep(0.1)
-        until not GetCharacterCondition(4)
+        until IsPlayerAvailable() and not IsPlayerCasting() 
+    else
+        -- do nothing
     end
-    
-    repeat
-        Sleep(0.1)
-    until IsPlayerAvailable() and not IsPlayerCasting()
 end
 
 -- Usage: DropboxSetAll() or DropboxSetAll(123456)
