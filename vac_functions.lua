@@ -740,6 +740,10 @@ function OpenTimers()
     local retry_interval = 5  -- x seconds interval between retries
 
     repeat
+        Sleep(0.1)
+    until IsPlayerAvailable() and not IsPlayerOccupied()
+    yield("/timers")
+    repeat
         local current_time = os.time()
         if current_time - last_trigger_time >= retry_interval then  -- Activate once every x seconds
             yield("/timers")
