@@ -1118,11 +1118,13 @@ end
 
 -- Paths to Limsa bell
 function PathToLimsaBell()
-    if ZoneCheck("Limsa Lominsa lower decks") then
-        -- stuff could go here
+    if ZoneCheck("Limsa Lominsa Lower Decks") then
+        --Movement(-123.72, 18.00, 20.55)
+        Movement(GetObjectRawXPos("Summoning Bell"), GetObjectRawYPos("Summoning Bell"), GetObjectRawZPos("Summoning Bell"))
     else
         Teleporter("Limsa Lominsa", "tp")
-        Movement(-123.72, 18.00, 20.55)
+        --Movement(-123.72, 18.00, 20.55)
+        Movement(GetObjectRawXPos("Summoning Bell"), GetObjectRawYPos("Summoning Bell"), GetObjectRawZPos("Summoning Bell"))
     end
 end
 
@@ -1721,6 +1723,7 @@ end
 
 -- Usage: IsHuntLogComplete("Arcanist1") or IsHuntLogComplete("Maelstrom2")
 -- Checks if player has the hunt log rank completed
+-- NEEDS doing
 function IsHuntLogComplete()
     -- stuff can go here
     -- check if the entire rank is done
@@ -1743,4 +1746,20 @@ function GetPlayerJobLevel(job)
     elseif type(job) ~= nil then
         return tonumber(GetLevel(Joblist[job]["ExpArrayIndex"]))
     end
+end
+
+-- Usage: ReturnHomeWorld()
+-- Checks if player is not on home world and returns Home
+-- ZoneTransitions() not required
+function ReturnHomeWorld()
+    Echo("Attempting to return to " .. GetHomeWorld())
+    
+    if GetCurrentWorld() ~= GetHomeWorld() then
+        -- Teleporter(GetHomeWorld(), "li")
+        yield("/li")
+    end
+    
+    repeat
+        Sleep(0.1)
+    until GetCurrentWorld() == GetHomeWorld() and IsPlayerAvailable()
 end

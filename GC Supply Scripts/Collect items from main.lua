@@ -25,9 +25,9 @@ local destination_server = "Louisoix"     -- Server characters need to travel fo
 local destination_aetheryte = "Limsa"     -- Aetheryte that characters need to travel to for collecting items, case insensitive and you can be vague
 local destination_house = 0               -- Options: 0 = FC, 1 = Personal, 2 = Apartment
 local destination_type = 0                -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
-local path_home = true                    -- Options: true = Paths home from destination, false = does nothing and logs out
-local do_movement = true                  -- Options: true = Paths to chosen character, false = does nothing and waits for chosen character to come to you
-local use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being char_list.lua, false uses the list you put in this file 
+local path_home = true                    -- Options: true = Paths home from destination, false = Does nothing and logs out
+local do_movement = true                  -- Options: true = Paths to chosen character, false = Does nothing and waits for chosen character to come to you
+local use_external_character_list = true  -- Options: true = Uses the external character list (char_list.lua), false = Uses the list you put in this file 
 
 -- Usage: First Last
 -- This is your main character name, do not include @Server
@@ -87,8 +87,11 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
         
         -- Switch characters if required, looks up current character and compares
         if GetCharacterName(true) ~= character_list_options[i][1] then
-            if not (ZoneCheck("Limsa Lominsa Lower") or ZoneCheck("Limsa Lominsa Upper")) then
-                Teleporter("Limsa", "tp")
+            -- checks if return_location options matches 1 which returns player to Limsa
+            if character_list_options[i][3] == 1 then
+                if not (ZoneCheck("Limsa Lominsa Lower") or ZoneCheck("Limsa Lominsa Upper")) then
+                    Teleporter("Limsa", "tp")
+                end
             end
             
             RelogCharacter(character_list_options[i][1])
@@ -111,12 +114,14 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
         -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
         if destination_type == 0 then
             dest_aetheryte, dest_aetheryte_fullname = FindZoneIDByAetheryte(destination_aetheryte)
-            if dest_aetheryte ~= GetZoneID() then
+            
+            -- If player is not at the destination then tp there
+            if GetZoneID() ~= dest_aetheryte then
                 Echo("Teleporting to " .. dest_aetheryte_fullname .. " to find " .. main_char_name)
                 Teleporter(destination_aetheryte, "tp")
                 ZoneTransitions()
             else
-                Echo("Already in the right zone to meet "..main_char_name)
+                Echo("Already in the right zone to meet " .. main_char_name)
             end
         end
         
@@ -177,42 +182,40 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
         PartyDisband()
         
         -- Alt character handling to go home
+        -- [2] return_home options: 0 = no, 1 = yes
+        -- [3] return_location options: 0 = do nothing, 1 = limsa, 2 = limsa bell, 3 = nearby bell, 4 = fc
         if path_home then
-            -- [2] return_home options: 0 = no, 1 = yes
-            -- [3] return_location options: 0 = fc entrance, 1 nearby bell, 2 limsa bell
             if character_list_options[i][2] == 1 then
-                Echo("Attempting to return to " .. GetHomeWorld())
-                
-                if GetCurrentWorld() ~= GetHomeWorld() then
-                    -- Teleporter(GetHomeWorld(), "li")
-                    yield("/li")
+                ReturnHomeWorld()
+            end
+            
+            -- Limsa stuff
+            if character_list_options[i][3] == 1 then
+                if not (ZoneCheck("Limsa Lominsa Lower") or ZoneCheck("Limsa Lominsa Upper")) then
+                    Echo("Attempting to go to Limsa")
+                    Teleporter("Limsa", "tp")
                 end
-                
-                repeat
-                    Sleep(0.1)
-                until GetCurrentWorld() == GetHomeWorld() and IsPlayerAvailable()
-                
-                -- FC Entrance stuff
-                if character_list_options[i][3] == 0 then
-                    Echo("Attempting to go to FC Entrance")
-                    Teleporter("Estate Hall", "tp")
-                    ZoneTransitions()
-                    -- This likely needs some logic on nearest "Entrance" for nearby estates
-                    PathToEstateEntrance()
-                end
-                
-                -- Nearby Retainer Bell Stuff
-                if character_list_options[i][3] == 1 then
-                    Echo("Attempting to go to nearest retainer bell")
-                    Target("Summoning Bell")
-                    Movement(GetObjectRawXPos("Summoning Bell"), GetObjectRawYPos("Summoning Bell"), GetObjectRawZPos("Summoning Bell"))
-                end
-                
-                -- Limsa Retainer Bell Stuff
-                if character_list_options[i][3] == 2 then
-                    Echo("Attempting to go to Limsa retainer bell")
-                    PathToLimsaBell()
-                end
+            end
+            
+            -- Limsa Retainer Bell Stuff
+            if character_list_options[i][3] == 2 then
+                Echo("Attempting to go to Limsa retainer bell")
+                PathToLimsaBell()
+            end
+            
+            -- Nearby Retainer Bell Stuff
+            if character_list_options[i][3] == 3 then
+                Echo("Attempting to go to nearest retainer bell")
+                Movement(GetObjectRawXPos("Summoning Bell"), GetObjectRawYPos("Summoning Bell"), GetObjectRawZPos("Summoning Bell"))
+            end
+            
+            -- FC Entrance stuff
+            if character_list_options[i][3] == 4 then
+                Echo("Attempting to go to FC Entrance")
+                Teleporter("Estate Hall (Free Company)", "tp")
+                ZoneTransitions()
+                -- This likely needs some logic on nearest "Entrance" for nearby estates
+                PathToEstateEntrance()
             end
         end
     end
