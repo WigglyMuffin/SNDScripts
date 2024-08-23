@@ -1081,16 +1081,18 @@ end
 -- # RETAINER UNLOCK #
 -- ###################
 
+-- Questionable does not support this yet, using alternative method
 function RetainerUnlock()
     if GetLevel() < 17 then
         Echo("You do not have the level 17 requirement.")
         return
     end
     
-    if not IsQuestDone("An Ill-conceived Venture (Limsa Lominsa)") then
-        DoQuest("An Ill-conceived Venture (Limsa Lominsa)")
+    if not IsQuestDone("An Ill-conceived Venture") then
+        -- stuff can go here
+        --DoQuest("An Ill-conceived Venture")
     else
-        DoQuest("An Ill-conceived Venture (Limsa Lominsa)") -- This has the echo text inside
+        DoQuest("An Ill-conceived Venture") -- This has the echo text inside
     end
 end
 

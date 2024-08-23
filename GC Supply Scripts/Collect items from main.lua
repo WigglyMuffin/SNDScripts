@@ -12,6 +12,7 @@
 ##################################################################
 
 -- You need to have Auto Retainer know who your characters are otherwise it will not work, to fix you will need to log into each missing character manually
+-- Optimal Dropbox settings are: Delay between trades, 4  // Trade open command throttle, 1554
 
 ]]
 
