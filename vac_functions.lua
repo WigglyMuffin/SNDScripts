@@ -737,7 +737,7 @@ end
 -- Opens the timers window
 function OpenTimers()
     local last_trigger_time = os.time()
-    local retry_interval = 4  -- x seconds interval between retries
+    local retry_interval = 5  -- x seconds interval between retries
 
     yield("/timers")
     repeat
