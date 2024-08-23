@@ -16,8 +16,8 @@ local character_list = {
 -- return_location options: 0 = do nothing, 1 = limsa, 2 = limsa bell, 3 = nearby bell, 4 = fc
 -- This is where your alts that need items are listed
 local character_list_options = {
-    {"First Last@Server", 0, 0},
-    {"First Last@Server", 0, 0}
+    { "First Last@Server", 0, 0 },
+    { "First Last@Server", 0, 0 }
 }
 
 -- Usage: First Last@Server

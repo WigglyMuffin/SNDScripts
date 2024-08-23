@@ -42,6 +42,7 @@ vac_functions.lua placed in the snd config folder
 -- Aurum vale unlock
 -- possible that there's more dungeon ones broken
 -- Job quests for marauder are likely to be implemented in some way soon, but none others are planned
+-- Marauder Stuff
 
 ###########
 # CONFIGS #
@@ -50,14 +51,29 @@ vac_functions.lua placed in the snd config folder
 -- Only set one of these
 DO_ARCANIST_QUESTS = false
 DO_ARCHER_QUESTS = false
+DO_MARAUDER_QUESTS = false
 
--- DoL job unlocks
+-- DoL job unlocks MIN/BTN/FSH
 DO_DOL_QUESTS = false
+
+-- Arcanist Hunt logs
+DO_ARCANIST_LOG_1 = false                 -- Recommended level 14 (highest enemy)
+DO_ARCANIST_LOG_2 = false                 -- Recommended level 24 (highest enemy)
+DO_ARCANIST_LOG_3 = false                 -- Recommended level 33 (highest enemy)
+
+-- Archer Hunt logs
+DO_ARCHER_LOG_1 = false                   -- Recommended level 15 (highest enemy)
+DO_ARCHER_LOG_2 = false                   -- Recommended level 23 (highest enemy)
+DO_ARCHER_LOG_3 = false                   -- Recommended level 32 (highest enemy)
+
+-- Marauder Hunt logs
+DO_MARAUDER_LOG_1 = false                 -- Recommended level 13 (highest enemy)
+DO_MARAUDER_LOG_2 = false                 -- Recommended level 20 (highest enemy)
+DO_MARAUDER_LOG_3 = false                 -- Recommended level 32 (highest enemy)
 
 -- Maelstrom Hunt logs, only does overworld enemies
 DO_MAELSTROM_LOG_1 = false                -- Requires level 20 (for the dungeon). This is for unlocking Storm Sergeant First Class
 DO_MAELSTROM_LOG_2 = false                -- Requires level 35 (for the dungeon), Storm Sergeant Third Class. This is for unlocking Chief Storm Sergeant
---DO_MAELSTROM_LOG_3 = false                -- Requires level 50 (for the dungeon). This does not unlock anything.
 
 -- Dungeon unlocks, queues dungeons after unlock
 DO_HALATALI = false                       -- Requires level 20. This is for unlocking GC rank by killing Maelstrom hunt log rank 1 enemies
@@ -69,6 +85,9 @@ DO_THE_AURUM_VALE = false                 -- Requires level 47, Chief Storm Serg
 DO_THE_LAVENDER_BEDS = false              -- This is for unlocking The Lavender Beds Housing
 DO_THE_GOBLET = false                     -- This is for unlocking The Goblet Housing
 DO_MIST = false                           -- This is for unlocking Mist Housing
+
+-- Retainer unlock
+DO_RETAINER = false                       -- This is for unlocking Retainers
 
 local use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being char_list.lua, false = use the list you put in this file 
 
@@ -631,6 +650,91 @@ function FisherUnlock()
     end
 end
 
+-- ###############
+-- # HUNTING LOG #
+-- ###############
+
+function ArcanistRank1()
+    if GetLevel() < 14 then
+        Echo("Warning: You are lower than level 14")
+        Echo("It is advised to be higher level, proceed with caution.")
+    end
+    
+    
+end
+
+function ArcanistRank2()
+    if GetLevel() < 24 then
+        Echo("Warning: You are lower than level 24")
+        Echo("It is advised to be higher level, proceed with caution.")
+    end
+    
+    
+end
+
+function ArcanistRank3()
+    if GetLevel() < 33 then
+        Echo("Warning: You are lower than level 33")
+        Echo("It is advised to be higher level, proceed with caution.")
+    end
+    
+    
+end
+
+function ArcherRank1()
+    if GetLevel() < 15 then
+        Echo("Warning: You are lower than level 15")
+        Echo("It is advised to be higher level, proceed with caution.")
+    end
+    
+    
+end
+
+function ArcherRank2()
+    if GetLevel() < 23 then
+        Echo("Warning: You are lower than level 23")
+        Echo("It is advised to be higher level, proceed with caution.")
+    end
+    
+    
+end
+
+function ArcherRank3()
+    if GetLevel() < 32 then
+        Echo("Warning: You are lower than level 32")
+        Echo("It is advised to be higher level, proceed with caution.")
+    end
+    
+    
+end
+
+function MarauderRank1()
+    if GetLevel() < 13 then
+        Echo("Warning: You are lower than level 13")
+        Echo("It is advised to be higher level, proceed with caution.")
+    end
+    
+    
+end
+
+function MarauderRank2()
+    if GetLevel() < 20 then
+        Echo("Warning: You are lower than level 20")
+        Echo("It is advised to be higher level, proceed with caution.")
+    end
+    
+    
+end
+
+function MarauderRank3()
+    if GetLevel() < 32 then
+        Echo("Warning: You are lower than level 32")
+        Echo("It is advised to be higher level, proceed with caution.")
+    end
+    
+    
+end
+
 -- ##################
 -- # GC HUNTING LOG #
 -- ##################
@@ -807,22 +911,6 @@ function MaelstromRank2()
     ZoneTransitions()
 end
 
--- Requires Second Storm Lieutenant rank
--- NEEDS a return if done
-function MaelstromRank3()
-    if GetMaelstromGCRank() < 9 then
-        Echo("You do not have the Second Storm Lieutenant rank requirement.")
-        return
-    end
-    
-    if GetLevel() < 50 then
-        Echo("Warning: You are lower than level 50")
-        Echo("It is advised to be higher level, proceed with caution.")
-    end
-    
-    -- stuff can go here
-end
-
 -- ###################
 -- # DUNGEON UNLOCKS #
 -- ###################
@@ -989,6 +1077,23 @@ function MistUnlock()
     end
 end
 
+-- ###################
+-- # RETAINER UNLOCK #
+-- ###################
+
+function RetainerUnlock()
+    if GetLevel() < 17 then
+        Echo("You do not have the level 17 requirement.")
+        return
+    end
+    
+    if not IsQuestDone("An Ill-conceived Venture (Limsa Lominsa)") then
+        DoQuest("An Ill-conceived Venture (Limsa Lominsa)")
+    else
+        DoQuest("An Ill-conceived Venture (Limsa Lominsa)") -- This has the echo text inside
+    end
+end
+
 -- ###############
 -- # MAIN SCRIPT #
 -- ###############
@@ -999,66 +1104,66 @@ function Main()
     --yield("/vbm cfg AI Enabled true")
     yield("/vbmai on")
     
-    if DO_ARCANIST_QUESTS then
-        Echo("Arcanist quests currently do not work")
-        --Arcanist1()
-        --Arcanist2()
-        --Arcanist3()
-    elseif DO_ARCHER_QUESTS then
-        Echo("Archer 1 quest is not finished")
-        --Archer1()
-        Archer2()
-        Archer3()
-    end
+    local actions = {
+        -- Arcanist job quests
+        { enabled = DO_ARCANIST_QUESTS, func = Arcanist1 },
+        { enabled = DO_ARCANIST_QUESTS, func = Arcanist2 },
+        { enabled = DO_ARCANIST_QUESTS, func = Arcanist3 },
+        
+        -- Archer job quests
+        { enabled = DO_ARCHER_QUESTS, func = Archer1 },
+        { enabled = DO_ARCHER_QUESTS, func = Archer2 },
+        { enabled = DO_ARCHER_QUESTS, func = Archer3 },
+        
+        -- Marauder job quests
+        { enabled = DO_MARAUDER_QUESTS, func = Marauder1 },
+        { enabled = DO_MARAUDER_QUESTS, func = Marauder2 },
+        { enabled = DO_MARAUDER_QUESTS, func = Marauder3 },
+        
+        -- DoL unlock quests
+        { enabled = DO_DOL_QUESTS, func = FisherUnlock },
+        { enabled = DO_DOL_QUESTS, func = MinerUnlock },
+        { enabled = DO_DOL_QUESTS, func = BotanistUnlock },
+        
+        -- Arcanist hunt logs
+        { enabled = DO_ARCANIST_LOG_1, func = ArcanistRank1 },
+        { enabled = DO_ARCANIST_LOG_2, func = ArcanistRank2 },
+        { enabled = DO_ARCANIST_LOG_3, func = ArcanistRank3 },
+        
+        -- Archer hunt logs
+        { enabled = DO_ARCHER_LOG_1, func = ArcherRank1 },
+        { enabled = DO_ARCHER_LOG_2, func = ArcherRank2 },
+        { enabled = DO_ARCHER_LOG_3, func = ArcherRank3 },
+        
+        -- Marauder hunt logs
+        { enabled = DO_MARAUDER_LOG_1, func = MarauderRank1 },
+        { enabled = DO_MARAUDER_LOG_2, func = MarauderRank2 },
+        { enabled = DO_MARAUDER_LOG_3, func = MarauderRank3 },
+        
+        -- Maelstrom hunt logs
+        { enabled = DO_MAELSTROM_LOG_1, func = MaelstromRank1 },
+        { enabled = DO_MAELSTROM_LOG_2, func = MaelstromRank2 },
+        
+        -- Dungeon unlocks
+        { enabled = DO_HALATALI, func = HalataliUnlock },
+        { enabled = DO_THE_SUNKEN_TEMPLE_OF_QARN, func = TheSunkenTempleOfQarnUnlock },
+        { enabled = DO_DZEMAEL_DARKHOLD, func = DzemaelDarkholdUnlock },
+        { enabled = DO_THE_AURUM_VALE, func = TheAurumValeUnlock },
+        
+        -- Housing unlocks
+        { enabled = DO_THE_LAVENDER_BEDS, func = TheLavenderBedsUnlock },
+        { enabled = DO_THE_GOBLET, func = TheGobletUnlock },
+        { enabled = DO_MIST, func = MistUnlock },
+        
+        -- Retainer unlocks
+        { enabled = DO_RETAINER, func = RetainerUnlock },
+    }
     
--- DoL
-    if DO_DOL_QUESTS then
-        FisherUnlock()
-        MinerUnlock()
-        BotanistUnlock()
-    end
-    
--- Hunt Logs
-    if DO_MAELSTROM_LOG_1 then
-        MaelstromRank1()
-    end
-    
-    if DO_MAELSTROM_LOG_2 then
-        MaelstromRank2()
-    end
-    
-    if DO_MAELSTROM_LOG_3 then
-        MaelstromRank3()
-    end
-    
--- Dungeons
-    if DO_HALATALI then
-        HalataliUnlock()
-    end
-    
-    if DO_THE_SUNKEN_TEMPLE_OF_QARN then
-        TheSunkenTempleOfQarnUnlock()
-    end
-    
-    if DO_DZEMAEL_DARKHOLD then
-        DzemaelDarkholdUnlock()
-    end
-    
-    if DO_THE_AURUM_VALE then
-        TheAurumValeUnlock()
-    end
-    
--- Housing
-    if DO_THE_LAVENDER_BEDS then
-        TheLavenderBedsUnlock()
-    end
-    
-    if DO_THE_GOBLET then
-        TheGobletUnlock()
-    end
-    
-    if DO_MIST then
-        MistUnlock()
+    -- Loop through functions
+    for _, action in ipairs(actions) do
+        if action.enabled then
+            action.func()
+        end
     end
 end
 
@@ -1067,7 +1172,7 @@ if multi_char then
         if GetCharacterName(true) == char then
             -- continue, no relogging needed
         else
-            if not (ZoneCheck(128) or ZoneCheck(129)) then
+            if not (ZoneCheck("Limsa Lominsa Lower") or ZoneCheck("Limsa Lominsa Upper")) then
                 Teleporter("Limsa", "tp")
             end
             
