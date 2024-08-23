@@ -92,6 +92,7 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
             if character_list_options[i][3] == 1 then
                 if not (ZoneCheck("Limsa Lominsa Lower") or ZoneCheck("Limsa Lominsa Upper")) then
                     Teleporter("Limsa", "tp")
+                    ZoneTransitions()
                 end
             end
             
@@ -114,10 +115,10 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
         -- Alt character destination type, how alt char is travelling to the main
         -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
         if destination_type == 0 then
-            dest_aetheryte, dest_aetheryte_fullname = FindZoneIDByAetheryte(destination_aetheryte)
+            dest_aetheryte_fullname = FindZoneIDByAetheryte(destination_aetheryte)
             
             -- If player is not at the destination then tp there
-            if GetZoneID() ~= dest_aetheryte then
+            if GetZoneID() ~= dest_aetheryte_fullname then
                 Echo("Teleporting to " .. dest_aetheryte_fullname .. " to find " .. main_char_name)
                 Teleporter(destination_aetheryte, "tp")
                 ZoneTransitions()
@@ -195,6 +196,7 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
                 if not (ZoneCheck("Limsa Lominsa Lower") or ZoneCheck("Limsa Lominsa Upper")) then
                     Echo("Attempting to go to Limsa")
                     Teleporter("Limsa", "tp")
+                    ZoneTransitions()
                 end
             end
             
