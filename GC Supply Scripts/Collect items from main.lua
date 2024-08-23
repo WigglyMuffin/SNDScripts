@@ -87,8 +87,8 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
         
         -- Switch characters if required, looks up current character and compares
         if GetCharacterName(true) ~= character_list_options[i][1] then
-            -- checks if return_location options matches 0 which returns player to Limsa
-            if character_list_options[i][3] == 0 then
+            -- checks if return_location options matches 1 which returns player to Limsa
+            if character_list_options[i][3] == 1 then
                 if not (ZoneCheck("Limsa Lominsa Lower") or ZoneCheck("Limsa Lominsa Upper")) then
                     Teleporter("Limsa", "tp")
                 end
@@ -183,14 +183,14 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
         
         -- Alt character handling to go home
         -- [2] return_home options: 0 = no, 1 = yes
-        -- [3] return_location options: 0 = limsa, 1 limsa bell, 2 nearby bell, 3 fc
+        -- [3] return_location options: 0 = do nothing, 1 = limsa, 2 = limsa bell, 3 = nearby bell, 4 = fc
         if path_home then
             if character_list_options[i][2] == 1 then
                 ReturnHomeWorld()
             end
             
             -- Limsa stuff
-            if character_list_options[i][3] == 0 then
+            if character_list_options[i][3] == 1 then
                 if not (ZoneCheck("Limsa Lominsa Lower") or ZoneCheck("Limsa Lominsa Upper")) then
                     Echo("Attempting to go to Limsa")
                     Teleporter("Limsa", "tp")
@@ -198,19 +198,19 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
             end
             
             -- Limsa Retainer Bell Stuff
-            if character_list_options[i][3] == 1 then
+            if character_list_options[i][3] == 2 then
                 Echo("Attempting to go to Limsa retainer bell")
                 PathToLimsaBell()
             end
             
             -- Nearby Retainer Bell Stuff
-            if character_list_options[i][3] == 2 then
+            if character_list_options[i][3] == 3 then
                 Echo("Attempting to go to nearest retainer bell")
                 Movement(GetObjectRawXPos("Summoning Bell"), GetObjectRawYPos("Summoning Bell"), GetObjectRawZPos("Summoning Bell"))
             end
             
             -- FC Entrance stuff
-            if character_list_options[i][3] == 3 then
+            if character_list_options[i][3] == 4 then
                 Echo("Attempting to go to FC Entrance")
                 Teleporter("Estate Hall (Free Company)", "tp")
                 ZoneTransitions()

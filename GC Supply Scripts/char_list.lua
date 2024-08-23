@@ -13,7 +13,7 @@ local character_list = {
 
 -- Usage: First Last@Server, return_home, return_location
 -- return_home options: 0 = no, 1 = yes
--- return_location options: 0 = limsa, 1 limsa bell, 2 nearby bell, 3 fc
+-- return_location options: 0 = do nothing, 1 = limsa, 2 = limsa bell, 3 = nearby bell, 4 = fc
 -- This is where your alts that need items are listed
 local character_list_options = {
     {"First Last@Server", 0, 0},
