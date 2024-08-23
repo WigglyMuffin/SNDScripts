@@ -996,7 +996,7 @@ end
 function Main()
     yield("/at e")
     yield("/p")
-    yield("/vbm cfg AI Enabled true")
+    --yield("/vbm cfg AI Enabled true")
     yield("/vbmai on")
     
     if DO_ARCANIST_QUESTS then

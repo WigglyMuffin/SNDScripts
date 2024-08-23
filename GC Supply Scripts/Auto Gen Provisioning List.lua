@@ -8,6 +8,9 @@
 local use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being char_list.lua, false uses the list you put in this file 
 local level_cap = 100                     -- Job level cap, adjust according to your current level cap
 local skip_level_capped_jobs = true       -- Options: true = will skip level capped jobs, false = will not skip level capped jobs
+local min_enabled = true                  -- Options: true = will store MIN items, false = will skip MIN items
+local btn_enabled = true                  -- Options: true = will store BTN items, false = will skip BTN items
+local fsh_enabled = true                  -- Options: true = will store FSH items, false = will skip FSH items
 
 -- This is where you put your character list if you choose to not use the external one
 -- If us_external_character_list is set to true then this list is completely skipped
@@ -158,7 +161,7 @@ function GetAndSaveProvisioningToTable()
             local ItemAmount = GetNodeText("ContentsInfoDetail", i, 2)
             
             if ListName == "GC_MIN" then
-                if (min_level < level_cap) or (not skip_level_capped_jobs) then
+                if min_enabled and ((min_level < level_cap) or not skip_level_capped_jobs) then
                     provisioning_list[charname]["MIN"] = {}
                     provisioning_list[charname]["MIN"]["Item"] = ItemName
                     provisioning_list[charname]["MIN"]["ID"] = ItemID
@@ -166,7 +169,7 @@ function GetAndSaveProvisioningToTable()
                 end
                 
             elseif ListName == "GC_BTN" then
-                if (btn_level < level_cap) or (not skip_level_capped_jobs) then
+                if btn_enabled and ((btn_level < level_cap) or not skip_level_capped_jobs) then
                     provisioning_list[charname]["BTN"] = {}
                     provisioning_list[charname]["BTN"]["Item"] = ItemName
                     provisioning_list[charname]["BTN"]["ID"] = ItemID
@@ -174,7 +177,7 @@ function GetAndSaveProvisioningToTable()
                 end
                 
             elseif ListName == "GC_FSH" then
-                if (fsh_level < level_cap) or (not skip_level_capped_jobs) then
+                if fsh_enabled and ((fsh_level < level_cap) or not skip_level_capped_jobs) then
                     provisioning_list[charname]["FSH"] = {}
                     provisioning_list[charname]["FSH"]["Item"] = ItemName
                     provisioning_list[charname]["FSH"]["ID"] = ItemID
