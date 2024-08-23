@@ -101,7 +101,7 @@ for index_name, item in pairs(provisioning_list) do
             Sleep(0.5)
             
             -- Handle FSH item
-            if item_list["FSH"] and not fsh_succeeded then
+            if item_list["FSH"] and not fsh_succeeded  then
                 local fsh_id = tonumber(item_list["FSH"]["ID"])
                 local fsh_qty = tonumber(item_list["FSH"]["QTY"])
                 
