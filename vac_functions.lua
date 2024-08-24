@@ -854,6 +854,7 @@ function DoGcRankUp()
         if gc_target then
             -- Target the correct GC officer
             Target(gc_target)
+            yield("/lockon")
         else
             return
         end
@@ -987,6 +988,7 @@ function OpenGcSupplyWindow(tab)
         if gc_target then
             -- Target the correct GC officer
             Target(gc_target)
+            yield("/lockon")
         else
             Echo("Unknown Grand Company ID: " .. tostring(gc_id))
             return
