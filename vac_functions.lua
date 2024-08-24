@@ -1524,7 +1524,7 @@ end
 -- Usage: EstateTeleport("First Last", 0)
 -- Options: 0 = Free Company, 1 = Personal, 2 = Apartment
 -- Opens estate list of added friend and teleports to specified location
--- ZoneTransitions() not required
+-- ZoneTransitions() not required to be called after
 function EstateTeleport(estate_char_name, estate_type)
     repeat
         Sleep(0.1)
@@ -2002,13 +2002,12 @@ end
 
 -- Usage: ReturnHomeWorld()
 -- Checks if player is not on home world and returns Home
--- ZoneTransitions() not required
+-- ZoneTransitions() not required to be called after
 function ReturnHomeWorld()
     Echo("Attempting to return to " .. GetHomeWorld())
     
     if GetCurrentWorld() ~= GetHomeWorld() then
-        -- Teleporter(GetHomeWorld(), "li")
-        yield("/li")
+        Teleporter(GetHomeWorld(), "li")
     end
     
     repeat

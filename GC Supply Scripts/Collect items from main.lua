@@ -92,7 +92,6 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
             if character_list_options[i][3] == 1 then
                 if not (ZoneCheck("Limsa Lominsa Lower") or ZoneCheck("Limsa Lominsa Upper")) then
                     Teleporter("Limsa", "tp")
-                    ZoneTransitions()
                 end
             end
             
@@ -105,8 +104,7 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
         Echo("Processing " .. i .. "/" .. #character_list_options .. ", current character: " .. alt_char_name)
         
         -- Check if alt character on correct server
-        -- Teleporter(destination_server, "li")
-        yield("/li " .. destination_server)
+        Teleporter(destination_server, "li")
         
         repeat
             Sleep(0.1)
@@ -121,7 +119,6 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
             if GetZoneID() ~= dest_aetheryte_fullname then
                 Echo("Teleporting to " .. dest_aetheryte_fullname .. " to find " .. main_char_name)
                 Teleporter(destination_aetheryte, "tp")
-                ZoneTransitions()
             else
                 Echo("Already in the right zone to meet " .. main_char_name)
             end
@@ -196,7 +193,6 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
                 if not (ZoneCheck("Limsa Lominsa Lower") or ZoneCheck("Limsa Lominsa Upper")) then
                     Echo("Attempting to go to Limsa")
                     Teleporter("Limsa", "tp")
-                    ZoneTransitions()
                 end
             end
             
@@ -216,7 +212,6 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
             if character_list_options[i][3] == 4 then
                 Echo("Attempting to go to FC Entrance")
                 Teleporter("Estate Hall (Free Company)", "tp")
-                ZoneTransitions()
                 -- This likely needs some logic on nearest "Entrance" for nearby estates
                 PathToEstateEntrance()
             end

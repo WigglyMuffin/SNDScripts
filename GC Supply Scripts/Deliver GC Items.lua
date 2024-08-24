@@ -53,7 +53,7 @@ function DOL()
     local home = GetCurrentWorld() == GetHomeWorld()
     
     if not home then
-        yield("/li")
+        Teleporter(GetHomeWorld(), "li")
         
         repeat
             Sleep(0.1)
@@ -71,7 +71,7 @@ function DOL()
         Sleep(0.1)
     until IsPlayerAvailable()
     
-    yield("/li gc")
+    Teleporter("GC", "li")
     
     repeat
         Sleep(0.1)
