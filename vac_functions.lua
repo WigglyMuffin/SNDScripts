@@ -832,6 +832,128 @@ function Target(target)
     until string.lower(GetTargetName()) == string.lower(target)
 end
 
+
+-- Usage: GcRankUp()  
+-- 
+-- Checks if you can rank up in your current gc, then it'll attempt to rank you up
+function DoGcRankUp()
+    yield("/at e")
+    local gc_id = GetPlayerGC()
+    local gc_rank_9_mission_complete = false
+    local gc_rank_8_mission_complete = false
+    local can_rankup, next_rank = CanGCRankUp()
+    
+    local gc_officer_names = {
+        [1] = "Storm Personnel Officer",
+        [2] = "Serpent Personnel Officer",
+        [3] = "Flame Personnel Officer"
+    }
+
+    local function OpenAndAttemptRankup()
+        local gc_target = gc_officer_names[gc_id]
+        if gc_target then
+            -- Target the correct GC officer
+            Target(gc_target)
+        else
+            return
+        end
+        repeat
+            yield("/pint")
+            Sleep(0.1)
+        until IsAddonReady("SelectString")
+        yield("/pcall SelectString true 1")
+        repeat
+            Sleep(0.1)
+        until IsAddonReady("GrandCompanyRankUp")
+        yield("/pcall GrandCompanyRankUp true 0")
+    end
+
+    if gc_id == 1 then -- checks if gc is maelstrom and checks if the quests are done
+        gc_rank_8_mission_complete = IsQuestComplete(66664)
+        gc_rank_9_mission_complete = IsQuestComplete(66667)
+
+    elseif gc_id == 2 then -- checks if gc is twin adder and checks if the quests are done
+        gc_rank_8_mission_complete = IsQuestComplete(66665)
+        gc_rank_9_mission_complete = IsQuestComplete(66668)
+
+    elseif gc_id == 3 then -- checks if gc is immortal flames and checks if the quests are done
+        gc_rank_8_mission_complete = IsQuestComplete(66666)
+        gc_rank_9_mission_complete = IsQuestComplete(66669)
+    end
+
+    if can_rankup then
+        if next_rank == 5 then
+            local log_rank_1_complete = IsHuntLogComplete(9, 0)
+            if log_rank_1_complete then
+                OpenAndAttemptRankup()
+            else
+                Echo("You need to finish GC hunting log 1 to rank up more")
+                return
+            end
+        elseif next_rank == 8 then
+            if not gc_rank_8_mission_complete then
+                Echo('You need to finish the quest "Shadows Uncast" to rank up more')
+            else
+                OpenAndAttemptRankup()
+            end
+            return
+        elseif next_rank == 9 then
+            local log_rank_2_complete = IsHuntLogComplete(9, 1)
+            if log_rank_2_complete and gc_rank_9_mission_complete then
+                OpenAndAttemptRankup()
+            else
+                if not log_rank_2_complete then
+                    Echo("You need to finish GC hunting log 2 to rank up more")
+                end
+                if not gc_rank_9_mission_complete then
+                    Echo('You need to finish the quest "Gilding The Bilious" to rank up more')
+                end
+            end
+            return
+        else
+            OpenAndAttemptRankup()
+        end
+    end
+end
+
+-- Usage: can_rankup, next_rank = CanGCRankUp()
+--
+-- returns true and the next rank if you can rank up, returns false if you can't 
+function CanGCRankUp()
+    local gc_rank = 0
+    local gc_id = GetPlayerGC()
+    local current_seals = 0
+    local gc_ranks = {
+        [1] = 0,
+        [2] = 2000,
+        [3] = 3000,
+        [4] = 4000,
+        [5] = 5000,
+        [6] = 6000,
+        [7] = 7000,
+        [8] = 8000,
+        [9] = 9000
+    }
+    if gc_id == 1 then -- checks if gc is maelstrom and adds seal amount to current_seals
+        current_seals = GetItemCount(20)
+        gc_rank = GetMaelstromGCRank()
+
+    elseif gc_id == 2 then -- checks if gc is twin adder and adds seal amount to current_seals
+        current_seals = GetItemCount(21)
+        gc_rank = GetAddersGCRank()
+
+    elseif gc_id == 3 then -- checks if gc is immortal flames and adds seal amount to current_seals
+        current_seals = GetItemCount(22)
+        gc_rank = GetFlamesGCRank()
+    end
+    local next_rank = gc_rank + 1 -- adds one so we know which gc rank we're attempting to rank up to
+    if current_seals >= gc_ranks[next_rank] and not gc_ranks[next_rank] >= 10 then -- excludes rank 10 and above as we don't handle that atm
+        return true, next_rank
+    else
+        return false, next_rank
+    end
+end
+
 -- Usage: OpenGcSupplyWindow(1)  
 -- Supply tab is 0 // Provisioning tab is 1 // Expert Delivery is 2  
 -- Anything above or below those numbers will not work 
@@ -1725,12 +1847,21 @@ function IsQuestNameAccepted()
     -- do when have actual quest list from csv
 end
 
--- Usage: IsHuntLogComplete("Arcanist1") or IsHuntLogComplete("Maelstrom2")
+-- Usage: IsHuntLogComplete(9, 0) or IsHuntLogComplete(0, 1)
 -- Checks if player has the hunt log rank completed
--- NEEDS doing
-function IsHuntLogComplete()
-    -- stuff can go here
-    -- check if the entire rank is done
+-- Valid jobs: 0 = GLA, 1 = PGL, 2 = MRD, 3 = LNC, 4 = ARC, 5 = ROG, 6 = CNJ, 7 = THM, 8 = ACN, 9 = GC
+-- Valid ranks/pages: 0-4 for jobs, 0-2 for GC
+function IsHuntLogComplete(class, rank)
+    OpenHuntLog(class, rank)
+    local rank_text = GetNodeText("MonsterNote", 33, rank, 3)
+    local left_num, right_num = rank_text:match("([^/]+)/([^/]+)")
+    if left_num == right_num then
+        CloseHuntLog()
+        return true
+    else
+        CloseHuntLog()
+        return false
+    end
 end
 
 -- Usage: GetPlayerJobLevel() // GetPlayerJobLevel("WAR") // GetPlayerJobLevel(11)
