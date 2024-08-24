@@ -104,7 +104,7 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
         Echo("Processing " .. i .. "/" .. #character_list_options .. ", current character: " .. alt_char_name)
         
         -- Check if alt character on correct server
-        Teleporter(destination_server, "li")
+        yield("/li " .. destination_server)
         
         repeat
             Sleep(0.1)

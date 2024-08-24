@@ -103,8 +103,7 @@ function Sleep(time)
 end
 
 -- Usage: ZoneTransitions()
---
--- Zone transition checker, does nothing if changing zones
+-- Zone transition checker, used if you need to path between two zones and waits until player is available
 function ZoneTransitions()
     -- Check if player is in transition between zones
     while not (GetCharacterCondition(45) or GetCharacterCondition(51)) do
@@ -476,27 +475,25 @@ function Teleporter(location, tp_kind) -- Teleporter handler
     local retries = 0
     local cast_check_interval = 0.1 -- Interval to check if casting started
     
-    -- Helper function to check if teleport was successful
-    local function is_teleport_successful()
-        return GetCharacterCondition(45) or GetCharacterCondition(51)
-    end
-
     -- Check if player is available and not casting or in combat/event, else a teleport cannot happen
     repeat
         Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32)
-
+    
     -- Teleport attempt loop
     while retries < max_retries do
         -- Pass lifestream stop if "li" teleport is used
         if tp_kind == "li" then
             yield("/lifestream stop")
-            Sleep(0.1)
+            
+            repeat
+                Sleep(0.1)
+            until not LifestreamIsBusy()
         end
-
+        
         -- If already in the specified zone, no need to teleport
         if FindZoneIDByAetheryte(location) == GetZoneID() then
-            LogInfo("Already in the right zone")
+            LogInfo("Already in the right zone.")
             return true
         end
         
@@ -523,15 +520,11 @@ function Teleporter(location, tp_kind) -- Teleporter handler
         end
         
         -- Checks if player is between zones
-        ZoneTransitions()
-        
-        -- If lifestream is busy, wait for it to finish
-        if tp_kind == "li" and LifestreamIsBusy() then
-            repeat
-                Sleep(0.1)
-            until not LifestreamIsBusy()
+        if GetCharacterCondition(45) or GetCharacterCondition(51) then
+            LogInfo("Teleport successful.")
+            return true
         end
-
+        
         -- Increment retries if teleport failed
         retries = retries + 1
         local retry_word = (max_retries == 1) and "retry" or "retries"
