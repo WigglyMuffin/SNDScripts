@@ -13,11 +13,8 @@ end
 -- Full quest list with both quest IDs and key IDs
 -- Dungeon ID list
 -- Distance stuff
--- Redo Teleporter()
 -- Redo Movement()
 -- IsQuestNameAccepted() see below
--- IsHuntLogComplete() see below
--- Add Lifestream ipc now that it's in SND
 
 -- #####################################
 -- #####################################
@@ -469,78 +466,6 @@ function DoHuntLog(target_name, target_distance, class, rank)
     end
 end
 
--- Usage: Teleporter("Limsa", "tp") or Teleporter("gc", "li")  
--- add support for item tp Teleporter("Vesper", "item")  
--- likely rewriting teleporter to have own version of lifestream with locations, coords and nav/tp handling
--- add trade detection to initiate /busy and remove after successful tp
--- maybe add random delays between retries
--- function Teleporter(location, tp_kind) -- Teleporter handler
-    -- local lifestream_stopped = false
-    -- local cast_time_buffer = 5 -- Just in case a buffer is required, teleports are 5 seconds long. Slidecasting, ping and fps can affect casts
-    -- local max_retries = 10  -- Teleporter retry amount, will not tp after number has been reached for safety
-    -- local retries = 0
-    
-    -- -- Initial check to ensure player can teleport
-    -- repeat
-        -- Sleep(0.1)
-    -- until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32) -- 26 is combat, 32 is quest event
-    
-    -- -- Try teleport, retry until max_retries is reached
-    -- while retries < max_retries do
-        -- -- Stop lifestream only once per teleport attempt
-        -- if FindZoneIDByAetheryte(location) == GetZoneID() and not tp_kind == "li" then
-            -- LogInfo("Already in the right zone")
-            -- break
-        -- end
-        
-        -- if tp_kind == "li" and not lifestream_stopped then
-            -- yield("/lifestream stop")
-            -- lifestream_stopped = true
-            -- Sleep(0.1)
-        -- end
-        
-        -- -- Attempt teleport
-        -- if not IsPlayerCasting() then
-            -- yield("/" .. tp_kind .. " " .. location)
-            -- Sleep(2.0) -- Wait to check if casting starts
-            
-            -- -- Check if the player started casting
-            -- if IsPlayerCasting() then
-                -- Sleep(cast_time_buffer) -- Wait for cast to complete
-            -- end
-        -- end
-
-        -- -- pause when lifestream is running and only break out of the loop when it's done
-        -- if LifestreamIsBusy() then
-            -- repeat
-                -- Sleep(0.1)
-            -- until not LifestreamIsBusy() and IsPlayerAvailable()
-            -- break
-        -- end
-
-        -- -- Check if the teleport was successful
-        -- if GetCharacterCondition(45) or GetCharacterCondition(51) then -- 45 is BetweenAreas, 51 is BetweenAreas51
-            -- LogInfo("Teleport successful.")
-            -- break
-        -- end
-        
-        -- -- Teleport retry increment
-        -- retries = retries + 1
-        -- LogInfo("Retrying teleport attempt #" .. retries)
-        
-        -- -- Reset lifestream_stopped for next retry
-        -- lifestream_stopped = false
-    -- end
-    
-    -- -- Teleporter failed handling
-    -- if retries >= max_retries then
-        -- local attempt_word = (max_retries == 1) and "attempt" or "attempts"
-        -- LogInfo("Teleport failed after " .. max_retries .. " " .. attempt_word .. ".")
-        -- Echo("Teleport failed after " .. max_retries .. " " .. attempt_word .. ".")
-        -- yield("/lifestream stop") -- Not always needed but removes lifestream ui
-    -- end
--- end
-
 -- New Teleport needs testing
 -- Usage: Teleporter("Limsa", "tp") or Teleporter("gc", "li") or Teleporter("Vesper", "item")
 -- Options: location = teleport location, tp_kind = tp, li, item
@@ -623,8 +548,6 @@ function Teleporter(location, tp_kind) -- Teleporter handler
     end
 end
 
--- NEEDS doing
--- Hook it up with the item list
 -- Usage: UseItemTeleport("Maelstrom")
 -- Will use specified teleport location item for teleporting
 function UseItemTeleport(location)
@@ -640,11 +563,10 @@ function UseItemTeleport(location)
     local item = teleport_items[location]
     
     if item then
-        -- Don't know how to do this yet
-        yield("/item_teleport " .. item)
+        yield("/item " .. item)
     else
-        LogInfo("No teleport item found for location: " .. location)
-        Echo("No teleport item found for location: " .. location)
+        LogInfo("No teleport item found for: " .. location)
+        Echo("No teleport item found for: " .. location)
     end
 end
 
