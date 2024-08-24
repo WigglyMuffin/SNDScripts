@@ -184,6 +184,8 @@ for index_name, item in pairs(provisioning_list) do
             Sleep(0.1)
             DropboxClearAll()
         end
+        
+        ClearFocusTarget()
     end
     
     while not on_list do

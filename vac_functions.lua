@@ -109,16 +109,22 @@ end
 --
 -- Zone transition checker, does nothing if changing zones
 function ZoneTransitions()
-    repeat 
-         Sleep(0.1)
-    until GetCharacterCondition(45) or GetCharacterCondition(51)
-    repeat 
+    -- Check if player is in transition between zones
+    while not (GetCharacterCondition(45) or GetCharacterCondition(51)) do
         Sleep(0.1)
-    until not GetCharacterCondition(45) or not GetCharacterCondition(51)
-    repeat
+    end
+    
+    -- Wait until player no longer in transition between zones
+    while GetCharacterCondition(45) or GetCharacterCondition(51) do
         Sleep(0.1)
-    until IsPlayerAvailable()
+    end
+    
+    -- Check if player is available
+    while not IsPlayerAvailable() or IsPlayerCasting() or GetCharacterCondition(26) or GetCharacterCondition(32) do
+        Sleep(0.1)
+    end
 end
+
 
 -- Usage: QuestNPC("SelectYesno"|"CutSceneSelectString", true, 0)
 --
@@ -463,77 +469,181 @@ function DoHuntLog(target_name, target_distance, class, rank)
     end
 end
 
-
 -- Usage: Teleporter("Limsa", "tp") or Teleporter("gc", "li")  
 -- add support for item tp Teleporter("Vesper", "item")  
 -- likely rewriting teleporter to have own version of lifestream with locations, coords and nav/tp handling
 -- add trade detection to initiate /busy and remove after successful tp
 -- maybe add random delays between retries
-function Teleporter(location, tp_kind) -- Teleporter handler
-    local lifestream_stopped = false
-    local cast_time_buffer = 5 -- Just in case a buffer is required, teleports are 5 seconds long. Slidecasting, ping and fps can affect casts
-    local max_retries = 10  -- Teleporter retry amount, will not tp after number has been reached for safety
-    local retries = 0
+-- function Teleporter(location, tp_kind) -- Teleporter handler
+    -- local lifestream_stopped = false
+    -- local cast_time_buffer = 5 -- Just in case a buffer is required, teleports are 5 seconds long. Slidecasting, ping and fps can affect casts
+    -- local max_retries = 10  -- Teleporter retry amount, will not tp after number has been reached for safety
+    -- local retries = 0
     
-    -- Initial check to ensure player can teleport
+    -- -- Initial check to ensure player can teleport
+    -- repeat
+        -- Sleep(0.1)
+    -- until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32) -- 26 is combat, 32 is quest event
+    
+    -- -- Try teleport, retry until max_retries is reached
+    -- while retries < max_retries do
+        -- -- Stop lifestream only once per teleport attempt
+        -- if FindZoneIDByAetheryte(location) == GetZoneID() and not tp_kind == "li" then
+            -- LogInfo("Already in the right zone")
+            -- break
+        -- end
+        
+        -- if tp_kind == "li" and not lifestream_stopped then
+            -- yield("/lifestream stop")
+            -- lifestream_stopped = true
+            -- Sleep(0.1)
+        -- end
+        
+        -- -- Attempt teleport
+        -- if not IsPlayerCasting() then
+            -- yield("/" .. tp_kind .. " " .. location)
+            -- Sleep(2.0) -- Wait to check if casting starts
+            
+            -- -- Check if the player started casting
+            -- if IsPlayerCasting() then
+                -- Sleep(cast_time_buffer) -- Wait for cast to complete
+            -- end
+        -- end
+
+        -- -- pause when lifestream is running and only break out of the loop when it's done
+        -- if LifestreamIsBusy() then
+            -- repeat
+                -- Sleep(0.1)
+            -- until not LifestreamIsBusy() and IsPlayerAvailable()
+            -- break
+        -- end
+
+        -- -- Check if the teleport was successful
+        -- if GetCharacterCondition(45) or GetCharacterCondition(51) then -- 45 is BetweenAreas, 51 is BetweenAreas51
+            -- LogInfo("Teleport successful.")
+            -- break
+        -- end
+        
+        -- -- Teleport retry increment
+        -- retries = retries + 1
+        -- LogInfo("Retrying teleport attempt #" .. retries)
+        
+        -- -- Reset lifestream_stopped for next retry
+        -- lifestream_stopped = false
+    -- end
+    
+    -- -- Teleporter failed handling
+    -- if retries >= max_retries then
+        -- local attempt_word = (max_retries == 1) and "attempt" or "attempts"
+        -- LogInfo("Teleport failed after " .. max_retries .. " " .. attempt_word .. ".")
+        -- Echo("Teleport failed after " .. max_retries .. " " .. attempt_word .. ".")
+        -- yield("/lifestream stop") -- Not always needed but removes lifestream ui
+    -- end
+-- end
+
+-- New Teleport needs testing
+-- Usage: Teleporter("Limsa", "tp") or Teleporter("gc", "li") or Teleporter("Vesper", "item")
+-- Options: location = teleport location, tp_kind = tp, li, item
+function Teleporter(location, tp_kind) -- Teleporter handler
+    local cast_time_buffer = 5 -- Teleports are 5 seconds long, include buffer time
+    local max_retries = 10 -- Max retries for teleport
+    local retries = 0
+    local cast_check_interval = 0.1 -- Interval to check if casting started
+    
+    -- Helper function to check if teleport was successful
+    local function is_teleport_successful()
+        return GetCharacterCondition(45) or GetCharacterCondition(51)
+    end
+
+    -- Check if player is available and not casting or in combat/event, else a teleport cannot happen
     repeat
         Sleep(0.1)
-    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32) -- 26 is combat, 32 is quest event
-    
-    -- Try teleport, retry until max_retries is reached
+    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32)
+
+    -- Teleport attempt loop
     while retries < max_retries do
-        -- Stop lifestream only once per teleport attempt
-        if FindZoneIDByAetheryte(location) == GetZoneID() and not tp_kind == "li" then
-            LogInfo("Already in the right zone")
-            break
-        end
-        
-        if tp_kind == "li" and not lifestream_stopped then
+        -- Pass lifestream stop if "li" teleport is used
+        if tp_kind == "li" then
             yield("/lifestream stop")
-            lifestream_stopped = true
             Sleep(0.1)
+        end
+
+        -- If already in the specified zone, no need to teleport
+        if FindZoneIDByAetheryte(location) == GetZoneID() then
+            LogInfo("Already in the right zone")
+            return true
         end
         
         -- Attempt teleport
-        if not IsPlayerCasting() then
+        if tp_kind == "item" then
+            UseItemTeleport(location) -- Use item to teleport
+        else
             yield("/" .. tp_kind .. " " .. location)
-            Sleep(2.0) -- Wait to check if casting starts
-            
-            -- Check if the player started casting
-            if IsPlayerCasting() then
-                Sleep(cast_time_buffer) -- Wait for cast to complete
-            end
         end
-
-        -- pause when lifestream is running and only break out of the loop when it's done
-        if LifestreamIsBusy() then
+        
+        -- Check if casting started
+        local cast_started = false
+        for i = 1, 20 do -- Check 20 times, with cast_check_interval delay
+            if IsPlayerCasting() then
+                cast_started = true
+                break
+            end
+            Sleep(cast_check_interval)
+        end
+        
+        -- Check if casting started and wait for it to finish
+        if cast_started then
+            Sleep(cast_time_buffer)
+        end
+        
+        -- Checks if player is between zones
+        ZoneTransitions()
+        
+        -- If lifestream is busy, wait for it to finish
+        if tp_kind == "li" and LifestreamIsBusy() then
             repeat
                 Sleep(0.1)
-            until not LifestreamIsBusy() and IsPlayerAvailable()
-            break
+            until not LifestreamIsBusy()
         end
 
-        -- Check if the teleport was successful
-        if GetCharacterCondition(45) or GetCharacterCondition(51) then -- 45 is BetweenAreas, 51 is BetweenAreas51
-            LogInfo("Teleport successful.")
-            break
-        end
-        
-        -- Teleport retry increment
+        -- Increment retries if teleport failed
         retries = retries + 1
-        LogInfo("Retrying teleport attempt #" .. retries)
-        
-        -- Reset lifestream_stopped for next retry
-        lifestream_stopped = false
+        local retry_word = (max_retries == 1) and "retry" or "retries"
+        LogInfo("Retrying teleport attempt #" .. max_retries .. " " .. retry_word .. ".")
     end
     
-    -- Teleporter failed handling
+    -- If retries exhausted, handle failure
     if retries >= max_retries then
         local attempt_word = (max_retries == 1) and "attempt" or "attempts"
         LogInfo("Teleport failed after " .. max_retries .. " " .. attempt_word .. ".")
         Echo("Teleport failed after " .. max_retries .. " " .. attempt_word .. ".")
-        yield("/lifestream stop") -- Not always needed but removes lifestream ui
+        yield("/lifestream stop") -- Stop lifestream and clear lifestream ui
+        return false
     end
+end
+
+-- NEEDS doing
+-- Hook it up with the item list
+function UseItemTeleport(location)
+    -- TP items mapped
+    local teleport_items = {
+        ["Immortal Flames"] = "Immortal Flames Aetheryte Ticket",
+        ["Maelstrom"] = "Maelstrom Aetheryte Ticket",
+        ["Twin Adder"] = "Twin Adder Aetheryte Ticket",
+        ["Firmament"] = "Firmament Aetheryte Ticket",
+        ["Vesper Bay"] = "Vesper Bay Aetheryte Ticket"
+    }
+    
+    local item = teleport_items[location]
+    
+    if item then
+        -- Don't know how to do this yet
+        yield("/item_teleport " .. item)
+    else
+        LogInfo("No teleport item found for location: " .. location)
+        Echo("No teleport item found for location: " .. location)
+    end
+end
 end
 
 -- stores if the mount message in Mount() has been sent already or not
