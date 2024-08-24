@@ -71,7 +71,7 @@ function DOL()
         Sleep(0.1)
     until IsPlayerAvailable()
     
-    Teleporter("gc", "li")
+    yield("/li gc")
     
     repeat
         Sleep(0.1)

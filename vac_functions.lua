@@ -914,6 +914,10 @@ function DoGcRankUp()
             OpenAndAttemptRankup()
         end
     end
+    Sleep(1)
+    repeat
+        Sleep(0.1)
+    until IsPlayerAvailable()
 end
 
 -- Usage: can_rankup, next_rank = CanGCRankUp()
@@ -932,7 +936,8 @@ function CanGCRankUp()
         [6] = 6000,
         [7] = 7000,
         [8] = 8000,
-        [9] = 9000
+        [9] = 9000,
+        [10] = 10000
     }
     if gc_id == 1 then -- checks if gc is maelstrom and adds seal amount to current_seals
         current_seals = GetItemCount(20)
@@ -947,7 +952,8 @@ function CanGCRankUp()
         gc_rank = GetFlamesGCRank()
     end
     local next_rank = gc_rank + 1 -- adds one so we know which gc rank we're attempting to rank up to
-    if current_seals >= gc_ranks[next_rank] and not gc_ranks[next_rank] >= 10 then -- excludes rank 10 and above as we don't handle that atm
+    Echo(gc_ranks[next_rank])
+    if current_seals > gc_ranks[next_rank] and next_rank < 10 then -- excludes rank 10 and above as we don't handle that atm
         return true, next_rank
     else
         return false, next_rank
@@ -1044,7 +1050,6 @@ function GcProvisioningDeliver()
             -- continue
         else
             LogInfo("Nothing here, moving on")
-            Echo("Nothing here, moving on")
             goto skip
         end
         
