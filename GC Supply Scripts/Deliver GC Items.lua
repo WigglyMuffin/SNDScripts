@@ -7,6 +7,7 @@
 -- ###########
 
 local use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being char_list.lua, false uses the list you put in this file 
+local do_rankups = true -- Automatically attempts to rank up your gc if set to true
 
 -- This is where you put your character list if you choose to not use the external one
 -- If us_external_character_list is set to true then this list is completely skipped
@@ -75,7 +76,9 @@ function DOL()
     repeat
         Sleep(0.1)
     until not LifestreamIsBusy()
-    
+    if do_rankups then
+        DoGcRankUp()
+    end
     OpenGcSupplyWindow(1)
     GcProvisioningDeliver()
     CloseGcSupplyWindow()
