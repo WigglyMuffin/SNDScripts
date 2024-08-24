@@ -544,6 +544,7 @@ end
 -- New Teleport needs testing
 -- Usage: Teleporter("Limsa", "tp") or Teleporter("gc", "li") or Teleporter("Vesper", "item")
 -- Options: location = teleport location, tp_kind = tp, li, item
+-- Will teleport player to specified location
 function Teleporter(location, tp_kind) -- Teleporter handler
     local cast_time_buffer = 5 -- Teleports are 5 seconds long, include buffer time
     local max_retries = 10 -- Max retries for teleport
@@ -624,6 +625,8 @@ end
 
 -- NEEDS doing
 -- Hook it up with the item list
+-- Usage: UseItemTeleport("Maelstrom")
+-- Will use specified teleport location item for teleporting
 function UseItemTeleport(location)
     -- TP items mapped
     local teleport_items = {
@@ -645,11 +648,11 @@ function UseItemTeleport(location)
     end
 end
 
--- stores if the mount message in Mount() has been sent already or not
-local mount_message = false
 -- Usage: Mount("SDS Fenrir") 
---
--- Will use Company Chocobo if left empty
+-- Attempts to use specified mount if player has mounts unlocked
+-- Will use "Company Chocobo" if left empty
+-- Stores if the locked mount message in Mount() has been sent already or not
+local mount_message = false
 function Mount(mount_name)
     local max_retries = 10   -- Maximum number of retries
     local retry_interval = 1.0 -- Time interval between retries in seconds
