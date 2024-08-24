@@ -644,7 +644,6 @@ function UseItemTeleport(location)
         Echo("No teleport item found for location: " .. location)
     end
 end
-end
 
 -- stores if the mount message in Mount() has been sent already or not
 local mount_message = false
