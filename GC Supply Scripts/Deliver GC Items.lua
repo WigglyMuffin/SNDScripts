@@ -10,7 +10,7 @@ local use_external_character_list = true  -- Options: true = uses the external c
 local do_rankups = true -- Automatically attempts to rank up your gc if set to true
 
 -- This is where you put your character list if you choose to not use the external one
--- If us_external_character_list is set to true then this list is completely skipped
+-- If use_external_character_list is set to true then this list is completely skipped
 local character_list = {
     "First Last@Server",
     "First Last@Server"

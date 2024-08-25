@@ -19,6 +19,7 @@ More information on what everything does will be listed near the toggle
 # Requirements #
 ################
 
+AutoDuty - https://puni.sh/api/repository/herc
 Boss Mod - https://puni.sh/api/repository/veyn OR BossMod Reborn - https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
 Lifestream - https://raw.githubusercontent.com/NightmareXIV/MyDalamudPlugins/main/pluginmaster.json
 Pandora - https://love.puni.sh/ment.json
@@ -91,7 +92,7 @@ DO_RETAINER = false                       -- This is for unlocking Retainers
 
 local use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being char_list.lua, false = use the list you put in this file 
 
-local multi_char = false                  -- Options: true = cycles through character list, false = single character
+local multi_char = true                  -- Options: true = cycles through character list, false = single character
 
 -- This is where you put your character list if you choose to not use the external one
 -- If use_external_character_list or multi_char is set to false then this list is completely skipped
@@ -228,8 +229,11 @@ end
 -- Limsa Arcanists' First Quest Level 1 "Way of the Arcanist"
 function Arcanist1()
     if not IsQuestDone("My First Grimoire") then
-        Teleporter("Limsa", "tp")
-        Teleporter("Arcanist", "li")
+        if not ZoneCheck("Limsa") then
+            Teleporter("Limsa", "tp")
+            Teleporter("Arcanist", "li")
+        end
+        
         Movement(-327.86, 12.89, 9.79)
         Target("Thubyrgeim")
         QuestNPC("SelectYesno", true, 0)
@@ -260,6 +264,11 @@ function Arcanist2()
     end
     
     if not IsQuestDone("What's in the Box") then
+        if not ZoneCheck("Limsa") then
+            Teleporter("Limsa", "tp")
+            Teleporter("Arcanist", "li")
+        end
+        
         Movement(-327.86, 12.89, 9.79)
         Target("Thubyrgeim")
         QuestNPC()
@@ -326,6 +335,11 @@ function Arcanist3()
     end
     
     if not IsQuestDone("Tactical Planning") then
+        if not ZoneCheck("Limsa") then
+            Teleporter("Limsa", "tp")
+            Teleporter("Arcanist", "li")
+        end
+        
         Movement(-327.86, 12.89, 9.79)
         Target("Thubyrgeim")
         QuestNPC()
@@ -393,8 +407,11 @@ function Archer2()
     end
     
     if not IsQuestDone("A Matter of Perspective") then
-        Teleporter("New Gridania", "tp")
-        Teleporter("Archers' Guild", "li")
+        if not ZoneCheck("New Gridania") then
+            Teleporter("New Gridania", "tp")
+            Teleporter("Archers' Guild", "li")
+        end
+        
         Movement(207.80, 0.10, 35.06)
         Target("Luciane")
         QuestNPC()
@@ -446,7 +463,12 @@ function Archer3()
     end
 
     if not IsQuestDone("Training with Leih") then
-        Sleep(1.0)
+        if not ZoneCheck("New Gridania") then
+            Teleporter("New Gridania", "tp")
+            Teleporter("Archers' Guild", "li")
+        end
+        
+        Movement(207.80, 0.10, 35.06)
         Target("Luciane")
         QuestNPC()
         Movement(208.91, 0.00, 29.65)
@@ -550,8 +572,11 @@ end
 -- NEEDS fixing
 function MinerUnlock()
     if not IsQuestDone("Way of the Miner") then
-        Teleporter("Ul'dah", "tp")
-        Teleporter("Weaver", "li")
+        if not ZoneCheck("Ul'dah") then
+            Teleporter("Ul'dah", "tp")
+            Teleporter("Weaver", "li")
+        end
+        
         Movement(1.54, 7.6, 153.55)
         Target("Linette")
         QuestNPC("SelectYesno", true, 0)
@@ -571,8 +596,11 @@ end
 -- Questionable does not support this yet, using alternative method
 function BotanistUnlock()
     if not IsQuestDone("Way of the Botanist") then
-        Teleporter("Gridania", "tp")
-        Teleporter("Mih", "li")
+        if not ZoneCheck("Gridania") then
+            Teleporter("Gridania", "tp")
+            Teleporter("Mih", "li")
+        end
+        
         Movement(-170.48, 10.39, -161.96)
         Movement(-238.64, 8, -144.90)
         Target("Leonceault")
@@ -593,8 +621,11 @@ end
 -- Questionable does not support this yet, using alternative method
 function FisherUnlock()
     if not IsQuestDone("Way of the Fisher") then
-        Teleporter("Limsa", "tp")
-        Teleporter("Fish", "li")
+        if not ZoneCheck("Limsa") then
+            Teleporter("Limsa", "tp")
+            Teleporter("Fish", "li")
+        end
+        
         Movement(-167.30, 4.55, 152.46)
         Target("N'nmulika")
         QuestNPC("SelectYesno", true, 0)
@@ -718,77 +749,77 @@ function MaelstromRank1()
     
     -- Amalj'aa Hunter
     if HuntLogCheck(MaelstromEnemiesLog1[1], 9, 0) then
-        ZoneCheck(145, "Camp Drybone", "tp")
+        if not ZoneCheck("Camp Drybone") then
+            Teleporter("Camp Drybone", "tp")
+        end
+        
         Movement(-112.60, -27.88, 343.99)
-        DoHuntLog(MaelstromEnemiesLog1[1], 150, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog1[1], 2500, 9, 0)
     end
     
     -- Sylvan Groan and Sylvan Sough
     if HuntLogCheck(MaelstromEnemiesLog1[5], 9, 0) or HuntLogCheck(MaelstromEnemiesLog1[6], 9, 0) then
-        ZoneCheck(152, "The Hawthorne Hut", "tp")
+        if not ZoneCheck("The Hawthorne Hut") then
+            Teleporter("The Hawthorne Hut", "tp")
+        end
+        
         Movement(-135.26, 15.12, -1.46)
         
         if HuntLogCheck(MaelstromEnemiesLog1[5], 9, 0) then
-            DoHuntLog(MaelstromEnemiesLog1[5], 150, 9, 0)
+            DoHuntLog(MaelstromEnemiesLog1[5], 2500, 9, 0)
         end
         
         if HuntLogCheck(MaelstromEnemiesLog1[6], 9, 0) then
             Movement(-135.26, 15.12, -1.46)
-            DoHuntLog(MaelstromEnemiesLog1[6], 150, 9, 0)
+            DoHuntLog(MaelstromEnemiesLog1[6], 2500, 9, 0)
         end
     end
     
     -- Kobold Pickman
     if HuntLogCheck(MaelstromEnemiesLog1[7], 9, 0) then
-        ZoneCheck(138, "Aleport", "tp")
+        if not ZoneCheck("Aleport") then
+            Teleporter("Aleport", "tp")
+        end
+        
         Movement(417.30, 35.15, -17.66)
         ZoneTransitions()
         Movement(-399.78, 37.64, 16.40)
-        DoHuntLog(MaelstromEnemiesLog1[7], 150, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog1[7], 2500, 9, 0)
     end
     
     -- Amalj'aa Bruiser 
     if HuntLogCheck(MaelstromEnemiesLog1[8], 9, 0) then
-        ZoneCheck(146, "Little Ala Mhigo", "tp")
+        if not ZoneCheck("Little Ala Mhigo") then
+            Teleporter("Little Ala Mhigo", "tp")
+        end
+        
         Movement(-9.38, 15.62, -291.08)
-        DoHuntLog(MaelstromEnemiesLog1[8], 150, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog1[8], 2500, 9, 0)
     end
     
     -- Ixali Straightbeak
     if HuntLogCheck(MaelstromEnemiesLog1[9], 9, 0) then
-        ZoneCheck(154, "Fallgourd Float", "tp")
+        if not ZoneCheck("Fallgourd Float") then
+            Teleporter("Fallgourd Float", "tp")
+        end
+        
         Movement(53.52, -37.91, 312.72)
-        DoHuntLog(MaelstromEnemiesLog1[9], 150, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog1[9], 2500, 9, 0)
     end
     
     -- Ixali Wildtalon
     if HuntLogCheck(MaelstromEnemiesLog1[10], 9, 0) then
-        ZoneCheck(154, "Fallgourd Float", "tp")
+        if not ZoneCheck("Fallgourd Float") then
+            Teleporter("Fallgourd Float", "tp")
+        end
+        
         Movement(-405, 9.5, 128)
         ZoneTransitions()
         Movement(468.13, 232.79, 321.85)
-        DoHuntLog(MaelstromEnemiesLog1[10], 150, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog1[10], 2500, 9, 0)
         Movement(224.32, 301.51, -142.16)
         Movement(229.20, 312.91, -235.02)
-        Dismount()
-        Sleep(0.5)
-        Target("Aetheryte")
-        Sleep(0.1)
-        Interact()
-        
-        -- Checks if player is attuning otherwise exit menu
-        if GetCharacterCondition(27) then
-            repeat
-                Sleep(0.1)
-            until IsPlayerAvailable()
-            
-            Sleep(1.0)
-        else
-            repeat
-                yield("/pcall SelectString true 3")
-                Sleep(0.1)
-            until not IsAddonVisible("SelectString")
-        end
+        AttuneAetheryte()
     end
     
     if not PandoraGetFeatureEnabled("Auto-Sync FATEs") then
@@ -815,56 +846,85 @@ function MaelstromRank2()
         Echo("It is advised to be higher level, proceed with caution.")
     end
     
+    if not PandoraGetFeatureEnabled("Auto-Sync FATEs") then
+        PandoraSetFeatureState("Auto-Sync FATEs", true)
+    end
+    
     -- Amalj'aa Divinator
     if HuntLogCheck(MaelstromEnemiesLog2[1], 9, 0) then
-        ZoneCheck(146, "Forgotten Springs", "tp")
+        if not ZoneCheck("Forgotten Springs") then
+            Teleporter("Forgotten Springs", "tp")
+        end
+        
         Movement(195.52, 10.28, 649.43)
-        DoHuntLog(MaelstromEnemiesLog2[1], 150, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog2[1], 2500, 9, 0)
     end
     
     -- Kobold Pitman
     if HuntLogCheck(MaelstromEnemiesLog2[2], 9, 0) then
-        ZoneCheck(137, "Costa del Sol", "tp")
+        if not ZoneCheck("Costa del Sol") then
+            Teleporter("Costa del Sol", "tp")
+        end
+        
         Movement(340.18, 34.70, 227.85)
-        DoHuntLog(MaelstromEnemiesLog2[2], 150, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog2[2], 2500, 9, 0)
     end
     
     -- Kobold Bedesman and Kobold Priest
     if HuntLogCheck(MaelstromEnemiesLog2[6], 9, 0) or HuntLogCheck(MaelstromEnemiesLog2[7], 9, 0) then
-        ZoneCheck(139, "Camp Bronze Lake", "tp")
+        if not ZoneCheck("Camp Bronze Lake") then
+            Teleporter("Camp Bronze Lake", "tp")
+        end
+        
         Movement(284.54, 42.55, -204.27)
         ZoneTransitions()
         Movement(191.80, 63.95, -273.12)
         
         if HuntLogCheck(MaelstromEnemiesLog2[6], 9, 0) then
-            DoHuntLog(MaelstromEnemiesLog2[6], 150, 9, 0)
+            DoHuntLog(MaelstromEnemiesLog2[6], 2500, 9, 0)
         end
+        
+        Movement(-113.44, 64.59, -216.03)
+        AttuneAetheryte()
         
         if HuntLogCheck(MaelstromEnemiesLog2[7], 9, 0) then
             Movement(39.38, 48.42, -381.98)
-            DoHuntLog(MaelstromEnemiesLog2[7], 150, 9, 0)
+            DoHuntLog(MaelstromEnemiesLog2[7], 2500, 9, 0)
         end
     end
     
     -- Sylvan Sigh
     if HuntLogCheck(MaelstromEnemiesLog2[8], 9, 0) then
-        ZoneCheck(152, "The Hawthorne Hut", "tp")
+        if not ZoneCheck("The Hawthorne Hut") then
+            Teleporter("The Hawthorne Hut", "tp")
+        end
+        
         Movement(69.56, 11.01, -3.68)
-        DoHuntLog(MaelstromEnemiesLog2[8], 150, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog2[8], 2500, 9, 0)
     end
     
     -- Shelfscale Sahagin
     if HuntLogCheck(MaelstromEnemiesLog2[9], 9, 0) then
-        ZoneCheck(138, "Aleport", "tp")
+        if not ZoneCheck("Aleport") then
+            Teleporter("Aleport", "tp")
+        end
+        
         Movement(-180.78, -39.74, -70.99)
-        DoHuntLog(MaelstromEnemiesLog2[9], 150, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog2[9], 2500, 9, 0)
     end
     
     -- Amalj'aa Pugilist
     if HuntLogCheck(MaelstromEnemiesLog2[10], 9, 0) then
-        ZoneCheck(145, "Little Ala Mhigo", "tp")
+        if not ZoneCheck("Little Ala Mhigo") then
+            Teleporter("Little Ala Mhigo", "tp")
+        end
+        
         Movement(-133.02, 15.68, 104.79)
-        DoHuntLog(MaelstromEnemiesLog2[10], 150, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog2[10], 2500, 9, 0)
+    end
+    
+    if not PandoraGetFeatureEnabled("Auto-Sync FATEs") then
+        PandoraSetFeatureState("Auto-Sync FATEs", false)
     end
     
     Teleporter("Limsa", "tp")
@@ -883,7 +943,11 @@ function HalataliUnlock()
     end
 
     if not IsQuestDone("Hallo Halatali") then
-        Teleporter("Horizon", "tp") -- could also use vesper bay ticket but needs the teleporter function adjusting
+        -- could also use vesper bay ticket but needs the teleporter function adjusting
+        if not ZoneCheck("Horizon") then
+            Teleporter("Horizon", "tp")
+        end
+        
         Movement(-280.59, 15.26, -316.75) -- It gets stuck otherwise
         Movement(-308.26, 21.15, -343.13) -- It gets stuck otherwise
         Movement(-399.64, 23.00, -351.08) -- It gets stuck otherwise
@@ -903,7 +967,11 @@ function TheSunkenTempleOfQarnUnlock()
     end
 
     if not IsQuestDone("Braving New Depths") then
-        Teleporter("Horizon", "tp") -- could also use vesper bay ticket but needs the teleporter function adjusting
+        -- could also use vesper bay ticket but needs the teleporter function adjusting
+        if not ZoneCheck("Horizon") then
+            Teleporter("Horizon", "tp")
+        end
+        
         Movement(-280.59, 15.26, -316.75) -- It gets stuck otherwise
         Movement(-308.26, 21.15, -343.13) -- It gets stuck otherwise
         Movement(-399.64, 23.00, -351.08) -- It gets stuck otherwise
@@ -951,8 +1019,11 @@ function DzemaelDarkholdUnlock()
     end
     
     if not IsQuestDone("Shadows Uncast (Maelstrom)") then
-        Teleporter("Limsa", "tp")
-        Teleporter("Aftcastle", "li")
+        if not ZoneCheck("Limsa") then
+            Teleporter("Limsa", "tp")
+            Teleporter("Aftcastle", "li")
+        end
+        
         DoQuest("Shadows Uncast (Maelstrom)")
         DutyFinderQueue(1,9) -- Will need updating once function updated
         DoQuest("Shadows Uncast (Maelstrom)")
@@ -972,8 +1043,11 @@ function TheAurumValeUnlock()
     end
 
     if not IsQuestDone("Gilding the Bilious (Maelstrom)") then
-        Teleporter("Limsa", "tp")
-        Teleporter("Aftcastle", "li")
+        if not ZoneCheck("Limsa") then
+            Teleporter("Limsa", "tp")
+            Teleporter("Aftcastle", "li")
+        end
+        
         DoQuest("Gilding the Bilious (Maelstrom)")
         DutyFinderQueue(1,10) -- Will need updating once function updated
         DoQuest("Shadows Uncast (Maelstrom)")
