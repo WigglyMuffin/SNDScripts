@@ -13,7 +13,7 @@ local btn_enabled = true                  -- Options: true = will store BTN item
 local fsh_enabled = true                  -- Options: true = will store FSH items, false = will skip FSH items
 
 -- This is where you put your character list if you choose to not use the external one
--- If us_external_character_list is set to true then this list is completely skipped
+-- If use_external_character_list is set to true then this list is completely skipped
 local character_list = {
     "First Last@Server",
     "First Last@Server"

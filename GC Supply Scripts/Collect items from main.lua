@@ -35,7 +35,7 @@ local use_external_character_list = true  -- Options: true = Uses the external c
 local main_char_name = "First Last"
 
 -- This is where you put your character list if you choose to not use the external one
--- If us_external_character_list is set to true then this list is completely skipped
+-- If use_external_character_list is set to true then this list is completely skipped
 -- Usage: First Last@Server, return_home, return_location
 -- return_home options: 0 = no, 1 = yes
 -- return_location options: 0 = fc entrance, 1 nearby bell, 2 limsa bell

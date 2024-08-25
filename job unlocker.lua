@@ -864,6 +864,10 @@ function MaelstromRank2()
         Echo("It is advised to be higher level, proceed with caution.")
     end
     
+    if not PandoraGetFeatureEnabled("Auto-Sync FATEs") then
+        PandoraSetFeatureState("Auto-Sync FATEs", true)
+    end
+    
     -- Amalj'aa Divinator
     if HuntLogCheck(MaelstromEnemiesLog2[1], 9, 0) then
         if not ZoneCheck("Forgotten Springs") then
@@ -932,6 +936,10 @@ function MaelstromRank2()
         
         Movement(-133.02, 15.68, 104.79)
         DoHuntLog(MaelstromEnemiesLog2[10], 150, 9, 0)
+    end
+    
+    if not PandoraGetFeatureEnabled("Auto-Sync FATEs") then
+        PandoraSetFeatureState("Auto-Sync FATEs", false)
     end
     
     Teleporter("Limsa", "tp")
