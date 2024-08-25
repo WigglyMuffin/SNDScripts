@@ -1272,7 +1272,7 @@ end
 function FindDutyID(duty_name)
     local duty_name_lower = string.lower(duty_name)
     
-    for key, value in pairs(zone_list) do
+    for key, value in pairs(Zone_List) do
         if string.lower(value["Duty"]) == duty_name_lower then
             return key
         end
@@ -1284,7 +1284,7 @@ end
 --
 -- returns the id of the zone you search for, if the search is vague enough it'll return any of the ones that it finds, so try to be specific
 function FindZoneID(zone)
-    zone = zone or zone_list["" .. GetZoneID() .. ""]["Zone"]
+    zone = zone or Zone_List["" .. GetZoneID() .. ""]["Zone"]
     
     -- Check if zone is string
     if type(zone) ~= "string" then
@@ -1293,7 +1293,7 @@ function FindZoneID(zone)
     
     local searchLower = zone:lower()
     
-    for id, entry in pairs(zone_list) do
+    for id, entry in pairs(Zone_List) do
         local placeName = entry["Zone"]
         if placeName and placeName:lower():find(searchLower) then
             return tonumber(id)
@@ -1308,7 +1308,7 @@ end
 -- returns the id of the zone of the aetheryte you search for, if the search is vague enough it'll return any of the ones that it finds, so try to be specific
 function FindZoneIDByAetheryte(targetAetheryte)
     local lowerTarget = targetAetheryte:lower()
-    for key, value in pairs(zone_list) do
+    for key, value in pairs(Zone_List) do
         for _, aetheryte in ipairs(value["Aetherytes"]) do
             if aetheryte:lower():find(lowerTarget, 1, true) then
                 return key, aetheryte
