@@ -248,7 +248,9 @@ function FindAndKillTarget(target_name, radius)
         
         repeat
             if not (GetDistanceToTarget() <= 2) and not PathIsRunning() then  
-                yield("/vnavmesh movetarget")
+                if not auto_attack_triggered then
+                    yield("/vnavmesh movetarget")
+                end
             end
             
             if GetDistanceToTarget() <= 2 and not auto_attack_triggered then
