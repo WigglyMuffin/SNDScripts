@@ -819,25 +819,7 @@ function MaelstromRank1()
         DoHuntLog(MaelstromEnemiesLog1[10], 150, 9, 0)
         Movement(224.32, 301.51, -142.16)
         Movement(229.20, 312.91, -235.02)
-        Dismount()
-        Sleep(0.5)
-        Target("Aetheryte")
-        Sleep(0.1)
-        Interact()
-        
-        -- Checks if player is attuning otherwise exit menu
-        if GetCharacterCondition(27) then
-            repeat
-                Sleep(0.1)
-            until IsPlayerAvailable()
-            
-            Sleep(1.0)
-        else
-            repeat
-                yield("/pcall SelectString true 3")
-                Sleep(0.1)
-            until not IsAddonVisible("SelectString")
-        end
+        AttuneAetheryte()
     end
     
     if not PandoraGetFeatureEnabled("Auto-Sync FATEs") then
@@ -901,6 +883,9 @@ function MaelstromRank2()
         if HuntLogCheck(MaelstromEnemiesLog2[6], 9, 0) then
             DoHuntLog(MaelstromEnemiesLog2[6], 150, 9, 0)
         end
+        
+        Movement(-113.44, 64.59, -216.03)
+        AttuneAetheryte()
         
         if HuntLogCheck(MaelstromEnemiesLog2[7], 9, 0) then
             Movement(39.38, 48.42, -381.98)

@@ -30,6 +30,7 @@ function InteractAndWait()
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
     
     Dismount()
+    Sleep(0.5)
     yield("/interact")
     
     repeat
@@ -63,7 +64,36 @@ function Interact()
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not IsMoving() or GetCharacterCondition(32)
     
     Dismount()
+    Sleep(0.5)
     yield("/interact")
+end
+
+-- Usage: AttuneAetheryte()
+-- Attunes with the Aetheryte, exits out of menus if already attuned
+function AttuneAetheryte()
+    repeat
+        Sleep(0.1)
+    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not IsMoving() or GetCharacterCondition(32)
+    
+    Target("Aetheryte")
+    Sleep(0.1)
+    Dismount()
+    Sleep(0.5)
+    yield("/interact")
+    
+    -- Checks if player is attuning otherwise exit menu
+    if GetCharacterCondition(27) then
+        repeat
+            Sleep(0.1)
+        until IsPlayerAvailable()
+        
+        Sleep(1.0)
+    else
+        repeat
+            yield("/pcall SelectString true 3")
+            Sleep(0.1)
+        until not IsAddonVisible("SelectString")
+    end
 end
 
 -- Usage: IsInParty()
