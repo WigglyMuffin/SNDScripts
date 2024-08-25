@@ -1946,12 +1946,12 @@ end
 -- Sets all items in Dropbox plugin to max values
 -- Optionally can include a numerical value to set gil transfer amount
 function DropboxSetAll(dropbox_gil)
-    local gil = 999999999
+    local gil = 999999999 -- Gil cap
 
     if dropbox_gil then
         gil = dropbox_gil
     else
-        gil = 999999999
+        gil = 999999999 -- Gil cap
     end
     
     for id = 1, 60000 do
@@ -1960,8 +1960,8 @@ function DropboxSetAll(dropbox_gil)
             DropboxSetItemQuantity(id, false, gil)
         elseif id < 2 or id > 19 then -- Excludes Shards, Crystals and Clusters
             -- Set all item ID except 2-19
-            DropboxSetItemQuantity(id, false, 139860) -- NQ
-            DropboxSetItemQuantity(id, true, 139860)  -- HQ
+            DropboxSetItemQuantity(id, false, 139860) -- NQ, 999*140
+            DropboxSetItemQuantity(id, true, 139860)  -- HQ, 999*140
         end
         
         Sleep(0.0001)
@@ -1974,9 +1974,8 @@ function DropboxClearAll()
     for id = 1, 60000 do
         DropboxSetItemQuantity(id, false, 0) -- NQ
         DropboxSetItemQuantity(id, true, 0)  -- HQ
+        Sleep(0.0001)
     end
-    
-    Sleep(0.0001)
 end
 
 -- Usage: IsQuestNameAccepted()
