@@ -114,7 +114,7 @@ end
 -- Checks if you're currently in the provided zone, you can supply zone name or aetheryte name
 function ZoneCheck(zone_name)
     local zone_id = FindZoneID(zone_name)
-    if not zone_id then
+    if zone_id == nil then
         zone_id = FindZoneIDByAetheryte(zone_name)
     end
     repeat
