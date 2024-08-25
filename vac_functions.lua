@@ -111,9 +111,12 @@ end
 
 -- Usage: ZoneCheck("Limsa Lominsa Lower Decks")
 --
--- Checks if you're currently in the provided zone
+-- Checks if you're currently in the provided zone, you can supply zone name or aetheryte name
 function ZoneCheck(zone_name)
     local zone_id = FindZoneID(zone_name)
+    if not zone_id then
+        zone_id = FindZoneIDByAetheryte(zone_name)
+    end
     repeat
         Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32)
