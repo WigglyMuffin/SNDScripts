@@ -754,7 +754,7 @@ function MaelstromRank1()
         end
         
         Movement(-112.60, -27.88, 343.99)
-        DoHuntLog(MaelstromEnemiesLog1[1], 150, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog1[1], 250, 9, 0)
     end
     
     -- Sylvan Groan and Sylvan Sough
@@ -766,12 +766,12 @@ function MaelstromRank1()
         Movement(-135.26, 15.12, -1.46)
         
         if HuntLogCheck(MaelstromEnemiesLog1[5], 9, 0) then
-            DoHuntLog(MaelstromEnemiesLog1[5], 150, 9, 0)
+            DoHuntLog(MaelstromEnemiesLog1[5], 250, 9, 0)
         end
         
         if HuntLogCheck(MaelstromEnemiesLog1[6], 9, 0) then
             Movement(-135.26, 15.12, -1.46)
-            DoHuntLog(MaelstromEnemiesLog1[6], 150, 9, 0)
+            DoHuntLog(MaelstromEnemiesLog1[6], 250, 9, 0)
         end
     end
     
@@ -784,7 +784,7 @@ function MaelstromRank1()
         Movement(417.30, 35.15, -17.66)
         ZoneTransitions()
         Movement(-399.78, 37.64, 16.40)
-        DoHuntLog(MaelstromEnemiesLog1[7], 150, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog1[7], 250, 9, 0)
     end
     
     -- Amalj'aa Bruiser 
@@ -794,7 +794,7 @@ function MaelstromRank1()
         end
         
         Movement(-9.38, 15.62, -291.08)
-        DoHuntLog(MaelstromEnemiesLog1[8], 150, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog1[8], 250, 9, 0)
     end
     
     -- Ixali Straightbeak
@@ -804,7 +804,7 @@ function MaelstromRank1()
         end
         
         Movement(53.52, -37.91, 312.72)
-        DoHuntLog(MaelstromEnemiesLog1[9], 150, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog1[9], 250, 9, 0)
     end
     
     -- Ixali Wildtalon
@@ -816,7 +816,7 @@ function MaelstromRank1()
         Movement(-405, 9.5, 128)
         ZoneTransitions()
         Movement(468.13, 232.79, 321.85)
-        DoHuntLog(MaelstromEnemiesLog1[10], 150, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog1[10], 250, 9, 0)
         Movement(224.32, 301.51, -142.16)
         Movement(229.20, 312.91, -235.02)
         AttuneAetheryte()
@@ -857,7 +857,7 @@ function MaelstromRank2()
         end
         
         Movement(195.52, 10.28, 649.43)
-        DoHuntLog(MaelstromEnemiesLog2[1], 150, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog2[1], 250, 9, 0)
     end
     
     -- Kobold Pitman
@@ -867,7 +867,7 @@ function MaelstromRank2()
         end
         
         Movement(340.18, 34.70, 227.85)
-        DoHuntLog(MaelstromEnemiesLog2[2], 150, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog2[2], 250, 9, 0)
     end
     
     -- Kobold Bedesman and Kobold Priest
@@ -881,7 +881,7 @@ function MaelstromRank2()
         Movement(191.80, 63.95, -273.12)
         
         if HuntLogCheck(MaelstromEnemiesLog2[6], 9, 0) then
-            DoHuntLog(MaelstromEnemiesLog2[6], 150, 9, 0)
+            DoHuntLog(MaelstromEnemiesLog2[6], 250, 9, 0)
         end
         
         Movement(-113.44, 64.59, -216.03)
@@ -889,7 +889,7 @@ function MaelstromRank2()
         
         if HuntLogCheck(MaelstromEnemiesLog2[7], 9, 0) then
             Movement(39.38, 48.42, -381.98)
-            DoHuntLog(MaelstromEnemiesLog2[7], 150, 9, 0)
+            DoHuntLog(MaelstromEnemiesLog2[7], 250, 9, 0)
         end
     end
     
@@ -900,7 +900,7 @@ function MaelstromRank2()
         end
         
         Movement(69.56, 11.01, -3.68)
-        DoHuntLog(MaelstromEnemiesLog2[8], 150, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog2[8], 250, 9, 0)
     end
     
     -- Shelfscale Sahagin
@@ -910,7 +910,7 @@ function MaelstromRank2()
         end
         
         Movement(-180.78, -39.74, -70.99)
-        DoHuntLog(MaelstromEnemiesLog2[9], 150, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog2[9], 250, 9, 0)
     end
     
     -- Amalj'aa Pugilist
@@ -920,7 +920,7 @@ function MaelstromRank2()
         end
         
         Movement(-133.02, 15.68, 104.79)
-        DoHuntLog(MaelstromEnemiesLog2[10], 150, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog2[10], 250, 9, 0)
     end
     
     if not PandoraGetFeatureEnabled("Auto-Sync FATEs") then
