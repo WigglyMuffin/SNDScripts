@@ -1250,9 +1250,9 @@ end
 -- Looks through the World_ID_List for the world name with X id and returns the name
 function FindWorldByID(searchID)
     for name, data in pairs(World_ID_List) do
-      if data.ID == searchID then
-        return name, data
-      end
+        if data.ID == searchID then
+            return name, data
+        end
     end
     return nil, nil
 end
@@ -1312,16 +1312,25 @@ end
 --
 -- returns the id of the zone of the aetheryte you search for, if the search is vague enough it'll return any of the ones that it finds, so try to be specific
 function FindZoneIDByAetheryte(targetAetheryte)
+    if type(targetAetheryte) ~= "string" then
+        return nil
+    end
     local lowerTarget = targetAetheryte:lower()
     for key, value in pairs(Zone_List) do
-        for _, aetheryte in ipairs(value["Aetherytes"]) do
-            if aetheryte:lower():find(lowerTarget, 1, true) then
-                return key, aetheryte
+        if type(value) == "table" and type(value["Aetherytes"]) == "table" then    
+            for _, aetheryte in ipairs(value["Aetherytes"]) do
+                if aetheryte:lower():find(lowerTarget, 1, true) then
+                    return key, aetheryte
+                end
             end
+        else
         end
     end
-    return 0, "Not found"
+    
+    return nil, "Not found"
 end
+
+
 
 
 -- Usage: ContainsLetters("meow")  
