@@ -1988,7 +1988,6 @@ function Dismount()
     end
 end
 
--- this function honestly might risk a crash currently, use with caution
 -- Usage: DropboxSetAll() or DropboxSetAll(123456)
 -- Sets all items in Dropbox plugin to max values
 -- Optionally can include a numerical value to set gil transfer amount
@@ -2022,7 +2021,6 @@ function DropboxSetAll(dropbox_gil)
     end
 end
 
--- this function honestly might risk a crash currently, use with caution
 -- Usage: DropboxClearAll()
 -- Clears all items in Dropbox plugin
 function DropboxClearAll()
