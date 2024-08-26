@@ -204,6 +204,7 @@ QuestNameList = {
 char_list = "char_list.lua"
 
 snd_config_folder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
+vac_config_folder = snd_config_folder .. "\\VAC\\"
 load_functions_file_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
 LoadFunctions = loadfile(load_functions_file_location)
 LoadFunctions()

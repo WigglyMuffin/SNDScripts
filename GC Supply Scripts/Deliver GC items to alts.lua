@@ -8,8 +8,13 @@ if you have everything configured right it's just start the script, go afk and y
 # CONFIGS #
 ###########
 ]]
+
 -- Set your alt accounts %appdata% config location otherwise it will not work
 snd_alt_config_folder = "C:\\Users\\ff14lowres\\AppData\\Roaming\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
+
+
+
+
 
 -- #####################################
 -- #  DON'T TOUCH ANYTHING BELOW HERE  #
@@ -19,12 +24,13 @@ snd_alt_config_folder = "C:\\Users\\ff14lowres\\AppData\\Roaming\\XIVLauncher\\p
 provisioning_list_name_to_load = "provisioning_list.lua"
 
 snd_config_folder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
+vac_config_folder = snd_config_folder .. "\\VAC\\"
 load_functions_file_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
 LoadFunctions = loadfile(load_functions_file_location)
 LoadFunctions()
 LoadFileCheck()
 
-dofile(snd_alt_config_folder .. provisioning_list_name_to_load)
+dofile(snd_alt_config_folder .. "\\VAC\\" .. provisioning_list_name_to_load)
 
 -- ###############
 -- # MAIN SCRIPT #

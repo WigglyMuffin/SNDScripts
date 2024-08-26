@@ -30,6 +30,7 @@ char_list = "char_list.lua"
 provisioning_list_save_name = "provisioning_list.lua"
 
 snd_config_folder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
+vac_config_folder = snd_config_folder .. "\\VAC\\"
 load_functions_file_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
 LoadFunctions = loadfile(load_functions_file_location)
 LoadFunctions()
@@ -44,8 +45,11 @@ LogInfo("[APL] provisioning_list_save_name: " .. provisioning_list_save_name)
 LogInfo("[APL] SNDConf+PROV: " .. snd_config_folder .. "" .. provisioning_list_save_name)
 LogInfo("[APL] ##############################")
 
+local gc_config_folder = vac_config_folder .. "\\GC\\"
+EnsureFolderExists(gc_config_folder)
+
 if use_external_character_list then
-    local char_data = dofile(snd_config_folder .. char_list)
+    local char_data = dofile(vac_config_folder .. char_list)
     character_list = char_data.character_list
 end
 
@@ -194,7 +198,8 @@ function GetAndSaveProvisioningToTable()
         end
 
         local provisioning_list_strings = "provisioning_list = " .. SerializeTable(provisioning_list)
-        local File = io.open(snd_config_folder .. "" .. provisioning_list_save_name, "w")
+        local filepath = gc_config_folder .. provisioning_list_save_name
+        local File = io.open(filepath, "w")
         File:write(provisioning_list_strings)
         File:close()
     end

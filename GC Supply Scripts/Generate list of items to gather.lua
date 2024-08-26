@@ -15,17 +15,23 @@
 -- # UNLESS YOU KNOW WHAT YOU'RE DOING #
 -- #####################################
 
+snd_config_folder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
+vac_config_folder = snd_config_folder .. "\\VAC\\"
+load_functions_file_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
+LoadFunctions = loadfile(load_functions_file_location)
+LoadFunctions()
+LoadFileCheck()
+
 provisioning_list_name_to_load = "provisioning_list.lua"
 
-SND_CONFIG_FOLDER = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
-dofile(SND_CONFIG_FOLDER .. provisioning_list_name_to_load)
+local gc_config_folder = vac_config_folder .. "\\GC\\"
+EnsureFolderExists(gc_config_folder)
+dofile(gc_config_folder .. provisioning_list_name_to_load)
 
 local output_filename = "list_to_gather.txt"
-local output_folder = SND_CONFIG_FOLDER .. "Lists\\"
+local output_folder = gc_config_folder
 
-if not os.execute("cd " .. output_folder) then
-    os.execute("mkdir " .. output_folder)
-end
+EnsureFolderExists(output_folder)
 
 local function combine_items_by_category(provisioning_list)
     local category_totals = {}

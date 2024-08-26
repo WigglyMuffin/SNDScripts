@@ -28,6 +28,7 @@ multi_char = true
 char_list = "char_list.lua"
 
 snd_config_folder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
+vac_config_folder = snd_config_folder .. "\\VAC\\"
 load_functions_file_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
 LoadFunctions = loadfile(load_functions_file_location)
 LoadFunctions()
@@ -37,11 +38,11 @@ LogInfo("[DGCI] ##############################")
 LogInfo("[DGCI] Starting script...")
 LogInfo("[DGCI] snd_config_folder: " .. snd_config_folder)
 LogInfo("[DGCI] char_list: " .. char_list)
-LogInfo("[DGCI] SNDConf+Char: " .. snd_config_folder .. "" .. char_list)
+LogInfo("[DGCI] SNDConf+Char: " .. vac_config_folder .. "" .. char_list)
 LogInfo("[DGCI] ##############################")
 
 if use_external_character_list then
-    local char_data = dofile(snd_config_folder .. char_list)
+    local char_data = dofile(vac_config_folder .. char_list)
     character_list = char_data.character_list
 end
 

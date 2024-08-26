@@ -22,11 +22,30 @@ end
 -- #####################################
 
 -- this part just loads all the lists into memory to use with various functions  
-local vac_lists = dofile(os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_lists.lua")
+local vac_lists = dofile(os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\VAC\\vac_lists.lua")
 Zone_List = vac_lists.Zone_List
 World_ID_List = vac_lists.World_ID_List
 DC_With_Worlds = vac_lists.DC_With_Worlds
 Job_List = vac_lists.Job_List
+
+-- Usage: EnsureFolderExists("/path/to/your/folder")
+--  
+-- Call this to check if a folder exists at the path you provide, if it doesn't it'll create it
+function EnsureFolderExists(folder_path)
+    -- Try to create a temporary file in the folder
+    local temp_file_path = folder_path .. "/.temp_file"
+    local file = io.open(temp_file_path, "w")
+    
+    -- If the file couldn't be opened, the folder doesn't exist
+    if not file then
+        -- Folder doesn't exist, create it
+        os.execute("mkdir -p " .. folder_path)
+    else
+        -- Folder exists, close and remove the temporary file
+        file:close()
+        os.remove(temp_file_path)
+    end
+end
 
 -- InteractAndWait()
 --
