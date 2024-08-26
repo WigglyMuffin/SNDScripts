@@ -108,7 +108,7 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
         
         repeat
             Sleep(0.1)
-        until GetCurrentWorld() == WorldIDList[destination_server].ID and IsPlayerAvailable()
+        until GetCurrentWorld() == World_ID_List[destination_server].ID and IsPlayerAvailable()
         
         -- Alt character destination type, how alt char is travelling to the main
         -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
