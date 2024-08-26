@@ -53,7 +53,7 @@ function DOL()
     local home = GetCurrentWorld() == GetHomeWorld()
     
     if not home then
-        Teleporter(GetHomeWorld(), "li")
+        Teleporter(FindWorldByID(GetHomeWorld()), "li")
         
         repeat
             Sleep(0.1)
@@ -71,7 +71,7 @@ function DOL()
         Sleep(0.1)
     until IsPlayerAvailable()
     
-    Teleporter("GC", "li")
+    Teleporter("gc", "li")
     
     repeat
         Sleep(0.1)

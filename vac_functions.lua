@@ -577,7 +577,7 @@ end
 -- end
 
 function Teleporter(location, tp_kind) -- Teleporter handler
-    local lifestream_stopped = false
+    tp_kind = string.lower(tp_kind)
     local cast_time_buffer = 5 -- Just in case a buffer is required, teleports are 5 seconds long. Slidecasting, ping and fps can affect casts
     local max_retries = 10  -- Teleporter retry amount, will not tp after number has been reached for safety
     local retries = 0
@@ -588,58 +588,72 @@ function Teleporter(location, tp_kind) -- Teleporter handler
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32) -- 26 is combat, 32 is quest event
     
     -- Try teleport, retry until max_retries is reached
-    while retries < max_retries do
-        -- Stop lifestream only once per teleport attempt
-        if FindZoneIDByAetheryte(location) == GetZoneID() and not tp_kind == "li" then
-            LogInfo("Already in the right zone")
-            break
-        end
-        
-        if tp_kind == "li" and not lifestream_stopped then
-            yield("/lifestream stop")
-            lifestream_stopped = true
-            Sleep(0.1)
-        end
-        
-        -- Attempt teleport
-        if not IsPlayerCasting() then
-            yield("/" .. tp_kind .. " " .. location)
-            Sleep(2.0) -- Wait to check if casting starts
-            
-            -- Check if the player started casting
-            if IsPlayerCasting() then
-                Sleep(cast_time_buffer) -- Wait for cast to complete
+    if tp_kind == "tp" then
+        while retries < max_retries do
+            -- Stop lifestream only once per teleport attempt
+            if FindZoneIDByAetheryte(location) == GetZoneID() then
+                LogInfo("Already in the right zone")
+                break
             end
-        end
-
-        -- pause when lifestream is running and only break out of the loop when it's done
-        if LifestreamIsBusy() then
-            repeat
-                Sleep(0.1)
-            until not LifestreamIsBusy() and IsPlayerAvailable()
-            break
-        end
-
-        -- Check if the teleport was successful
-        if GetCharacterCondition(45) or GetCharacterCondition(51) then -- 45 is BetweenAreas, 51 is BetweenAreas51
-            LogInfo("Teleport successful.")
-            break
-        end
-        
-        -- Teleport retry increment
-        retries = retries + 1
-        LogInfo("Retrying teleport attempt #" .. retries)
-        
-        -- Reset lifestream_stopped for next retry
-        lifestream_stopped = false
-    end
+            
+            -- Attempt teleport
+            if not IsPlayerCasting() then
+                yield("/tp " .. location)
+                Sleep(2.0) -- Wait to check if casting starts
+                
+                -- Check if the player started casting
+                if IsPlayerCasting() then
+                    Sleep(cast_time_buffer) -- Wait for cast to complete
+                end
+            end
     
-    -- Teleporter failed handling
-    if retries >= max_retries then
-        local attempt_word = (max_retries == 1) and "attempt" or "attempts"
-        LogInfo("Teleport failed after " .. max_retries .. " " .. attempt_word .. ".")
-        Echo("Teleport failed after " .. max_retries .. " " .. attempt_word .. ".")
-        yield("/lifestream stop") -- Not always needed but removes lifestream ui
+            -- Check if the teleport was successful
+            if GetCharacterCondition(45) or GetCharacterCondition(51) then -- 45 is BetweenAreas, 51 is BetweenAreas51
+                LogInfo("Teleport successful.")
+                break
+            end
+            
+            -- Teleport retry increment
+            retries = retries + 1
+            LogInfo("Retrying teleport, attempt #" .. retries)
+        end
+        
+        -- Teleporter failed handling
+        if retries >= max_retries then
+            local attempt_word = (max_retries == 1) and "attempt" or "attempts"
+            LogInfo("Teleport failed after " .. max_retries .. " " .. attempt_word .. ".")
+            Echo("Teleport failed after " .. max_retries .. " " .. attempt_word .. ".")
+        end
+    elseif tp_kind == "li" then
+        while retries < max_retries do
+        
+            if FindZoneIDByAetheryte(location) == GetZoneID() then
+                LogInfo("Already in the right zone")
+                break
+            end
+            if not IsPlayerCasting() then
+                yield("/li " .. location)
+                Sleep(2.0) -- give lifestream some time to start
+            end
+
+            if LifestreamIsBusy() then
+                repeat
+                    Sleep(0.1)
+                until not LifestreamIsBusy() and IsPlayerAvailable()
+                break
+            end
+            retries = retries + 1
+            LogInfo("Retrying lifestream, attempt #" .. retries)
+        end
+        -- Reset lifestream_stopped for next retry
+        if retries >= max_retries then
+            local attempt_word = (max_retries == 1) and "attempt" or "attempts"
+            LogInfo("Lifestream failed after " .. max_retries .. " " .. attempt_word .. ".")
+            Echo("Lifestream failed after " .. max_retries .. " " .. attempt_word .. ".")
+            yield("/lifestream stop") -- Not always needed but removes lifestream ui
+        end
+    else
+        Echo('Invalid option "' .. tp_kind .. '", valid options are li and tp')
     end
 end
 
@@ -1081,8 +1095,7 @@ function CanGCRankUp()
         current_seals = GetItemCount(22)
         gc_rank = GetFlamesGCRank()
     end
-    local next_rank = gc_rank + 1 -- adds one so we know which gc rank we're attempting to rank up to
-    Echo(gc_ranks[next_rank])
+    local next_rank = gc_rank + 1 -- adds one so we know which gc rank we're attempting to rank up total
     if current_seals > gc_ranks[next_rank] and next_rank < 10 then -- excludes rank 10 and above as we don't handle that atm
         return true, next_rank
     else
@@ -1531,10 +1544,12 @@ function PartyAccept()
         repeat
             Sleep(0.1)
         until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
-        
         repeat
-            yield("/pcall SelectYesno true 0")
             Sleep(0.1)
+        until IsAddonVisible("SelectYesno")
+        repeat
+            Sleep(0.1)
+            yield("/pcall SelectYesno true 0")
         until not IsAddonVisible("SelectYesno")
     end
 end
