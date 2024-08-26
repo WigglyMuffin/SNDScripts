@@ -1544,12 +1544,16 @@ function PartyAccept()
         repeat
             Sleep(0.1)
         until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
+        
         repeat
             Sleep(0.1)
         until IsAddonVisible("SelectYesno")
+        
+        Sleep(0.1)
+        
         repeat
-            Sleep(0.1)
             yield("/pcall SelectYesno true 0")
+            Sleep(0.1)
         until not IsAddonVisible("SelectYesno")
     end
 end
