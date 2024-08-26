@@ -222,8 +222,6 @@ for index_name, item in pairs(provisioning_list) do
                 on_list = true
                 break
             end
-            
-            Sleep(0.1)
         end
         
         if not on_list then
