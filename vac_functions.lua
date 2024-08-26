@@ -1541,20 +1541,29 @@ end
 -- NEEDS a name arg
 function PartyAccept()
     if not IsInParty() then
+        -- Wait until the player is available, not casting, and not in combat
         repeat
             Sleep(0.1)
         until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
-        
+
+        -- Wait until the "SelectYesno" addon is visible
         repeat
             Sleep(0.1)
         until IsAddonVisible("SelectYesno")
-        
+
         Sleep(0.1)
-        
+
+        -- Accept the party invite
+        yield("/pcall SelectYesno true 0")
+
+        -- Wait until the player is in a party
         repeat
-            yield("/pcall SelectYesno true 0")
             Sleep(0.1)
-        until not IsAddonVisible("SelectYesno")
+        until IsInParty()
+
+        LogInfo("Party invitation accepted.")
+    else
+        LogInfo("Player is already in a party.")
     end
 end
 
