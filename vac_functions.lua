@@ -23,10 +23,11 @@ end
 
 -- this part just loads all the lists into memory to use with various functions  
 local vac_lists = dofile(os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_lists.lua")
-Zone_List = vac_lists.Zone_List
-World_ID_List = vac_lists.World_ID_List
 DC_With_Worlds = vac_lists.DC_With_Worlds
+Item_List = vac_lists.Item_List
 Job_List = vac_lists.Job_List
+World_ID_List = vac_lists.World_ID_List
+Zone_List = vac_lists.Zone_List
 
 -- InteractAndWait()
 --
@@ -1992,22 +1993,29 @@ end
 -- Sets all items in Dropbox plugin to max values
 -- Optionally can include a numerical value to set gil transfer amount
 function DropboxSetAll(dropbox_gil)
-    local gil = 999999999 -- Gil cap
-
-    if dropbox_gil then
-        gil = dropbox_gil
-    else
-        gil = 999999999 -- Gil cap
+    if not Item_List then
+        LogInfo("Item_List is nil. Cannot set items.")
+        return
     end
     
-    for id = 1, 60000 do
-        if id == 1 then
-            -- Set gil to gil cap or specified gil amount
-            DropboxSetItemQuantity(id, false, gil)
-        elseif id < 2 or id > 19 then -- Excludes Shards, Crystals and Clusters
-            -- Set all item ID except 2-19
-            DropboxSetItemQuantity(id, false, 139860) -- NQ, 999*140
-            DropboxSetItemQuantity(id, true, 139860)  -- HQ, 999*140
+    local gil = 999999999 -- Gil cap
+    
+    if dropbox_gil then
+        gil = dropbox_gil
+    end
+    
+    -- Iterate over the Item_List
+    for id, item in pairs(Item_List) do
+        -- Check if the item is tradeable
+        if item['Untradeable'] == false then
+            if id == 1 then
+                -- Set gil to gil cap or specified gil amount
+                DropboxSetItemQuantity(id, false, gil)
+            elseif id < 2 or id > 19 then -- Excludes Shards, Crystals, and Clusters
+                -- Set all item ID except 2-19
+                DropboxSetItemQuantity(id, false, 139860) -- NQ, 999*140
+                DropboxSetItemQuantity(id, true, 139860)  -- HQ, 999*140
+            end
         end
         
         Sleep(0.0001)
@@ -2018,9 +2026,16 @@ end
 -- Usage: DropboxClearAll()
 -- Clears all items in Dropbox plugin
 function DropboxClearAll()
-    for id = 1, 60000 do
-        DropboxSetItemQuantity(id, false, 0) -- NQ
-        DropboxSetItemQuantity(id, true, 0)  -- HQ
+    if not Item_List then
+        LogInfo("Item_List is nil. Cannot clear items.")
+        return
+    end
+    
+    for id, item in pairs(Item_List) do
+        if item['Untradeable'] == false then
+            DropboxSetItemQuantity(id, false, 0) -- NQ
+            DropboxSetItemQuantity(id, true, 0)  -- HQ
+        end
         Sleep(0.0001)
     end
 end
