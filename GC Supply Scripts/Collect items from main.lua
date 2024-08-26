@@ -140,7 +140,7 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
             -- Paths to main char only if you have do_movement set to true
             if do_movement then
                 -- Path to main char
-                PathToObject(main_char_name)
+                PathToObject(main_char_name, 3)
             end
             
             -- Invite main char to party, needs a target
@@ -162,7 +162,7 @@ local function ProcessAltCharacters(character_list_options, destination_server, 
             -- Paths to main char only if you have do_movement set to true
             if do_movement then
                 -- Path to main char
-                PathToObject(main_char_name)
+                PathToObject(main_char_name, 3)
             end
             
             -- Invite main char to party, needs a target

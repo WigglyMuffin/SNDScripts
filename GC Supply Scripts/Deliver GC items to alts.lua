@@ -36,6 +36,7 @@ local chars_processed = 0
 
 for _ in pairs(provisioning_list) do
     list_length = list_length + 1
+    Sleep(0.1)
 end
 
 for index_name, item in pairs(provisioning_list) do
@@ -193,7 +194,10 @@ for index_name, item in pairs(provisioning_list) do
         Echo("Waiting for party invite")
         Echo("############################")
         
-        PartyLeave()
+        if IsInParty() then
+            PartyLeave()
+            Sleep(0.1)
+        end
         
         repeat 
             PartyAccept()
@@ -212,6 +216,8 @@ for index_name, item in pairs(provisioning_list) do
                 on_list = true
                 break
             end
+            
+            Sleep(0.1)
         end
         
         if not on_list then

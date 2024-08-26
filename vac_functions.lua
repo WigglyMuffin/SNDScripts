@@ -1574,16 +1574,26 @@ function PartyLeave()
         repeat
             Sleep(0.1)
         until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
+        
         yield("/partycmd leave")
+        
         repeat
             Sleep(0.1)
         until IsAddonVisible("SelectYesno")
+        
+        Sleep(0.1)
+        
         repeat
             yield("/pcall SelectYesno true 0")
             Sleep(0.1)
         until not IsAddonVisible("SelectYesno")
+        
+        LogInfo("Party has been left.")
+    else
+        LogInfo("Player is not in a party.")
     end
 end
+
 -- Usage: EstateTeleport("First Last", 0)
 -- Options: 0 = Free Company, 1 = Personal, 2 = Apartment
 -- Opens estate list of added friend and teleports to specified location
