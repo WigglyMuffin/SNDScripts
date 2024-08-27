@@ -34,7 +34,7 @@ dofile(vac_config_folder .. "\\GC\\" .. provisioning_list_name_to_load)
 -- # MAIN SCRIPT #
 -- ###############
 
-DropboxSetItemQuantity(1, false, 0)
+DropboxClearAll()
 local list_length = 0
 local chars_processed = 0
 
@@ -234,7 +234,6 @@ for index_name, item in pairs(provisioning_list) do
     
     if on_list then
         Sleep(0.1)
-        DropboxClearAll()
         chars_processed = chars_processed + 1
         Echo("############################")
         Echo("Done! " .. chars_processed .. "/" .. list_length .. " characters processed")
@@ -243,7 +242,7 @@ for index_name, item in pairs(provisioning_list) do
     end
 end
 
-DropboxSetItemQuantity(1, false, 0)
+DropboxClearAll()
 Echo("############################")
 Echo("Script finished")
 Echo("############################")
