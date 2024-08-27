@@ -25,7 +25,6 @@ LoadFileCheck()
 provisioning_list_name_to_load = "provisioning_list.lua"
 
 local gc_config_folder = vac_config_folder .. "\\GC\\"
-EnsureFolderExists(gc_config_folder)
 dofile(gc_config_folder .. provisioning_list_name_to_load)
 
 local output_filename = "list_to_gather.txt"

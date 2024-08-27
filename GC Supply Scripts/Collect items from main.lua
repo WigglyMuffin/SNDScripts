@@ -55,7 +55,7 @@ local character_list_options = {
 -- ###################
 
 -- Edit char_list.lua file for configuring characters
-char_list = "char_list.lua"
+char_list = "vac_char_list.lua"
 
 snd_config_folder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
 vac_config_folder = snd_config_folder .. "\\VAC\\"
@@ -72,7 +72,7 @@ LogInfo("[CIFM] SNDConf+Char: " .. snd_config_folder .. "" .. char_list)
 LogInfo("[CIFM] ##############################")
 
 if use_external_character_list then
-    local char_data = dofile(vac_config_folder .. char_list)
+    local char_data = dofile(snd_config_folder .. char_list)
     character_list_options = char_data.character_list_options
 end
 

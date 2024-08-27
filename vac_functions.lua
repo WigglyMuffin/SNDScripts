@@ -3,7 +3,7 @@
 -- It contains the functions required to make the scripts work
 
 function LoadFileCheck()
-	Echo("Successfully loaded the functions file")
+	LogInfo("Successfully loaded the vac functions file")
 end
 
 -- ###############
@@ -21,7 +21,7 @@ end
 -- #####################################
 -- #####################################
 
--- this part just loads all the lists into memory to use with various functions  
+-- this part just loads all the lists into memory to use with various functions
 local vac_lists = dofile(os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_lists.lua")
 DC_With_Worlds = vac_lists.DC_With_Worlds
 Item_List = vac_lists.Item_List

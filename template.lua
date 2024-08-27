@@ -24,9 +24,10 @@ local character_list = {
 -- #####################################
 
 -- Edit char_list.lua file for configuring characters
-char_list = "char_list.lua"
+char_list = "vac_char_list.lua"
 
 snd_config_folder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
+vac_config_folder = snd_config_folder .. "\\VAC\\"
 load_functions_file_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
 LoadFunctions = loadfile(load_functions_file_location)
 LoadFunctions()

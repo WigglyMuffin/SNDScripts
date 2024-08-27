@@ -14,8 +14,6 @@ snd_alt_config_folder = "C:\\Users\\ff14lowres\\AppData\\Roaming\\XIVLauncher\\p
 
 
 
-
-
 -- #####################################
 -- #  DON'T TOUCH ANYTHING BELOW HERE  #
 -- # UNLESS YOU KNOW WHAT YOU'RE DOING #
@@ -30,7 +28,7 @@ LoadFunctions = loadfile(load_functions_file_location)
 LoadFunctions()
 LoadFileCheck()
 
-dofile(snd_alt_config_folder .. "\\VAC\\" .. provisioning_list_name_to_load)
+dofile(vac_config_folder .. "\\GC\\" .. provisioning_list_name_to_load)
 
 -- ###############
 -- # MAIN SCRIPT #

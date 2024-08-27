@@ -26,7 +26,7 @@ local character_list = {
 -- # UNLESS YOU KNOW WHAT YOU'RE DOING #
 -- #####################################
 
-char_list = "char_list.lua"
+char_list = "vac_char_list.lua"
 provisioning_list_save_name = "provisioning_list.lua"
 
 snd_config_folder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
@@ -49,7 +49,7 @@ local gc_config_folder = vac_config_folder .. "\\GC\\"
 EnsureFolderExists(gc_config_folder)
 
 if use_external_character_list then
-    local char_data = dofile(vac_config_folder .. char_list)
+    local char_data = dofile(snd_config_folder .. char_list)
     character_list = char_data.character_list
 end
 
