@@ -31,9 +31,9 @@ Generates a character list you can insert into vac_char_list for use with Kupo B
 -- set the characters you're generating a list with, the list generates in order
 
 local gen_char_list = {
-{"Mrow Mrow@Louisoux"},
-{"Smol Meow@Lich"},
-{"Beeg Meow@Zodiark"},
+    "Mrow Mrow@Louisoux",
+    "Smol Meow@Lich",
+    "Beeg Meow@Zodiark",
 }
 
 -- Here you set the default settings each character will have when generated
@@ -85,7 +85,7 @@ local function generate_character_list_options()
     local character_list_options = {}
 
     for _, char in ipairs(gen_char_list) do
-        local char_name = char[1]
+        local char_name = char
         local server_to_use = destination_server
         
         -- If set_destination_server_to_home_server is true, extract the world from the character name
