@@ -1,10 +1,10 @@
 --[[
-  _____             _    __  __                       _       
- |  __ \           | |  |  \/  |                     | |      
- | |__) |___   ___ | |_ | \  / |  ___    ___    __ _ | |  ___ 
- |  ___// _ \ / __|| __|| |\/| | / _ \  / _ \  / _` || | / _ \
- | |   | (_) |\__ \| |_ | |  | || (_) || (_) || (_| || ||  __/
- |_|    \___/ |___/ \__||_|  |_| \___/  \___/  \__, ||_| \___|
+  _____             _      __  __                       _       
+ |  __ \           | |    |  \/  |                     | |      
+ | |__) |___   ___ | |_   | \  / |  ___    ___    __ _ | |  ___ 
+ |  ___// _ \ / __|| __|  | |\/| | / _ \  / _ \  / _` || | / _ \
+ | |   | (_) |\__ \| |_   | |  | || (_) || (_) || (_| || ||  __/
+ |_|    \___/ |___/ \__|  |_|  |_| \___/  \___/  \__, ||_| \___|
                                                 __/ |         
                                                |___/          
 ####################
@@ -147,6 +147,7 @@ end
 
 local function Main(character_list_postmoogle)
     for i = 1, #character_list_postmoogle do
+        DropboxSetItemQuantity(0, false, 0)
         -- Update alt character name
         local alt_char_name = character_list_postmoogle[i]["Name"]
 
@@ -211,7 +212,7 @@ local function Main(character_list_postmoogle)
             -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
             if destination_type == 0 then
                 local dest_aetheryte_id = FindZoneIDByAetheryte(destination_aetheryte)
-            
+
                 -- If player is not at the destination then tp there
                 if GetZoneID() ~= dest_aetheryte_id then
                     Echo("Teleporting to " .. destination_aetheryte .. " to find " .. trading_with)
@@ -291,15 +292,10 @@ local function Main(character_list_postmoogle)
 
                 Echo("Getting Ready to trade")
 
-                Sleep(0.5)
-                Target(party_member)
-                yield("/focustarget <t>")
-                Sleep(0.5)
-
                 local item_trades_succeeded = false
 
                 -- process character item list
-                for _, item in ipairs(i["Items"]) do
+                for _, item in ipairs(character_list_postmoogle[i]["Items"]) do
                     local item_name = item[1]
                     local item_id = FindItemID(item_name)
                     local item_amount = item[2]
@@ -312,7 +308,23 @@ local function Main(character_list_postmoogle)
                     local item_name = item[1]
                     local item_id = FindItemID(item_name)
                     local item_amount = item[2]
-                    table.insert(items_to_trade, {id = item_id, amount = item_amount})
+                    -- Check if the item already exists in items_to_trade
+                    local found = false
+                    for _, existing_item in ipairs(items_to_trade) do
+                        if existing_item.id == item_id then
+                            -- If the item exists, update the amount
+                            existing_item.amount = existing_item.amount + item_amount
+                            found = true
+                            break
+                        end
+                        Sleep(0.0001)
+                    end
+
+                    -- If the item does not exist, add it to the list
+                    if not found then
+                        table.insert(items_to_trade, {id = item_id, amount = item_amount})
+                    end
+
                     Sleep(0.0001)
                 end
 
@@ -321,25 +333,22 @@ local function Main(character_list_postmoogle)
                 local item_amount_lookup = {}
                 for _, item in ipairs(items_to_trade) do
                     item_amount_lookup[item.id] = item.amount
+                    Sleep(0.0001)
                 end
 
                 -- Do the actual trading
+
                 while not item_trades_succeeded do
                     DropboxClearAll()
+                    Sleep(0.1) -- this has to be here otherwise the script will break
                     for _, item in ipairs(items_to_trade_inventory_amount) do
-                        local item_id = item.id
-                        local item_amount = item_amount_lookup[item_id]
-
-                        if item_amount then
-                            DropboxSetItemQuantity(item_id, false, item_amount)
-                            DropboxSetItemQuantity(item_id, true, item_amount)
-                            Sleep(0.0001)
-                        end
+                        local item_id = tonumber(item.id)
+                        local item_amount = tonumber(item_amount_lookup[item_id])
+                        DropboxSetItemQuantity(item_id, false, item_amount)
+                        Sleep(0.0001)
                     end
 
-                    Sleep(0.2)
                     DropboxStart()
-
                     repeat
                         trade_status = DropboxIsBusy()
 
@@ -348,13 +357,13 @@ local function Main(character_list_postmoogle)
                             Sleep(0.5)
                         end
                     until not trade_status
-
                     -- Check if everything went smoothly
                     for s = #items_to_trade_inventory_amount, 1, -1 do
                         local item = items_to_trade_inventory_amount[s]
                         local item_id = item.id
                         local expected_amount = item.amount
-
+                        Echo(item_id)
+                        Echo(expected_amount)
                         -- Get the current count of the item in the inventory
                         local current_count = GetItemCount(item_id, true)
 
@@ -363,6 +372,7 @@ local function Main(character_list_postmoogle)
                             -- Remove the item from the list
                             table.remove(items_to_trade_inventory_amount, s)
                         end
+                        Sleep(0.0001)
                     end
 
                     -- If list is empty then all items succeded
@@ -371,17 +381,15 @@ local function Main(character_list_postmoogle)
                     end
                 end
 
-                -- save current gil so we can check if the gil trade went right
 
                 while not gil_trade_succeeded do
-                    DropboxClearAll()
                     local gil_inv_amount = GetGil()
                     -- Set gil trade amount to 1
                     DropboxSetItemQuantity(1, false, 1)
-                    
+
                     Sleep(0.1)
                     DropboxStart()
-                    
+
                     -- Wait for the gil trade to complete
                     repeat
                         trade_status = DropboxIsBusy()
@@ -390,16 +398,18 @@ local function Main(character_list_postmoogle)
                             Sleep(0.5)
                         end
                     until not trade_status -- Exit loop when gil trade is no longer busy
-                    
+
                     -- Check if the gil trade went right
                     if GetGil() == (gil_inv_amount - 1) then
                         gil_trade_succeeded = true
                     else
                         LogInfo("[GCID] Trade did not succeed, retrying...")
+                        DropboxSetItemQuantity(1, false, 0)
                     end
-                    
+
                     Sleep(0.1)
                 end
+                DropboxSetItemQuantity(1, false, 0)
                 ClearFocusTarget()
             end
 
@@ -411,7 +421,7 @@ local function Main(character_list_postmoogle)
                     Sleep(0.1)
                 end
 
-                Echo("Waiting for party invite from " .. i["Trading With"])
+                Echo("Waiting for party invite from " .. trading_with)
 
                 repeat
                     PartyAccept()
@@ -420,8 +430,12 @@ local function Main(character_list_postmoogle)
 
                 local party_member = GetPartyMemberName(0)
 
-                if party_member == i["Trading With"] then
+                if party_member == trading_with then
                     ready_to_trade = true
+                    Sleep(0.5)
+                    Target(party_member)
+                    yield("/focustarget <t>")
+                    Sleep(0.5)
                 else
                     Echo(party_member .. " is not the right character, leaving party")
                 end
@@ -442,12 +456,10 @@ local function Main(character_list_postmoogle)
             if alt_char_name ~= character_list_postmoogle[i_temp]["Name"] then
                 Echo("delivery job done")
                 if return_home then
-                    Echo(alt_char_name .. " returning home")
+                    Echo(alt_char_name .. " returning home to")
                     LogInfo("[PostMoogle] Returning home")
-                    if return_location == 1 then
-                        ReturnHomeWorld()
-                    end
-    
+                    ReturnHomeWorld()
+
                     -- Limsa stuff
                     if return_location == 1 then
                         if not (ZoneCheck("Limsa Lominsa Lower") or ZoneCheck("Limsa Lominsa Upper")) then
@@ -455,19 +467,19 @@ local function Main(character_list_postmoogle)
                             Teleporter("Limsa", "tp")
                         end
                     end
-    
+
                     -- Limsa Retainer Bell Stuff
                     if return_location == 2 then
                         LogInfo("[PostMoogle] Attempting to go to Limsa retainer bell")
                         PathToLimsaBell()
                     end
-    
+
                     -- Nearby Retainer Bell Stuff
                     if return_location == 3 then
                         LogInfo("[PostMoogle] Attempting to go to nearest retainer bell")
                         Movement(GetObjectRawXPos("Summoning Bell"), GetObjectRawYPos("Summoning Bell"), GetObjectRawZPos("Summoning Bell"))
                     end
-    
+
                     -- FC Entrance stuff
                     if return_location == 4 then
                         LogInfo("[PostMoogle] Attempting to go to FC Entrance")

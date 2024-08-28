@@ -146,9 +146,7 @@ end
 -- Checks if you're currently in the provided zone, you can supply zone name or aetheryte name
 function ZoneCheck(zone_name)
     local zone_id = FindZoneID(zone_name)
-    Echo("zoneid 1: "..tostring(zone_id))
     if zone_id == nil then
-        Echo("zoneid 2: "..tostring(zone_id))
         zone_id = FindZoneIDByAetheryte(zone_name)
     end
     repeat
@@ -2064,7 +2062,7 @@ function ReturnHomeWorld()
     
     repeat
         Sleep(0.1)
-    until GetCurrentWorld() == GetHomeWorld() and IsPlayerAvailable()
+    until GetCurrentWorld() == GetHomeWorld() and IsPlayerAvailable() and not LifestreamIsBusy()
 end
 
 -- Usage: CheckPluginsEnabled("AutoRetainer") or CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream")
