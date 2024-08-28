@@ -12,8 +12,6 @@ if you have everything configured right it's just start the script, go afk and y
 -- Set your alt accounts %appdata% config location otherwise it will not work
 snd_alt_config_folder = "C:\\Users\\ff14lowres\\AppData\\Roaming\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
 
-
-
 -- #####################################
 -- #  DON'T TOUCH ANYTHING BELOW HERE  #
 -- # UNLESS YOU KNOW WHAT YOU'RE DOING #

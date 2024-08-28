@@ -1201,7 +1201,10 @@ end
 -- Attempts to deliver everything under the provisioning window, skipping over what it can't
 function GcProvisioningDeliver()
     Sleep(0.5)
-    PauseYesAlready()
+    
+    if HasPlugin("YesAlready") then
+        PauseYesAlready()
+    end
     
     for i = 4, 2, -1 do
         repeat
@@ -1276,7 +1279,9 @@ function GcProvisioningDeliver()
         ::skip::
     end
     
-    RestoreYesAlready()
+    if HasPlugin("YesAlready") then
+        RestoreYesAlready()
+    end
 end
 
 -- Usage: FindWorldByID(11) // FindWorldByID(GetHomeWorld())

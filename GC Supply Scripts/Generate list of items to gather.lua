@@ -22,7 +22,9 @@ LoadFunctions = loadfile(load_functions_file_location)
 LoadFunctions()
 LoadFileCheck()
 
-CheckPluginsEnabled("SomethingNeedDoing")
+if not CheckPluginsEnabled("SomethingNeedDoing") then
+    return -- Stops script as plugins not available
+end
 
 provisioning_list_name_to_load = "provisioning_list.lua"
 
@@ -171,5 +173,3 @@ local combined_items_by_category = combine_items_by_category(provisioning_list)
 local character_summaries = create_character_summary(provisioning_list)
 
 write_to_file(combined_items_by_category, character_summaries, output_folder .. output_filename)
-
-
