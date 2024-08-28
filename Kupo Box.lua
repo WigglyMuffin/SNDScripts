@@ -44,7 +44,7 @@ Currently the way it knows when the trades are done is by being traded 1 gil, ho
 Edit vac_char_list.lua file for configuring characters, or utilize the local character list below
 
 These settings will override what you include in the character list, which means if you set a setting here then all characters will use that setting
-to use any of the overrides you need to uncommend the line and set the value ]]
+to use any of the overrides you need to uncomment the line and set it to what you want. uncommenting is just removing the two lines at the start ]]
 
 -- local trading_with_override = "Smol Meow"            -- Name of the character you're trading with, do not include world
 -- local destination_server_override = "Sephirot"       -- Server characters need to travel to for collecting items

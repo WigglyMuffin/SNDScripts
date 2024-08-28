@@ -29,6 +29,7 @@ Generates a character list you can insert into vac_char_list for use with Kupo B
 ##    Settings     ##
 ###################]]
 -- set the characters you're generating a list with, the list generates in order
+-- you could technically just copy the character_list from the vac_char_list if you have one there into this
 
 local gen_char_list = {
     "Mrow Mrow@Louisoux",
@@ -46,6 +47,7 @@ local destination_house = 0 -- Options: 0 = FC, 1 = Personal, 2 = Apartment // O
 local do_movement = false -- Options: true, false // will move to the character you're trading to, usually this is done by the delivery character
 local return_home = false -- Options: true, false // will just log out if set to false, otherwise will move to home server and to set location configured by ["Return Location"]
 local return_location = 0 -- Options: 0 = do nothing, 1 = limsa, 2 = limsa bell, 3 = nearby bell, 4 = fc 
+
 
 local set_destination_server_to_home_server = true
 -- This option if set to true will override destination_server and set it to that chars home server
