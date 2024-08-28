@@ -2148,16 +2148,20 @@ function CheckPluginsEnabled(...)
     
     -- Echo enabled plugins
     if #enabled_plugins > 0 then
+        LogInfo("Enabled plugins: " .. table.concat(enabled_plugins, ", "))
         Echo("Enabled plugins: " .. table.concat(enabled_plugins, ", "))
     else
+        LogInfo("No plugins are enabled.")
         Echo("No plugins are enabled.")
     end
     
     -- Echo missing plugins
     if #missing_plugins > 0 then
+        LogInfo("Missing or not enabled plugins: " .. table.concat(missing_plugins, ", "))
         Echo("Missing or not enabled plugins: " .. table.concat(missing_plugins, ", "))
         return false -- Returns false to be used with if statements to stop script
     else
+        LogInfo("All plugins are enabled.")
         Echo("All plugins are enabled.")
         return true -- Returns true be used with if statements to start script
     end
