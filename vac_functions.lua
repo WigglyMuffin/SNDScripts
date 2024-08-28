@@ -2,9 +2,16 @@
 -- So it should look like this %appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\vac_functions.lua
 -- It contains the functions required to make the scripts work
 
-function LoadFileCheck()
-	LogInfo("[VAC] Successfully loaded the vac functions file")
-end
+--[[################
+##    Version     ##
+##     1.0.0      ##
+####################
+
+-> 1.0.0: Initial release
+
+
+
+]]
 
 -- ###############
 -- # TO DO STUFF #
@@ -20,6 +27,10 @@ end
 -- #####################################
 -- #####################################
 -- #####################################
+
+function LoadFileCheck()
+	LogInfo("[VAC] Successfully loaded the vac functions file")
+end
 
 -- this part just loads all the lists into memory to use with various functions
 local vac_lists = dofile(os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_lists.lua")
@@ -513,90 +524,6 @@ function DoHuntLog(target_name, target_distance, class, rank)
     end
 end
 
--- New Teleport needs testing
--- Usage: Teleporter("Limsa", "tp") or Teleporter("gc", "li") or Teleporter("Vesper", "item")
--- Options: location = teleport location, tp_kind = tp, li, item
--- Will teleport player to specified location
--- function Teleporter(location, tp_kind) -- Teleporter handler
-    -- local cast_time_buffer = 5 -- Teleports are 5 seconds long, include buffer time
-    -- local max_retries = 10 -- Max retries for teleport
-    -- local retries = 0
-    -- local cast_check_interval = 0.1 -- Interval to check if casting started
-    -- local player_teleported = false
-    
-    -- -- Check if player is available and not casting or in combat/event, else a teleport cannot happen
-    -- repeat
-        -- Sleep(0.1)
-    -- until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32)
-    
-    -- -- Teleport attempt loop
-    -- while retries < max_retries do
-        -- -- Pass lifestream stop if "li" teleport is used
-        -- if tp_kind == "li" then
-            -- yield("/lifestream stop")
-            
-            -- repeat
-                -- Sleep(0.1)
-            -- until not LifestreamIsBusy()
-        -- end
-        
-        -- -- If already in the specified zone, no need to teleport
-        -- -- if FindZoneIDByAetheryte(location) == GetZoneID() then
-            -- -- LogInfo("[VAC] Already in the right zone.")
-            -- -- player_teleported = true
-            -- -- return true
-        -- -- end
-        
-        -- -- Attempt teleport
-        -- if tp_kind == "item" then
-            -- UseItemTeleport(location) -- Use item to teleport
-        -- else
-            -- yield("/" .. tp_kind .. " " .. location)
-        -- end
-        
-        -- -- Check if casting started
-        -- local cast_started = false
-        -- for i = 1, 20 do -- Check 20 times, with cast_check_interval delay
-            -- if IsPlayerCasting() then
-                -- cast_started = true
-                -- break
-            -- end
-            -- Sleep(cast_check_interval)
-        -- end
-        
-        -- -- Check if casting started and wait for it to finish
-        -- if cast_started then
-            -- Sleep(cast_time_buffer)
-        -- end
-        
-        -- -- Checks if player is between zones
-        -- if GetCharacterCondition(45) or GetCharacterCondition(51) then
-            -- LogInfo("[VAC] Teleport successful.")
-            -- player_teleported = true
-            -- return true
-        -- end
-        
-        -- -- Increment retries if teleport failed
-        -- retries = retries + 1
-        -- local retry_word = (max_retries == 1) and "retry" or "retries"
-        -- LogInfo("[VAC] Retrying teleport attempt #" .. max_retries .. " " .. retry_word .. ".")
-    -- end
-    
-    -- -- Return on whether teleport was successful
-    -- if player_teleported then
-        -- return true
-    -- else
-        -- -- Fail handling if retries reached max amount
-        -- if retries >= max_retries then
-            -- local attempt_word = (max_retries == 1) and "attempt" or "attempts"
-            -- LogInfo("[VAC] Teleport failed after " .. max_retries .. " " .. attempt_word .. ".")
-            -- Echo("Teleport failed after " .. max_retries .. " " .. attempt_word .. ".")
-            -- yield("/lifestream stop") -- Stop lifestream and clear lifestream UI
-            -- return false
-        -- end
-    -- end
--- end
-
 function Teleporter(location, tp_kind) -- Teleporter handler
     tp_kind = string.lower(tp_kind)
     local cast_time_buffer = 5 -- Just in case a buffer is required, teleports are 5 seconds long. Slidecasting, ping and fps can affect casts
@@ -648,10 +575,6 @@ function Teleporter(location, tp_kind) -- Teleporter handler
     elseif tp_kind == "li" then
         while retries < max_retries do
         
-            if FindZoneIDByAetheryte(location) == GetZoneID() then
-                LogInfo("[VAC] Already in the right zone")
-                break
-            end
             if not IsPlayerCasting() then
                 yield("/li " .. location)
                 Sleep(2.0) -- give lifestream some time to start
@@ -1359,7 +1282,7 @@ function FindZoneIDByAetheryte(targetAetheryte)
         if type(value) == "table" and type(value["Aetherytes"]) == "table" then    
             for _, aetheryte in ipairs(value["Aetherytes"]) do
                 if aetheryte:lower():find(lowerTarget, 1, true) then
-                    return key, aetheryte
+                    return tonumber(key), aetheryte
                 end
             end
         else
@@ -2022,26 +1945,33 @@ function DropboxSetAll(dropbox_gil)
         return
     end
     
-    local gil = 999999999 -- Gil cap
-    
-    if dropbox_gil then
-        gil = dropbox_gil
-    end
-    
+    local gil = dropbox_gil or 999999999 -- Gil cap
+
+    -- list that stores all the items in your inventory and their amounts
+    local inventory = {}
+
     -- Iterate over the Item_List
     for id, item in pairs(Item_List) do
         -- Check if the item is tradeable
-        if item['Untradeable'] == false then
-            if id == 1 then
-                -- Set gil to gil cap or specified gil amount
-                DropboxSetItemQuantity(id, false, gil)
-            elseif id < 2 or id > 19 then -- Excludes Shards, Crystals, and Clusters
-                -- Set all item ID except 2-19
-                DropboxSetItemQuantity(id, false, 139860) -- NQ, 999*140
-                DropboxSetItemQuantity(id, true, 139860)  -- HQ, 999*140
+        if item['Untradeable'] == false or item['Name'] ~= "" then
+            local item_count = GetItemCount(id, true)
+            if item_count > 0 then
+                -- Add the item to the inventory list
+                inventory[id] = item_count
             end
         end
         
+        Sleep(0.0001)
+    end
+
+    for id, item in pairs(inventory) do
+        if id == 1 then
+            -- Set gil to gil cap or specified gil amount
+            DropboxSetItemQuantity(id, false, gil)
+        elseif id < 2 or id > 19 then -- Excludes Shards, Crystals, and Clusters
+            DropboxSetItemQuantity(id, false, 139860) -- NQ, 999*140
+            DropboxSetItemQuantity(id, true, 139860)  -- HQ, 999*140
+        end
         Sleep(0.0001)
     end
 end
@@ -2053,12 +1983,26 @@ function DropboxClearAll()
         LogInfo("[VAC] Item_List is nil. Cannot clear items.")
         return
     end
-    
+
+    -- list that stores all the items in your inventory and their amounts
+    local inventory = {}
+
+    -- Iterate over the item list and checks it against your inventory, if it finds an item in your inventory it will be added to the list to be cleared
     for id, item in pairs(Item_List) do
-        if item['Untradeable'] == false then
-            DropboxSetItemQuantity(id, false, 0) -- NQ
-            DropboxSetItemQuantity(id, true, 0)  -- HQ
+        if item['Untradeable'] == false or item['Name'] ~= "" then
+            local item_count = GetItemCount(id, true)
+            if item_count > 0 then
+                -- Add the item to the inventory list
+                inventory[id] = item_count
+            end
         end
+        Sleep(0.0001)
+    end
+
+    -- Clear the items in inventory
+    for id, item in pairs(inventory) do
+        DropboxSetItemQuantity(id, false, 0) -- NQ
+        DropboxSetItemQuantity(id, true, 0)  -- HQ
         Sleep(0.0001)
     end
 end
