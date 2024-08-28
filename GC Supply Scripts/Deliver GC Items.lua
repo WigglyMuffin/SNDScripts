@@ -34,7 +34,9 @@ LoadFunctions = loadfile(load_functions_file_location)
 LoadFunctions()
 LoadFileCheck()
 
-CheckPluginsEnabled("SomethingNeedDoing")
+if not CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream", "PandorasBox", "SomethingNeedDoing", "TextAdvance", "vnavmesh") then
+    return -- Stops script as plugins not available
+end
 
 LogInfo("[DGCI] ##############################")
 LogInfo("[DGCI] Starting script...")

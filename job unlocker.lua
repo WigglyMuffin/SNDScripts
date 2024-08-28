@@ -1131,7 +1131,10 @@ function Main()
     yield("/p")
     --yield("/vbm cfg AI Enabled true")
     yield("/vbmai on")
-    CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream", "AutoDuty", "BossModReborn", "PandorasBox", "Questionable", "RotationSolver", "SomethingNeedDoing", "TextAdvance", "vnavmesh")
+    
+    if not CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream", "AutoDuty", "BossModReborn", "PandorasBox", "Questionable", "RotationSolver", "SomethingNeedDoing", "TextAdvance", "vnavmesh") then
+        return -- Stops script as plugins not available
+    end
     
     local actions = {
         -- Arcanist job quests

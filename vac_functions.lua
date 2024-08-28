@@ -2121,6 +2121,7 @@ end
 -- Usage: CheckPluginsEnabled("AutoRetainer") or CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream")
 -- Can take an infinite amount of plugin strings
 -- Will check if the player has the specified plugins installed/enabled and echoes enabled + disabled plugins
+-- If statement can be used 
 function CheckPluginsEnabled(...)
     local enabled_plugins = {}
     local missing_plugins = {}
@@ -2136,7 +2137,7 @@ function CheckPluginsEnabled(...)
         end
     end
     
-    -- Sort the plugin names alphabetically
+    -- Sort the plugin names a-z
     table.sort(enabled_plugins)
     table.sort(missing_plugins)
     
@@ -2150,7 +2151,9 @@ function CheckPluginsEnabled(...)
     -- Echo missing plugins
     if #missing_plugins > 0 then
         Echo("Missing or not enabled plugins: " .. table.concat(missing_plugins, ", "))
+        return false -- Returns false to be used with if statements to stop script
     else
         Echo("All plugins are enabled.")
+        return true -- Returns true be used with if statements to start script
     end
 end

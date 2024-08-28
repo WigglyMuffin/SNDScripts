@@ -27,7 +27,9 @@ LoadFunctions = loadfile(load_functions_file_location)
 LoadFunctions()
 LoadFileCheck()
 
-CheckPluginsEnabled("SomethingNeedDoing")
+if not CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream", "PandorasBox", "SomethingNeedDoing", "TextAdvance", "vnavmesh") then
+    return -- Stops script as plugins not available
+end
 
 alt_vac_config_folder = snd_alt_config_folder .. "VAC"
 dofile(alt_vac_config_folder .. '\\GC\\' .. provisioning_list_name_to_load)

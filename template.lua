@@ -33,7 +33,9 @@ LoadFunctions = loadfile(load_functions_file_location)
 LoadFunctions()
 LoadFileCheck()
 
-CheckPluginsEnabled("SomethingNeedDoing")
+if not CheckPluginsEnabled("SomethingNeedDoing") then
+    return -- Stops script as plugins not available
+end
 
 LogInfo("[TEMP] ##############################")
 LogInfo("[TEMP] Starting script...")
