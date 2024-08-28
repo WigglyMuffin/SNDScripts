@@ -1,7 +1,7 @@
 --[[
 
 ############################################################
-##                        Kupo Box                        ##
+##                       Post Moogle                      ##
 ##                 Character List Generator               ##
 ############################################################
 
@@ -17,7 +17,9 @@
 ##                  Description                   ##
 ####################################################
 
-Generates a character list you can insert into vac_char_list for use with Kupo Box, or directly into Kupo Box itself
+Generates a character list you can insert into vac_char_list for use with Post Moogle, or directly into Post Moogle itself
+
+i almost recommend running this without much configuration and configuring everything on a per character basis
 
 ####################################################
 ##                Required Plugins                ##
@@ -37,9 +39,9 @@ local gen_char_list = {
     "Beeg Meow@Zodiark",
 }
 
--- Here you set the default settings each character will have when generated
+-- Here you set the default settings each character will have when generated, you can just leave everything default and edit it on a per character basis after it's generated
 
-local trading_with = "Meow meow"  -- The name of the character you're logging in on
+local trading_with = "Meow meow"  -- The name of the character you're trading with
 local destination_server = "Zodiark" -- Character you're trading with, without world
 local destination_type = 0 -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
 local destination_aetheryte = "Aleport" -- Aetheryte to meet at if ["Destination Type"] is set to 0
@@ -47,9 +49,17 @@ local destination_house = 0 -- Options: 0 = FC, 1 = Personal, 2 = Apartment // O
 local do_movement = false -- Options: true, false // will move to the character you're trading to, usually this is done by the delivery character
 local return_home = false -- Options: true, false // will just log out if set to false, otherwise will move to home server and to set location configured by ["Return Location"]
 local return_location = 0 -- Options: 0 = do nothing, 1 = limsa, 2 = limsa bell, 3 = nearby bell, 4 = fc 
+local items = {
+-- This is where you configure what items each character is going to be delivering, the format is {"ITEMNAME", AMOUNT}
+-- if you want to do it character specific you have to edit the generated character list afterwards
+-- It is not case sensitive, however it needs to be the full name so it doesn't accidentally get the wrong item
+-- add or remove as you wish, can even leave it empty just fine
+{"Example Item", 50},
+{"Example Item 2", 70},
+{"Example Item 3", 20}
+}
 
-
-local set_destination_server_to_home_server = true
+local set_destination_server_to_home_server = false
 -- This option if set to true will override destination_server and set it to that chars home server
 -- If the list is in order it can be used to make everything faster as the characters do not have to travel anywhere, 
 -- they just meet the trader on their server at the set location
@@ -106,6 +116,7 @@ local function generate_character_list_options()
             ["Do Movement"] = do_movement,
             ["Return Home"] = return_home,
             ["Return Location"] = return_location,
+            ["Items"] = items,
             -- Order list
             ["_order"] = {
                 "Name",
@@ -116,7 +127,8 @@ local function generate_character_list_options()
                 "Destination House",
                 "Do Movement",
                 "Return Home",
-                "Return Location"
+                "Return Location",
+                "Items"
             }
         })
     end
@@ -132,7 +144,7 @@ local function write_to_file(filename, data)
     EnsureFolderExists(tools_folder)
     local file = io.open(tools_folder .. filename, "w")
 
-    file:write("local character_list_kupobox = {\n")
+    file:write("local character_list_postmoogle = {\n")
     
     for _, char in ipairs(data) do
         file:write("    {\n")
@@ -141,6 +153,12 @@ local function write_to_file(filename, data)
             local value = char[key]
             if type(value) == "string" then
                 file:write(string.format("        [\"%s\"] = \"%s\",\n", key, value))
+            elseif type(value) == "table" then
+                file:write(string.format("        [\"%s\"] = {\n", key))
+                for _, item in ipairs(value) do
+                    file:write(string.format("            {\"%s\", %d},\n", item[1], item[2]))
+                end
+                file:write("        },\n")
             else
                 file:write(string.format("        [\"%s\"] = %s,\n", key, tostring(value)))
             end
@@ -152,4 +170,4 @@ local function write_to_file(filename, data)
     file:close()
 end
 
-write_to_file("Kupo Box chars.lua", character_list_options)
+write_to_file("Post Moogle Chars.lua", character_list_options)

@@ -166,7 +166,7 @@ end
 --
 -- prints provided text into chat
 function Echo(text)
-    yield("/echo " .. text)
+    yield("/echo " .. tostring(text))
 end
 
 -- Usage: Sleep(0.1) or Sleep("0.1")
@@ -463,7 +463,7 @@ end
 -- Valid classes: 0 = GLA, 1 = PGL, 2 = MRD, 3 = LNC, 4 = ARC, 5 = ROG, 6 = CNJ, 7 = THM, 8 = ACN, 9 = GC
 -- Valid ranks/pages: 0-4 for jobs, 0-2 for GC
 -- Opens and checks current progress and returns a true if finished or a false if not
-function HuntLogCheck(target_name,class,rank)
+function HuntLogCheck(target_name, class, rank)
     OpenHuntLog(class,rank, 2)
     local node_text = ""
     local function CheckTargetAmountNeeded(sub_node)
@@ -2109,4 +2109,20 @@ function CheckPluginsEnabled(...)
         Echo("All plugins are enabled.")
         return true -- Returns true be used with if statements to start script
     end
+end
+
+-- Usage: FindItemID("Copper")
+--
+-- Searches the item list for an item and returns it's id, not case sensitive but you need the full item name
+function FindItemID(item_to_find)
+    local searchTerm = string.lower(item_to_find)
+
+    for key, item in pairs(Item_List) do
+        local itemName = string.lower(item['Name'])
+
+        if itemName == searchTerm then
+            return key
+        end
+    end
+    return nil
 end

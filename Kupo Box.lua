@@ -70,7 +70,7 @@ local use_external_character_list = true
 -- If use_external_character_list is set to true then this list is completely skipped
 -- This list uses the same options as shown in the overrides above
 
-local character_list_options = {
+local character_list_kupobox = {
     {
         ["Name"] = "Large Meow@Bismarck", -- the name of the character you're logging in on
         ["Trading With"] = "Smol Meow", -- character you're trading with, without world
@@ -127,17 +127,17 @@ LogInfo("[KupoBox] ##############################")
 
 if use_external_character_list then
     local char_data = dofile(snd_config_folder .. char_list)
-    character_list_options = char_data.character_list_options
+    character_list_kupobox = char_data.character_list_kupobox
 end
 
 --[[###########
 # MAIN SCRIPT #
 #############]]
 
-local function ProcessAltCharacters(character_list_options)
-    for i = 1, #character_list_options do
+local function ProcessAltCharacters(character_list_kupobox)
+    for i = 1, #character_list_kupobox do
         -- Update alt character name
-        local alt_char_name = character_list_options[i]["Name"]
+        local alt_char_name = character_list_kupobox[i]["Name"]
 
         -- this is just to store the boolean for if we're skipping a char or not
         local skip = false
@@ -149,14 +149,14 @@ local function ProcessAltCharacters(character_list_options)
         end
         if not skip then
             -- apply overrides if they're needed, otherwise set the settings from the character
-            local trading_with = trading_with_override or character_list_options[i]["Trading With"]
-            local destination_server = destination_server_override or character_list_options[i]["Destination Server"]
-            local destination_type = destination_type_override or character_list_options[i]["Destination Type"]
-            local destination_aetheryte = destination_aetheryte_override or character_list_options[i]["Destination Aetheryte"]
-            local destination_house = destination_house_override or character_list_options[i]["Destination House"]
-            local do_movement = do_movement_override or character_list_options[i]["Do Movement"]
-            local return_home = return_home_override or character_list_options[i]["Return Home"]
-            local return_location = return_location_override or character_list_options[i]["Return Location"]
+            local trading_with = trading_with_override or character_list_kupobox[i]["Trading With"]
+            local destination_server = destination_server_override or character_list_kupobox[i]["Destination Server"]
+            local destination_type = destination_type_override or character_list_kupobox[i]["Destination Type"]
+            local destination_aetheryte = destination_aetheryte_override or character_list_kupobox[i]["Destination Aetheryte"]
+            local destination_house = destination_house_override or character_list_kupobox[i]["Destination House"]
+            local do_movement = do_movement_override or character_list_kupobox[i]["Do Movement"]
+            local return_home = return_home_override or character_list_kupobox[i]["Return Home"]
+            local return_location = return_location_override or character_list_kupobox[i]["Return Location"]
 
 
             -- Switch characters if required, looks up current character and compares
@@ -176,8 +176,8 @@ local function ProcessAltCharacters(character_list_options)
             Echo("Picking up items from " .. trading_with .. " on server " .. destination_server)
             LogInfo("[KupoBox] Picking up items from " .. trading_with .. " on server " .. destination_server)
 
-            Echo("Processing " .. i .. "/" .. #character_list_options .. ", current character: " .. alt_char_name)
-            LogInfo("[KupoBox] Processing " .. i .. "/" .. #character_list_options .. ", current character: " .. alt_char_name)
+            Echo("Processing " .. i .. "/" .. #character_list_kupobox .. ", current character: " .. alt_char_name)
+            LogInfo("[KupoBox] Processing " .. i .. "/" .. #character_list_kupobox .. ", current character: " .. alt_char_name)
 
             -- Check if alt character on correct server
             if GetCurrentWorld() == World_ID_List[destination_server].ID then
@@ -197,7 +197,7 @@ local function ProcessAltCharacters(character_list_options)
             -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
             if destination_type == 0 then
                 local dest_aetheryte_id = FindZoneIDByAetheryte(destination_aetheryte)
-            
+
                 -- If player is not at the destination then tp there
                 if GetZoneID() ~= dest_aetheryte_id then
                     Echo("Teleporting to " .. destination_aetheryte .. " to find " .. trading_with)
@@ -270,9 +270,9 @@ local function ProcessAltCharacters(character_list_options)
             WaitForGilIncrease(1)
 
             -- Notify when all characters are finished
-            if i == #character_list_options then
-                Echo("Finished all " .. #character_list_options .. " characters")
-                LogInfo("Finished all " .. #character_list_options .. " characters")
+            if i == #character_list_kupobox then
+                Echo("Finished all " .. #character_list_kupobox .. " characters")
+                LogInfo("Finished all " .. #character_list_kupobox .. " characters")
             end
 
             -- Disband party once gil trigger has happened
@@ -321,5 +321,5 @@ local function ProcessAltCharacters(character_list_options)
     end
 end
 
-ProcessAltCharacters(character_list_options)
+ProcessAltCharacters(character_list_kupobox)
 LogInfo("[KupoBox] All characters complete, script finished")
