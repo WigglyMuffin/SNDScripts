@@ -3,7 +3,7 @@
 -- It contains the functions required to make the scripts work
 
 function LoadFileCheck()
-	LogInfo("Successfully loaded the vac functions file")
+	LogInfo("[VAC] Successfully loaded the vac functions file")
 end
 
 -- ###############
@@ -314,7 +314,7 @@ end
 function GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get_node_text_location_1, get_node_text_location_2)
     bypass = "next task"
     if get_node_text_location_2 == nil then 
-        LogInfo("GetNodeTextLookupUpdate: "..get_node_text_type.." "..get_node_text_location.." "..get_node_text_location_1)
+        LogInfo("[VAC] GetNodeTextLookupUpdate: "..get_node_text_type.." "..get_node_text_location.." "..get_node_text_location_1)
         get_node_text = GetNodeText(get_node_text_type, get_node_text_location, get_node_text_location_1)
         if get_node_text == get_node_text_location_1 then
             return bypass
@@ -323,7 +323,7 @@ function GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get
         end
     --- i hate
     else
-        LogInfo("GetNodeTextLookupUpdate2: "..get_node_text_type.." "..get_node_text_location.." "..get_node_text_location_1.." "..get_node_text_location_2)
+        LogInfo("[VAC] GetNodeTextLookupUpdate2: "..get_node_text_type.." "..get_node_text_location.." "..get_node_text_location_1.." "..get_node_text_location_2)
         get_node_text = GetNodeText(get_node_text_type, get_node_text_location, get_node_text_location_1, get_node_text_location_2)
         if get_node_text == get_node_text_location_2 then
             return bypass
@@ -346,10 +346,10 @@ function QuestChecker(target_name, target_distance, get_node_text_type, get_node
     end
     while true do
         updated_node_text = GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get_node_text_location_1, get_node_text_location_2)
-        LogInfo("[JU] updated_node_text: "..updated_node_text)
-        LogInfo("[JU] Extract: "..extractTask(updated_node_text))
+        LogInfo("[VAC] updated_node_text: "..updated_node_text)
+        LogInfo("[VAC] Extract: "..extractTask(updated_node_text))
         local last_char = string.sub(updated_node_text, -1)
-        LogInfo("[JU] last char: "..updated_node_text)
+        LogInfo("[VAC] last char: "..updated_node_text)
         Sleep(2.0)
         if updated_node_text == get_node_text_match or not string.match(last_char, "%d") then
             break
@@ -380,7 +380,7 @@ function NodeScanner(get_node_text_type, get_node_text_match)
             local clean_node_text = extractTask(node_check)
             if clean_node_text == nil then
             else 
-                --LogInfo(tostring(clean_node_text))
+                --LogInfo([VAC] tostring(clean_node_text))
             end
             if clean_node_text == get_node_text_match then
                 return location, sub_node
@@ -396,7 +396,7 @@ function NodeScanner(get_node_text_type, get_node_text_match)
                 local clean_node_text = extractTask(node_check)
                 if clean_node_text == nil then
                 else 
-                    --LogInfo(tostring(clean_node_text))
+                    --LogInfo([VAC] tostring(clean_node_text))
                 end
                 if clean_node_text == get_node_text_match then
                     return location, sub_node, sub_node2
@@ -476,10 +476,10 @@ function HuntLogCheck(target_name,class,rank)
     end
     local target_amount_needed_node = FindTargetNode()
     if not target_amount_needed_node then
-        LogInfo("Couldn't find "..target_name.." in hunting log, likely already finished")
+        LogInfo("[VAC] Couldn't find "..target_name.." in hunting log, likely already finished")
         return false, 0
     else
-        LogInfo("Found "..target_name.." in hunting log, time to hunt")
+        LogInfo("[VAC] Found "..target_name.." in hunting log, time to hunt")
         local target_amount_needed = CheckTargetAmountNeeded(target_amount_needed_node)
         if target_amount_needed == 0 then
             CloseHuntLog()
@@ -542,7 +542,7 @@ end
         
         -- -- If already in the specified zone, no need to teleport
         -- -- if FindZoneIDByAetheryte(location) == GetZoneID() then
-            -- -- LogInfo("Already in the right zone.")
+            -- -- LogInfo("[VAC] Already in the right zone.")
             -- -- player_teleported = true
             -- -- return true
         -- -- end
@@ -571,7 +571,7 @@ end
         
         -- -- Checks if player is between zones
         -- if GetCharacterCondition(45) or GetCharacterCondition(51) then
-            -- LogInfo("Teleport successful.")
+            -- LogInfo("[VAC] Teleport successful.")
             -- player_teleported = true
             -- return true
         -- end
@@ -579,7 +579,7 @@ end
         -- -- Increment retries if teleport failed
         -- retries = retries + 1
         -- local retry_word = (max_retries == 1) and "retry" or "retries"
-        -- LogInfo("Retrying teleport attempt #" .. max_retries .. " " .. retry_word .. ".")
+        -- LogInfo("[VAC] Retrying teleport attempt #" .. max_retries .. " " .. retry_word .. ".")
     -- end
     
     -- -- Return on whether teleport was successful
@@ -589,7 +589,7 @@ end
         -- -- Fail handling if retries reached max amount
         -- if retries >= max_retries then
             -- local attempt_word = (max_retries == 1) and "attempt" or "attempts"
-            -- LogInfo("Teleport failed after " .. max_retries .. " " .. attempt_word .. ".")
+            -- LogInfo("[VAC] Teleport failed after " .. max_retries .. " " .. attempt_word .. ".")
             -- Echo("Teleport failed after " .. max_retries .. " " .. attempt_word .. ".")
             -- yield("/lifestream stop") -- Stop lifestream and clear lifestream UI
             -- return false
@@ -613,7 +613,7 @@ function Teleporter(location, tp_kind) -- Teleporter handler
         while retries < max_retries do
             -- Stop lifestream only once per teleport attempt
             if FindZoneIDByAetheryte(location) == GetZoneID() then
-                LogInfo("Already in the right zone")
+                LogInfo("[VAC] Already in the right zone")
                 break
             end
             
@@ -630,26 +630,26 @@ function Teleporter(location, tp_kind) -- Teleporter handler
     
             -- Check if the teleport was successful
             if GetCharacterCondition(45) or GetCharacterCondition(51) then -- 45 is BetweenAreas, 51 is BetweenAreas51
-                LogInfo("Teleport successful.")
+                LogInfo("[VAC] Teleport successful.")
                 break
             end
             
             -- Teleport retry increment
             retries = retries + 1
-            LogInfo("Retrying teleport, attempt #" .. retries)
+            LogInfo("[VAC] Retrying teleport, attempt #" .. retries)
         end
         
         -- Teleporter failed handling
         if retries >= max_retries then
             local attempt_word = (max_retries == 1) and "attempt" or "attempts"
-            LogInfo("Teleport failed after " .. max_retries .. " " .. attempt_word .. ".")
+            LogInfo("[VAC] Teleport failed after " .. max_retries .. " " .. attempt_word .. ".")
             Echo("Teleport failed after " .. max_retries .. " " .. attempt_word .. ".")
         end
     elseif tp_kind == "li" then
         while retries < max_retries do
         
             if FindZoneIDByAetheryte(location) == GetZoneID() then
-                LogInfo("Already in the right zone")
+                LogInfo("[VAC] Already in the right zone")
                 break
             end
             if not IsPlayerCasting() then
@@ -664,12 +664,12 @@ function Teleporter(location, tp_kind) -- Teleporter handler
                 break
             end
             retries = retries + 1
-            LogInfo("Retrying lifestream, attempt #" .. retries)
+            LogInfo("[VAC] Retrying lifestream, attempt #" .. retries)
         end
         -- Reset lifestream_stopped for next retry
         if retries >= max_retries then
             local attempt_word = (max_retries == 1) and "attempt" or "attempts"
-            LogInfo("Lifestream failed after " .. max_retries .. " " .. attempt_word .. ".")
+            LogInfo("[VAC] Lifestream failed after " .. max_retries .. " " .. attempt_word .. ".")
             Echo("Lifestream failed after " .. max_retries .. " " .. attempt_word .. ".")
             yield("/lifestream stop") -- Not always needed but removes lifestream ui
         end
@@ -695,7 +695,7 @@ function UseItemTeleport(location)
     if item then
         yield("/item " .. item)
     else
-        LogInfo("No teleport item found for: " .. location)
+        LogInfo("[VAC] No teleport item found for: " .. location)
         Echo("No teleport item found for: " .. location)
     end
 end
@@ -1217,7 +1217,7 @@ function GcProvisioningDeliver()
         if ContainsLetters(item_name) and item_qty >= item_requested_amount then
             -- continue
         else
-            LogInfo("Nothing here, moving on")
+            LogInfo("[VAC] Nothing here, moving on")
             goto skip
         end
         
@@ -1232,7 +1232,7 @@ function GcProvisioningDeliver()
         until IsAddonReady("GrandCompanySupplyReward") or err_counter_request >= 70
         
         if err_counter_request >= 70 then
-            LogInfo("Something might have gone wrong")
+            LogInfo("[VAC] Something might have gone wrong")
             err_counter_request = 0
         else
             yield("/pcall GrandCompanySupplyReward true 0")
@@ -1587,9 +1587,9 @@ function PartyAccept()
             Sleep(0.1)
         until IsInParty()
 
-        LogInfo("Party invitation accepted.")
+        LogInfo("[VAC] Party invitation accepted.")
     else
-        LogInfo("Player is already in a party.")
+        LogInfo("[VAC] Player is already in a party.")
     end
 end
 
@@ -1614,9 +1614,9 @@ function PartyLeave()
             Sleep(0.1)
         until not IsAddonVisible("SelectYesno")
         
-        LogInfo("Party has been left.")
+        LogInfo("[VAC] Party has been left.")
     else
-        LogInfo("Player is not in a party.")
+        LogInfo("[VAC] Player is not in a party.")
     end
 end
 
@@ -2018,7 +2018,7 @@ end
 -- Optionally can include a numerical value to set gil transfer amount
 function DropboxSetAll(dropbox_gil)
     if not Item_List then
-        LogInfo("Item_List is nil. Cannot set items.")
+        LogInfo("[VAC] Item_List is nil. Cannot set items.")
         return
     end
     
@@ -2050,7 +2050,7 @@ end
 -- Clears all items in Dropbox plugin
 function DropboxClearAll()
     if not Item_List then
-        LogInfo("Item_List is nil. Cannot clear items.")
+        LogInfo("[VAC] Item_List is nil. Cannot clear items.")
         return
     end
     
@@ -2148,21 +2148,21 @@ function CheckPluginsEnabled(...)
     
     -- Echo enabled plugins
     if #enabled_plugins > 0 then
-        LogInfo("Enabled plugins: " .. table.concat(enabled_plugins, ", "))
+        LogInfo("[VAC] Enabled plugins: " .. table.concat(enabled_plugins, ", "))
         Echo("Enabled plugins: " .. table.concat(enabled_plugins, ", "))
     else
-        LogInfo("No plugins are enabled.")
+        LogInfo("[VAC] No plugins are enabled.")
         Echo("No plugins are enabled.")
     end
     
     -- Echo missing plugins
     if #missing_plugins > 0 then
-        LogInfo("Missing or not enabled plugins: " .. table.concat(missing_plugins, ", "))
+        LogInfo("[VAC] Missing or not enabled plugins: " .. table.concat(missing_plugins, ", "))
         Echo("Missing or not enabled plugins: " .. table.concat(missing_plugins, ", "))
         return false -- Returns false to be used with if statements to stop script
     else
         LogInfo("All plugins are enabled.")
-        Echo("All plugins are enabled.")
+        Echo("[VAC] All plugins are enabled.")
         return true -- Returns true be used with if statements to start script
     end
 end
