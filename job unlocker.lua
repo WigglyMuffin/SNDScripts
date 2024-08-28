@@ -1131,6 +1131,7 @@ function Main()
     yield("/p")
     --yield("/vbm cfg AI Enabled true")
     yield("/vbmai on")
+    CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream", "AutoDuty", "BossModReborn", "PandorasBox", "Questionable", "RotationSolver", "SomethingNeedDoing", "TextAdvance", "vnavmesh")
     
     local actions = {
         -- Arcanist job quests

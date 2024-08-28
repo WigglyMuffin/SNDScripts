@@ -22,6 +22,8 @@ LoadFunctions = loadfile(load_functions_file_location)
 LoadFunctions()
 LoadFileCheck()
 
+CheckPluginsEnabled("SomethingNeedDoing")
+
 provisioning_list_name_to_load = "provisioning_list.lua"
 
 local gc_config_folder = vac_config_folder .. "\\GC\\"

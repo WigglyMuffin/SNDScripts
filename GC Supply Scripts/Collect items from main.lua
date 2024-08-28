@@ -64,6 +64,8 @@ LoadFunctions = loadfile(load_functions_file_location)
 LoadFunctions()
 LoadFileCheck()
 
+CheckPluginsEnabled("SomethingNeedDoing")
+
 LogInfo("[CIFM] ##############################")
 LogInfo("[CIFM] Starting script...")
 LogInfo("[CIFM] snd_config_folder: " .. snd_config_folder)

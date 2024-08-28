@@ -34,6 +34,8 @@ LoadFunctions = loadfile(load_functions_file_location)
 LoadFunctions()
 LoadFileCheck()
 
+CheckPluginsEnabled("SomethingNeedDoing")
+
 LogInfo("[DGCI] ##############################")
 LogInfo("[DGCI] Starting script...")
 LogInfo("[DGCI] snd_config_folder: " .. snd_config_folder)

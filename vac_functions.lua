@@ -26,15 +26,16 @@ local vac_lists = dofile(os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\
 DC_With_Worlds = vac_lists.DC_With_Worlds
 Item_List = vac_lists.Item_List
 Job_List = vac_lists.Job_List
+Quest_List = vac_lists.Quest_List
 World_ID_List = vac_lists.World_ID_List
 Zone_List = vac_lists.Zone_List
 
--- Usage: EnsureFolderExists("/path/to/your/folder")
+-- Usage: EnsureFolderExists("\\path\\to\\your\\folder")
 --  
 -- Call this to check if a folder exists at the path you provide, if it doesn't it'll create it
 function EnsureFolderExists(folder_path)
     -- Try to create a temporary file in the folder
-    local temp_file_path = folder_path .. "/.temp_file"
+    local temp_file_path = folder_path .. "\\.temp_file"
     local file = io.open(temp_file_path, "w")
     
     -- If the file couldn't be opened, the folder doesn't exist
@@ -2115,4 +2116,41 @@ function ReturnHomeWorld()
     repeat
         Sleep(0.1)
     until GetCurrentWorld() == GetHomeWorld() and IsPlayerAvailable()
+end
+
+-- Usage: CheckPluginsEnabled("AutoRetainer") or CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream")
+-- Can take an infinite amount of plugin strings
+-- Will check if the player has the specified plugins installed/enabled and echoes enabled + disabled plugins
+function CheckPluginsEnabled(...)
+    local enabled_plugins = {}
+    local missing_plugins = {}
+    
+    -- Pass all arguments into a table
+    local plugins = {...}
+    
+    for _, plugin_name in ipairs(plugins) do
+        if HasPlugin(plugin_name) then
+            table.insert(enabled_plugins, plugin_name)
+        else
+            table.insert(missing_plugins, plugin_name)
+        end
+    end
+    
+    -- Sort the plugin names alphabetically
+    table.sort(enabled_plugins)
+    table.sort(missing_plugins)
+    
+    -- Echo enabled plugins
+    if #enabled_plugins > 0 then
+        Echo("Enabled plugins: " .. table.concat(enabled_plugins, ", "))
+    else
+        Echo("No plugins are enabled.")
+    end
+    
+    -- Echo missing plugins
+    if #missing_plugins > 0 then
+        Echo("Missing or not enabled plugins: " .. table.concat(missing_plugins, ", "))
+    else
+        Echo("All plugins are enabled.")
+    end
 end

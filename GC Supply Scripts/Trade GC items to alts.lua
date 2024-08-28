@@ -27,6 +27,8 @@ LoadFunctions = loadfile(load_functions_file_location)
 LoadFunctions()
 LoadFileCheck()
 
+CheckPluginsEnabled("SomethingNeedDoing")
+
 alt_vac_config_folder = snd_alt_config_folder .. "VAC"
 dofile(alt_vac_config_folder .. '\\GC\\' .. provisioning_list_name_to_load)
 
@@ -228,7 +230,7 @@ for index_name, item in pairs(provisioning_list) do
             Echo("Disbanding party and starting again")
             Echo("############################")
             PartyLeave()
-            Sleep(1)
+            Sleep(1.0)
         end
     end
     

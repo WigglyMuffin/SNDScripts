@@ -36,6 +36,8 @@ LoadFunctions = loadfile(load_functions_file_location)
 LoadFunctions()
 LoadFileCheck()
 
+CheckPluginsEnabled("SomethingNeedDoing")
+
 LogInfo("[APL] ##############################")
 LogInfo("[APL] Starting script...")
 LogInfo("[APL] snd_config_folder: " .. snd_config_folder)
