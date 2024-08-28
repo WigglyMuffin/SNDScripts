@@ -2161,8 +2161,8 @@ function CheckPluginsEnabled(...)
         Echo("Missing or not enabled plugins: " .. table.concat(missing_plugins, ", "))
         return false -- Returns false to be used with if statements to stop script
     else
-        LogInfo("All plugins are enabled.")
-        Echo("[VAC] All plugins are enabled.")
+        LogInfo("[VAC] All plugins are enabled.")
+        Echo("All plugins are enabled.")
         return true -- Returns true be used with if statements to start script
     end
 end
