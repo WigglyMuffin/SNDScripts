@@ -14,26 +14,26 @@ local character_list = {
 -- this is for use with the KupoBox item pickup script
 local character_list_options = {
     {
-        ["Name"] = "Large Meow@Bismarck", -- the name of the character you're logging in on
-        ["Trading With"] = "Smol Meow", -- character you're trading with, without world
-        ["Destination Server"] = "Sephirot", -- server you're going to pick up items on
+        ["Name"] = "Large Meow@Sephirot", -- The name of the character you're logging in on
+        ["Trading With"] = "Smol Meow", -- Character you're trading with, without world
+        ["Destination Server"] = "Sephirot", -- Server you're going to pick up items on
         ["Destination Type"] = 0, -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
-        ["Destination Aetheryte"] = "Aleport", -- aetheryte to meet at if ["Destination Type"] is set to 0
+        ["Destination Aetheryte"] = "Aleport", -- Aetheryte to meet at if ["Destination Type"] is set to 0
         ["Destination House"] = 0, -- Options: 0 = FC, 1 = Personal, 2 = Apartment // Only active if ["Destination Type"] is set to 1 or 2
-        ["Do Movement"] = false, -- will move to the character you're trading to, usually this is done by the delivery character
-        ["Return Home"] = false, -- will just log out if set to false, otherwise will move to home server and to set location configured by ["Return Location"]
-        ["Return Location"] = 0 -- 0 = do nothing, 1 = limsa, 2 = limsa bell, 3 = nearby bell, 4 = fc 
+        ["Do Movement"] = false, -- Options: true, false // will move to the character you're trading to, usually this is done by the delivery character
+        ["Return Home"] = false, -- Options: true, false // will just log out if set to false, otherwise will move to home server and to set location configured by ["Return Location"]
+        ["Return Location"] = 0 -- Options: 0 = do nothing, 1 = limsa, 2 = limsa bell, 3 = nearby bell, 4 = fc 
     },
     {
-        ["Name"] = "Larger Meow@Ravana", -- the name of the character you're logging in on
-        ["Trading With"] = "Smol Meow", -- character you're trading with, without world
-        ["Destination Server"] = "Sephirot", -- server you're going to pick up items on
+        ["Name"] = "Larger Meow@Ravana", -- The name of the character you're logging in on
+        ["Trading With"] = "Smol Meow", -- Character you're trading with, without world
+        ["Destination Server"] = "Sephirot", -- Server you're going to pick up items on
         ["Destination Type"] = 0, -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
-        ["Destination Aetheryte"] = "Aleport", -- aetheryte to meet at if ["Destination Type"] is set to 0
+        ["Destination Aetheryte"] = "Aleport", -- Aetheryte to meet at if ["Destination Type"] is set to 0
         ["Destination House"] = 0, -- Options: 0 = FC, 1 = Personal, 2 = Apartment // Only active if ["Destination Type"] is set to 1 or 2
-        ["Do Movement"] = false, -- will move to the character you're trading to, usually this is done by the delivery character
-        ["Return Home"] = false, -- will just log out if set to false, otherwise will move to home server and to set location configured by ["Return Location"]
-        ["Return Location"] = 0 -- 0 = do nothing, 1 = limsa, 2 = limsa bell, 3 = nearby bell, 4 = fc 
+        ["Do Movement"] = false, -- Options: true, false // will move to the character you're trading to, usually this is done by the delivery character
+        ["Return Home"] = false, -- Options: true, false // will just log out if set to false, otherwise will move to home server and to set location configured by ["Return Location"]
+        ["Return Location"] = 0 -- Options: 0 = do nothing, 1 = limsa, 2 = limsa bell, 3 = nearby bell, 4 = fc 
     },
 }
 
