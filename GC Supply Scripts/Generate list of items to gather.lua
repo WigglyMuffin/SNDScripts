@@ -26,6 +26,10 @@ if not CheckPluginsEnabled("SomethingNeedDoing") then
     return -- Stops script as plugins not available
 end
 
+if HasPlugin("YesAlready") then
+    PauseYesAlready()
+end
+
 provisioning_list_name_to_load = "provisioning_list.lua"
 
 local gc_config_folder = vac_config_folder .. "\\GC\\"
@@ -173,3 +177,7 @@ local combined_items_by_category = combine_items_by_category(provisioning_list)
 local character_summaries = create_character_summary(provisioning_list)
 
 write_to_file(combined_items_by_category, character_summaries, output_folder .. output_filename)
+
+if HasPlugin("YesAlready") then
+    RestoreYesAlready()
+end

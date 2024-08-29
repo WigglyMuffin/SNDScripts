@@ -34,6 +34,7 @@
 ##    Settings     ##
 #####################
 
+-- stuff can go here
 
 --[[#################################
 #  DON'T TOUCH ANYTHING BELOW HERE  #
@@ -44,6 +45,7 @@
 # FUNCTION LOADER #
 #################]]
 
+-- stuff can go here
 
 snd_config_folder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
 load_functions_file_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
@@ -55,6 +57,16 @@ if not CheckPluginsEnabled() then
     return -- Stops script as plugins not available
 end
 
+if HasPlugin("YesAlready") then
+    PauseYesAlready()
+end
+
 --[[###########
 # MAIN SCRIPT #
 #############]]
+
+-- stuff can go here
+
+if HasPlugin("YesAlready") then
+    RestoreYesAlready()
+end

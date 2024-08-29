@@ -40,6 +40,10 @@ if not CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream", "Pa
     return -- Stops script as plugins not available
 end
 
+if HasPlugin("YesAlready") then
+    PauseYesAlready()
+end
+
 LogInfo("[APL] ##############################")
 LogInfo("[APL] Starting script...")
 LogInfo("[APL] snd_config_folder: " .. snd_config_folder)
@@ -214,3 +218,7 @@ function Main()
 end
 
 Main()
+
+if HasPlugin("YesAlready") then
+    RestoreYesAlready()
+end

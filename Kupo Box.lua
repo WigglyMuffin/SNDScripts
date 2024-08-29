@@ -55,16 +55,13 @@ to use any of the overrides you need to uncomment the line and set it to what yo
 -- local return_home_override = true                    -- Options: true = Returns home from destination, false = Does nothing and logs out
 -- local return_location_override = 0                   -- Options: 0 = do nothing, 1 = limsa, 2 = limsa bell, 3 = nearby bell, 4 = fc 
 
-
 -- in case something somehow goes wrong you can set the amount of characters in the list to skip, this goes from the top of the list
 -- a good way to know how many chars you actually need to skip is to read the processing echo in chat which lists how many chars it's finished already and which char it's on  ]]
 local skip_chars = 0 -- number of characters you'd like to skip
 
-
 -- Options: true / false
 -- If the below options is set to true then it will utilize the external vac_char_list and you need to make sure that is correctly configured
 local use_external_character_list = true
-
 
 -- This is where you put your character list if you choose to not use the external one
 -- If use_external_character_list is set to true then this list is completely skipped
@@ -116,6 +113,10 @@ LoadFileCheck()
 
 if not CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream", "PandorasBox", "SomethingNeedDoing", "TextAdvance", "vnavmesh") then
     return -- Stops script as plugins not available
+end
+
+if HasPlugin("YesAlready") then
+    PauseYesAlready()
 end
 
 LogInfo("[KupoBox] ##############################")
@@ -323,3 +324,7 @@ end
 
 ProcessAltCharacters(character_list_kupobox)
 LogInfo("[KupoBox] All characters complete, script finished")
+
+if HasPlugin("YesAlready") then
+    RestoreYesAlready()
+end

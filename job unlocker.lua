@@ -1127,14 +1127,18 @@ end
 -- ###############
 
 function Main()
+    if not CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream", "AutoDuty", "BossModReborn", "PandorasBox", "Questionable", "RotationSolver", "SomethingNeedDoing", "TextAdvance", "vnavmesh") then
+        return -- Stops script as plugins not available
+    end
+    
+    if HasPlugin("YesAlready") then
+        PauseYesAlready()
+    end
+    
     yield("/at e")
     yield("/p")
     --yield("/vbm cfg AI Enabled true")
     yield("/vbmai on")
-    
-    if not CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream", "AutoDuty", "BossModReborn", "PandorasBox", "Questionable", "RotationSolver", "SomethingNeedDoing", "TextAdvance", "vnavmesh") then
-        return -- Stops script as plugins not available
-    end
     
     local actions = {
         -- Arcanist job quests
@@ -1196,6 +1200,10 @@ function Main()
         if action.enabled then
             action.func()
         end
+    end
+    
+    if HasPlugin("YesAlready") then
+        RestoreYesAlready()
     end
 end
 
