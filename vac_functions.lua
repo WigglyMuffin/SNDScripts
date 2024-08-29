@@ -633,6 +633,9 @@ function DoHuntLog(target_name, target_distance, class, rank)
     end
 end
 
+-- Usage: Teleporter("Limsa", "tp") or Teleporter("gc", "li") or Teleporter("Vesper", "item")
+-- Options: location = teleport location, tp_kind = tp, li, item
+-- Will teleport player to specified location
 function Teleporter(location, tp_kind) -- Teleporter handler
     tp_kind = string.lower(tp_kind)
     local cast_time_buffer = 5 -- Just in case a buffer is required, teleports are 5 seconds long. Slidecasting, ping and fps can affect casts
@@ -831,22 +834,10 @@ function Movement(x_position, y_position, z_position, range)
         return math.floor(pos + 0.49999999999999994)
     end
 
-    local x_position_floored = floor_position(x_position)
-    local y_position_floored = floor_position(y_position)
-    local z_position_floored = floor_position(z_position)
-
     local function IsWithinRange(xpos, ypos, zpos)
-        return math.abs(xpos - x_position_floored) <= range and
-               math.abs(ypos - y_position_floored) <= range and
-               math.abs(zpos - z_position_floored) <= range
-    end
-
-    local function GetDistanceToTarget(xpos, ypos, zpos)
-        return math.sqrt(
-            (xpos - x_position_floored)^2 +
-            (ypos - y_position_floored)^2 +
-            (zpos - z_position_floored)^2
-        )
+        return math.abs(xpos - floor_position(x_position)) <= range and
+               math.abs(ypos - floor_position(y_position)) <= range and
+               math.abs(zpos - floor_position(z_position)) <= range
     end
 
     local function NavToDestination()
@@ -859,10 +850,7 @@ function Movement(x_position, y_position, z_position, range)
         local retries = 0
         repeat
             Sleep(0.1)
-            local xpos = floor_position(GetPlayerRawXPos())
-            local ypos = floor_position(GetPlayerRawYPos())
-            local zpos = floor_position(GetPlayerRawZPos())
-            local distance_to_target = GetDistanceToTarget(xpos, ypos, zpos)
+            local distance_to_target = FindDistanceToPos(x_position, y_position, z_position)
 
             if distance_to_target > min_distance_for_mounting and TerritorySupportsMounting() and (IsQuestComplete(66236) or IsQuestComplete(66237) or IsQuestComplete(66238)) then
                 repeat
@@ -881,7 +869,7 @@ function Movement(x_position, y_position, z_position, range)
     NavToDestination()
 
     local stuck_timer = 0
-    local previous_distance_to_target = nil
+    local previous_distance_to_target = 0
     while true do
         if not GetCharacterCondition(45) then
             local xpos = floor_position(GetPlayerRawXPos())
@@ -889,7 +877,7 @@ function Movement(x_position, y_position, z_position, range)
             local zpos = floor_position(GetPlayerRawZPos())
             Sleep(0.1)
             
-            local current_distance_to_target = GetDistanceToTarget(xpos, ypos, zpos)
+            local current_distance_to_target = FindDistanceToPos(xpos, ypos, zpos)
 
             if IsWithinRange(xpos, ypos, zpos) and not GetCharacterCondition(45) then
                 yield("/vnav stop")
@@ -1400,9 +1388,6 @@ function FindZoneIDByAetheryte(targetAetheryte)
     
     return nil, "Not found"
 end
-
-
-
 
 -- Usage: ContainsLetters("meow")  
 -- 
