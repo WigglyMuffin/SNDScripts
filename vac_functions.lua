@@ -526,18 +526,10 @@ function OpenHuntLog(class, rank, show)
     -- 1 Maelstrom
     -- 2 Twin adders
     -- 3 Immortal flames
-    local timer = 0
-    local log_open = false
-    yield("/huntinglog")
-    while not log_open do
-        if IsAddonReady("MonsterNote") then
-            log_open = true
-        end
-        if timer > 50 then
-            yield("/huntinglog")
-        end
-        Sleep(0.1)
-    end
+    repeat
+        yield("/huntinglog")
+        Sleep(0.5)
+    until IsAddonReady("MonsterNote")
     local gc_id = GetPlayerGC()
     if class == 9 then
         yield("/pcall MonsterNote false 3 9 "..tostring(gc_id))
@@ -553,18 +545,10 @@ end
 -- Usage: CloseHuntLog()  
 -- Closes the Hunting Log if open
 function CloseHuntLog()
-    local timer = 0
-    local log_open = false
-    yield("/huntinglog")
-    while not log_open do
-        if not IsAddonVisible("MonsterNote") then
-            log_open = true
-        end
-        if timer > 50 then
-            yield("/huntinglog")
-        end
-        Sleep(0.1)
-    end
+    repeat
+        yield("/huntinglog")
+        Sleep(0.5)
+    until not IsAddonVisible("MonsterNote")
 end
 
 -- Usage: HuntLogCheck("Amalj'aa Hunter", 9, 0)
@@ -620,10 +604,15 @@ function DoHuntLog(target_name, target_distance, class, rank)
     if AmountLeft > 0 and TargetsLeft then
         while not finished do 
             TargetsLeft, AmountLeft = HuntLogCheck(target_name,class,rank)
+            if AmountLeft > 0 then
+                repeat
+                    FindAndKillTarget(target_name, target_distance)
+                    AmountLeft = AmountLeft - 1
+                    Sleep(3)
+                until AmountLeft == 0
+            end
             if AmountLeft == 0 then
                 finished = true
-            else
-                FindAndKillTarget(target_name, target_distance)
             end
             Sleep(3)
         end
