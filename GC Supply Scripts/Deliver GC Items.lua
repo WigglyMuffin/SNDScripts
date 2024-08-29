@@ -38,6 +38,10 @@ if not CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream", "Pa
     return -- Stops script as plugins not available
 end
 
+if HasPlugin("YesAlready") then
+    PauseYesAlready()
+end
+
 LogInfo("[DGCI] ##############################")
 LogInfo("[DGCI] Starting script...")
 LogInfo("[DGCI] snd_config_folder: " .. snd_config_folder)
@@ -116,4 +120,8 @@ if multi_char then
     end
 else
     Main()
+end
+
+if HasPlugin("YesAlready") then
+    RestoreYesAlready()
 end

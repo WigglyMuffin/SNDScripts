@@ -129,6 +129,10 @@ if not CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream", "Pa
     return -- Stops script as plugins not available
 end
 
+if HasPlugin("YesAlready") then
+    PauseYesAlready()
+end
+
 LogInfo("[PostMoogle] ##############################")
 LogInfo("[PostMoogle] Starting script...")
 LogInfo("[PostMoogle] snd_config_folder: " .. snd_config_folder)
@@ -498,3 +502,7 @@ end
 
 Main(character_list_postmoogle)
 LogInfo("[PostMoogle] All characters complete, script finished")
+
+if HasPlugin("YesAlready") then
+    RestoreYesAlready()
+end

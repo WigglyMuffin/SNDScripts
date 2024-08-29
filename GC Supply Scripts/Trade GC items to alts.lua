@@ -29,6 +29,10 @@ if not CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream", "Pa
     return -- Stops script as plugins not available
 end
 
+if HasPlugin("YesAlready") then
+    PauseYesAlready()
+end
+
 alt_vac_config_folder = snd_alt_config_folder .. "VAC"
 dofile(alt_vac_config_folder .. '\\GC\\' .. provisioning_list_name_to_load)
 
@@ -248,3 +252,7 @@ DropboxClearAll()
 Echo("############################")
 Echo("Script finished")
 Echo("############################")
+
+if HasPlugin("YesAlready") then
+    RestoreYesAlready()
+end

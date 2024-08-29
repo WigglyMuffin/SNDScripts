@@ -88,7 +88,7 @@ DO_THE_GOBLET = false                     -- This is for unlocking The Goblet Ho
 DO_MIST = false                           -- This is for unlocking Mist Housing
 
 -- Retainer unlock
-DO_RETAINER = false                       -- This is for unlocking Retainers
+DO_RETAINER = false                       -- This is for unlocking Retainers and Ventures
 
 local use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being char_list.lua, false = use the list you put in this file 
 
@@ -209,6 +209,14 @@ load_functions_file_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginCon
 LoadFunctions = loadfile(load_functions_file_location)
 LoadFunctions()
 LoadFileCheck()
+
+if not CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream", "AutoDuty", "BossModReborn", "PandorasBox", "Questionable", "RotationSolver", "SomethingNeedDoing", "TextAdvance", "vnavmesh") then
+    return -- Stops script as plugins not available
+end
+
+if HasPlugin("YesAlready") then
+    PauseYesAlready()
+end
 
 LogInfo("[JU] ##############################")
 LogInfo("[JU] Starting script...")
@@ -857,7 +865,7 @@ function MaelstromRank2()
             Teleporter("Forgotten Springs", "tp")
         end
         
-        Movement(195.52, 10.28, 649.43)
+        Movement(310.98, 7.83, 641.79)
         DoHuntLog(MaelstromEnemiesLog2[1], 2500, 9, 0)
     end
     
@@ -900,7 +908,7 @@ function MaelstromRank2()
             Teleporter("The Hawthorne Hut", "tp")
         end
         
-        Movement(69.56, 11.01, -3.68)
+        Movement(193.44, -4.12, -4.61)
         DoHuntLog(MaelstromEnemiesLog2[8], 2500, 9, 0)
     end
     
@@ -920,7 +928,7 @@ function MaelstromRank2()
             Teleporter("Little Ala Mhigo", "tp")
         end
         
-        Movement(-133.02, 15.68, 104.79)
+        Movement(-36.09, 8.03, 149.24)
         DoHuntLog(MaelstromEnemiesLog2[10], 2500, 9, 0)
     end
     
@@ -1132,10 +1140,6 @@ function Main()
     --yield("/vbm cfg AI Enabled true")
     yield("/vbmai on")
     
-    if not CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream", "AutoDuty", "BossModReborn", "PandorasBox", "Questionable", "RotationSolver", "SomethingNeedDoing", "TextAdvance", "vnavmesh") then
-        return -- Stops script as plugins not available
-    end
-    
     local actions = {
         -- Arcanist job quests
         { enabled = DO_ARCANIST_QUESTS, func = Arcanist1 },
@@ -1221,4 +1225,8 @@ if multi_char then
     end
 else
     Main()
+end
+
+if HasPlugin("YesAlready") then
+    RestoreYesAlready()
 end
