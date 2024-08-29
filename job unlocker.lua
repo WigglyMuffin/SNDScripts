@@ -88,7 +88,7 @@ DO_THE_GOBLET = false                     -- This is for unlocking The Goblet Ho
 DO_MIST = false                           -- This is for unlocking Mist Housing
 
 -- Retainer unlock
-DO_RETAINER = false                       -- This is for unlocking Retainers
+DO_RETAINER = false                       -- This is for unlocking Retainers and Ventures
 
 local use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being char_list.lua, false = use the list you put in this file 
 
@@ -209,6 +209,14 @@ load_functions_file_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginCon
 LoadFunctions = loadfile(load_functions_file_location)
 LoadFunctions()
 LoadFileCheck()
+
+if not CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream", "AutoDuty", "BossModReborn", "PandorasBox", "Questionable", "RotationSolver", "SomethingNeedDoing", "TextAdvance", "vnavmesh") then
+    return -- Stops script as plugins not available
+end
+
+if HasPlugin("YesAlready") then
+    PauseYesAlready()
+end
 
 LogInfo("[JU] ##############################")
 LogInfo("[JU] Starting script...")
@@ -1127,14 +1135,6 @@ end
 -- ###############
 
 function Main()
-    if not CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream", "AutoDuty", "BossModReborn", "PandorasBox", "Questionable", "RotationSolver", "SomethingNeedDoing", "TextAdvance", "vnavmesh") then
-        return -- Stops script as plugins not available
-    end
-    
-    if HasPlugin("YesAlready") then
-        PauseYesAlready()
-    end
-    
     yield("/at e")
     yield("/p")
     --yield("/vbm cfg AI Enabled true")
@@ -1201,10 +1201,6 @@ function Main()
             action.func()
         end
     end
-    
-    if HasPlugin("YesAlready") then
-        RestoreYesAlready()
-    end
 end
 
 if multi_char then
@@ -1229,4 +1225,8 @@ if multi_char then
     end
 else
     Main()
+end
+
+if HasPlugin("YesAlready") then
+    RestoreYesAlready()
 end
