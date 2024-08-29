@@ -752,9 +752,9 @@ function MaelstromRank1()
         return
     end
     
-    if not PandoraGetFeatureEnabled("Auto-Sync FATEs") then
-        PandoraSetFeatureState("Auto-Sync FATEs", true)
-    end
+    -- if not PandoraGetFeatureEnabled("Auto-Sync FATEs") then
+        -- PandoraSetFeatureState("Auto-Sync FATEs", true)
+    -- end
     
     -- Amalj'aa Hunter
     if HuntLogCheck(MaelstromEnemiesLog1[1], 9, 0) then
@@ -831,9 +831,9 @@ function MaelstromRank1()
         AttuneAetheryte()
     end
     
-    if not PandoraGetFeatureEnabled("Auto-Sync FATEs") then
-        PandoraSetFeatureState("Auto-Sync FATEs", false)
-    end
+    -- if not PandoraGetFeatureEnabled("Auto-Sync FATEs") then
+        -- PandoraSetFeatureState("Auto-Sync FATEs", false)
+    -- end
     
     Teleporter("Limsa", "tp")
 end
@@ -855,9 +855,9 @@ function MaelstromRank2()
         Echo("It is advised to be higher level, proceed with caution.")
     end
     
-    if not PandoraGetFeatureEnabled("Auto-Sync FATEs") then
-        PandoraSetFeatureState("Auto-Sync FATEs", true)
-    end
+    -- if not PandoraGetFeatureEnabled("Auto-Sync FATEs") then
+        -- PandoraSetFeatureState("Auto-Sync FATEs", true)
+    -- end
     
     -- Amalj'aa Divinator
     if HuntLogCheck(MaelstromEnemiesLog2[1], 9, 0) then
@@ -933,9 +933,9 @@ function MaelstromRank2()
         DoHuntLog(MaelstromEnemiesLog2[10], 2500, 9, 0)
     end
     
-    if not PandoraGetFeatureEnabled("Auto-Sync FATEs") then
-        PandoraSetFeatureState("Auto-Sync FATEs", false)
-    end
+    -- if not PandoraGetFeatureEnabled("Auto-Sync FATEs") then
+        -- PandoraSetFeatureState("Auto-Sync FATEs", false)
+    -- end
     
     Teleporter("Limsa", "tp")
 end
