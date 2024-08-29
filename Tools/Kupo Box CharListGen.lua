@@ -39,8 +39,8 @@ local gen_char_list = {
 
 -- Here you set the default settings each character will have when generated
 
-local trading_with = "Meow meow"  -- The name of the character you're logging in on
-local destination_server = "Zodiark" -- Character you're trading with, without world
+local trading_with = "Meow meow"   -- The name of the character you're trading with
+local destination_server = "Zodiark" -- Set this to the server you're meeting the delivery character on
 local destination_type = 0 -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
 local destination_aetheryte = "Aleport" -- Aetheryte to meet at if ["Destination Type"] is set to 0
 local destination_house = 0 -- Options: 0 = FC, 1 = Personal, 2 = Apartment // Only active if ["Destination Type"] is set to 1 or 2
@@ -48,11 +48,11 @@ local do_movement = false -- Options: true, false // will move to the character 
 local return_home = false -- Options: true, false // will just log out if set to false, otherwise will move to home server and to set location configured by ["Return Location"]
 local return_location = 0 -- Options: 0 = do nothing, 1 = limsa, 2 = limsa bell, 3 = nearby bell, 4 = fc 
 
-
-local set_destination_server_to_home_server = true
 -- This option if set to true will override destination_server and set it to that chars home server
 -- If the list is in order it can be used to make everything faster as the characters do not have to travel anywhere, 
 -- they just meet the trader on their server at the set location
+local set_destination_server_to_home_server = true
+
 
 --[[#################################
 #  DON'T TOUCH ANYTHING BELOW HERE  #

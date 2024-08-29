@@ -68,13 +68,13 @@ function FindGCItemID(itemName)
         GC_BTN = "GC_BTN",
         GC_FSH = "GC_FSH"
     }
-    
+
     for list, listName in pairs(lists) do
         if _G[list][itemName] then
             return _G[list][itemName].ID, listName
         end
     end
-    
+
     return 0, "Not found"
 end
 
@@ -89,16 +89,16 @@ function SerializeTable(val, name, depth)
 
     if type(val) == "table" then
         result = result .. "{\n"
-        
+
         for k, v in pairs(val) do
             local key
-            
+
             if type(k) == "string" then
                 key = string.format("[%q]", k)
             else
                 key = "[" .. k .. "]"
             end
-            
+
             result = result .. SerializeTable(v, key, depth + 1) .. ",\n"
         end
         result = result .. indent .. "}"
@@ -121,22 +121,22 @@ function GetAndSaveProvisioningToTable()
             LogInfo("[APL] Already on the right character: " .. char)
         else 
             LogInfo("[APL] Logging into: " .. char)
-            
+
             if not (ZoneCheck("Limsa Lominsa Lower Deck") or ZoneCheck("Limsa Lominsa Upper Deck")) then
                 Teleporter("Limsa", "tp")
             end
-            
+
             RelogCharacter(char)
             Sleep(7.5) -- This is enough time to log out completely and not too long to cut into new logins
             LoginCheck()
         end
-        
+
         local charname = GetCharacterName()
-        
+
         repeat
             Sleep(0.1)
         until IsPlayerAvailable()
-        
+
         local min_level = GetPlayerJobLevel("MIN")
         local btn_level = GetPlayerJobLevel("BTN")
         local fsh_level = GetPlayerJobLevel("FSH")
@@ -150,12 +150,12 @@ function GetAndSaveProvisioningToTable()
                 return false
             end
         end
-        
+
         local Row1ItemName = GetNodeText("ContentsInfoDetail", 101, 5)
         LogInfo("[APL] " .. tostring(Row1ItemName))
         LogInfo("[APL] " .. tostring(ContainsLetters(Row1ItemName)))
         provisioning_list[charname] = {}
-        
+
         for i = 101, 99, -1 do
             local ItemName = GetNodeText("ContentsInfoDetail", i, 5) 
             if ContainsLetters(ItemName) then
@@ -167,7 +167,7 @@ function GetAndSaveProvisioningToTable()
             LogInfo("[APL] Inserting from row") 
             local ItemID, ListName = FindGCItemID(ItemName)
             local ItemAmount = GetNodeText("ContentsInfoDetail", i, 2)
-            
+
             if ListName == "GC_MIN" then
                 if min_enabled and ((min_level < level_cap) or not skip_level_capped_jobs) then
                     provisioning_list[charname]["MIN"] = {}
@@ -175,7 +175,7 @@ function GetAndSaveProvisioningToTable()
                     provisioning_list[charname]["MIN"]["ID"] = ItemID
                     provisioning_list[charname]["MIN"]["QTY"] = ItemAmount
                 end
-                
+
             elseif ListName == "GC_BTN" then
                 if btn_enabled and ((btn_level < level_cap) or not skip_level_capped_jobs) then
                     provisioning_list[charname]["BTN"] = {}
@@ -183,7 +183,7 @@ function GetAndSaveProvisioningToTable()
                     provisioning_list[charname]["BTN"]["ID"] = ItemID
                     provisioning_list[charname]["BTN"]["QTY"] = ItemAmount
                 end
-                
+
             elseif ListName == "GC_FSH" then
                 if fsh_enabled and ((fsh_level < level_cap) or not skip_level_capped_jobs) then
                     provisioning_list[charname]["FSH"] = {}
@@ -193,7 +193,7 @@ function GetAndSaveProvisioningToTable()
                 end
             end
         end
-        
+
         if not provisioning_list[charname]["MIN"] and not provisioning_list[charname]["BTN"] and not provisioning_list[charname]["FSH"] then
             provisioning_list[charname] = nil
         else
