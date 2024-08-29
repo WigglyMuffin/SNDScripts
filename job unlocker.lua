@@ -944,7 +944,7 @@ end
 -- ###################
 
 -- need to do a dungeon queue function
-
+-- this should probably be retuned to not rely on qst
 function HalataliUnlock()
     if GetLevel() < 20 then
         Echo("You do not have the level 20 requirement.")
@@ -958,7 +958,7 @@ function HalataliUnlock()
         end
         
         Movement(-280.59, 15.26, -316.75) -- It gets stuck otherwise
-        Movement(-308.26, 21.15, -343.13) -- It gets stuck otherwise
+        Movement(-314.96, 23.44, -347.65) -- It gets stuck otherwise
         Movement(-399.64, 23.00, -351.08) -- It gets stuck otherwise
         Movement(-471.06, 23.01, -354.81)
         DoQuest("Hallo Halatali")

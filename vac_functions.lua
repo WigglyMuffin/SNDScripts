@@ -246,6 +246,21 @@ function QuestNPCSingle(dialogue_type, dialogue_confirm, dialogue_option)
     end
 end
 
+-- Usage: FindNearestObject("Heckler Imp")
+-- 
+-- Returns the XYZ coordinates of the nearest object with that name
+function FindNearestObject(object_name)
+    local object_x_pos = GetObjectRawXPos(object_name)
+    local object_y_pos = GetObjectRawYPos(object_name)
+    local object_z_pos = GetObjectRawZPos(object_name)
+
+    if object_x_pos == 0.0 and object_y_pos == 0.0 and object_z_pos == 0.0 then
+        return nil, nil, nil
+    else
+        return object_x_pos, object_y_pos, object_z_pos
+    end
+end
+
 -- Usage: TargetNearestEnemy("Heckler Imp", 20)
 -- 
 -- Targets the nearest enemy of the name you supply, within the radius
@@ -274,10 +289,15 @@ end
 -- 
 -- Utilizes TargetNearestEnemy() to find and kill the provided target within the radius
 function FindAndKillTarget(target_name, radius)
+    local target_x_pos, target_y_pos, target_z_pos = FindNearestObject(target_name)
+    if target_x_pos == nil then
+        return
+    end
+    Movement(target_x_pos,target_y_pos,target_z_pos)
     TargetNearestEnemy(target_name, radius)
     local dist_to_target = GetDistanceToTarget()
     local auto_attack_triggered = false
-    
+
     while GetTargetHP() > 0 and dist_to_target <= radius do
         if GetCharacterCondition(4) then
             repeat
@@ -285,27 +305,27 @@ function FindAndKillTarget(target_name, radius)
                 Sleep(0.1)
             until not GetCharacterCondition(4)
         end
-        
+
         yield("/rotation manual")
-        
+
         repeat
             if not (GetDistanceToTarget() <= 2) and not PathIsRunning() then  
                 if not auto_attack_triggered then
                     yield("/vnavmesh movetarget")
                 end
             end
-            
+
             if GetDistanceToTarget() <= 2 and not auto_attack_triggered then
                 DoAction("Auto-attack")
-                
+
                 if IsTargetInCombat() and GetCharacterCondition(26) then
                     auto_attack_triggered = true
                 end
             end
-            
+
             Sleep(0.1)
         until GetTargetHP() <= 0
-        
+
         yield("/vnavmesh stop")
     end
     Sleep(0.5)
@@ -753,7 +773,7 @@ function Movement(x_position, y_position, z_position, range)
             local zpos = floor_position(GetPlayerRawZPos())
             local distance_to_target = GetDistanceToTarget(xpos, ypos, zpos)
 
-            if distance_to_target > min_distance_for_mounting and TerritorySupportsMounting() then
+            if distance_to_target > min_distance_for_mounting and TerritorySupportsMounting() and (IsQuestComplete(66236) or IsQuestComplete(66237) or IsQuestComplete(66238)) then
                 repeat
                     Mount()
                     Sleep(0.1)
@@ -1321,11 +1341,11 @@ function DistanceName(distance_char_name1, distance_char_name2)
     local x1 = GetObjectRawXPos(distance_char_name1)
     local y1 = GetObjectRawYPos(distance_char_name1)
     local z1 = GetObjectRawZPos(distance_char_name1)
-    
+
     local x2 = GetObjectRawXPos(distance_char_name2)
     local y2 = GetObjectRawYPos(distance_char_name2)
     local z2 = GetObjectRawZPos(distance_char_name2)
-    
+
     local dx = x2 - x1
     local dy = y2 - y1
     local dz = z2 - z1
@@ -1341,7 +1361,7 @@ function PathToObject(path_object_name, range)
     else
         Movement(GetObjectRawXPos(path_object_name), GetObjectRawYPos(path_object_name), GetObjectRawZPos(path_object_name), range)
     end
-    
+
     repeat
         Sleep(0.1)
     until not PathIsRunning()
@@ -1372,16 +1392,16 @@ end
 function WaitForGilIncrease(gil_increase_amount)
     -- Gil variable store before trade
     local previous_gil = GetGil()
-    
+
     while true do
         Sleep(1.0) -- Wait for 1 second between checks
-        
+
         local current_gil = GetGil()
         if current_gil > previous_gil and (current_gil - previous_gil) == gil_increase_amount then
             Echo(gil_increase_amount .. " Gil successfully traded")
             break -- Exit the loop when the gil increase is detected
         end
-        
+
         previous_gil = current_gil -- Update gil amount for the next check
     end
 end
