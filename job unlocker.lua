@@ -860,27 +860,27 @@ function MaelstromRank2()
     -- end
     
     -- Amalj'aa Divinator
-    if HuntLogCheck(MaelstromEnemiesLog2[1], 9, 0) then
+    if HuntLogCheck(MaelstromEnemiesLog2[1], 9, 1) then
         if not ZoneCheck("Forgotten Springs") then
             Teleporter("Forgotten Springs", "tp")
         end
         
         Movement(310.98, 7.83, 641.79)
-        DoHuntLog(MaelstromEnemiesLog2[1], 2500, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog2[1], 2500, 9, 1)
     end
     
     -- Kobold Pitman
-    if HuntLogCheck(MaelstromEnemiesLog2[2], 9, 0) then
+    if HuntLogCheck(MaelstromEnemiesLog2[2], 9, 1) then
         if not ZoneCheck("Costa del Sol") then
             Teleporter("Costa del Sol", "tp")
         end
         
         Movement(340.18, 34.70, 227.85)
-        DoHuntLog(MaelstromEnemiesLog2[2], 2500, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog2[2], 2500, 9, 1)
     end
     
     -- Kobold Bedesman and Kobold Priest
-    if HuntLogCheck(MaelstromEnemiesLog2[6], 9, 0) or HuntLogCheck(MaelstromEnemiesLog2[7], 9, 0) then
+    if HuntLogCheck(MaelstromEnemiesLog2[6], 9, 1) or HuntLogCheck(MaelstromEnemiesLog2[7], 9, 1) then
         if not ZoneCheck("Camp Bronze Lake") then
             Teleporter("Camp Bronze Lake", "tp")
         end
@@ -889,48 +889,48 @@ function MaelstromRank2()
         ZoneTransitions()
         Movement(191.80, 63.95, -273.12)
         
-        if HuntLogCheck(MaelstromEnemiesLog2[6], 9, 0) then
-            DoHuntLog(MaelstromEnemiesLog2[6], 2500, 9, 0)
+        if HuntLogCheck(MaelstromEnemiesLog2[6], 9, 1) then
+            DoHuntLog(MaelstromEnemiesLog2[6], 2500, 9, 1)
         end
         
         Movement(-113.44, 64.59, -216.03)
         AttuneAetheryte()
         
-        if HuntLogCheck(MaelstromEnemiesLog2[7], 9, 0) then
+        if HuntLogCheck(MaelstromEnemiesLog2[7], 9, 1) then
             Movement(39.38, 48.42, -381.98)
-            DoHuntLog(MaelstromEnemiesLog2[7], 2500, 9, 0)
+            DoHuntLog(MaelstromEnemiesLog2[7], 2500, 9, 1)
         end
     end
     
     -- Sylvan Sigh
-    if HuntLogCheck(MaelstromEnemiesLog2[8], 9, 0) then
+    if HuntLogCheck(MaelstromEnemiesLog2[8], 9, 1) then
         if not ZoneCheck("The Hawthorne Hut") then
             Teleporter("The Hawthorne Hut", "tp")
         end
         
         Movement(193.44, -4.12, -4.61)
-        DoHuntLog(MaelstromEnemiesLog2[8], 50, 9, 0) -- Morbols are nearby, bad breath is bad
+        DoHuntLog(MaelstromEnemiesLog2[8], 50, 9, 1) -- Morbols are nearby, bad breath is bad
     end
     
     -- Shelfscale Sahagin
-    if HuntLogCheck(MaelstromEnemiesLog2[9], 9, 0) then
+    if HuntLogCheck(MaelstromEnemiesLog2[9], 9, 1) then
         if not ZoneCheck("Aleport") then
             Teleporter("Aleport", "tp")
         end
         
         Movement(0.56, -12.91, -96.50)
         Movement(-42.53, -22.25, -144.41)
-        DoHuntLog(MaelstromEnemiesLog2[9], 2500, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog2[9], 2500, 9, 1)
     end
     
     -- Amalj'aa Pugilist
-    if HuntLogCheck(MaelstromEnemiesLog2[10], 9, 0) then
+    if HuntLogCheck(MaelstromEnemiesLog2[10], 9, 1) then
         if not ZoneCheck("Little Ala Mhigo") then
             Teleporter("Little Ala Mhigo", "tp")
         end
         
         Movement(-36.09, 8.03, 149.24)
-        DoHuntLog(MaelstromEnemiesLog2[10], 2500, 9, 0)
+        DoHuntLog(MaelstromEnemiesLog2[10], 2500, 9, 1)
     end
     
     -- if not PandoraGetFeatureEnabled("Auto-Sync FATEs") then
