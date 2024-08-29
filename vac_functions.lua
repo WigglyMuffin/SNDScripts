@@ -285,25 +285,22 @@ function TargetNearestEnemy(target_name, radius)
     return closest_target
 end
 
--- Usage: FindAndKillTarget("Heckler Imp", 20)
+-- Usage: FindDistanceToObject("Goblin")
 -- 
--- Uses TargetNearestEnemy() to find and kill the provided target within the specified radius
-function FindAndKillTarget(target_name, radius)
-    local auto_attack_triggered = false
-    local target_x_pos, target_y_pos, target_z_pos = FindNearestObject(target_name)
+-- Returns the distance from the player to an object
+function FindDistanceToObject(object_name)
 
-    if target_x_pos == nil then
-        return
-    end
+    local object_x_pos = GetObjectRawXPos(object_name)
+    local object_y_pos = GetObjectRawYPos(object_name)
+    local object_z_pos = GetObjectRawZPos(object_name)
 
-    -- this stuff should probably be made into it's own functions
     local function floor_position(pos)
         return math.floor(pos + 0.49999999999999994)
     end
 
-    local target_x_position_floored = floor_position(target_x_pos)
-    local target_y_position_floored = floor_position(target_y_pos)
-    local target_z_position_floored = floor_position(target_z_pos)
+    local object_x_position_floored = floor_position(object_x_pos)
+    local object_y_position_floored = floor_position(object_y_pos)
+    local object_z_position_floored = floor_position(object_z_pos)
 
     local xpos = floor_position(GetPlayerRawXPos())
     local ypos = floor_position(GetPlayerRawYPos())
@@ -311,13 +308,60 @@ function FindAndKillTarget(target_name, radius)
 
     local function DistanceToTarget(xpos, ypos, zpos)
         return math.sqrt(
-            (xpos - target_x_position_floored)^2 +
-            (ypos - target_y_position_floored)^2 +
-            (zpos - target_z_position_floored)^2
+            (xpos - object_x_position_floored)^2 +
+            (ypos - object_y_position_floored)^2 +
+            (zpos - object_z_position_floored)^2
         )
     end
 
-    local distance_to_target = DistanceToTarget(xpos, ypos, zpos)
+    local distance_to_object = DistanceToTarget(xpos, ypos, zpos)
+
+    return distance_to_object
+end
+
+-- Usage: FindDistanceToPos(x, y, z)
+-- 
+-- Returns the distance from the player to a position
+function FindDistanceToPos(pos_x, pos_y, pos_z)
+
+    local function floor_position(pos)
+        return math.floor(pos + 0.49999999999999994)
+    end
+
+    local object_x_position_floored = floor_position(pos_x)
+    local object_y_position_floored = floor_position(pos_y)
+    local object_z_position_floored = floor_position(pos_z)
+
+    local xpos = floor_position(GetPlayerRawXPos())
+    local ypos = floor_position(GetPlayerRawYPos())
+    local zpos = floor_position(GetPlayerRawZPos())
+
+    local function DistanceToTarget(xpos, ypos, zpos)
+        return math.sqrt(
+            (xpos - object_x_position_floored)^2 +
+            (ypos - object_y_position_floored)^2 +
+            (zpos - object_z_position_floored)^2
+        )
+    end
+
+    local distance_to_object = DistanceToTarget(xpos, ypos, zpos)
+
+    return distance_to_object
+end
+
+-- Usage: FindAndKillTarget("Heckler Imp", 20)
+-- 
+-- Uses TargetNearestEnemy() to find and kill the provided target within the specified radius
+function FindAndKillTarget(target_name, radius)
+    local radius = radius or 50
+    local auto_attack_triggered = false
+    local target_x_pos, target_y_pos, target_z_pos = FindNearestObject(target_name)
+
+    if target_x_pos == nil then
+        return
+    end
+
+    local distance_to_target = FindDistanceToPos(target_x_pos, target_y_pos, target_z_pos)
 
     if distance_to_target > radius then
         return
@@ -500,9 +544,9 @@ function OpenHuntLog(class, rank, show)
     else 
         yield("/pcall MonsterNote false 0 "..tostring(class))
     end
-    Sleep(0.2)
+    Sleep(0.3)
     yield("/pcall MonsterNote false 1 "..rank)
-    Sleep(0.1)
+    Sleep(0.3)
     yield("/pcall MonsterNote false 2 "..show)
 end
 
@@ -565,6 +609,7 @@ function HuntLogCheck(target_name, class, rank)
         end
     end
 end
+
 -- Usage: DoHuntLog("Amalj'aa Hunter", 40, 9, 0)
 -- Valid classes: 0 = GLA, 1 = PGL, 2 = MRD, 3 = LNC, 4 = ARC, 5 = ROG, 6 = CNJ, 7 = THM, 8 = ACN, 9 = GC
 -- Valid ranks/pages: 0-4 for jobs, 0-2 for GC
