@@ -289,16 +289,17 @@ end
 -- 
 -- Uses TargetNearestEnemy() to find and kill the provided target within the specified radius
 function FindAndKillTarget(target_name, radius)
-    local dist_to_target = GetDistanceToTarget()
     local auto_attack_triggered = false
     local target_x_pos, target_y_pos, target_z_pos = FindNearestObject(target_name)
-    
+
     if target_x_pos == nil then
         return
     end
-    
+
     Movement(target_x_pos, target_y_pos, target_z_pos, 4)
     TargetNearestEnemy(target_name, radius)
+
+    local dist_to_target = GetDistanceToTarget()
 
     while GetTargetHP() > 0 and dist_to_target <= radius do
         if GetCharacterCondition(4) then
