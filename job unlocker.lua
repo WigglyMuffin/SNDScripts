@@ -918,7 +918,8 @@ function MaelstromRank2()
             Teleporter("Aleport", "tp")
         end
         
-        Movement(-180.78, -39.74, -70.99)
+        Movement(0.56, -12.91, -96.50)
+        Movement(-42.53, -22.25, -144.41)
         DoHuntLog(MaelstromEnemiesLog2[9], 2500, 9, 0)
     end
     
