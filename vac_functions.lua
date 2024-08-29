@@ -292,6 +292,10 @@ function FindAndKillTarget(target_name, radius)
     local auto_attack_triggered = false
     local target_x_pos, target_y_pos, target_z_pos = FindNearestObject(target_name)
 
+    if target_x_pos == nil then
+        return
+    end
+
     -- this stuff should probably be made into it's own functions
     local function floor_position(pos)
         return math.floor(pos + 0.49999999999999994)
@@ -315,7 +319,7 @@ function FindAndKillTarget(target_name, radius)
 
     local distance_to_target = DistanceToTarget(xpos, ypos, zpos)
 
-    if target_x_pos == nil or distance_to_target > radius then
+    if distance_to_target > radius then
         return
     end
 
