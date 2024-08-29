@@ -292,7 +292,30 @@ function FindAndKillTarget(target_name, radius)
     local auto_attack_triggered = false
     local target_x_pos, target_y_pos, target_z_pos = FindNearestObject(target_name)
 
-    if target_x_pos == nil then
+    -- this stuff should probably be made into it's own functions
+    local function floor_position(pos)
+        return math.floor(pos + 0.49999999999999994)
+    end
+
+    local target_x_position_floored = floor_position(target_x_pos)
+    local target_y_position_floored = floor_position(target_y_pos)
+    local target_z_position_floored = floor_position(target_z_pos)
+
+    local xpos = floor_position(GetPlayerRawXPos())
+    local ypos = floor_position(GetPlayerRawYPos())
+    local zpos = floor_position(GetPlayerRawZPos())
+
+    local function DistanceToTarget(xpos, ypos, zpos)
+        return math.sqrt(
+            (xpos - target_x_position_floored)^2 +
+            (ypos - target_y_position_floored)^2 +
+            (zpos - target_z_position_floored)^2
+        )
+    end
+
+    local distance_to_target = DistanceToTarget(xpos, ypos, zpos)
+
+    if target_x_pos == nil or distance_to_target > radius then
         return
     end
 
@@ -455,29 +478,45 @@ function OpenHuntLog(class, rank, show)
     -- 1 Maelstrom
     -- 2 Twin adders
     -- 3 Immortal flames
-    repeat
-        yield("/huntinglog")
-        Sleep(0.5)
-    until IsAddonReady("MonsterNote")
+    local timer = 0
+    local log_open = false
+    yield("/huntinglog")
+    while not log_open do
+        if IsAddonReady("MonsterNote") then
+            log_open = true
+        end
+        if timer > 50 then
+            yield("/huntinglog")
+        end
+        Sleep(0.1)
+    end
     local gc_id = GetPlayerGC()
     if class == 9 then
         yield("/pcall MonsterNote false 3 9 "..tostring(gc_id))
     else 
         yield("/pcall MonsterNote false 0 "..tostring(class))
     end
-    Sleep(0.3)
+    Sleep(0.2)
     yield("/pcall MonsterNote false 1 "..rank)
-    Sleep(0.3)
+    Sleep(0.1)
     yield("/pcall MonsterNote false 2 "..show)
 end
 
 -- Usage: CloseHuntLog()  
 -- Closes the Hunting Log if open
 function CloseHuntLog()
-    repeat
-        yield("/huntinglog")
-        Sleep(0.5)
-    until not IsAddonVisible("MonsterNote")
+    local timer = 0
+    local log_open = false
+    yield("/huntinglog")
+    while not log_open do
+        if not IsAddonVisible("MonsterNote") then
+            log_open = true
+        end
+        if timer > 50 then
+            yield("/huntinglog")
+        end
+        Sleep(0.1)
+    end
 end
 
 -- Usage: HuntLogCheck("Amalj'aa Hunter", 9, 0)
