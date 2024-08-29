@@ -865,7 +865,7 @@ function MaelstromRank2()
             Teleporter("Forgotten Springs", "tp")
         end
         
-        Movement(195.52, 10.28, 649.43)
+        Movement(310.98, 7.83, 641.79)
         DoHuntLog(MaelstromEnemiesLog2[1], 2500, 9, 0)
     end
     
@@ -908,7 +908,7 @@ function MaelstromRank2()
             Teleporter("The Hawthorne Hut", "tp")
         end
         
-        Movement(69.56, 11.01, -3.68)
+        Movement(193.44, -4.12, -4.61)
         DoHuntLog(MaelstromEnemiesLog2[8], 2500, 9, 0)
     end
     
@@ -928,7 +928,7 @@ function MaelstromRank2()
             Teleporter("Little Ala Mhigo", "tp")
         end
         
-        Movement(-133.02, 15.68, 104.79)
+        Movement(-36.09, 8.03, 149.24)
         DoHuntLog(MaelstromEnemiesLog2[10], 2500, 9, 0)
     end
     
