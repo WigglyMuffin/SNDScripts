@@ -114,6 +114,7 @@ end
 -- Usage: AttuneAetheryte()
 -- Attunes with the Aetheryte, exits out of menus if already attuned
 function AttuneAetheryte()
+    -- Wait until the player is ready to interact
     repeat
         Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not IsMoving()
@@ -121,20 +122,15 @@ function AttuneAetheryte()
     -- Target and interact with the Aetheryte
     Target("Aetheryte")
     Sleep(0.1)
-    Dismount()
-    Sleep(0.5)
-    yield("/interact")
-    Sleep(0.1)
+    Interact()
+    
+    -- Wait until attuning is complete
+    repeat
+        Sleep(0.1)
+    until not GetCharacterCondition(27)
 
-    -- Handle attuning or already attuned states
-    if GetCharacterCondition(27) then
-        repeat
-            Sleep(0.1)
-        until IsPlayerAvailable()
-
-        Sleep(1.0)
-    elseif GetCharacterCondition(32) then
-        -- Handle the case where the player is already attuned
+    -- If the player is already attuned then exit the menu
+    if GetCharacterCondition(32) then
         repeat
             Sleep(0.1)
         until IsAddonVisible("SelectString")
@@ -147,6 +143,7 @@ function AttuneAetheryte()
         until not IsAddonVisible("SelectString")
     end
 
+    -- Wait until player is available
     repeat
         Sleep(0.1)
     until IsPlayerAvailable()
