@@ -2166,7 +2166,7 @@ function DropboxSetAll(dropbox_gil)
         LogInfo("[VAC] Item_List is nil. Cannot set items.")
         return
     end
-
+    
     local gil = dropbox_gil or 999999999 -- Gil cap
 
     -- list that stores all the items in your inventory and their amounts
@@ -2182,7 +2182,7 @@ function DropboxSetAll(dropbox_gil)
                 inventory[id] = item_count
             end
         end
-
+        
         Sleep(0.0001)
     end
 
@@ -2190,7 +2190,7 @@ function DropboxSetAll(dropbox_gil)
         if id == 1 then
             -- Set gil to gil cap or specified gil amount
             DropboxSetItemQuantity(id, false, gil)
-        elseif id < 2 or id > 19 then                 -- Excludes Shards, Crystals, and Clusters
+        elseif id < 2 or id > 19 then -- Excludes Shards, Crystals, and Clusters
             DropboxSetItemQuantity(id, false, 139860) -- NQ, 999*140
             DropboxSetItemQuantity(id, true, 139860)  -- HQ, 999*140
         end
