@@ -434,13 +434,11 @@ end
 -- Usage: GetNodeTextLookupUpdate("_ToDolist",16,3,4) // GetNodeTextLookupUpdate("_ToDolist",16,3)
 --
 -- function that's honestly nothing but tragic, is only called by Questchecker and Nodescanner, could be called manually.
-function GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get_node_text_location_1,
-                                 get_node_text_location_2)
+function GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get_node_text_location_1, get_node_text_location_2)
     bypass = "next task"
     if get_node_text_location_2 == nil then
-        LogInfo("[VAC] GetNodeTextLookupUpdate: " ..
-            get_node_text_type .. " " .. get_node_text_location .. " " .. get_node_text_location_1)
-        get_node_text = GetNodeText(get_node_text_type, get_node_text_location, get_node_text_location_1)
+        LogInfo("[VAC] GetNodeTextLookupUpdate: " .. get_node_text_type .. " " .. get_node_text_location .. " " .. get_node_text_location_1)
+            get_node_text = GetNodeText(get_node_text_type, get_node_text_location, get_node_text_location_1)
         if get_node_text == get_node_text_location_1 then
             return bypass
         else
@@ -448,11 +446,8 @@ function GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get
         end
         --- i hate
     else
-        LogInfo("[VAC] GetNodeTextLookupUpdate2: " ..
-            get_node_text_type .. " " .. get_node_text_location ..
-            " " .. get_node_text_location_1 .. " " .. get_node_text_location_2)
-        get_node_text = GetNodeText(get_node_text_type, get_node_text_location, get_node_text_location_1,
-            get_node_text_location_2)
+        LogInfo("[VAC] GetNodeTextLookupUpdate2: " .. get_node_text_type .. " " .. get_node_text_location .. " " .. get_node_text_location_1 .. " " .. get_node_text_location_2)
+        get_node_text = GetNodeText(get_node_text_type, get_node_text_location, get_node_text_location_1,get_node_text_location_2)
         if get_node_text == get_node_text_location_2 then
             return bypass
         else
@@ -467,15 +462,13 @@ end
 --
 -- This is used to find the provided target in the _ToDolist node and kill them until no more targets are needed
 function QuestChecker(target_name, target_distance, get_node_text_type, get_node_text_match)
-    local get_node_text_location, get_node_text_location_1, get_node_text_location_2 = NodeScanner(get_node_text_type,
-        get_node_text_match)
+    local get_node_text_location, get_node_text_location_1, get_node_text_location_2 = NodeScanner(get_node_text_type, get_node_text_match)
     local function extractTask(text)
         local task = string.match(text, "^(.-)%s%d+/%d+$")
         return task or text
     end
     while true do
-        updated_node_text = GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get_node_text_location_1,
-            get_node_text_location_2)
+        updated_node_text = GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get_node_text_location_1, get_node_text_location_2)
         LogInfo("[VAC] updated_node_text: " .. updated_node_text)
         LogInfo("[VAC] Extract: " .. extractTask(updated_node_text))
         local last_char = string.sub(updated_node_text, -1)
@@ -929,8 +922,7 @@ function Movement(x_position, y_position, z_position, range)
             end
 
             if previous_position and previous_distance_to_target and not GetCharacterCondition(45) then
-                local distance_traveled = GetDistanceToTarget(previous_position.x, previous_position.y,
-                    previous_position.z)
+                local distance_traveled = GetDistanceToTarget(previous_position.x, previous_position.y, previous_position.z)
 
                 if current_distance_to_target >= previous_distance_to_target - min_progress_distance and distance_traveled < min_progress_distance then
                     stuck_timer = stuck_timer + stuck_check_interval
