@@ -40,6 +40,9 @@ Job_List = vac_lists.Job_List
 Quest_List = vac_lists.Quest_List
 World_ID_List = vac_lists.World_ID_List
 Zone_List = vac_lists.Zone_List
+GC_MIN_List = vac_lists.GC_MIN_List
+GC_BTN_List = vac_lists.GC_BTN_List
+GC_FSH_List = vac_lists.GC_FSH_List
 
 -- Usage: EnsureFolderExists("\\path\\to\\your\\folder")
 --
