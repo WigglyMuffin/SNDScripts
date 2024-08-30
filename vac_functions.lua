@@ -29,7 +29,7 @@
 -- #####################################
 
 function LoadFileCheck()
-	LogInfo("[VAC] Successfully loaded the vac functions file")
+    LogInfo("[VAC] Successfully loaded the vac functions file")
 end
 
 -- this part just loads all the lists into memory to use with various functions
@@ -42,13 +42,13 @@ World_ID_List = vac_lists.World_ID_List
 Zone_List = vac_lists.Zone_List
 
 -- Usage: EnsureFolderExists("\\path\\to\\your\\folder")
---  
+--
 -- Call this to check if a folder exists at the path you provide, if it doesn't it'll create it
 function EnsureFolderExists(folder_path)
     -- Try to create a temporary file in the folder
     local temp_file_path = folder_path .. "\\.temp_file"
     local file = io.open(temp_file_path, "w")
-    
+
     -- If the file couldn't be opened, the folder doesn't exist
     if not file then
         -- Folder doesn't exist, create it
@@ -67,11 +67,11 @@ function InteractAndWait()
     repeat
         Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
-    
+
     Dismount()
     Sleep(0.5)
     yield("/interact")
-    
+
     repeat
         Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
@@ -101,7 +101,7 @@ function Interact()
     repeat
         Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not IsMoving() or GetCharacterCondition(32)
-    
+
     Dismount()
     Sleep(0.5)
     yield("/interact")
@@ -167,7 +167,7 @@ function ZoneCheck(zone_name)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32)
 
     if GetZoneID() == zone_id then
-        return true -- Returns true if zone matches
+        return true  -- Returns true if zone matches
     else
         return false -- Returns false if zone doesn't match
     end
@@ -182,7 +182,7 @@ end
 
 -- Usage: Sleep(0.1) or Sleep("0.1")
 --
--- replaces yield wait spam, halts the script for X seconds 
+-- replaces yield wait spam, halts the script for X seconds
 function Sleep(time)
     yield("/wait " .. tostring(time))
 end
@@ -194,18 +194,17 @@ function ZoneTransitions()
     while not (GetCharacterCondition(45) or GetCharacterCondition(51)) do
         Sleep(0.1)
     end
-    
+
     -- Wait until player no longer in transition between zones
     while GetCharacterCondition(45) or GetCharacterCondition(51) do
         Sleep(0.1)
     end
-    
+
     -- Check if player is available
     while not IsPlayerAvailable() or IsPlayerCasting() or GetCharacterCondition(26) or GetCharacterCondition(32) do
         Sleep(0.1)
     end
 end
-
 
 -- Usage: QuestNPC("SelectYesno"|"CutSceneSelectString", true, 0)
 --
@@ -216,16 +215,16 @@ function QuestNPC(DialogueType, DialogueConfirm, DialogueOption)
         Sleep(0.1)
     end
     if DialogueConfirm then
-        repeat 
+        repeat
             Sleep(0.1)
         until IsAddonVisible(DialogueType)
         if DialogueOption == nil then
             repeat
                 Sleep(0.1)
             until IsAddonVisible(DialogueType)
-            
+
             yield("/pcall " .. DialogueType .. " true 0")
-        
+
             repeat
                 Sleep(0.1)
             until not IsAddonVisible(DialogueType)
@@ -233,7 +232,7 @@ function QuestNPC(DialogueType, DialogueConfirm, DialogueOption)
             repeat
                 Sleep(0.1)
             until IsAddonVisible(DialogueType)
-            
+
             yield("/pcall " .. DialogueType .. " true " .. DialogueOption)
 
             repeat
@@ -255,7 +254,7 @@ function QuestNPCSingle(dialogue_type, dialogue_confirm, dialogue_option)
         Sleep(0.5)
     end
     if dialogue_confirm then
-        repeat 
+        repeat
             Sleep(0.1)
         until IsAddonReady(dialogue_type)
         Sleep(0.5)
@@ -270,7 +269,7 @@ function QuestNPCSingle(dialogue_type, dialogue_confirm, dialogue_option)
 end
 
 -- Usage: FindNearestObject("Heckler Imp")
--- 
+--
 -- Returns the XYZ coordinates of the nearest object with that name
 function FindNearestObject(object_name)
     local object_x_pos = GetObjectRawXPos(object_name)
@@ -285,34 +284,33 @@ function FindNearestObject(object_name)
 end
 
 -- Usage: TargetNearestEnemy("Heckler Imp", 20)
--- 
+--
 -- Targets the nearest enemy of the name you supply, within the radius
 function TargetNearestEnemy(target_name, radius)
     local smallest_distance = 10000000000000.0
     local closest_target
-    local objectKind = 0 -- Set objectkind to 0 so GetNearbyObjectNames pulls everything nearby
+    local objectKind = 0                                                                             -- Set objectkind to 0 so GetNearbyObjectNames pulls everything nearby
     local radius = radius or 0
-    local nearby_objects = GetNearbyObjectNames(radius^2,objectKind) -- Pull all nearby objects/enemies into a list
-    if nearby_objects.Count > 0 then -- Starts a loop if there's more than 0 nearby objects
-      for i = 0, nearby_objects.Count - 1 do  -- loops until no more objects 
-        yield("/target "..nearby_objects[i])
-        if not GetTargetName() or nearby_objects[i] ~= GetTargetName() then -- If target name is nil, skip it
-        elseif GetDistanceToTarget() < smallest_distance and GetTargetName() == target_name then -- if object matches the target_name and the distance to target is smaller than the current smallest_distance, proceed
-          smallest_distance = GetDistanceToTarget()
-          closest_target = GetTargetName()
+    local nearby_objects = GetNearbyObjectNames(radius ^ 2, objectKind)                              -- Pull all nearby objects/enemies into a list
+    if nearby_objects.Count > 0 then                                                                 -- Starts a loop if there's more than 0 nearby objects
+        for i = 0, nearby_objects.Count - 1 do                                                       -- loops until no more objects
+            yield("/target " .. nearby_objects[i])
+            if not GetTargetName() or nearby_objects[i] ~= GetTargetName() then                      -- If target name is nil, skip it
+            elseif GetDistanceToTarget() < smallest_distance and GetTargetName() == target_name then -- if object matches the target_name and the distance to target is smaller than the current smallest_distance, proceed
+                smallest_distance = GetDistanceToTarget()
+                closest_target = GetTargetName()
+            end
         end
-      end
-      ClearTarget()
-      if closest_target then yield("/target "..closest_target) end -- after the loop ends it targets the closest enemy
+        ClearTarget()
+        if closest_target then yield("/target " .. closest_target) end -- after the loop ends it targets the closest enemy
     end
     return closest_target
 end
 
 -- Usage: FindDistanceToObject("Goblin")
--- 
+--
 -- Returns the distance from the player to an object
 function FindDistanceToObject(object_name)
-
     local object_x_pos = GetObjectRawXPos(object_name)
     local object_y_pos = GetObjectRawYPos(object_name)
     local object_z_pos = GetObjectRawZPos(object_name)
@@ -331,9 +329,9 @@ function FindDistanceToObject(object_name)
 
     local function DistanceToTarget(xpos, ypos, zpos)
         return math.sqrt(
-            (xpos - object_x_position_floored)^2 +
-            (ypos - object_y_position_floored)^2 +
-            (zpos - object_z_position_floored)^2
+            (xpos - object_x_position_floored) ^ 2 +
+            (ypos - object_y_position_floored) ^ 2 +
+            (zpos - object_z_position_floored) ^ 2
         )
     end
 
@@ -343,10 +341,9 @@ function FindDistanceToObject(object_name)
 end
 
 -- Usage: FindDistanceToPos(x, y, z)
--- 
+--
 -- Returns the distance from the player to a position
 function FindDistanceToPos(pos_x, pos_y, pos_z)
-
     local function floor_position(pos)
         return math.floor(pos + 0.49999999999999994)
     end
@@ -361,9 +358,9 @@ function FindDistanceToPos(pos_x, pos_y, pos_z)
 
     local function DistanceToTarget(xpos, ypos, zpos)
         return math.sqrt(
-            (xpos - object_x_position_floored)^2 +
-            (ypos - object_y_position_floored)^2 +
-            (zpos - object_z_position_floored)^2
+            (xpos - object_x_position_floored) ^ 2 +
+            (ypos - object_y_position_floored) ^ 2 +
+            (zpos - object_z_position_floored) ^ 2
         )
     end
 
@@ -373,7 +370,7 @@ function FindDistanceToPos(pos_x, pos_y, pos_z)
 end
 
 -- Usage: FindAndKillTarget("Heckler Imp", 20)
--- 
+--
 -- Uses TargetNearestEnemy() to find and kill the provided target within the specified radius
 function FindAndKillTarget(target_name, radius)
     local radius = radius or 50
@@ -406,7 +403,7 @@ function FindAndKillTarget(target_name, radius)
         yield("/rotation manual")
 
         repeat
-            if not (GetDistanceToTarget() <= 4) and not PathIsRunning() then  
+            if not (GetDistanceToTarget() <= 4) and not PathIsRunning() then
                 if not auto_attack_triggered then
                     yield("/vnavmesh movetarget")
                 end
@@ -437,26 +434,31 @@ end
 -- Usage: GetNodeTextLookupUpdate("_ToDolist",16,3,4) // GetNodeTextLookupUpdate("_ToDolist",16,3)
 --
 -- function that's honestly nothing but tragic, is only called by Questchecker and Nodescanner, could be called manually.
-function GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get_node_text_location_1, get_node_text_location_2)
+function GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get_node_text_location_1,
+                                 get_node_text_location_2)
     bypass = "next task"
-    if get_node_text_location_2 == nil then 
-        LogInfo("[VAC] GetNodeTextLookupUpdate: "..get_node_text_type.." "..get_node_text_location.." "..get_node_text_location_1)
+    if get_node_text_location_2 == nil then
+        LogInfo("[VAC] GetNodeTextLookupUpdate: " ..
+            get_node_text_type .. " " .. get_node_text_location .. " " .. get_node_text_location_1)
         get_node_text = GetNodeText(get_node_text_type, get_node_text_location, get_node_text_location_1)
         if get_node_text == get_node_text_location_1 then
             return bypass
         else
             return get_node_text
         end
-    --- i hate
+        --- i hate
     else
-        LogInfo("[VAC] GetNodeTextLookupUpdate2: "..get_node_text_type.." "..get_node_text_location.." "..get_node_text_location_1.." "..get_node_text_location_2)
-        get_node_text = GetNodeText(get_node_text_type, get_node_text_location, get_node_text_location_1, get_node_text_location_2)
+        LogInfo("[VAC] GetNodeTextLookupUpdate2: " ..
+            get_node_text_type .. " " .. get_node_text_location ..
+            " " .. get_node_text_location_1 .. " " .. get_node_text_location_2)
+        get_node_text = GetNodeText(get_node_text_type, get_node_text_location, get_node_text_location_1,
+            get_node_text_location_2)
         if get_node_text == get_node_text_location_2 then
             return bypass
         else
             return get_node_text
         end
-    --- this function
+        --- this function
     end
     Echo("GetNodeTextLookupUpdate went wrong somewhere")
 end
@@ -465,17 +467,19 @@ end
 --
 -- This is used to find the provided target in the _ToDolist node and kill them until no more targets are needed
 function QuestChecker(target_name, target_distance, get_node_text_type, get_node_text_match)
-    local get_node_text_location, get_node_text_location_1, get_node_text_location_2 = NodeScanner(get_node_text_type, get_node_text_match)
+    local get_node_text_location, get_node_text_location_1, get_node_text_location_2 = NodeScanner(get_node_text_type,
+        get_node_text_match)
     local function extractTask(text)
         local task = string.match(text, "^(.-)%s%d+/%d+$")
         return task or text
     end
     while true do
-        updated_node_text = GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get_node_text_location_1, get_node_text_location_2)
-        LogInfo("[VAC] updated_node_text: "..updated_node_text)
-        LogInfo("[VAC] Extract: "..extractTask(updated_node_text))
+        updated_node_text = GetNodeTextLookupUpdate(get_node_text_type, get_node_text_location, get_node_text_location_1,
+            get_node_text_location_2)
+        LogInfo("[VAC] updated_node_text: " .. updated_node_text)
+        LogInfo("[VAC] Extract: " .. extractTask(updated_node_text))
         local last_char = string.sub(updated_node_text, -1)
-        LogInfo("[VAC] last char: "..updated_node_text)
+        LogInfo("[VAC] last char: " .. updated_node_text)
         Sleep(2.0)
         if updated_node_text == get_node_text_match or not string.match(last_char, "%d") then
             break
@@ -505,7 +509,7 @@ function NodeScanner(get_node_text_type, get_node_text_match)
             local node_check = GetNodeText(get_node_text_type, location, sub_node)
             local clean_node_text = extractTask(node_check)
             if clean_node_text == nil then
-            else 
+            else
                 --LogInfo([VAC] tostring(clean_node_text))
             end
             if clean_node_text == get_node_text_match then
@@ -521,7 +525,7 @@ function NodeScanner(get_node_text_type, get_node_text_match)
                 local node_check = GetNodeText(get_node_text_type, location, sub_node, sub_node2)
                 local clean_node_text = extractTask(node_check)
                 if clean_node_text == nil then
-                else 
+                else
                     --LogInfo([VAC] tostring(clean_node_text))
                 end
                 if clean_node_text == get_node_text_match then
@@ -541,7 +545,7 @@ end
 -- The first variable is the class to open, the second is the rank to open
 function OpenHuntLog(class, rank, show)
     local defaultshow = 2
-    local defaultrank = 0 --
+    local defaultrank = 0  --
     local defaultclass = 9 -- this is the gc log
     rank = rank or defaultrank
     class = class or defaultclass
@@ -549,27 +553,27 @@ function OpenHuntLog(class, rank, show)
     -- 1 Maelstrom
     -- 2 Twin adders
     -- 3 Immortal flames
-    
+
     repeat
         yield("/huntinglog")
         Sleep(0.5)
     until IsAddonReady("MonsterNote")
-    
+
     local gc_id = GetPlayerGC()
-    
+
     if class == 9 then
         yield("/pcall MonsterNote false 3 9 " .. tostring(gc_id))
-    else 
+    else
         yield("/pcall MonsterNote false 0 " .. tostring(class))
     end
-    
+
     Sleep(0.3)
     yield("/pcall MonsterNote false 1 " .. rank)
     Sleep(0.3)
     yield("/pcall MonsterNote false 2 " .. show)
 end
 
--- Usage: CloseHuntLog()  
+-- Usage: CloseHuntLog()
 -- Closes the Hunting Log if open
 function CloseHuntLog()
     repeat
@@ -583,22 +587,21 @@ end
 -- Valid ranks/pages: 0-4 for jobs, 0-2 for GC
 -- Opens and checks current progress and returns a true if finished or a false if not
 function HuntLogCheck(target_name, class, rank)
-    OpenHuntLog(class,rank, 2)
+    OpenHuntLog(class, rank, 2)
     local node_text = ""
     local function CheckTargetAmountNeeded(sub_node)
         local target_amount = tostring(GetNodeText("MonsterNote", 2, sub_node, 3))
         local first_number = tonumber(target_amount:sub(1, 1))
         local last_number = tonumber(target_amount:sub(-1))
-        
+
         if first_number == last_number then
             return 0
         else
             return last_number - first_number
         end
     end
-    
+
     local function FindTargetNode()
-    
         for sub_node = 5, 60 do
             Sleep(0.001)
             node_text = tostring(GetNodeText("MonsterNote", 2, sub_node, 4))
@@ -607,16 +610,16 @@ function HuntLogCheck(target_name, class, rank)
             end
         end
     end
-    
+
     local target_amount_needed_node = FindTargetNode()
-    
+
     if not target_amount_needed_node then
         LogInfo("[VAC] Couldn't find " .. target_name .. " in hunting log, likely already finished")
         return false, 0
     else
         LogInfo("[VAC] Found " .. target_name .. " in hunting log, time to hunt")
         local target_amount_needed = CheckTargetAmountNeeded(target_amount_needed_node)
-        
+
         if target_amount_needed == 0 then
             CloseHuntLog()
             return false, target_amount_needed
@@ -633,12 +636,12 @@ end
 -- Opens and checks current progress of Hunting Log for automated killing
 function DoHuntLog(target_name, target_distance, class, rank)
     local finished = false
-    local TargetsLeft, AmountLeft = HuntLogCheck(target_name,class,rank)
-    
+    local TargetsLeft, AmountLeft = HuntLogCheck(target_name, class, rank)
+
     if AmountLeft > 0 and TargetsLeft then
-        while not finished do 
-            TargetsLeft, AmountLeft = HuntLogCheck(target_name,class,rank)
-            
+        while not finished do
+            TargetsLeft, AmountLeft = HuntLogCheck(target_name, class, rank)
+
             if AmountLeft > 0 then
                 repeat
                     FindAndKillTarget(target_name, target_distance)
@@ -646,13 +649,13 @@ function DoHuntLog(target_name, target_distance, class, rank)
                     Sleep(3)
                 until AmountLeft == 0
             end
-            
+
             if AmountLeft == 0 then
                 finished = true
             end
             Sleep(3)
         end
-        
+
         if not GetCharacterCondition(26) then
             yield("/rotation off")
         end
@@ -664,15 +667,15 @@ end
 -- Will teleport player to specified location
 function Teleporter(location, tp_kind) -- Teleporter handler
     tp_kind = string.lower(tp_kind)
-    local cast_time_buffer = 5 -- Just in case a buffer is required, teleports are 5 seconds long. Slidecasting, ping and fps can affect casts
-    local max_retries = 10  -- Teleporter retry amount, will not tp after number has been reached for safety
+    local cast_time_buffer = 5         -- Just in case a buffer is required, teleports are 5 seconds long. Slidecasting, ping and fps can affect casts
+    local max_retries = 10             -- Teleporter retry amount, will not tp after number has been reached for safety
     local retries = 0
-    
+
     -- Initial check to ensure player can teleport
     repeat
         Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32) -- 26 is combat, 32 is quest event
-    
+
     -- Try teleport, retry until max_retries is reached
     if tp_kind == "tp" then
         while retries < max_retries do
@@ -681,29 +684,29 @@ function Teleporter(location, tp_kind) -- Teleporter handler
                 LogInfo("[VAC] Already in the right zone")
                 break
             end
-            
+
             -- Attempt teleport
             if not IsPlayerCasting() then
                 yield("/tp " .. location)
                 Sleep(2.0) -- Wait to check if casting starts
-                
+
                 -- Check if the player started casting
                 if IsPlayerCasting() then
                     Sleep(cast_time_buffer) -- Wait for cast to complete
                 end
             end
-    
+
             -- Check if the teleport was successful
             if GetCharacterCondition(45) or GetCharacterCondition(51) then -- 45 is BetweenAreas, 51 is BetweenAreas51
                 LogInfo("[VAC] Teleport successful.")
                 break
             end
-            
+
             -- Teleport retry increment
             retries = retries + 1
             LogInfo("[VAC] Retrying teleport, attempt #" .. retries)
         end
-        
+
         -- Teleporter failed handling
         if retries >= max_retries then
             local attempt_word = (max_retries == 1) and "attempt" or "attempts"
@@ -712,7 +715,6 @@ function Teleporter(location, tp_kind) -- Teleporter handler
         end
     elseif tp_kind == "li" then
         while retries < max_retries do
-        
             if not IsPlayerCasting() then
                 yield("/li " .. location)
                 Sleep(2.0) -- give lifestream some time to start
@@ -750,9 +752,9 @@ function UseItemTeleport(location)
         ["Firmament"] = "Firmament Aetheryte Ticket",
         ["Vesper Bay"] = "Vesper Bay Aetheryte Ticket"
     }
-    
+
     local item = teleport_items[location]
-    
+
     if item then
         yield("/item " .. item)
     else
@@ -761,15 +763,15 @@ function UseItemTeleport(location)
     end
 end
 
--- Usage: Mount("SDS Fenrir") 
+-- Usage: Mount("SDS Fenrir")
 -- Attempts to use specified mount if player has mounts unlocked
 -- Will use "Company Chocobo" if left empty
 -- Stores if the locked mount message in Mount() has been sent already or not
 local mount_message = false
 function Mount(mount_name)
-    local max_retries = 10   -- Maximum number of retries
+    local max_retries = 10     -- Maximum number of retries
     local retry_interval = 1.0 -- Time interval between retries in seconds
-    local retries = 0        -- Counter for the number of retries
+    local retries = 0          -- Counter for the number of retries
 
     -- Check if the player has unlocked mounts by checking the quest completion
     if not (IsQuestComplete(66236) or IsQuestComplete(66237) or IsQuestComplete(66238)) then
@@ -782,7 +784,6 @@ function Mount(mount_name)
     end
 
     if TerritorySupportsMounting() then -- Check if territory is mountable using the snd function
-
         -- Return if the player is already mounted
         if GetCharacterCondition(4) then
             return
@@ -835,19 +836,19 @@ end
 -- Usage: LogOut()
 function LogOut()
     yield("/logout")
-    
+
     repeat
         Sleep(0.1)
     until IsAddonVisible("SelectYesno")
-    
+
     yield("/pcall SelectYesno true 4")
-    
+
     repeat
         Sleep(0.1)
     until not IsAddonVisible("SelectYesno")
 end
 
--- Usage: Movement(674.92, 19.37, 436.02) // Movement(674.92, 19.37, 436.02, 15)  
+-- Usage: Movement(674.92, 19.37, 436.02) // Movement(674.92, 19.37, 436.02, 15)
 -- the first three are x y z coordinates and the last one is how far away it's allowed to stop from the target
 -- deals with vnav movement, kind of has some stuck checks but it's probably not as reliable as it can be, you do not have to include range
 function Movement(x_position, y_position, z_position, range)
@@ -868,21 +869,21 @@ function Movement(x_position, y_position, z_position, range)
 
     local function IsWithinRange(xpos, ypos, zpos)
         return math.abs(xpos - x_position_floored) <= range and
-               math.abs(ypos - y_position_floored) <= range and
-               math.abs(zpos - z_position_floored) <= range
+            math.abs(ypos - y_position_floored) <= range and
+            math.abs(zpos - z_position_floored) <= range
     end
 
     local function GetDistanceToTarget(xpos, ypos, zpos)
         return math.sqrt(
-            (xpos - x_position_floored)^2 +
-            (ypos - y_position_floored)^2 +
-            (zpos - z_position_floored)^2
+            (xpos - x_position_floored) ^ 2 +
+            (ypos - y_position_floored) ^ 2 +
+            (zpos - z_position_floored) ^ 2
         )
     end
 
     local function NavToDestination()
         NavReload()
-        
+
         repeat
             Sleep(0.1)
         until NavIsReady()
@@ -901,7 +902,7 @@ function Movement(x_position, y_position, z_position, range)
                     Sleep(0.1)
                 until GetCharacterCondition(4)
             end
-            
+
             yield("/vnav moveto " .. x_position .. " " .. y_position .. " " .. z_position)
             retries = retries + 1
         until PathIsRunning() or retries >= max_retries
@@ -914,14 +915,14 @@ function Movement(x_position, y_position, z_position, range)
     local stuck_timer = 0
     local previous_position = nil
     local previous_distance_to_target = nil
-    
+
     while true do
         if not GetCharacterCondition(45) then
             local xpos = floor_position(GetPlayerRawXPos())
             local ypos = floor_position(GetPlayerRawYPos())
             local zpos = floor_position(GetPlayerRawZPos())
             Sleep(0.1)
-            
+
             local current_distance_to_target = GetDistanceToTarget(xpos, ypos, zpos)
             local current_position = { x = xpos, y = ypos, z = zpos }
 
@@ -931,15 +932,16 @@ function Movement(x_position, y_position, z_position, range)
             end
 
             if previous_position and previous_distance_to_target and not GetCharacterCondition(45) then
-            local distance_traveled = GetDistanceToTarget(previous_position.x, previous_position.y, previous_position.z)
-            
+                local distance_traveled = GetDistanceToTarget(previous_position.x, previous_position.y,
+                    previous_position.z)
+
                 if current_distance_to_target >= previous_distance_to_target - min_progress_distance and distance_traveled < min_progress_distance then
                     stuck_timer = stuck_timer + stuck_check_interval
                 else
                     stuck_timer = 0
                 end
             end
-            
+
             previous_distance_to_target = current_distance_to_target
             previous_position = current_position
 
@@ -948,11 +950,11 @@ function Movement(x_position, y_position, z_position, range)
                 Sleep(0.1)
                 DoGeneralAction("Jump")
                 NavReload()
-                
+
                 repeat
                     Sleep(0.1)
                 until NavIsReady()
-                
+
                 NavToDestination()
                 stuck_timer = 0
             end
@@ -975,19 +977,18 @@ function OpenTimers()
     repeat
         Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerOccupied()
-    
+
     yield("/timers")
-    
+
     repeat
         local current_time = os.time()
-        
+
         if current_time - last_trigger_time >= retry_interval then -- Activate once every x seconds
             yield("/timers")
-            last_trigger_time = current_time -- Store the last trigger time
+            last_trigger_time = current_time                       -- Store the last trigger time
         end
-        
+
         Sleep(0.1)
-        
     until IsAddonReady("ContentsInfo")
 
     last_trigger_time = 0 -- Reset the trigger time
@@ -996,7 +997,7 @@ function OpenTimers()
         local current_time = os.time()
         if current_time - last_trigger_time >= retry_interval then -- Activate once every x seconds
             yield("/pcall ContentsInfo True 12 1")
-            last_trigger_time = current_time -- Store the last trigger time
+            last_trigger_time = current_time                       -- Store the last trigger time
         end
         Sleep(0.1)
     until IsAddonReady("ContentsInfoDetail")
@@ -1013,7 +1014,7 @@ function MarketBoardChecker()
             ItemSearchWasVisible = true
         end
     until ItemSearchWasVisible
-    
+
     repeat
         Sleep(0.1)
     until not IsAddonVisible("ItemSearch")
@@ -1021,56 +1022,56 @@ end
 
 -- Usage: BuyFromStore(1, 15) <--- buys 15 of X item
 --
--- number_in_list is which item you're buying from the list, top item is 1, 2 is below that, 3 is below that etc...  
+-- number_in_list is which item you're buying from the list, top item is 1, 2 is below that, 3 is below that etc...
 -- only works for the "Store" addon window, i'd be careful calling it anywhere else
 function BuyFromStore(number_in_list, amount)
     -- compensates for the top being 0
     number_in_list = number_in_list - 1
     attempts = 0
-    
+
     repeat
         attempts = attempts + 1
         Sleep(0.1)
     until (IsAddonReady("Shop") or attempts >= 100)
-    
+
     -- attempts above 50 is about 5 seconds
     if attempts >= 100 then
         Echo("Waited too long, store window not found, moving on")
     end
-    
+
     if IsAddonReady("Shop") and number_in_list and amount then
         yield("/pcall Shop True 0 " .. number_in_list .. " " .. amount)
         repeat
             Sleep(0.1)
         until IsAddonReady("SelectYesno")
-        
+
         yield("/pcall SelectYesno true 0")
-        
+
         repeat
             Sleep(0.1)
         until not IsAddonReady("SelectYesno")
-        
+
         Sleep(0.5)
     end
 end
 
--- Usage: CloseStore()  
+-- Usage: CloseStore()
 -- Function used to close store windows
 function CloseStore()
     if IsAddonVisible("Shop") then
         yield("/pcall Shop True -1")
     end
-    
+
     repeat
         Sleep(0.1)
     until not IsAddonVisible("Shop")
-    
+
     repeat
         Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
 end
 
--- Usage: Target("Storm Quartermaster")  
+-- Usage: Target("Storm Quartermaster")
 -- TODO: target checking for consistency and speed
 function Target(target)
     repeat
@@ -1079,9 +1080,8 @@ function Target(target)
     until string.lower(GetTargetName()) == string.lower(target)
 end
 
-
--- Usage: GcRankUp()  
--- 
+-- Usage: GcRankUp()
+--
 -- Checks if you can rank up in your current gc, then it'll attempt to rank you up
 function DoGcRankUp()
     yield("/at e")
@@ -1089,7 +1089,7 @@ function DoGcRankUp()
     local gc_rank_9_mission_complete = false
     local gc_rank_8_mission_complete = false
     local can_rankup, next_rank = CanGCRankUp()
-    
+
     local gc_officer_names = {
         [1] = "Storm Personnel Officer",
         [2] = "Serpent Personnel Officer",
@@ -1098,7 +1098,7 @@ function DoGcRankUp()
 
     local function OpenAndAttemptRankup()
         local gc_target = gc_officer_names[gc_id]
-        
+
         if gc_target then
             -- Target the correct GC officer
             Target(gc_target)
@@ -1106,29 +1106,27 @@ function DoGcRankUp()
         else
             return
         end
-        
+
         repeat
             yield("/pint")
             Sleep(0.1)
         until IsAddonReady("SelectString")
-        
+
         yield("/pcall SelectString true 1")
-        
+
         repeat
             Sleep(0.1)
         until IsAddonReady("GrandCompanyRankUp")
-        
+
         yield("/pcall GrandCompanyRankUp true 0")
     end
 
     if gc_id == 1 then -- checks if gc is maelstrom and checks if the quests are done
         gc_rank_8_mission_complete = IsQuestComplete(66664)
         gc_rank_9_mission_complete = IsQuestComplete(66667)
-
     elseif gc_id == 2 then -- checks if gc is twin adder and checks if the quests are done
         gc_rank_8_mission_complete = IsQuestComplete(66665)
         gc_rank_9_mission_complete = IsQuestComplete(66668)
-
     elseif gc_id == 3 then -- checks if gc is immortal flames and checks if the quests are done
         gc_rank_8_mission_complete = IsQuestComplete(66666)
         gc_rank_9_mission_complete = IsQuestComplete(66669)
@@ -1137,7 +1135,7 @@ function DoGcRankUp()
     if can_rankup then
         if next_rank == 5 then
             local log_rank_1_complete = IsHuntLogComplete(9, 0)
-            
+
             if log_rank_1_complete then
                 OpenAndAttemptRankup()
             else
@@ -1168,9 +1166,9 @@ function DoGcRankUp()
             OpenAndAttemptRankup()
         end
     end
-    
+
     Sleep(1.0)
-    
+
     repeat
         Sleep(0.1)
     until IsPlayerAvailable()
@@ -1178,7 +1176,7 @@ end
 
 -- Usage: can_rankup, next_rank = CanGCRankUp()
 --
--- returns true and the next rank if you can rank up, returns false if you can't 
+-- returns true and the next rank if you can rank up, returns false if you can't
 function CanGCRankUp()
     local gc_rank = 0
     local gc_id = GetPlayerGC()
@@ -1195,22 +1193,21 @@ function CanGCRankUp()
         [9] = 9000,
         [10] = 10000
     }
-    
+
     if gc_id == 1 then -- checks if gc is maelstrom and adds seal amount to current_seals
         current_seals = GetItemCount(20)
         gc_rank = GetMaelstromGCRank()
-
     elseif gc_id == 2 then -- checks if gc is twin adder and adds seal amount to current_seals
         current_seals = GetItemCount(21)
         gc_rank = GetAddersGCRank()
-
     elseif gc_id == 3 then -- checks if gc is immortal flames and adds seal amount to current_seals
         current_seals = GetItemCount(22)
         gc_rank = GetFlamesGCRank()
     end
-    
-    local next_rank = gc_rank + 1 -- adds one so we know which gc rank we're attempting to rank up total
-    
+
+    local next_rank = gc_rank +
+    1                                                              -- adds one so we know which gc rank we're attempting to rank up total
+
     if current_seals > gc_ranks[next_rank] and next_rank < 10 then -- excludes rank 10 and above as we don't handle that atm
         return true, next_rank
     else
@@ -1218,13 +1215,12 @@ function CanGCRankUp()
     end
 end
 
--- Usage: OpenGcSupplyWindow(1)  
--- Supply tab is 0 // Provisioning tab is 1 // Expert Delivery is 2  
--- Anything above or below those numbers will not work 
+-- Usage: OpenGcSupplyWindow(1)
+-- Supply tab is 0 // Provisioning tab is 1 // Expert Delivery is 2
+-- Anything above or below those numbers will not work
 --
 -- All it does is open the gc supply window to whatever tab you want, or changes to a tab if it's already open
 function OpenGcSupplyWindow(tab)
-
     -- swaps tabs if the gc supply list is already open
     if IsAddonVisible("GrandCompanySupplyList") then
         if (tab <= 0 or tab >= 3) then
@@ -1239,10 +1235,10 @@ function OpenGcSupplyWindow(tab)
             [2] = "Serpent Personnel Officer",
             [3] = "Flame Personnel Officer"
         }
-        
+
         local gc_id = GetPlayerGC()
         local gc_target = gc_officer_names[gc_id]
-        
+
         if gc_target then
             -- Target the correct GC officer
             Target(gc_target)
@@ -1252,35 +1248,35 @@ function OpenGcSupplyWindow(tab)
             return
         end
 
-        
+
         repeat
             yield("/pint")
             Sleep(0.1)
         until IsAddonReady("SelectString")
-        
+
         yield("/pcall SelectString true 0")
-        
+
         repeat
             Sleep(0.1)
         until IsAddonReady("GrandCompanySupplyList")
-        
+
         yield("/pcall GrandCompanySupplyList true 0 " .. tab)
     end
 end
 
--- Usage: CloseGcSupplyWindow()  
--- literally just closes the gc supply window  
+-- Usage: CloseGcSupplyWindow()
+-- literally just closes the gc supply window
 -- probably is due some small consistency changes but it should be fine where it is now
 function CloseGcSupplyWindow()
     attempt_counter = 0
     ::tryagain::
     if IsAddonVisible("GrandCompanySupplyList") then
         yield("/pcall GrandCompanySupplyList true -1")
-        
+
         repeat
             Sleep(0.1)
         until IsAddonReady("SelectString")
-        
+
         yield("/pcall SelectString true -1")
     end
     if IsAddonReady("SelectString") then
@@ -1301,11 +1297,11 @@ end
 -- Attempts to deliver everything under the provisioning window, skipping over what it can't
 function GcProvisioningDeliver()
     Sleep(0.5)
-    
+
     if HasPlugin("YesAlready") then
         PauseYesAlready()
     end
-    
+
     for i = 4, 2, -1 do
         repeat
             Sleep(0.1)
@@ -1313,47 +1309,47 @@ function GcProvisioningDeliver()
         local item_name = GetNodeText("GrandCompanySupplyList", 6, i, 10)
         local item_qty = tonumber(GetNodeText("GrandCompanySupplyList", 6, i, 6))
         local item_requested_amount = tonumber(GetNodeText("GrandCompanySupplyList", 6, i, 9))
-        
+
         if ContainsLetters(item_name) and item_qty >= item_requested_amount then
             -- continue
         else
             LogInfo("[VAC] Nothing here, moving on")
             goto skip
         end
-        
+
         local row_to_call = i - 2
-        yield("/pcall GrandCompanySupplyList true 1 "..row_to_call)
+        yield("/pcall GrandCompanySupplyList true 1 " .. row_to_call)
         local err_counter_request = 0
         local err_counter_supply = 0
-        
+
         repeat
-            err_counter_request = err_counter_request+1
+            err_counter_request = err_counter_request + 1
             Sleep(0.1)
         until IsAddonReady("GrandCompanySupplyReward") or err_counter_request >= 70
-        
+
         if err_counter_request >= 70 then
             LogInfo("[VAC] Something might have gone wrong")
             err_counter_request = 0
         else
             yield("/pcall GrandCompanySupplyReward true 0")
         end
-        
+
         Sleep(0.2)
-        
+
         -- Wait for either SelectYesno or GrandCompanySupplyList
         local wait_time = 0
         local max_wait_time = 2.0 -- Max wait time
-        
+
         while wait_time < max_wait_time do
             if IsAddonReady("SelectYesno") then
                 -- SelectYesno appeared before GrandCompanySupplyList
                 local attempt_count = 0
                 local max_attempts = 10
-                
+
                 repeat
                     yield("/pcall SelectYesno true 0")
                     Sleep(0.05)
-                    
+
                     if IsAddonVisible("SelectYesno") then
                         attempt_count = attempt_count + 1
                     else
@@ -1365,27 +1361,27 @@ function GcProvisioningDeliver()
                 -- GrandCompanySupplyList appeared first instead, SelectYesno was skipped
                 break
             end
-            
+
             Sleep(0.1)
             wait_time = wait_time + 0.1
         end
-        
+
         repeat
-            err_counter_supply = err_counter_supply+1
+            err_counter_supply = err_counter_supply + 1
             Sleep(0.1)
         until IsAddonReady("GrandCompanySupplyList") or err_counter_supply >= 50
-        
+
         err_counter_supply = 0
         ::skip::
     end
-    
+
     if HasPlugin("YesAlready") then
         RestoreYesAlready()
     end
 end
 
 -- Usage: FindWorldByID(11) // FindWorldByID(GetHomeWorld())
--- 
+--
 -- Looks through the World_ID_List for the world name with X id and returns the name
 function FindWorldByID(searchID)
     for name, data in pairs(World_ID_List) do
@@ -1397,7 +1393,7 @@ function FindWorldByID(searchID)
 end
 
 -- Usage: FindDCWorldIsOn("Cerbeus") Will return Chaos
--- 
+--
 -- Looks through the DC_With_Worlds table and returns the datacenter a world is on
 function FindDCWorldIsOn(worldName)
     for datacenter, worlds in pairs(DC_With_Worlds) do
@@ -1410,12 +1406,12 @@ function FindDCWorldIsOn(worldName)
     return nil
 end
 
--- Usage: FindDutyID("Sastasha")  
--- 
+-- Usage: FindDutyID("Sastasha")
+--
 -- returns the id of the duty you search for, if the search is vague enough it'll return any of the ones that it finds, so try to be specific
 function FindDutyID(duty_name)
     local duty_name_lower = string.lower(duty_name)
-    
+
     for key, value in pairs(Zone_List) do
         if string.lower(value["Duty"]) == duty_name_lower then
             return key
@@ -1429,21 +1425,21 @@ end
 -- returns the id of the zone you search for, if the search is vague enough it'll return any of the ones that it finds, so try to be specific
 function FindZoneID(zone)
     zone = zone or Zone_List["" .. GetZoneID() .. ""]["Zone"]
-    
+
     -- Check if zone is string
     if type(zone) ~= "string" then
         return nil -- return 0
     end
-    
+
     local searchLower = zone:lower()
-    
+
     for id, entry in pairs(Zone_List) do
         local placeName = entry["Zone"]
         if placeName and placeName:lower():find(searchLower) then
             return tonumber(id)
         end
     end
-    
+
     return nil -- return 0
 end
 
@@ -1456,7 +1452,7 @@ function FindZoneIDByAetheryte(targetAetheryte)
     end
     local lowerTarget = targetAetheryte:lower()
     for key, value in pairs(Zone_List) do
-        if type(value) == "table" and type(value["Aetherytes"]) == "table" then    
+        if type(value) == "table" and type(value["Aetherytes"]) == "table" then
             for _, aetheryte in ipairs(value["Aetherytes"]) do
                 if aetheryte:lower():find(lowerTarget, 1, true) then
                     return tonumber(key), aetheryte
@@ -1465,12 +1461,50 @@ function FindZoneIDByAetheryte(targetAetheryte)
         else
         end
     end
-    
+
     return nil, "Not found"
 end
 
--- Usage: ContainsLetters("meow")  
+-- Function to find the name of an aetheryte by ID
+-- Usage: local name = FindAetheryteNameByID("55")
 -- 
+-- Will return the name of the aetheryte with the given id, or nil if not found
+function FindAetheryteNameByID(aetheryte_id)
+    aetheryte_id = tostring(aetheryte_id)
+    for _, zone in pairs(Zone_List) do
+        if zone["Aetherytes"] then
+            for _, aetheryte in ipairs(zone["Aetherytes"]) do
+                if aetheryte["ID"] == aetheryte_id then
+                    return aetheryte["Name"]
+                end
+            end
+        end
+    end
+    return nil  -- Return nil if not found
+end
+
+
+
+-- Function to find the ID of an aetheryte by name
+-- Usage: local id = FindAetheryteIDByName("Aleport")
+-- 
+-- Will return the ID of the aetheryte with the given name, or nil if not found
+function FindAetheryteIDByName(aetheryte_name)
+    aetheryte_name = tostring(aetheryte_name)
+    for _, zone in pairs(Zone_List) do
+        if zone["Aetherytes"] then
+            for _, aetheryte in ipairs(zone["Aetherytes"]) do
+                if aetheryte["Name"] == aetheryte_name then
+                    return tonumber(aetheryte["ID"])
+                end
+            end
+        end
+    end
+    return nil     -- Return nil if not found
+end
+
+-- Usage: ContainsLetters("meow")
+--
 -- Will return if whatever you provide it has letters or not
 function ContainsLetters(input)
     if input:match("%a") then
@@ -1487,7 +1521,7 @@ function Distance(x1, y1, z1, x2, y2, z2)
     local dx = x2 - x1
     local dy = y2 - y1
     local dz = z2 - z1
-    return math.sqrt(dx^2 + dy^2 + dz^2)
+    return math.sqrt(dx ^ 2 + dy ^ 2 + dz ^ 2)
 end
 
 -- Usage: DistanceName("First Last", "First Last") or DistanceName("Aetheryte", "Retainer Bell")
@@ -1505,7 +1539,7 @@ function DistanceName(distance_char_name1, distance_char_name2)
     local dx = x2 - x1
     local dy = y2 - y1
     local dz = z2 - z1
-    return math.sqrt(dx^2 + dy^2 + dz^2)
+    return math.sqrt(dx ^ 2 + dy ^ 2 + dz ^ 2)
 end
 
 -- Usage: PathToObject("First Last") or PathToObject("Aetheryte", 2)
@@ -1513,9 +1547,11 @@ end
 -- Optionally can include a range value to stop once distance between character and target has been reached
 function PathToObject(path_object_name, range)
     if range == nil then
-        Movement(GetObjectRawXPos(path_object_name), GetObjectRawYPos(path_object_name), GetObjectRawZPos(path_object_name))
+        Movement(GetObjectRawXPos(path_object_name), GetObjectRawYPos(path_object_name),
+            GetObjectRawZPos(path_object_name))
     else
-        Movement(GetObjectRawXPos(path_object_name), GetObjectRawYPos(path_object_name), GetObjectRawZPos(path_object_name), range)
+        Movement(GetObjectRawXPos(path_object_name), GetObjectRawYPos(path_object_name),
+            GetObjectRawZPos(path_object_name), range)
     end
 
     repeat
@@ -1530,35 +1566,50 @@ function PathToEstateEntrance()
     Movement(GetObjectRawXPos("Entrance"), GetObjectRawYPos("Entrance"), GetObjectRawZPos("Entrance"), 4)
 end
 
--- Paths to Limsa bell
+-- Function to navigate to the summoning bell in limsa lominsa lower decks
+-- Usage: PathToLimsaBell()
+--
+-- Will move the character to the summoning bell if already in limsa lominsa lower decks,
+-- Otherwise teleports to limsa lominsa and then moves to the summoning bell
 function PathToLimsaBell()
+    -- Check if the current zone is limsa lominsa lower decks
     if ZoneCheck("Limsa Lominsa Lower Decks") then
-        --Movement(-123.72, 18.00, 20.55)
-        Movement(GetObjectRawXPos("Summoning Bell"), GetObjectRawYPos("Summoning Bell"), GetObjectRawZPos("Summoning Bell"))
+        -- Move directly to the summoning bell using its coordinates
+        Movement(GetObjectRawXPos("Summoning Bell"), GetObjectRawYPos("Summoning Bell"),
+            GetObjectRawZPos("Summoning Bell"))
     else
+        -- Teleport to limsa lominsa if not already in lower decks
         Teleporter("Limsa Lominsa", "tp")
-        --Movement(-123.72, 18.00, 20.55)
-        Movement(GetObjectRawXPos("Summoning Bell"), GetObjectRawYPos("Summoning Bell"), GetObjectRawZPos("Summoning Bell"))
+        -- After teleporting, move to the summoning bell using its coordinates
+        Movement(GetObjectRawXPos("Summoning Bell"), GetObjectRawYPos("Summoning Bell"),
+            GetObjectRawZPos("Summoning Bell"))
     end
 end
 
+-- Function to wait until a specified amount of gil is traded
 -- Usage: WaitForGilIncrease(1)
--- Obtains current gil and waits for specified gil to be traded
--- Acts as the trigger before moving on
+--
+-- This function monitors the gil amount and waits until it increases by the
+-- specified amount. It acts as a trigger before proceeding with further actions.
 function WaitForGilIncrease(gil_increase_amount)
-    -- Gil variable store before trade
+    -- Store the current amount of gil before the trade
     local previous_gil = GetGil()
 
+    -- Continuously check the gil amount until the specified increase is detected
     while true do
-        Sleep(1.0) -- Wait for 1 second between checks
+        Sleep(1.0) -- Pause execution for 1 second between checks
 
+        -- Retrieve the current amount of gil
         local current_gil = GetGil()
+
+        -- Check if the gil has increased by the specified amount
         if current_gil > previous_gil and (current_gil - previous_gil) == gil_increase_amount then
             Echo(gil_increase_amount .. " Gil successfully traded")
-            break -- Exit the loop when the gil increase is detected
+            break -- Exit the loop when the desired increase in gil is detected
         end
 
-        previous_gil = current_gil -- Update gil amount for the next check
+        -- Update the previous gil amount for the next check
+        previous_gil = current_gil
     end
 end
 
@@ -1566,26 +1617,26 @@ end
 -- Will target and invite player to a party, and retrying if the invite timeout happens
 -- Can only be used if target is in range
 function PartyInvite(party_invite_name)
-    local invite_timeout = 305 -- 300 Seconds is the invite timeout, adding 5 seconds for good measure
+    local invite_timeout = 305   -- 300 Seconds is the invite timeout, adding 5 seconds for good measure
     local start_time = os.time() -- Stores the invite time
-    
+
     while not IsInParty() do
         repeat
             Sleep(0.1)
         until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
-        
+
         Target(party_invite_name)
         yield("/invite")
-        
+
         -- Wait for the target player to accept the invite or the timeout to expire
         while not IsInParty() do
             Sleep(0.1)
-            
+
             -- Check if the invite has expired
             if os.time() - start_time >= invite_timeout then
                 Echo("Invite expired. Reinviting " .. party_invite_name)
                 start_time = os.time() -- Reset the start time for the new invite
-                break -- Break the loop to resend the invite
+                break                  -- Break the loop to resend the invite
             end
         end
     end
@@ -1597,45 +1648,45 @@ end
 -- Can be used from anywhere
 -- Semi broken at the moment
 function PartyInviteMenu(party_invite_menu_first, party_invite_menu_full)
-    local invite_timeout = 305 -- 300 Seconds is the invite timeout, adding 5 seconds for good measure
+    local invite_timeout = 305   -- 300 Seconds is the invite timeout, adding 5 seconds for good measure
     local start_time = os.time() -- Stores the invite time
-    
+
     while not IsInParty() do
         repeat
             Sleep(0.1)
         until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
-        
+
         repeat
             yield('/search first "' .. party_invite_menu_first .. '" en jp de fr')
             Sleep(0.5)
         until IsAddonVisible("SocialList")
-        
+
         -- Probably needs the node scanner here to match the name, otherwise it will invite whoever was previously searched, will probably mess up for multiple matches too
-        
+
         repeat
             yield('/pcall SocialList true 1 0 "' .. party_invite_menu_full .. '"')
             Sleep(0.5)
         until IsAddonVisible("ContextMenu")
-        
+
         repeat
             yield("/pcall ContextMenu true 0 3 0")
             Sleep(0.1)
         until not IsAddonVisible("ContextMenu")
-        
+
         repeat
             yield("/pcall Social true -1")
             Sleep(0.1)
         until not IsAddonVisible("Social")
-        
+
         -- Wait for the target player to accept the invite or the timeout to expire
         while not IsInParty() do
             Sleep(0.1)
-            
+
             -- Check if the invite has expired
             if os.time() - start_time >= invite_timeout then
                 Echo("Invite expired. Reinviting " .. party_invite_menu_full)
                 start_time = os.time() -- Reset the start time for the new invite
-                break -- Break the loop to resend the invite
+                break                  -- Break the loop to resend the invite
             end
         end
     end
@@ -1649,9 +1700,9 @@ function PartyDisband()
         repeat
             Sleep(0.1)
         until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
-        
+
         yield("/partycmd disband")
-        
+
         repeat
             yield("/pcall SelectYesno true 0")
             Sleep(0.1)
@@ -1697,20 +1748,20 @@ function PartyLeave()
         repeat
             Sleep(0.1)
         until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
-        
+
         yield("/partycmd leave")
-        
+
         repeat
             Sleep(0.1)
         until IsAddonVisible("SelectYesno")
-        
+
         Sleep(0.1)
-        
+
         repeat
             yield("/pcall SelectYesno true 0")
             Sleep(0.1)
         until not IsAddonVisible("SelectYesno")
-        
+
         LogInfo("[VAC] Party has been left.")
     else
         LogInfo("[VAC] Player is not in a party.")
@@ -1725,14 +1776,14 @@ function EstateTeleport(estate_char_name, estate_type)
     repeat
         Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
-    
+
     yield("/estatelist " .. estate_char_name)
-    
+
     repeat
         yield("/pcall TeleportHousingFriend true " .. estate_type)
         Sleep(0.1)
     until not IsAddonVisible("TeleportHousingFriend")
-    
+
     ZoneTransitions()
 end
 
@@ -1744,7 +1795,7 @@ function RelogCharacter(relog_char_name)
     repeat
         Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
-    
+
     yield("/ays relog " .. relog_char_name)
 end
 
@@ -1754,22 +1805,22 @@ function EquipRecommendedGear()
     repeat
         Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
-    
+
     repeat
         yield("/character")
         Sleep(0.1)
     until IsAddonVisible("Character")
-    
+
     repeat
         yield("/pcall Character true 12")
         Sleep(0.1)
     until IsAddonVisible("RecommendEquip")
-    
+
     repeat
         yield("/character")
         Sleep(0.1)
     until not IsAddonVisible("Character")
-    
+
     repeat
         yield("/pcall RecommendEquip true 0")
         Sleep(0.1)
@@ -1789,7 +1840,7 @@ end
 function GetRandomNumber(min, max)
     -- Reseed the random number
     math.randomseed(os.time() + os.clock() * 100000)
-    
+
     -- Generate and return a random number from the min and max values
     return min + (max - min) * math.random()
 end
@@ -1800,11 +1851,11 @@ function GetPlayerPos()
     -- Find and format player pos
     local x, y, z = GetPlayerRawXPos(), GetPlayerRawYPos(), GetPlayerRawZPos()
     local pos = string.format("%.2f, %.2f, %.2f", x, y, z)
-    
+
     return pos
 end
 
--- Usage: GetPlayerJob() 
+-- Usage: GetPlayerJob()
 -- Returns the current player job abbreviation
 function GetPlayerJob()
     -- Mapping for GetClassJobId()
@@ -1822,7 +1873,7 @@ function DoAction(action_name)
             Sleep(0.1)
         until not GetCharacterCondition(4)
     end
-    
+
     yield('/ac "' .. action_name .. '"')
 end
 
@@ -1835,7 +1886,7 @@ function DoGeneralAction(general_action_name)
             Sleep(0.1)
         until not GetCharacterCondition(4)
     end
-    
+
     yield('/gaction "' .. general_action_name .. '"')
 end
 
@@ -1864,31 +1915,31 @@ end
 function DoQuest(quest_do_name)
     -- Look up the quest by name
     local quest = QuestNameList[quest_do_name]
-    
+
     -- If the quest not found, echo and return false
     if not quest then
         Echo('Quest "' .. quest_do_name .. '" not found.')
         return false
     end
-    
+
     -- Check if the quest is already completed
     if IsQuestComplete(quest.quest_key) then
         Echo('You have already completed the "' .. quest_do_name .. '" quest.')
         return true
     end
-    
+
     -- Start the quest
     yield("/qst next " .. quest.quest_id)
     Sleep(0.5)
     yield("/qst start")
-    
+
     -- Wait until the quest is complete, with condition checking since some NPCs talk too long
     repeat
         Sleep(0.1)
     until IsQuestComplete(quest.quest_key) and IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32)
-    
+
     Sleep(0.5)
-    
+
     return true
 end
 
@@ -1919,41 +1970,41 @@ function DutyFinderQueue(duty_finder_tab_number, duty_finder_number)
         yield("/dutyfinder")
         Sleep(0.1)
     until IsAddonVisible("ContentsFinder")
-    
+
     -- Pick the duty tab
     repeat
         yield("/pcall ContentsFinder true 1 " .. duty_finder_tab_number)
         Sleep(0.1)
     until IsAddonVisible("JournalDetail")
-    
+
     -- Clear the duty selection
     repeat
         yield("/pcall ContentsFinder true 12 1")
         Sleep(0.1)
     until IsAddonVisible("ContentsFinder")
-    
+
     -- Pick the duty
     repeat
         yield("/pcall ContentsFinder true 3 " .. duty_finder_number)
         Sleep(0.1)
     until IsAddonVisible("ContentsFinder")
-    
+
     -- Take note of current ZoneID to know when duty is over later
     Sleep(0.1)
     local current_zone_id = GetZoneID()
-    
+
     -- Queue the duty
     repeat
         yield("/pcall ContentsFinder true 12 0")
         Sleep(0.1)
     until IsAddonVisible("ContentsFinderConfirm")
-    
+
     -- Accept the duty
     repeat
         yield("/pcall ContentsFinderConfirm true 8")
         Sleep(0.1)
     until not IsAddonVisible("ContentsFinderConfirm")
-    
+
     -- Compare ZoneID to know when duty is over
     Sleep(5.0)
     if GetZoneID() ~= current_zone_id then
@@ -1973,48 +2024,48 @@ end
 -- will return to this later
 
 -- function DutyFinderQueue(duty_finder_number, duty_finder_name)
-    -- -- Open duty finder
-    -- repeat
-        -- yield("/dutyfinder")
-        -- Sleep(0.1)
-    -- until IsAddonVisible("ContentsFinder")
-    
-    -- -- Clear the duty selection
-    -- repeat
-        -- yield("/pcall ContentsFinder true 12 1")
-        -- Sleep(0.1)
-    -- until IsAddonVisible("ContentsFinder")
-    
-    -- -- Pick the duty
-    -- repeat
-        -- OpenRegularDuty(duty_finder_number)
-        -- Sleep(0.1)
-    -- until IsAddonVisible("ContentsFinder")
-    
-    -- -- Take note of current ZoneID to know when duty is over later
-    -- Sleep(0.1)
-    -- local current_zone_id = GetZoneID()
-    
-    -- -- Queue the duty
-    -- repeat
-        -- yield("/pcall ContentsFinder true 12 0")
-        -- Sleep(0.1)
-    -- until IsAddonVisible("ContentsFinderConfirm")
-    
-    -- -- Accept the duty
-    -- repeat
-        -- yield("/pcall ContentsFinderConfirm true 8")
-        -- Sleep(0.1)
-    -- until not IsAddonVisible("ContentsFinderConfirm")
-    
-    -- -- Compare ZoneID to know when duty is over
-    -- Sleep(5.0)
-    -- if GetZoneID() ~= current_zone_id then
-        -- repeat
-            -- ZoneCheck(GetZoneID())
-            -- Sleep(0.1)
-        -- until current_zone_id == GetZoneID()
-    -- end
+-- -- Open duty finder
+-- repeat
+-- yield("/dutyfinder")
+-- Sleep(0.1)
+-- until IsAddonVisible("ContentsFinder")
+
+-- -- Clear the duty selection
+-- repeat
+-- yield("/pcall ContentsFinder true 12 1")
+-- Sleep(0.1)
+-- until IsAddonVisible("ContentsFinder")
+
+-- -- Pick the duty
+-- repeat
+-- OpenRegularDuty(duty_finder_number)
+-- Sleep(0.1)
+-- until IsAddonVisible("ContentsFinder")
+
+-- -- Take note of current ZoneID to know when duty is over later
+-- Sleep(0.1)
+-- local current_zone_id = GetZoneID()
+
+-- -- Queue the duty
+-- repeat
+-- yield("/pcall ContentsFinder true 12 0")
+-- Sleep(0.1)
+-- until IsAddonVisible("ContentsFinderConfirm")
+
+-- -- Accept the duty
+-- repeat
+-- yield("/pcall ContentsFinderConfirm true 8")
+-- Sleep(0.1)
+-- until not IsAddonVisible("ContentsFinderConfirm")
+
+-- -- Compare ZoneID to know when duty is over
+-- Sleep(5.0)
+-- if GetZoneID() ~= current_zone_id then
+-- repeat
+-- ZoneCheck(GetZoneID())
+-- Sleep(0.1)
+-- until current_zone_id == GetZoneID()
+-- end
 -- end
 
 -- NEEDS loot rules and language fixing
@@ -2031,14 +2082,14 @@ end
 -- 8 = Language (Jp, En, De, Fr)
 -- Automatically sets specified duty finder settings
 function DutyFinderSettings(...)
-    local duty_finder_settings = {...}
+    local duty_finder_settings = { ... }
 
     -- Open duty finder
     repeat
         yield("/dutyfinder")
         Sleep(0.1)
     until IsAddonVisible("ContentsFinder")
-    
+
     -- Open duty finder settings
     repeat
         yield("/pcall ContentsFinder true 15")
@@ -2052,7 +2103,7 @@ function DutyFinderSettings(...)
             Sleep(0.1)
         until IsAddonVisible("ContentsFinderSetting")
     end
-    
+
     -- Close duty finder settings
     repeat
         yield("/pcall ContentsFinderSetting true 0")
@@ -2069,7 +2120,7 @@ function DutyFinderSettingsClear()
         yield("/dutyfinder")
         Sleep(0.1)
     until IsAddonVisible("ContentsFinder")
-    
+
     -- Open duty finder settings
     repeat
         yield("/pcall ContentsFinder true 15")
@@ -2083,7 +2134,7 @@ function DutyFinderSettingsClear()
             Sleep(0.1)
         until IsAddonVisible("ContentsFinderSetting")
     end
-    
+
     -- Close duty finder settings
     repeat
         yield("/pcall ContentsFinderSetting true 0")
@@ -2104,7 +2155,7 @@ function Dismount()
 
         repeat
             Sleep(0.1)
-        until IsPlayerAvailable() and not IsPlayerCasting() 
+        until IsPlayerAvailable() and not IsPlayerCasting()
     else
         -- do nothing
     end
@@ -2118,7 +2169,7 @@ function DropboxSetAll(dropbox_gil)
         LogInfo("[VAC] Item_List is nil. Cannot set items.")
         return
     end
-    
+
     local gil = dropbox_gil or 999999999 -- Gil cap
 
     -- list that stores all the items in your inventory and their amounts
@@ -2134,7 +2185,7 @@ function DropboxSetAll(dropbox_gil)
                 inventory[id] = item_count
             end
         end
-        
+
         Sleep(0.0001)
     end
 
@@ -2142,7 +2193,7 @@ function DropboxSetAll(dropbox_gil)
         if id == 1 then
             -- Set gil to gil cap or specified gil amount
             DropboxSetItemQuantity(id, false, gil)
-        elseif id < 2 or id > 19 then -- Excludes Shards, Crystals, and Clusters
+        elseif id < 2 or id > 19 then                 -- Excludes Shards, Crystals, and Clusters
             DropboxSetItemQuantity(id, false, 139860) -- NQ, 999*140
             DropboxSetItemQuantity(id, true, 139860)  -- HQ, 999*140
         end
@@ -2231,11 +2282,11 @@ end
 -- ZoneTransitions() not required to be called after
 function ReturnHomeWorld()
     Echo("Attempting to return to " .. GetHomeWorld())
-    
+
     if GetCurrentWorld() ~= GetHomeWorld() then
         Teleporter(GetHomeWorld(), "li")
     end
-    
+
     repeat
         Sleep(0.1)
     until GetCurrentWorld() == GetHomeWorld() and IsPlayerAvailable() and not LifestreamIsBusy()
@@ -2244,14 +2295,14 @@ end
 -- Usage: CheckPluginsEnabled("AutoRetainer") or CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream")
 -- Can take an infinite amount of plugin strings
 -- Will check if the player has the specified plugins installed/enabled and echoes enabled + disabled plugins
--- If statement can be used 
+-- If statement can be used
 function CheckPluginsEnabled(...)
     local enabled_plugins = {}
     local missing_plugins = {}
-    
+
     -- Pass all arguments into a table
-    local plugins = {...}
-    
+    local plugins = { ... }
+
     for _, plugin_name in ipairs(plugins) do
         if HasPlugin(plugin_name) then
             table.insert(enabled_plugins, plugin_name)
@@ -2259,11 +2310,11 @@ function CheckPluginsEnabled(...)
             table.insert(missing_plugins, plugin_name)
         end
     end
-    
+
     -- Sort the plugin names a-z
     table.sort(enabled_plugins)
     table.sort(missing_plugins)
-    
+
     -- Echo enabled plugins
     if #enabled_plugins > 0 then
         LogInfo("[VAC] Enabled plugins: " .. table.concat(enabled_plugins, ", "))
@@ -2272,7 +2323,7 @@ function CheckPluginsEnabled(...)
         LogInfo("[VAC] No plugins are enabled.")
         Echo("No plugins are enabled.")
     end
-    
+
     -- Echo missing plugins
     if #missing_plugins > 0 then
         LogInfo("[VAC] Missing or not enabled plugins: " .. table.concat(missing_plugins, ", "))
