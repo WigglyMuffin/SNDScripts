@@ -2184,23 +2184,23 @@ function DropboxSetAll(dropbox_gil)
         return
     end
     
-    local gil = 999999999 -- Gil cap
+    -- Gil cap or specified gil amount
+    local gil = dropbox_gil or 999999999
     
-    if dropbox_gil then
-        gil = dropbox_gil
-    end
+    -- Maximum quantity for items (999 * 140)
+    local max_quantity = 139860
     
     -- Iterate over the Item_List
     for id, item in pairs(Item_List) do
         -- Check if the item is tradeable
-        if item['Untradeable'] == false then
+        if not item['Untradeable'] then
             if id == 1 then
                 -- Set gil to gil cap or specified gil amount
                 DropboxSetItemQuantity(id, false, gil)
             elseif id < 2 or id > 19 then -- Excludes Shards, Crystals, and Clusters
                 -- Set all item ID except 2-19
-                DropboxSetItemQuantity(id, false, 139860) -- NQ, 999*140
-                DropboxSetItemQuantity(id, true, 139860)  -- HQ, 999*140
+                DropboxSetItemQuantity(id, false, max_quantity) -- NQ
+                DropboxSetItemQuantity(id, true, max_quantity)  -- HQ
             end
         end
         
@@ -2217,7 +2217,7 @@ function DropboxClearAll()
     end
     
     for id, item in pairs(Item_List) do
-        if item['Untradeable'] == false then
+        if not item['Untradeable'] then
             DropboxSetItemQuantity(id, false, 0) -- NQ
             DropboxSetItemQuantity(id, true, 0)  -- HQ
         end
