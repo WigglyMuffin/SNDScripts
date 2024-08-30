@@ -640,8 +640,6 @@ function DoHuntLog(target_name, target_distance, class, rank)
 
     if AmountLeft > 0 and TargetsLeft then
         while not finished do
-            TargetsLeft, AmountLeft = HuntLogCheck(target_name, class, rank)
-
             if AmountLeft > 0 then
                 repeat
                     FindAndKillTarget(target_name, target_distance)
@@ -649,11 +647,10 @@ function DoHuntLog(target_name, target_distance, class, rank)
                     Sleep(3)
                 until AmountLeft == 0
             end
-
+            TargetsLeft, AmountLeft = HuntLogCheck(target_name, class, rank)
             if AmountLeft == 0 then
                 finished = true
             end
-            Sleep(3)
         end
 
         if not GetCharacterCondition(26) then
