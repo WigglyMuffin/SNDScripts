@@ -2163,7 +2163,7 @@ end
 -- Optionally can include a numerical value to set gil transfer amount
 function DropboxSetAll(dropbox_gil)
     if not Item_List then
-        LogInfo("Item_List is nil. Cannot set items.")
+        LogInfo("[VAC] Item_List is nil. Cannot set items.")
         return
     end
     
@@ -2195,7 +2195,7 @@ end
 -- Clears all items in Dropbox plugin
 function DropboxClearAll()
     if not Item_List then
-        LogInfo("Item_List is nil. Cannot clear items.")
+        LogInfo("[VAC] Item_List is nil. Cannot clear items.")
         return
     end
     
