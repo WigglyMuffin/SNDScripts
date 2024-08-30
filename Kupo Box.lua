@@ -182,11 +182,11 @@ local function ProcessAltCharacters(character_list_kupobox)
 
             -- Check if alt character on correct server
             if GetCurrentWorld() == World_ID_List[destination_server].ID then
-                -- already on the right server, do nothing
-                LogInfo("[KupoBox] Already on the right server to trade: "..destination_server)
+                -- If player is on destination_server then do nothing
+                LogInfo("[KupoBox] Already on the right server to trade: " .. destination_server)
             else
-                -- go to the needed server
-                LogInfo("[KupoBox] On the wrong server, transferring to: "..destination_server)
+                -- If player is not on destination_server then go there
+                LogInfo("[KupoBox] On the wrong server, transferring to: " .. destination_server)
                 Teleporter(destination_server, "li")
             end
 

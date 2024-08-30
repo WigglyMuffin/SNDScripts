@@ -64,6 +64,7 @@ function DOL()
     if not home then
         Teleporter(FindWorldByID(GetHomeWorld()), "li")
         Sleep(1)
+        
         repeat
             Sleep(0.1)
         until not LifestreamIsBusy() and IsPlayerAvailable()

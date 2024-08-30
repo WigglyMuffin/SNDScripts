@@ -1461,7 +1461,6 @@ function FindZoneIDByAetheryte(targetAetheryte)
     return nil, "Not found"
 end
 
-
 -- Function to find the name of an aetheryte by ID
 -- Usage: local name = FindAetheryteNameByID("55")
 -- 
@@ -1479,8 +1478,6 @@ function FindAetheryteNameByID(aetheryte_id)
     end
     return nil  -- Return nil if not found
 end
-
-
 
 -- Function to find the ID of an aetheryte by name
 -- Usage: local id = FindAetheryteIDByName("Aleport")
@@ -1543,14 +1540,34 @@ end
 -- Finds specified object and paths to it
 -- Optionally can include a range value to stop once distance between character and target has been reached
 function PathToObject(path_object_name, range)
-    if range == nil then
-        Movement(GetObjectRawXPos(path_object_name), GetObjectRawYPos(path_object_name),
-            GetObjectRawZPos(path_object_name))
-    else
-        Movement(GetObjectRawXPos(path_object_name), GetObjectRawYPos(path_object_name),
-            GetObjectRawZPos(path_object_name), range)
+    -- Check whether path_object_name isn't nil
+    if not path_object_name or path_object_name == "" then
+        LogInfo("[VAC] PathToObject name is empty.")
+        Echo("PathToObject name is empty.")
+        return
     end
 
+    path_object_name = string.lower(path_object_name)
+
+    if not DoesObjectExist(path_object_name) then
+        LogInfo("[VAC] Object '" .. path_object_name .. "' does not exist.")
+        Echo("Object '" .. path_object_name .. "' does not exist.")
+        return
+    end
+
+    -- Get the object pos
+    local x_pos = GetObjectRawXPos(path_object_name)
+    local y_pos = GetObjectRawYPos(path_object_name)
+    local z_pos = GetObjectRawZPos(path_object_name)
+
+    -- Pass x y z pos to Movement, range optional
+    if range then
+        Movement(x_pos, y_pos, z_pos, range)
+    else
+        Movement(x_pos, y_pos, z_pos)
+    end
+
+    -- Wait until the pathing is complete
     repeat
         Sleep(0.1)
     until not PathIsRunning()
