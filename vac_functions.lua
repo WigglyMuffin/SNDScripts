@@ -43,6 +43,7 @@ Zone_List = vac_lists.Zone_List
 GC_MIN_List = vac_lists.GC_MIN_List
 GC_BTN_List = vac_lists.GC_BTN_List
 GC_FSH_List = vac_lists.GC_FSH_List
+Fate_List = vac_lists.Fate_List
 
 -- Usage: EnsureFolderExists("\\path\\to\\your\\folder")
 --
