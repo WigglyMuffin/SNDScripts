@@ -2163,37 +2163,30 @@ end
 -- Optionally can include a numerical value to set gil transfer amount
 function DropboxSetAll(dropbox_gil)
     if not Item_List then
-        LogInfo("[VAC] Item_List is nil. Cannot set items.")
+        LogInfo("Item_List is nil. Cannot set items.")
         return
     end
     
-    local gil = dropbox_gil or 999999999 -- Gil cap
-
-    -- list that stores all the items in your inventory and their amounts
-    local inventory = {}
-
+    local gil = 999999999 -- Gil cap
+    
+    if dropbox_gil then
+        gil = dropbox_gil
+    end
+    
     -- Iterate over the Item_List
     for id, item in pairs(Item_List) do
         -- Check if the item is tradeable
-        if item['Untradeable'] == false or item['Name'] ~= "" then
-            local item_count = GetItemCount(id, true)
-            if item_count > 0 then
-                -- Add the item to the inventory list
-                inventory[id] = item_count
+        if item['Untradeable'] == false then
+            if id == 1 then
+                -- Set gil to gil cap or specified gil amount
+                DropboxSetItemQuantity(id, false, gil)
+            elseif id < 2 or id > 19 then -- Excludes Shards, Crystals, and Clusters
+                -- Set all item ID except 2-19
+                DropboxSetItemQuantity(id, false, 139860) -- NQ, 999*140
+                DropboxSetItemQuantity(id, true, 139860)  -- HQ, 999*140
             end
         end
         
-        Sleep(0.0001)
-    end
-
-    for id, item in pairs(inventory) do
-        if id == 1 then
-            -- Set gil to gil cap or specified gil amount
-            DropboxSetItemQuantity(id, false, gil)
-        elseif id < 2 or id > 19 then -- Excludes Shards, Crystals, and Clusters
-            DropboxSetItemQuantity(id, false, 139860) -- NQ, 999*140
-            DropboxSetItemQuantity(id, true, 139860)  -- HQ, 999*140
-        end
         Sleep(0.0001)
     end
 end
@@ -2202,29 +2195,15 @@ end
 -- Clears all items in Dropbox plugin
 function DropboxClearAll()
     if not Item_List then
-        LogInfo("[VAC] Item_List is nil. Cannot clear items.")
+        LogInfo("Item_List is nil. Cannot clear items.")
         return
     end
-
-    -- list that stores all the items in your inventory and their amounts
-    local inventory = {}
-
-    -- Iterate over the item list and checks it against your inventory, if it finds an item in your inventory it will be added to the list to be cleared
+    
     for id, item in pairs(Item_List) do
-        if item['Untradeable'] == false or item['Name'] ~= "" then
-            local item_count = GetItemCount(id, true)
-            if item_count > 0 then
-                -- Add the item to the inventory list
-                inventory[id] = item_count
-            end
+        if item['Untradeable'] == false then
+            DropboxSetItemQuantity(id, false, 0) -- NQ
+            DropboxSetItemQuantity(id, true, 0)  -- HQ
         end
-        Sleep(0.0001)
-    end
-
-    -- Clear the items in inventory
-    for id, item in pairs(inventory) do
-        DropboxSetItemQuantity(id, false, 0) -- NQ
-        DropboxSetItemQuantity(id, true, 0)  -- HQ
         Sleep(0.0001)
     end
 end
