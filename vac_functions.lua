@@ -1443,20 +1443,24 @@ function FindZoneIDByAetheryte(targetAetheryte)
     if type(targetAetheryte) ~= "string" then
         return nil
     end
+
     local lowerTarget = targetAetheryte:lower()
+
     for key, value in pairs(Zone_List) do
         if type(value) == "table" and type(value["Aetherytes"]) == "table" then
             for _, aetheryte in ipairs(value["Aetherytes"]) do
-                if aetheryte:lower():find(lowerTarget, 1, true) then
-                    return tonumber(key), aetheryte
+                if type(aetheryte) == "table" and type(aetheryte["Name"]) == "string" then
+                    if aetheryte["Name"]:lower():find(lowerTarget, 1, true) then
+                        return tonumber(key), aetheryte
+                    end
                 end
             end
-        else
         end
     end
 
     return nil, "Not found"
 end
+
 
 -- Function to find the name of an aetheryte by ID
 -- Usage: local name = FindAetheryteNameByID("55")
