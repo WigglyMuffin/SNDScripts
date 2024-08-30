@@ -772,9 +772,8 @@ function MaelstromRank1()
             Teleporter("The Hawthorne Hut", "tp")
         end
         
-        Movement(-135.26, 15.12, -1.46)
-        
         if HuntLogCheck(MaelstromEnemiesLog1[5], 9, 0) then
+            Movement(-135.26, 15.12, -1.46)
             DoHuntLog(MaelstromEnemiesLog1[5], 2500, 9, 0)
         end
         
@@ -874,34 +873,36 @@ function MaelstromRank2()
         if not ZoneCheck("Costa del Sol") then
             Teleporter("Costa del Sol", "tp")
         end
-        
+
         Movement(340.18, 34.70, 227.85)
         DoHuntLog(MaelstromEnemiesLog2[2], 2500, 9, 1)
     end
-    
+
     -- Kobold Bedesman and Kobold Priest
     if HuntLogCheck(MaelstromEnemiesLog2[6], 9, 1) or HuntLogCheck(MaelstromEnemiesLog2[7], 9, 1) then
-        if not ZoneCheck("Camp Bronze Lake") then
-            Teleporter("Camp Bronze Lake", "tp")
-        end
-        
-        Movement(284.54, 42.55, -204.27)
-        ZoneTransitions()
-        Movement(191.80, 63.95, -273.12)
-        
         if HuntLogCheck(MaelstromEnemiesLog2[6], 9, 1) then
+            if not ZoneCheck("Camp Bronze Lake") then
+                Teleporter("Camp Bronze Lake", "tp")
+            end
+
+            Movement(284.54, 42.55, -204.27)
+            ZoneTransitions()
+            Movement(191.80, 63.95, -273.12)
             DoHuntLog(MaelstromEnemiesLog2[6], 2500, 9, 1)
+            Movement(-113.44, 64.59, -216.03)
+            AttuneAetheryte()
         end
-        
-        Movement(-113.44, 64.59, -216.03)
-        AttuneAetheryte()
-        
+
         if HuntLogCheck(MaelstromEnemiesLog2[7], 9, 1) then
+            if not ZoneCheck("Camp Overlook") then
+                Teleporter("Camp Overlook", "tp")
+            end
+
             Movement(39.38, 48.42, -381.98)
             DoHuntLog(MaelstromEnemiesLog2[7], 2500, 9, 1)
         end
     end
-    
+
     -- Sylvan Sigh
     if HuntLogCheck(MaelstromEnemiesLog2[8], 9, 1) then
         if not ZoneCheck("The Hawthorne Hut") then

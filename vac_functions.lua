@@ -112,27 +112,40 @@ end
 function AttuneAetheryte()
     repeat
         Sleep(0.1)
-    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not IsMoving() or GetCharacterCondition(32)
-    
+    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not IsMoving()
+
+    -- Target and interact with the Aetheryte
     Target("Aetheryte")
     Sleep(0.1)
     Dismount()
     Sleep(0.5)
     yield("/interact")
-    
-    -- Checks if player is attuning otherwise exit menu
+    Sleep(0.1)
+
+    -- Handle attuning or already attuned states
     if GetCharacterCondition(27) then
         repeat
             Sleep(0.1)
         until IsPlayerAvailable()
-        
+
         Sleep(1.0)
-    else
+    elseif GetCharacterCondition(32) then
+        -- Handle the case where the player is already attuned
         repeat
-            yield("/pcall SelectString true 3")
+            Sleep(0.1)
+        until IsAddonVisible("SelectString")
+
+        Sleep(0.1)
+        yield("/pcall SelectString true 3")
+
+        repeat
             Sleep(0.1)
         until not IsAddonVisible("SelectString")
     end
+
+    repeat
+        Sleep(0.1)
+    until IsPlayerAvailable()
 end
 
 -- Usage: IsInParty()
@@ -208,12 +221,22 @@ function QuestNPC(DialogueType, DialogueConfirm, DialogueOption)
         until IsAddonVisible(DialogueType)
         if DialogueOption == nil then
             repeat
-                yield("/pcall " .. DialogueType .. " true 0")
+                Sleep(0.1)
+            until IsAddonVisible(DialogueType)
+            
+            yield("/pcall " .. DialogueType .. " true 0")
+        
+            repeat
                 Sleep(0.1)
             until not IsAddonVisible(DialogueType)
         else
             repeat
-                yield("/pcall " .. DialogueType .. " true " .. DialogueOption)
+                Sleep(0.1)
+            until IsAddonVisible(DialogueType)
+            
+            yield("/pcall " .. DialogueType .. " true " .. DialogueOption)
+
+            repeat
                 Sleep(0.1)
             until not IsAddonVisible(DialogueType)
         end
@@ -526,20 +549,24 @@ function OpenHuntLog(class, rank, show)
     -- 1 Maelstrom
     -- 2 Twin adders
     -- 3 Immortal flames
+    
     repeat
         yield("/huntinglog")
         Sleep(0.5)
     until IsAddonReady("MonsterNote")
+    
     local gc_id = GetPlayerGC()
+    
     if class == 9 then
-        yield("/pcall MonsterNote false 3 9 "..tostring(gc_id))
+        yield("/pcall MonsterNote false 3 9 " .. tostring(gc_id))
     else 
-        yield("/pcall MonsterNote false 0 "..tostring(class))
+        yield("/pcall MonsterNote false 0 " .. tostring(class))
     end
+    
     Sleep(0.3)
-    yield("/pcall MonsterNote false 1 "..rank)
+    yield("/pcall MonsterNote false 1 " .. rank)
     Sleep(0.3)
-    yield("/pcall MonsterNote false 2 "..show)
+    yield("/pcall MonsterNote false 2 " .. show)
 end
 
 -- Usage: CloseHuntLog()  
@@ -562,13 +589,16 @@ function HuntLogCheck(target_name, class, rank)
         local target_amount = tostring(GetNodeText("MonsterNote", 2, sub_node, 3))
         local first_number = tonumber(target_amount:sub(1, 1))
         local last_number = tonumber(target_amount:sub(-1))
+        
         if first_number == last_number then
             return 0
         else
             return last_number - first_number
         end
     end
+    
     local function FindTargetNode()
+    
         for sub_node = 5, 60 do
             Sleep(0.001)
             node_text = tostring(GetNodeText("MonsterNote", 2, sub_node, 4))
@@ -577,13 +607,16 @@ function HuntLogCheck(target_name, class, rank)
             end
         end
     end
+    
     local target_amount_needed_node = FindTargetNode()
+    
     if not target_amount_needed_node then
-        LogInfo("[VAC] Couldn't find "..target_name.." in hunting log, likely already finished")
+        LogInfo("[VAC] Couldn't find " .. target_name .. " in hunting log, likely already finished")
         return false, 0
     else
-        LogInfo("[VAC] Found "..target_name.." in hunting log, time to hunt")
+        LogInfo("[VAC] Found " .. target_name .. " in hunting log, time to hunt")
         local target_amount_needed = CheckTargetAmountNeeded(target_amount_needed_node)
+        
         if target_amount_needed == 0 then
             CloseHuntLog()
             return false, target_amount_needed
@@ -601,9 +634,11 @@ end
 function DoHuntLog(target_name, target_distance, class, rank)
     local finished = false
     local TargetsLeft, AmountLeft = HuntLogCheck(target_name,class,rank)
+    
     if AmountLeft > 0 and TargetsLeft then
         while not finished do 
             TargetsLeft, AmountLeft = HuntLogCheck(target_name,class,rank)
+            
             if AmountLeft > 0 then
                 repeat
                     FindAndKillTarget(target_name, target_distance)
@@ -611,11 +646,13 @@ function DoHuntLog(target_name, target_distance, class, rank)
                     Sleep(3)
                 until AmountLeft == 0
             end
+            
             if AmountLeft == 0 then
                 finished = true
             end
             Sleep(3)
         end
+        
         if not GetCharacterCondition(26) then
             yield("/rotation off")
         end
@@ -797,13 +834,15 @@ end
 
 -- Usage: LogOut()
 function LogOut()
+    yield("/logout")
+    
     repeat
-        yield("/logout")
         Sleep(0.1)
     until IsAddonVisible("SelectYesno")
     
+    yield("/pcall SelectYesno true 4")
+    
     repeat
-        yield("/pcall SelectYesno true 4")
         Sleep(0.1)
     until not IsAddonVisible("SelectYesno")
 end
@@ -816,7 +855,7 @@ function Movement(x_position, y_position, z_position, range)
     local max_retries = 100
     local stuck_check_interval = 0.1
     local stuck_threshold_seconds = 3
-    local min_progress_distance = 1
+    local min_progress_distance = 0.1
     local min_distance_for_mounting = 20
 
     local function floor_position(pos)
@@ -873,7 +912,9 @@ function Movement(x_position, y_position, z_position, range)
     NavToDestination()
 
     local stuck_timer = 0
+    local previous_position = nil
     local previous_distance_to_target = nil
+    
     while true do
         if not GetCharacterCondition(45) then
             local xpos = floor_position(GetPlayerRawXPos())
@@ -882,20 +923,25 @@ function Movement(x_position, y_position, z_position, range)
             Sleep(0.1)
             
             local current_distance_to_target = GetDistanceToTarget(xpos, ypos, zpos)
+            local current_position = { x = xpos, y = ypos, z = zpos }
 
             if IsWithinRange(xpos, ypos, zpos) and not GetCharacterCondition(45) then
                 yield("/vnav stop")
                 break
             end
 
-            if previous_distance_to_target and not GetCharacterCondition(45) then
-                if current_distance_to_target >= previous_distance_to_target - min_progress_distance then
+            if previous_position and previous_distance_to_target and not GetCharacterCondition(45) then
+            local distance_traveled = GetDistanceToTarget(previous_position.x, previous_position.y, previous_position.z)
+            
+                if current_distance_to_target >= previous_distance_to_target - min_progress_distance and distance_traveled < min_progress_distance then
                     stuck_timer = stuck_timer + stuck_check_interval
                 else
                     stuck_timer = 0
                 end
             end
+            
             previous_distance_to_target = current_distance_to_target
+            previous_position = current_position
 
             if stuck_timer >= stuck_threshold_seconds and not GetCharacterCondition(45) then
                 DoGeneralAction("Jump")
@@ -919,25 +965,29 @@ function Movement(x_position, y_position, z_position, range)
     end
 end
 
-
 -- Usage: OpenTimers()
 -- this should probably be renamed to open gc timers
 -- Opens the timers window
 function OpenTimers()
     local last_trigger_time = os.time()
-    local retry_interval = 5  -- x seconds interval between retries
+    local retry_interval = 5 -- x seconds interval between retries
 
     repeat
         Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerOccupied()
+    
     yield("/timers")
+    
     repeat
         local current_time = os.time()
-        if current_time - last_trigger_time >= retry_interval then  -- Activate once every x seconds
+        
+        if current_time - last_trigger_time >= retry_interval then -- Activate once every x seconds
             yield("/timers")
-            last_trigger_time = current_time  -- Store the last trigger time
+            last_trigger_time = current_time -- Store the last trigger time
         end
+        
         Sleep(0.1)
+        
     until IsAddonReady("ContentsInfo")
 
     last_trigger_time = 0 -- Reset the trigger time
@@ -946,7 +996,7 @@ function OpenTimers()
         local current_time = os.time()
         if current_time - last_trigger_time >= retry_interval then -- Activate once every x seconds
             yield("/pcall ContentsInfo True 12 1")
-            last_trigger_time = current_time  -- Store the last trigger time
+            last_trigger_time = current_time -- Store the last trigger time
         end
         Sleep(0.1)
     until IsAddonReady("ContentsInfoDetail")
@@ -977,20 +1027,29 @@ function BuyFromStore(number_in_list, amount)
     -- compensates for the top being 0
     number_in_list = number_in_list - 1
     attempts = 0
+    
     repeat
         attempts = attempts + 1
         Sleep(0.1)
     until (IsAddonReady("Shop") or attempts >= 100)
+    
     -- attempts above 50 is about 5 seconds
     if attempts >= 100 then
         Echo("Waited too long, store window not found, moving on")
     end
+    
     if IsAddonReady("Shop") and number_in_list and amount then
-        yield("/pcall Shop True 0 "..number_in_list.." "..amount)
+        yield("/pcall Shop True 0 " .. number_in_list .. " " .. amount)
         repeat
             Sleep(0.1)
         until IsAddonReady("SelectYesno")
+        
         yield("/pcall SelectYesno true 0")
+        
+        repeat
+            Sleep(0.1)
+        until not IsAddonReady("SelectYesno")
+        
         Sleep(0.5)
     end
 end
@@ -1039,6 +1098,7 @@ function DoGcRankUp()
 
     local function OpenAndAttemptRankup()
         local gc_target = gc_officer_names[gc_id]
+        
         if gc_target then
             -- Target the correct GC officer
             Target(gc_target)
@@ -1046,14 +1106,18 @@ function DoGcRankUp()
         else
             return
         end
+        
         repeat
             yield("/pint")
             Sleep(0.1)
         until IsAddonReady("SelectString")
+        
         yield("/pcall SelectString true 1")
+        
         repeat
             Sleep(0.1)
         until IsAddonReady("GrandCompanyRankUp")
+        
         yield("/pcall GrandCompanyRankUp true 0")
     end
 
@@ -1073,6 +1137,7 @@ function DoGcRankUp()
     if can_rankup then
         if next_rank == 5 then
             local log_rank_1_complete = IsHuntLogComplete(9, 0)
+            
             if log_rank_1_complete then
                 OpenAndAttemptRankup()
             else
@@ -1103,7 +1168,9 @@ function DoGcRankUp()
             OpenAndAttemptRankup()
         end
     end
-    Sleep(1)
+    
+    Sleep(1.0)
+    
     repeat
         Sleep(0.1)
     until IsPlayerAvailable()
@@ -1128,6 +1195,7 @@ function CanGCRankUp()
         [9] = 9000,
         [10] = 10000
     }
+    
     if gc_id == 1 then -- checks if gc is maelstrom and adds seal amount to current_seals
         current_seals = GetItemCount(20)
         gc_rank = GetMaelstromGCRank()
@@ -1140,7 +1208,9 @@ function CanGCRankUp()
         current_seals = GetItemCount(22)
         gc_rank = GetFlamesGCRank()
     end
+    
     local next_rank = gc_rank + 1 -- adds one so we know which gc rank we're attempting to rank up total
+    
     if current_seals > gc_ranks[next_rank] and next_rank < 10 then -- excludes rank 10 and above as we don't handle that atm
         return true, next_rank
     else
@@ -1154,6 +1224,7 @@ end
 --
 -- All it does is open the gc supply window to whatever tab you want, or changes to a tab if it's already open
 function OpenGcSupplyWindow(tab)
+
     -- swaps tabs if the gc supply list is already open
     if IsAddonVisible("GrandCompanySupplyList") then
         if (tab <= 0 or tab >= 3) then
@@ -1186,10 +1257,13 @@ function OpenGcSupplyWindow(tab)
             yield("/pint")
             Sleep(0.1)
         until IsAddonReady("SelectString")
+        
         yield("/pcall SelectString true 0")
+        
         repeat
             Sleep(0.1)
         until IsAddonReady("GrandCompanySupplyList")
+        
         yield("/pcall GrandCompanySupplyList true 0 " .. tab)
     end
 end
@@ -1202,9 +1276,11 @@ function CloseGcSupplyWindow()
     ::tryagain::
     if IsAddonVisible("GrandCompanySupplyList") then
         yield("/pcall GrandCompanySupplyList true -1")
+        
         repeat
             Sleep(0.1)
         until IsAddonReady("SelectString")
+        
         yield("/pcall SelectString true -1")
     end
     if IsAddonReady("SelectString") then
