@@ -87,7 +87,9 @@ function DOL()
         Sleep(0.1)
     until not LifestreamIsBusy()
     if do_rankups then
-        DoGcRankUp()
+        repeat
+            DoGcRankUp()
+        until not CanGCRankUp()
     end
     OpenGcSupplyWindow(1)
     GcProvisioningDeliver()

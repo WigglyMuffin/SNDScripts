@@ -2183,13 +2183,13 @@ function DropboxSetAll(dropbox_gil)
         LogInfo("[VAC] Item_List is nil. Cannot set items.")
         return
     end
-    
+
     local gil = 999999999 -- Gil cap
-    
+
     if dropbox_gil then
         gil = dropbox_gil
     end
-    
+
     -- Iterate over the Item_List
     for id, item in pairs(Item_List) do
         -- Check if the item is tradeable
@@ -2203,7 +2203,7 @@ function DropboxSetAll(dropbox_gil)
                 DropboxSetItemQuantity(id, true, 139860)  -- HQ, 999*140
             end
         end
-        
+    
         Sleep(0.0001)
     end
 end
@@ -2215,7 +2215,7 @@ function DropboxClearAll()
         LogInfo("[VAC] Item_List is nil. Cannot clear items.")
         return
     end
-    
+
     for id, item in pairs(Item_List) do
         if item['Untradeable'] == false then
             DropboxSetItemQuantity(id, false, 0) -- NQ
