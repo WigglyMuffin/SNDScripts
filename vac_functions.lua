@@ -410,7 +410,10 @@ function FindAndKillTarget(target_name, radius)
         yield("/rotation manual")
 
         repeat
-            if not (GetDistanceToTarget() <= 4) and not PathIsRunning() then
+            if GetDistanceToTarget() <= 4 and PathIsRunning() then
+                yield("/vnav stop")
+            end
+            if not GetDistanceToTarget() <= 4 and not PathIsRunning() then
                 if not auto_attack_triggered then
                     yield("/vnavmesh movetarget")
                 end
