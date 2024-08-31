@@ -50,12 +50,19 @@ to use any of the overrides you need to uncomment the line and set it to what yo
 -- local do_movement_override = true                    -- Options: true = Paths to chosen character, false = Does nothing and waits for chosen character to come to you
 -- local return_home_override = true                    -- Options: true = Returns home from destination, false = Does nothing and logs out
 -- local return_location_override = 0                   -- Options: 0 = do nothing, 1 = limsa, 2 = limsa bell, 3 = nearby bell, 4 = fc 
-
+local gil_cut = 0                                   -- This is how much gil you want to always cut off the top when doing gil trades, just so the character has some gil to travel with
 
 
 -- Here you can add items you want included with every trade
 local always_include = {
-    {"Gil", 5}, -- trades 5 gil
+    {"Salvaged Ring", 99999},
+    {"Salvaged Bracelet", 99999},
+    {"Salvaged Earring", 99999},
+    {"Salvaged Necklace", 99999},
+    {"Extravagant Salvaged Ring", 99999},
+    {"Extravagant Salvaged Bracelet", 99999},
+    {"Extravagant Salvaged Earring", 99999},
+    {"Extravagant Salvaged Necklace", 99999}
 }
 
 -- in case something somehow goes wrong you can set the amount of characters in the list to skip, this goes from the top of the list
@@ -248,7 +255,7 @@ local function Main(character_list_postmoogle)
                 if do_movement then
                     -- Path to main char
                     LogInfo("[PostMoogle] do_movement is set to true, moving towards " .. trading_with)
-                    PathToObject(trading_with, 3)
+                    PathToObject(trading_with, 2)
                 else
                     LogInfo("[PostMoogle] do_movement is set to false, not moving")
                 end
@@ -272,7 +279,7 @@ local function Main(character_list_postmoogle)
                 if do_movement then
                     -- Path to main char
                     LogInfo("[PostMoogle] do_movement is set to true, moving towards " .. trading_with)
-                    PathToObject(trading_with, 3)
+                    PathToObject(trading_with, 2)
                 else
                     LogInfo("[PostMoogle] do_movement is set to false, not moving")
                 end
@@ -303,7 +310,14 @@ local function Main(character_list_postmoogle)
                     local item_name = item[1]
                     local item_id = FindItemID(item_name)
                     local item_amount = item[2]
-                    table.insert(items_to_trade, {id = item_id, amount = item_amount})
+                    local item_inv_amount = GetItemCount(item_id, true)
+                    if item_inv_amount > 0 then
+                        if item_amount > item_inv_amount then
+                            table.insert(items_to_trade, {id = item_id, amount = item_inv_amount})
+                        else
+                            table.insert(items_to_trade, {id = item_id, amount = item_amount})
+                        end
+                    end
                     Sleep(0.0001)
                 end
 
@@ -312,6 +326,7 @@ local function Main(character_list_postmoogle)
                     local item_name = item[1]
                     local item_id = FindItemID(item_name)
                     local item_amount = item[2]
+                    local item_inv_amount = GetItemCount(item_id, true)
                     -- Check if the item already exists in items_to_trade
                     local found = false
                     for _, existing_item in ipairs(items_to_trade) do
@@ -326,7 +341,13 @@ local function Main(character_list_postmoogle)
 
                     -- If the item does not exist, add it to the list
                     if not found then
-                        table.insert(items_to_trade, {id = item_id, amount = item_amount})
+                        if item_inv_amount > 0 then
+                            if item_amount > item_inv_amount then
+                                table.insert(items_to_trade, {id = item_id, amount = item_inv_amount})
+                            else
+                                table.insert(items_to_trade, {id = item_id, amount = item_amount})
+                            end
+                        end
                     end
 
                     Sleep(0.0001)
@@ -341,13 +362,18 @@ local function Main(character_list_postmoogle)
                 end
 
                 -- Do the actual trading
-
+                local gil_has_been_cut = false
+                
                 while not item_trades_succeeded do
                     DropboxClearAll()
                     Sleep(0.1) -- this has to be here otherwise the script will break
                     for _, item in ipairs(items_to_trade_inventory_amount) do
                         local item_id = tonumber(item.id)
                         local item_amount = tonumber(item_amount_lookup[item_id])
+                        if item_id == 1 and not gil_has_been_cut then
+                            item_amount = item_amount - gil_cut
+                            gil_has_been_cut = true
+                        end
                         DropboxSetItemQuantity(item_id, false, item_amount)
                         Sleep(0.0001)
                     end
@@ -366,13 +392,11 @@ local function Main(character_list_postmoogle)
                         local item = items_to_trade_inventory_amount[s]
                         local item_id = item.id
                         local expected_amount = item.amount
-                        Echo(item_id)
-                        Echo(expected_amount)
                         -- Get the current count of the item in the inventory
                         local current_count = GetItemCount(item_id, true)
 
                         -- Check if the current item amount is less than the expected amount
-                        if current_count < expected_amount then
+                        if current_count < expected_amount or current_count == 0 then
                             -- Remove the item from the list
                             table.remove(items_to_trade_inventory_amount, s)
                         end
@@ -385,7 +409,7 @@ local function Main(character_list_postmoogle)
                     end
                 end
 
-
+                local gil_trade_succeeded = false
                 while not gil_trade_succeeded do
                     local gil_inv_amount = GetGil()
                     -- Set gil trade amount to 1

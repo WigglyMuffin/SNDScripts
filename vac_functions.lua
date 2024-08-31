@@ -416,18 +416,19 @@ function FindAndKillTarget(target_name, radius)
             if not (GetDistanceToTarget() <= 4) and not PathIsRunning() then
                 if not auto_attack_triggered then
                     yield("/vnavmesh movetarget")
+                    Sleep(0.1)
                 end
             end
 
             if GetDistanceToTarget() <= 4 and not auto_attack_triggered then
                 DoAction("Auto-attack")
-
+                Sleep(0.1)
                 if IsTargetInCombat() and GetCharacterCondition(26) then
                     auto_attack_triggered = true
                 end
             end
 
-            Sleep(0.1)
+            Sleep(0.05)
         until GetTargetHP() <= 0
 
         yield("/vnavmesh stop")
@@ -2318,10 +2319,11 @@ end
 -- Checks if player is not on home world and returns Home
 -- ZoneTransitions() not required to be called after
 function ReturnHomeWorld()
-    Echo("Attempting to return to " .. GetHomeWorld())
+    local homeworld = FindWorldByID(GetHomeWorld())
+    Echo("Attempting to return to " .. homeworld)
 
     if GetCurrentWorld() ~= GetHomeWorld() then
-        Teleporter(GetHomeWorld(), "li")
+        Teleporter(homeworld, "li")
     end
 
     repeat

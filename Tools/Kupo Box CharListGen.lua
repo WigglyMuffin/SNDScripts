@@ -28,13 +28,21 @@ Generates a character list you can insert into vac_char_list for use with Kupo B
 #####################
 ##    Settings     ##
 ###################]]
--- set the characters you're generating a list with, the list generates in order
--- you could technically just copy the character_list from the vac_char_list if you have one there into this
 
+-- Set the characters you're generating a list with, the list generates in order
+-- You could technically just copy the character_list from the vac_char_list if you have one there into this
 local gen_char_list = {
-    "Mrow Mrow@Louisoux",
-    "Smol Meow@Lich",
-    "Beeg Meow@Zodiark",
+    "Mrow Mrow@Louisoux", -- Character 1
+    "Smol Meow@Lich",     -- Character 2
+    "Beeg Meow@Zodiark",  -- Character 3
+}
+
+-- Here you can define a list of trading partners.
+-- If a partner is not provided (i.e., it remains empty), the default trading partner will be used, the one set in trading_with in the default settings section.
+local trading_with_list = {
+    --"Mrow Mrow@Louisoux",   -- Corresponding trading partner for Character 1
+    --"Smol Meow@Lich",       -- Corresponding trading partner for Character 2
+    --"Beeg Meow@Zodiark"     -- Corresponding trading partner for Character 3
 }
 
 -- Here you set the default settings each character will have when generated
@@ -83,13 +91,24 @@ local function extract_world_from_name(char_name)
     return nil
 end
 
+local function strip_after_at(input_string)
+    local result = string.match(input_string, "([^@]+)")
+    return result
+end
+
 local function generate_character_list_options()
     local character_list_options = {}
 
     for _, char in ipairs(gen_char_list) do
         local char_name = char
         local server_to_use = destination_server
-        
+        local trading_with_override = trading_with_list[_]
+        local trading_with_t = ""
+        if trading_with_override ~= nil then
+            trading_with_t = strip_after_at(trading_with_override)
+        else
+            trading_with_t = strip_after_at(trading_with)
+        end
         -- If set_destination_server_to_home_server is true, extract the world from the character name
         if set_destination_server_to_home_server then
             server_to_use = extract_world_from_name(char_name) or destination_server
@@ -98,7 +117,7 @@ local function generate_character_list_options()
         -- Insert the character data into the list and maintain order
         table.insert(character_list_options, {
             ["Name"] = char_name,
-            ["Trading With"] = trading_with,
+            ["Trading With"] = trading_with_t,
             ["Destination Server"] = server_to_use,
             ["Destination Type"] = destination_type,
             ["Destination Aetheryte"] = destination_aetheryte,
