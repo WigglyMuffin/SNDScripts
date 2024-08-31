@@ -1,5 +1,6 @@
 # Using these scripts
 These scripts are for levelling your DoL jobs on an alt account, they are made for two accounts and are not compatible with a single account.
+
 They are designed to automatically tell you what GC turnins you need for your DoL jobs by giving you an items to gather list, which are then used to distribute from your main account to your alt account using the other provided scripts.
 1. Configure the `vac_char_list.lua` file to include all of your chosen alt account characters following the format specified inside of the file, place this into your `%appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\` of the user account your alt account is located.
 2. Run `Auto gen Provisioning List.lua` on your alt account to generate a `provisioning_list.lua` file which is used for the later scripts, it will be found with GC related things in `%appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\VAC\GC\`, this will be your relevant user account %appdata%.
@@ -9,7 +10,10 @@ They are designed to automatically tell you what GC turnins you need for your Do
 6. You will need to place the `vac_functions.lua` and `vac_lists.lua` files in `%appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\` of your respective user accounts too, for both your main and alt account. Refer to the file structure tree below for a visual representation.
 
 ## Configuring vac_char_list correctly
-Make sure you have `vac_char_list.lua` configured in the following format or some of the scripts will not work. You can use the provided files found in the `Tools` folder named `Kupo Box CharListGen.lua` and `Post Moogle CharListGen.lua` to assist with creating the correct format lists.
+Make sure you have `vac_char_list.lua` configured in the following format or some of the scripts will not work. 
+
+You can use the provided files found in the `Tools` folder named `Kupo Box CharListGen.lua` and `Post Moogle CharListGen.lua` to assist with creating the correct format lists.
+
 A detailed description is available for each variable inside of the included file. The following lists are for demonstration purposes only, but serve as a reference point as well.
 
 ```
