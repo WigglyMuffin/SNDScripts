@@ -481,6 +481,9 @@ local function Main(character_list_postmoogle)
             -- [2] return_home options: 0 = no, 1 = yes
             -- [3] return_location options: 0 = do nothing, 1 = limsa, 2 = limsa bell, 3 = nearby bell, 4 = fc
             local i_temp = i + 1 -- adds +1 to the index so i can check which character is next and only run return routine if the character is different
+            if character_list_postmoogle[i_temp]["Name"] == nil then
+                i_temp = i_temp - 1
+            end
             if alt_char_name ~= character_list_postmoogle[i_temp]["Name"] then
                 Echo("delivery job done")
                 if return_home then
