@@ -1936,13 +1936,15 @@ end
 -- Usage: DoGeneralAction("Jump")
 -- Uses specified general action
 function DoGeneralAction(general_action_name)
-    if GetCharacterCondition(4) then
+    -- Check if the action is not "Jump" and the character is mounted
+    if general_action_name ~= "Jump" and GetCharacterCondition(4) then
         repeat
             Dismount()
             Sleep(0.1)
         until not GetCharacterCondition(4)
     end
 
+    -- Do the general action
     yield('/gaction "' .. general_action_name .. '"')
 end
 
