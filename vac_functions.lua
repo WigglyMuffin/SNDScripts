@@ -19,9 +19,15 @@
 
 -- Full quest list with both quest IDs and key IDs
 -- Dungeon ID list
--- Distance stuff
--- Redo Movement()
--- IsQuestNameAccepted() see below
+-- IsQuestNameAccepted() function
+-- EatFood() function
+-- UseItem() function
+-- Closest aetheryte to player and distance calculations
+-- Add flight to Movement() function
+-- Refactor Teleporter() function
+-- Add fate related functions
+-- Convert over to /callback from /pcall
+-- Add error handling for nil/"" and convert lowercase or tostring/tonumber etc
 
 -- #####################################
 -- #####################################
