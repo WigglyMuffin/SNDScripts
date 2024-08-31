@@ -932,7 +932,7 @@ function MaelstromRank2()
         
         Movement(193.44, -4.12, -4.61)
         DoHuntLog(MaelstromEnemiesLog2[8], 50, 9, 1) -- Morbols are nearby, bad breath is bad
-        Movement(189.85, -4.80, -17.73)
+        Movement(187.28, -0.56, 39.33)
     end
     
     -- Shelfscale Sahagin
