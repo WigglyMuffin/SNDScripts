@@ -50,7 +50,10 @@ to use any of the overrides you need to uncomment the line and set it to what yo
 -- local do_movement_override = true                    -- Options: true = Paths to chosen character, false = Does nothing and waits for chosen character to come to you
 -- local return_home_override = true                    -- Options: true = Returns home from destination, false = Does nothing and logs out
 -- local return_location_override = 0                   -- Options: 0 = do nothing, 1 = limsa, 2 = limsa bell, 3 = nearby bell, 4 = fc 
-local gil_cut = 0                                       -- This is how much gil you want to always cut off the top when doing gil trades, just so the character has some gil to travel with
+
+-- This is how much gil you want to always cut off the top when doing gil trades, just so the character has some gil to travel with
+-- Set it to zero if you'd like to cut off nothing
+local gil_cut = 0
 
 
 -- Here you can add items you want included with every trade
