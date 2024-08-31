@@ -127,7 +127,7 @@ function AttuneAetheryte()
     Target("Aetheryte")
     Sleep(0.1)
     Interact()
-    Sleep(0.1)
+    Sleep(1.0)
 
     -- If the player is already attuned then exit the menu
     if GetCharacterCondition(32) or IsAddonVisible("SelectString") then

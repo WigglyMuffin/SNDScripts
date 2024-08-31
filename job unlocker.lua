@@ -893,20 +893,30 @@ function MaelstromRank2()
             AttuneAetheryte()
         end
 
+        -- Checks if "Camp Overlook" aetheryte is attuned, and zone logic to save time
         if HuntLogCheck(MaelstromEnemiesLog2[7], 9, 1) then
             if IsAetheryteAttuned("Camp Overlook") then
                 if not ZoneCheck("Camp Overlook") then
                     Teleporter("Camp Overlook", "tp")
                 end
+                Movement(39.38, 48.42, -381.98)
+                DoHuntLog(MaelstromEnemiesLog2[7], 2500, 9, 1)
             else
-                if not ZoneCheck("Camp Bronze Lake") then
+                if ZoneCheck("Camp Bronze Lake") then
+                    Movement(284.54, 42.55, -204.27)
+                    ZoneTransitions()
+                    Movement(-113.44, 64.59, -216.03)
+                    AttuneAetheryte()
+                elseif ZoneCheck("Camp Overlook") then
+                    Movement(-113.44, 64.59, -216.03)
+                    AttuneAetheryte()
+                else
                     Teleporter("Camp Bronze Lake", "tp")
+                    Movement(284.54, 42.55, -204.27)
+                    ZoneTransitions()
+                    Movement(-113.44, 64.59, -216.03)
+                    AttuneAetheryte()
                 end
-
-                Movement(284.54, 42.55, -204.27)
-                ZoneTransitions()
-                Movement(-113.44, 64.59, -216.03)
-                AttuneAetheryte()
             end
 
             Movement(39.38, 48.42, -381.98)
