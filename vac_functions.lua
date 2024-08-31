@@ -844,11 +844,11 @@ end
 -- Moves player to specified x y z coordinates with optional distance value to stop movement when player is within specified distance
 -- Will automatically mount, unstuck the player if player is stuck and stop within 2.4494898 distance of the destination
 function Movement(x_position, y_position, z_position, range)
-    local range = range or 2.4494898 -- Set default range if not provided
-    local max_retries = 10 -- Max number of retries to start moving
-    local stuck_check_interval = 1 -- Interval in seconds to check if stuck
-    local stuck_threshold_seconds = 3 -- Time in seconds before considering the player stuck
-    local min_progress_distance = 0.1 -- Minimum distance to be considered as making progress when pathing
+    local range = range or 2.4494898     -- Set default range if not provided
+    local max_retries = 10               -- Max number of retries to start moving
+    local stuck_check_interval = 1       -- Interval in seconds to check if stuck
+    local stuck_threshold_seconds = 3    -- Time in seconds before considering the player stuck
+    local min_progress_distance = 0.1    -- Minimum distance to be considered as making progress when pathing
     local min_distance_for_mounting = 20 -- Distance threshold for deciding to mount
 
     -- Floor position value to the nearest integer
@@ -2376,4 +2376,36 @@ function FindItemID(item_to_find)
         end
     end
     return nil
+end
+
+-- Usage: IsAetheryteAttuned("Limsa Lominsa")
+-- Will check whether player has specified aetheryte attuned
+-- Returns true or false
+function IsAetheryteAttuned(aetheryte_attuned_name)
+    -- Validate input
+    if not aetheryte_attuned_name or aetheryte_attuned_name == "" then
+        LogInfo("[VAC] IsAetheryteAttuned: Aetheryte name is missing or empty.")
+        Echo("Aetheryte name is missing or empty.")
+        return false
+    end
+
+    -- Convert the input name to lowercase
+    local aetheryte_attuned_name = string.lower(aetheryte_attuned_name)
+
+    -- Find the Aetheryte ID by name
+    local aetheryte_id = FindAetheryteIDByName(aetheryte_attuned_name)
+    
+    -- If Aetheryte ID is not found
+    if not aetheryte_id then
+        LogInfo("[VAC] IsAetheryteAttuned: Aetheryte '" .. aetheryte_attuned_name .. "' not found.")
+        Echo("Aetheryte '" .. aetheryte_attuned_name .. "' not found.")
+        return false
+    end
+
+    -- Check if the Aetheryte is unlocked/attuned
+    if IsAetheryteUnlocked(aetheryte_id) then
+        return true
+    else
+        return false
+    end
 end
