@@ -236,8 +236,8 @@ local function ProcessAltCharacters(character_list_kupobox)
                 end
 
                 -- Invite main char to party, needs a target
-                PartyInvite(trading_with)
-                LogInfo("[KupoBox] Inviting " .. trading_with .. " to party")
+                -- PartyInvite(trading_with)
+                -- LogInfo("[KupoBox] Inviting " .. trading_with .. " to party")
 
             elseif destination_type == 2 then
                 -- If destination_type is 2, first go to the estate entrance, then to the main character
@@ -264,7 +264,7 @@ local function ProcessAltCharacters(character_list_kupobox)
                 end
 
                 -- Invite main char to party, needs a target
-                PartyInvite(trading_with)
+                -- PartyInvite(trading_with)
             end
 
             -- Wait for the gil transfer to complete
@@ -277,8 +277,8 @@ local function ProcessAltCharacters(character_list_kupobox)
             end
 
             -- Disband party once gil trigger has happened
-            LogInfo("[KupoBox] Disbanding party")
-            PartyDisband()
+            -- LogInfo("[KupoBox] Disbanding party")
+            -- PartyDisband()
 
             -- Alt character handling to go home
             -- [2] return_home options: 0 = no, 1 = yes
