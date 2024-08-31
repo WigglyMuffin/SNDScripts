@@ -19,9 +19,15 @@
 
 -- Full quest list with both quest IDs and key IDs
 -- Dungeon ID list
--- Distance stuff
--- Redo Movement()
--- IsQuestNameAccepted() see below
+-- IsQuestNameAccepted() function
+-- EatFood() function
+-- UseItem() function
+-- Closest aetheryte to player and distance calculations
+-- Add flight to Movement() function
+-- Refactor Teleporter() function
+-- Add fate related functions
+-- Convert over to /callback from /pcall
+-- Add error handling for nil/"" and convert lowercase or tostring/tonumber etc
 
 -- #####################################
 -- #####################################
@@ -109,11 +115,16 @@ function Interact()
     Dismount()
     Sleep(0.5)
     yield("/interact")
+    
+    repeat
+        Sleep(0.1)
+    until not IsPlayerCasting()
 end
 
 -- Usage: AttuneAetheryte()
 -- Attunes with the Aetheryte, exits out of menus if already attuned
 function AttuneAetheryte()
+    -- Wait until the player is ready to interact
     repeat
         Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not IsMoving()
@@ -121,20 +132,11 @@ function AttuneAetheryte()
     -- Target and interact with the Aetheryte
     Target("Aetheryte")
     Sleep(0.1)
-    Dismount()
-    Sleep(0.5)
-    yield("/interact")
-    Sleep(0.1)
+    Interact()
+    Sleep(1.0)
 
-    -- Handle attuning or already attuned states
-    if GetCharacterCondition(27) then
-        repeat
-            Sleep(0.1)
-        until IsPlayerAvailable()
-
-        Sleep(1.0)
-    elseif GetCharacterCondition(32) then
-        -- Handle the case where the player is already attuned
+    -- If the player is already attuned then exit the menu
+    if GetCharacterCondition(32) or IsAddonVisible("SelectString") then
         repeat
             Sleep(0.1)
         until IsAddonVisible("SelectString")
@@ -147,6 +149,7 @@ function AttuneAetheryte()
         until not IsAddonVisible("SelectString")
     end
 
+    -- Wait until player is available
     repeat
         Sleep(0.1)
     until IsPlayerAvailable()
@@ -828,6 +831,7 @@ function Mount(mount_name)
 end
 
 -- Usage: LogOut()
+-- Logs the player out of the game
 function LogOut()
     yield("/logout")
 
@@ -843,30 +847,34 @@ function LogOut()
 end
 
 -- Usage: Movement(674.92, 19.37, 436.02) // Movement(674.92, 19.37, 436.02, 15)
--- the first three are x y z coordinates and the last one is how far away it's allowed to stop from the target
--- deals with vnav movement, kind of has some stuck checks but it's probably not as reliable as it can be, you do not have to include range
+-- Moves player to specified x y z coordinates with optional distance value to stop movement when player is within specified distance
+-- Will automatically mount, unstuck the player if player is stuck and stop within 2.4494898 distance of the destination
 function Movement(x_position, y_position, z_position, range)
-    local range = range or 2.4494898 -- 2, 2.4494898, 2.8284272, 3.464101 = 4, 6, 8, 12
-    local max_retries = 100
-    local stuck_check_interval = 0.1
-    local stuck_threshold_seconds = 3
-    local min_progress_distance = 0.1
-    local min_distance_for_mounting = 20
+    local range = range or 2.4494898     -- Set default range if not provided
+    local max_retries = 10               -- Max number of retries to start moving
+    local stuck_check_interval = 1       -- Interval in seconds to check if stuck
+    local stuck_threshold_seconds = 3    -- Time in seconds before considering the player stuck
+    local min_progress_distance = 0.1    -- Minimum distance to be considered as making progress when pathing
+    local min_distance_for_mounting = 20 -- Distance threshold for deciding to mount
 
+    -- Floor position value to the nearest integer
     local function floor_position(pos)
         return math.floor(pos + 0.49999999999999994)
     end
 
+    -- Floor the target positions to the nearest integer
     local x_position_floored = floor_position(x_position)
     local y_position_floored = floor_position(y_position)
     local z_position_floored = floor_position(z_position)
 
+    -- Check if the current position is within the target range
     local function IsWithinRange(xpos, ypos, zpos)
         return math.abs(xpos - x_position_floored) <= range and
-            math.abs(ypos - y_position_floored) <= range and
-            math.abs(zpos - z_position_floored) <= range
+               math.abs(ypos - y_position_floored) <= range and
+               math.abs(zpos - z_position_floored) <= range
     end
 
+    -- Calculate the distance from the current position to the target
     local function GetDistanceToTarget(xpos, ypos, zpos)
         return math.sqrt(
             (xpos - x_position_floored) ^ 2 +
@@ -875,85 +883,116 @@ function Movement(x_position, y_position, z_position, range)
         )
     end
 
+    -- Initiate movement towards the destination using vnavmesh
     local function NavToDestination()
-        NavReload()
+        NavReload() -- Reload vnavmesh to ensure it's ready
 
+        -- Wait until vnavmesh is ready
         repeat
             Sleep(0.1)
         until NavIsReady()
 
-        local retries = 0
+        local retries = 0 -- Initialize retry counter
+
         repeat
             Sleep(0.1)
+            -- Get player current position
             local xpos = floor_position(GetPlayerRawXPos())
             local ypos = floor_position(GetPlayerRawYPos())
             local zpos = floor_position(GetPlayerRawZPos())
+            -- Calculate distance to target
             local distance_to_target = GetDistanceToTarget(xpos, ypos, zpos)
 
+            -- Check if the player should mount based on distance and conditions
             if distance_to_target > min_distance_for_mounting and TerritorySupportsMounting() and (IsQuestComplete(66236) or IsQuestComplete(66237) or IsQuestComplete(66238)) then
+                -- Attempt to mount until successful
                 repeat
                     Mount()
                     Sleep(0.1)
                 until GetCharacterCondition(4)
             end
 
+            -- Start moving towards the destination
             yield("/vnav moveto " .. x_position .. " " .. y_position .. " " .. z_position)
             retries = retries + 1
-        until PathIsRunning() or retries >= max_retries
+        until PathIsRunning() or retries >= max_retries -- Stop if path is running or max retries reached
 
         Sleep(0.1)
     end
 
-    NavToDestination()
+    NavToDestination() -- Call the function to start navigating to the destination
 
-    local stuck_timer = 0
-    local previous_position = nil
-    local previous_distance_to_target = nil
+    local stuck_timer = 0 -- Timer to track how long the player has been stuck
+    local previous_distance_to_target = nil -- Store the previous distance to target
+    local previous_relative_position = nil -- Store player previous position relative to the target
 
     while true do
+        -- Check whether player is not currently teleporting or in a state where movement is disabled
         if not GetCharacterCondition(45) then
+            -- Get player current position
             local xpos = floor_position(GetPlayerRawXPos())
             local ypos = floor_position(GetPlayerRawYPos())
             local zpos = floor_position(GetPlayerRawZPos())
             Sleep(0.1)
 
+            -- Calculate the current distance to the target
             local current_distance_to_target = GetDistanceToTarget(xpos, ypos, zpos)
-            local current_position = { x = xpos, y = ypos, z = zpos }
+            -- Calculate player current relative position to the target
+            local current_relative_position = {
+                x = xpos - x_position_floored,
+                y = ypos - y_position_floored,
+                z = zpos - z_position_floored
+            }
 
+            -- If the player is within the target range, stop movement
             if IsWithinRange(xpos, ypos, zpos) and not GetCharacterCondition(45) then
                 yield("/vnav stop")
                 break
             end
 
-            if previous_position and previous_distance_to_target and not GetCharacterCondition(45) then
-                local distance_traveled = GetDistanceToTarget(previous_position.x, previous_position.y, previous_position.z)
+            -- If there was a previous position, check if the player is stuck
+            if previous_relative_position and previous_distance_to_target and not GetCharacterCondition(45) then
+                -- Calculate the distance traveled since the last check
+                local distance_traveled = math.sqrt(
+                    (current_relative_position.x - previous_relative_position.x) ^ 2 +
+                    (current_relative_position.y - previous_relative_position.y) ^ 2 +
+                    (current_relative_position.z - previous_relative_position.z) ^ 2
+                )
 
+                -- Check if the player has made sufficient progress
                 if current_distance_to_target >= previous_distance_to_target - min_progress_distance and distance_traveled < min_progress_distance then
-                    stuck_timer = stuck_timer + stuck_check_interval
+                    stuck_timer = stuck_timer + stuck_check_interval -- Increment the stuck timer if no progress
                 else
-                    stuck_timer = 0
+                    stuck_timer = stuck_timer - stuck_check_interval / 2 -- Decrease stuck timer if progress is made
+                    if stuck_timer < 0 then -- Make sure stuck timer can't go negative
+                        stuck_timer = 0 
+                    end
                 end
             end
 
+            -- Update the previous distance and position for the next iteration
             previous_distance_to_target = current_distance_to_target
-            previous_position = current_position
+            previous_relative_position = current_relative_position
 
+            -- If the stuck timer exceeds the threshold, do actions to get unstuck
             if stuck_timer >= stuck_threshold_seconds and not GetCharacterCondition(45) then
-                DoGeneralAction("Jump")
+                DoGeneralAction("Jump") -- Attempt to get unstuck by jumping
                 Sleep(0.1)
                 DoGeneralAction("Jump")
-                NavReload()
+                NavReload() -- Reload vnavmesh
 
+                -- Wait until vnavmesh is ready again
                 repeat
                     Sleep(0.1)
                 until NavIsReady()
 
-                NavToDestination()
-                stuck_timer = 0
+                NavToDestination() -- Retry pathing to the destination
+                stuck_timer = 0 -- Reset the stuck timer
             end
 
-            Sleep(0.05)
+            Sleep(0.05) -- Small delay before the next loop iteration
         end
+        -- Exit the loop if the player is teleporting or in a state where movement is disabled
         if GetCharacterCondition(45) then
             break
         end
@@ -2183,24 +2222,24 @@ function DropboxSetAll(dropbox_gil)
         LogInfo("[VAC] Item_List is nil. Cannot set items.")
         return
     end
-
-    local gil = 999999999 -- Gil cap
-
-    if dropbox_gil then
-        gil = dropbox_gil
-    end
-
+    
+    -- Gil cap or specified gil amount
+    local gil = dropbox_gil or 999999999
+    
+    -- Maximum quantity for items (999 * 140)
+    local max_quantity = 139860
+    
     -- Iterate over the Item_List
     for id, item in pairs(Item_List) do
         -- Check if the item is tradeable
-        if item['Untradeable'] == false then
+        if not item['Untradeable'] then
             if id == 1 then
                 -- Set gil to gil cap or specified gil amount
                 DropboxSetItemQuantity(id, false, gil)
             elseif id < 2 or id > 19 then -- Excludes Shards, Crystals, and Clusters
                 -- Set all item ID except 2-19
-                DropboxSetItemQuantity(id, false, 139860) -- NQ, 999*140
-                DropboxSetItemQuantity(id, true, 139860)  -- HQ, 999*140
+                DropboxSetItemQuantity(id, false, max_quantity) -- NQ
+                DropboxSetItemQuantity(id, true, max_quantity)  -- HQ
             end
         end
     
@@ -2217,7 +2256,7 @@ function DropboxClearAll()
     end
 
     for id, item in pairs(Item_List) do
-        if item['Untradeable'] == false then
+        if not item['Untradeable'] then
             DropboxSetItemQuantity(id, false, 0) -- NQ
             DropboxSetItemQuantity(id, true, 0)  -- HQ
         end
@@ -2343,4 +2382,36 @@ function FindItemID(item_to_find)
         end
     end
     return nil
+end
+
+-- Usage: IsAetheryteAttuned("Limsa Lominsa")
+-- Will check whether player has specified aetheryte attuned
+-- Returns true or false
+function IsAetheryteAttuned(aetheryte_attuned_name)
+    -- Validate input
+    if not aetheryte_attuned_name or aetheryte_attuned_name == "" then
+        LogInfo("[VAC] IsAetheryteAttuned: Aetheryte name is missing or empty.")
+        Echo("Aetheryte name is missing or empty.")
+        return false
+    end
+
+    -- Convert the input name to lowercase
+    local aetheryte_attuned_name = string.lower(aetheryte_attuned_name)
+
+    -- Find the Aetheryte ID by name
+    local aetheryte_id = FindAetheryteIDByName(aetheryte_attuned_name)
+    
+    -- If Aetheryte ID is not found
+    if not aetheryte_id then
+        LogInfo("[VAC] IsAetheryteAttuned: Aetheryte '" .. aetheryte_attuned_name .. "' not found.")
+        Echo("Aetheryte '" .. aetheryte_attuned_name .. "' not found.")
+        return false
+    end
+
+    -- Check if the Aetheryte is unlocked/attuned
+    if IsAetheryteUnlocked(aetheryte_id) then
+        return true
+    else
+        return false
+    end
 end
