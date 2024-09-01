@@ -861,7 +861,7 @@ function MaelstromRank2()
         return
     end
     
-    if GetMaelstromGCRank() >= 9 then
+    if GetMaelstromGCRank() >= 8 then
         Echo("You have already completed this hunting log.")
         return
     end
