@@ -1174,7 +1174,6 @@ function CanGCRankUp()
     local gc_rank = 0
     local gc_id = GetPlayerGC()
     local current_seals = 0
-    local next_rank = gc_rank + 1 -- adds one so we know which gc rank we're attempting to rank up total
     local gc_ranks = {
         [1] = 0,
         [2] = 2000,
@@ -1210,6 +1209,8 @@ function CanGCRankUp()
         gc_rank = GetFlamesGCRank()
     end
 
+    local next_rank = gc_rank + 1 -- adds one so we know which gc rank we're attempting to rank up total
+    
     if next_rank == 5 then
         local log_rank_1_complete = IsHuntLogComplete(9, 0)
         if log_rank_1_complete then
