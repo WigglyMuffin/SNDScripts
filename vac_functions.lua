@@ -1174,6 +1174,7 @@ function CanGCRankUp()
     local gc_rank = 0
     local gc_id = GetPlayerGC()
     local current_seals = 0
+    local next_rank = gc_rank + 1 -- adds one so we know which gc rank we're attempting to rank up total
     local gc_ranks = {
         [1] = 0,
         [2] = 2000,
@@ -1237,8 +1238,6 @@ function CanGCRankUp()
             end
         end
     end
-
-    local next_rank = gc_rank + 1 -- adds one so we know which gc rank we're attempting to rank up total
 
     if current_seals > gc_ranks[next_rank] and next_rank <= 9 and can_rankup then -- excludes rank 10 and above as we don't handle that atm
         return true, next_rank
