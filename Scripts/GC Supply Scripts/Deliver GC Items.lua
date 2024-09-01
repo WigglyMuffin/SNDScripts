@@ -9,14 +9,12 @@
 local use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being char_list.lua, false uses the list you put in this file 
 local do_rankups = true -- Automatically attempts to rank up your gc if set to true
 
--- This is where you put your character list if you choose to not use the external one
+-- This is where you put your character list if you choose to not use the external one (vac_char_list.lua)
 -- If use_external_character_list is set to true then this list is completely skipped
 local character_list = {
     "First Last@Server",
     "First Last@Server"
 }
-
--- Edit char_list.lua file for configuring characters
 
 multi_char = true
 
@@ -59,43 +57,44 @@ end
 -- #############
 
 function DOL()
-    local home = GetCurrentWorld() == GetHomeWorld()
-    
-    if not home then
+    local home_world = GetCurrentWorld() == GetHomeWorld()
+
+    if not home_world then
         Teleporter(FindWorldByID(GetHomeWorld()), "li")
-        Sleep(1)
-        
+        Sleep(1.0)
+
         repeat
             Sleep(0.1)
         until not LifestreamIsBusy() and IsPlayerAvailable()
-        
+
         -- Wait until the player is on the home world
         repeat
             Sleep(0.1)
-            home = GetCurrentWorld() == GetHomeWorld()
-        until home
+            home_world = GetCurrentWorld() == GetHomeWorld()
+        until home_world
     end
-    
+
     -- Wait until the player is fully available
     repeat
         Sleep(0.1)
     until IsPlayerAvailable()
-    
+
     Teleporter("gc", "li")
-    
+
     repeat
         Sleep(0.1)
     until not LifestreamIsBusy()
+
     if do_rankups then
         repeat
             DoGcRankUp()
         until not CanGCRankUp()
     end
+
     OpenGcSupplyWindow(1)
     GcProvisioningDeliver()
     CloseGcSupplyWindow()
 end
-
 
 -- ###############
 -- # MAIN SCRIPT #
@@ -114,11 +113,11 @@ if multi_char then
             Sleep(7.5)
             LoginCheck()
         end
-        
+
         repeat
             Sleep(0.1)
         until IsPlayerAvailable()
-        
+
         Main()
     end
 else
