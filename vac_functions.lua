@@ -538,8 +538,6 @@ function NodeScanner(get_node_text_type, get_node_text_match)
             end
         end
     end
-    Echo("Can't find the node text, everything will probably crash now since there's no proper handler yet")
-    return
 end
 
 -- Usage: OpenHuntLog(9, 0), Defaults to rank 0 if empty
@@ -2016,6 +2014,15 @@ function IsPlayerHigherThanLevel(player_higher_level)
     if GetLevel() > player_higher_level then
         return true
     end
+end
+
+-- Usage: AutoDutyRun("Sastasha")
+-- 
+-- Runs a dungeon once through AutoDuty
+function AutoDutyRun(duty)
+    duty = tostring(duty)
+    local duty_id = FindDutyID(duty)
+    yield("/autoduty run " .. duty_id .. " 1 true")
 end
 
 -- NEEDS some kind of translation so you can just do "Sastasha" than needing to do 1

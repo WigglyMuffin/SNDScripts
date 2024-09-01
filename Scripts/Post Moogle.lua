@@ -14,18 +14,19 @@
 
 -> 1.0.0: Initial release
 
-############################################################
-##                      Description                       ##
-############################################################
+####################################################
+##                  Description                   ##
+####################################################
 
 This script allows you to send out a configurable post moogle to deliver items to the character of your choice. 
 it allows you to configure what you deliver on a per character basis and it allows you to use an always_include list to forcibly add items in that to all deliveries
 it also allows for swapping delivery character and continue deliveries from them, it's all configurable in the Delivery_List.lua
 
 it's supposed to be used alongside Kupo Box where they will meet up, this will trade the items and when kupo box receives the 1 gil trade it'll go to next character
-############################################################
-##                   Required Plugins                     ##
-############################################################
+
+####################################################
+##                  Requirements                  ##
+####################################################
 
 -> AutoRetainer : https://love.puni.sh/ment.json
 -> Teleporter : In the default first party dalamud repository
@@ -34,6 +35,9 @@ it's supposed to be used alongside Kupo Box where they will meet up, this will t
 -> Something Need Doing (Expanded Edition) : https://puni.sh/api/repository/croizat
 -> Pandora's Box : https://love.puni.sh/ment.json
 -> vnavmesh : https://puni.sh/api/repository/veyn
+-> Dropbox : https://puni.sh/api/repository/kawaii
+    -> Recommended settings in dropbox are 4 frames delay between trades and 1000ms trade open command throttle.
+    -> You NEED to make sure the dropbox window is open on the Item Trade Queue tab when you start this script
 
 #####################
 ##    Settings     ##

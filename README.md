@@ -6,12 +6,14 @@ Files that work:
 1. `job unlocker.lua` is the script used to either do GC related tasks such as hunt log or unlock and do quests related to GC/FC things.
 
 This script allows you to complete quests, hunt logs and other various things for maintaining GC, FC and retainer related actions.
+A lot of this script can or will be replaced by questionable in the future so it's not a prio to fix broken features, however if there is demand they might be fixed.
 
 ## Item trading
 1. `Post Moogle.lua` is the supplying part of the item trading duo script, has configurable options and can be configured easily using `Post Moogle CharListGen.lua`.
 2. `Kupo Box.lua` is the receiving part of the item trading duo script, has configurable options and can be configured easily using `Kupo Box CharListGen.lua`.
 
 Both of these allow for quickly transferring items between two or more characters.
+The CharListGen scripts can be found under the tools folder.
 
 ## GC Provision Supply
 1. `Auto Gen Provisioning List.lua` compiles all required GC provision supply items into a file to further be used with other scripts.
@@ -21,6 +23,8 @@ Both of these allow for quickly transferring items between two or more character
 
 These scripts allow you to easily level up DoL jobs, and at scale.
 
-### All files use `vac_functions.lua`, `vac_lists.lua` and `vac_char_list.lua`.
+### All files use `vac_functions.lua`, `vac_lists.lua` and optionally, but used by default, `vac_char_list.lua`.
+The above files need to be places in your Something Need Doing config directory, which will be located at %appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\
+
 
 Required plugins: AutoRetainer, Teleporter, Lifestream, TextAdvance, Something Need Doing (Expanded Edition), Pandora's Box, vnavmesh

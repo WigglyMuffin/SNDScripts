@@ -1,6 +1,23 @@
---[[############
-# Job unlocker #
-################
+--[[
+############################################################
+##                           Job                          ##
+##                         Unlocker                       ##
+############################################################
+
+THIS SCRIPT WILL PROBABLY BE RENAMED AND REDONE AT SOME POINT
+It's features changed a lot from what it was initially meant to be and some things don't work anymore
+
+####################
+##    Version     ##
+##     1.0.0      ##
+####################
+
+-> 1.0.0: Initial release
+
+
+####################################################
+##                  Description                   ##
+####################################################
 
 To use this script correctly, you will need different stages of MSQ completed up to certain point which are listed below, either using Questionable plugin or equivalent
 While there are no minimum MSQ needing to be completed, it is recommended having a GC so you can access most of these options
@@ -15,20 +32,20 @@ Housing unlocks will unlock the first three housing areas as specified
 
 More information on what everything does will be listed near the toggle
 
-################
-# Requirements #
-################
+####################################################
+##                  Requirements                  ##
+####################################################
 
-AutoDuty - https://puni.sh/api/repository/herc
-Boss Mod - https://puni.sh/api/repository/veyn OR BossMod Reborn - https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
-Lifestream - https://raw.githubusercontent.com/NightmareXIV/MyDalamudPlugins/main/pluginmaster.json
-Pandora - https://love.puni.sh/ment.json
-Questionable - https://plugins.carvel.li/
-Rotation Solver Reborn - https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
-Something Need Doing (Expanded Edition) - https://puni.sh/api/repository/croizat
-Teleporter - Base Dalamud
-Textadvance - https://raw.githubusercontent.com/NightmareXIV/MyDalamudPlugins/main/pluginmaster.json
-Vnavmesh - https://puni.sh/api/repository/veyn
+-> AutoDuty - https://puni.sh/api/repository/herc
+-> Boss Mod - https://puni.sh/api/repository/veyn OR BossMod Reborn - https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
+-> Lifestream - https://raw.githubusercontent.com/NightmareXIV/MyDalamudPlugins/main/pluginmaster.json
+-> Pandora - https://love.puni.sh/ment.json
+-> Questionable - https://plugins.carvel.li/
+-> Rotation Solver Reborn - https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
+-> Something Need Doing (Expanded Edition) - https://puni.sh/api/repository/croizat
+-> Teleporter - Base Dalamud
+-> Textadvance - https://raw.githubusercontent.com/NightmareXIV/MyDalamudPlugins/main/pluginmaster.json
+-> Vnavmesh - https://puni.sh/api/repository/veyn
 
 Other:
 char_list.lua file in the snd config folder with your characters configured properly unless you disable the external character list
@@ -45,9 +62,9 @@ vac_functions.lua placed in the snd config folder
 -- Job quests for marauder are likely to be implemented in some way soon, but none others are planned
 -- Marauder Stuff
 
-###########
-# CONFIGS #
-#########]]
+#####################
+##    Settings     ##
+###################]]
 
 -- Only set one of these
 DO_ARCANIST_QUESTS = false
