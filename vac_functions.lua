@@ -1115,6 +1115,12 @@ end
 --
 -- Checks if you can rank up in your current gc, then it'll attempt to rank you up
 function DoGcRankUp()
+    -- check in case it's called when you can't rank up
+    local can_rankup = CanGCRankUp()
+    if not can_rankup then
+        return
+    end
+
     yield("/at e")
     local gc_id = GetPlayerGC()
 
