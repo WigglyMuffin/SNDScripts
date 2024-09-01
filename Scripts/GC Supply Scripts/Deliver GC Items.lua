@@ -86,9 +86,15 @@ function DOL()
     until not LifestreamIsBusy()
 
     if do_rankups then
-        repeat
-            DoGcRankUp()
-        until not CanGCRankUp()
+        local rankups_done = false
+        while not rankups_done do
+            local can_rankup = CanGCRankUp()
+            if can_rankup then
+                DoGcRankUp()
+            else
+                rankups_done = true
+            end
+        end
     end
 
     OpenGcSupplyWindow(1)

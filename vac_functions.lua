@@ -1140,13 +1140,13 @@ function DoGcRankUp()
             Sleep(0.1)
         until IsAddonReady("SelectString")
 
-        yield("/callback SelectString true 1")
+        yield("/pcall SelectString true 1")
 
         repeat
             Sleep(0.1)
         until IsAddonReady("GrandCompanyRankUp")
 
-        yield("/callback GrandCompanyRankUp true 0")
+        yield("/pcall GrandCompanyRankUp true 0")
     end
 
     OpenAndAttemptRankup()
