@@ -5,8 +5,8 @@
  |  ___// _ \ / __|| __|  | |\/| | / _ \  / _ \  / _` || | / _ \
  | |   | (_) |\__ \| |_   | |  | || (_) || (_) || (_| || ||  __/
  |_|    \___/ |___/ \__|  |_|  |_| \___/  \___/  \__, ||_| \___|
-                                                __/ |         
-                                               |___/          
+                                                 __/ |         
+                                                |___/          
 ####################
 ##    Version     ##
 ##     1.0.0      ##
@@ -59,6 +59,9 @@ to use any of the overrides you need to uncomment the line and set it to what yo
 -- Set it to zero if you'd like to cut off nothing
 local gil_cut = 0
 
+-- Options: true = waits for party invite before trading, false = uses distance based proximity check for trading
+-- toggling this off is usually the faster but less safe method of trading
+local party_invite = true
 
 -- Here you can add items you want included with every trade
 local always_include = {
@@ -80,6 +83,8 @@ local skip_chars = 0 -- number of characters you'd like to skip
 -- Options: true / false
 -- If the below options is set to true then it will utilize the external vac_char_list and you need to make sure that is correctly configured
 local use_external_character_list = true
+
+
 
 
 -- This is where you put your character list if you choose to not use the external one
@@ -286,7 +291,7 @@ local function Main(character_list_postmoogle)
                 if do_movement then
                     -- Path to main char
                     LogInfo("[PostMoogle] do_movement is set to true, moving towards " .. trading_with)
-                    PathToObject(trading_with, 2)
+                    PathToObject(trading_with, 2.5)
                 else
                     LogInfo("[PostMoogle] do_movement is set to false, not moving")
                 end
@@ -448,13 +453,43 @@ local function Main(character_list_postmoogle)
                 ClearFocusTarget()
             end
 
+            local ready_to_trade = false
 
-            Target(trading_with)
-            yield("/focustarget <t>")
-            repeat
-                Sleep(0.1)
-            until GetDistanceToTarget() < 3
-            Sleep(0.5)
+            -- checks if party invite method is set to true or not
+            if party_invite then
+                while not ready_to_trade do
+                    if IsInParty() then
+                        PartyLeave()
+                        Sleep(0.1)
+                    end
+
+                    Echo("Waiting for party invite from " .. trading_with)
+
+                    repeat
+                        PartyAccept()
+                        Sleep(0.1)
+                    until IsInParty()
+
+                    local party_member = GetPartyMemberName(0)
+
+                    if party_member == trading_with then
+                        ready_to_trade = true
+                        Sleep(0.5)
+                        Target(party_member)
+                        yield("/focustarget <t>")
+                        Sleep(0.5)
+                    else
+                        Echo(party_member .. " is not the right character, leaving party")
+                    end
+                end
+            else
+                Target(trading_with)
+                yield("/focustarget <t>")
+                repeat
+                    Sleep(0.1)
+                until GetDistanceToTarget() < 3
+                Sleep(0.5)
+            end
 
             TradeItems()
 

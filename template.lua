@@ -30,22 +30,18 @@
 -> 
 -> 
 
-#####################
-##    Settings     ##
-###################]]
+####################################################
+##                    Settings                    ##
+##################################################]]
 
 -- stuff can go here
 
---[[#################################
-#  DON'T TOUCH ANYTHING BELOW HERE  #
-# UNLESS YOU KNOW WHAT YOU'RE DOING #
-#####################################
 
-###################
-# FUNCTION LOADER #
-#################]]
 
--- stuff can go here
+
+--[[################################################
+##                  Script Start                  ##
+##################################################]]
 
 snd_config_folder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
 load_functions_file_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
@@ -60,10 +56,6 @@ end
 if HasPlugin("YesAlready") then
     PauseYesAlready()
 end
-
---[[###########
-# MAIN SCRIPT #
-#############]]
 
 -- stuff can go here
 

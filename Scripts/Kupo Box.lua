@@ -58,9 +58,16 @@ to use any of the overrides you need to uncomment the line and set it to what yo
 -- local return_home_override = true                    -- Options: true = Returns home from destination, false = Does nothing and logs out
 -- local return_location_override = 0                   -- Options: 0 = do nothing, 1 = limsa, 2 = limsa bell, 3 = nearby bell, 4 = fc 
 
+
+-- Options: true = invites character you're trading with to party for trading, false = uses distance based proximity check for trading
+-- toggling this off is usually the faster but less safe method of trading
+local party_invite = true
+
+
 -- in case something somehow goes wrong you can set the amount of characters in the list to skip, this goes from the top of the list
 -- a good way to know how many chars you actually need to skip is to read the processing echo in chat which lists how many chars it's finished already and which char it's on  ]]
 local skip_chars = 0 -- number of characters you'd like to skip
+
 
 -- Options: true / false
 -- If the below options is set to true then it will utilize the external vac_char_list and you need to make sure that is correctly configured
@@ -239,8 +246,10 @@ local function ProcessAltCharacters(character_list_kupobox)
                 end
 
                 -- Invite main char to party, needs a target
-                -- PartyInvite(trading_with)
-                -- LogInfo("[KupoBox] Inviting " .. trading_with .. " to party")
+                if party_invite then
+                    PartyInvite(trading_with)
+                    LogInfo("[KupoBox] Inviting " .. trading_with .. " to party")
+                end
 
             elseif destination_type == 2 then
                 -- If destination_type is 2, first go to the estate entrance, then to the main character
@@ -267,7 +276,9 @@ local function ProcessAltCharacters(character_list_kupobox)
                 end
 
                 -- Invite main char to party, needs a target
-                -- PartyInvite(trading_with)
+                if party_invite then
+                    PartyInvite(trading_with)
+                end
             end
 
             -- Wait for the gil transfer to complete
@@ -280,8 +291,10 @@ local function ProcessAltCharacters(character_list_kupobox)
             end
 
             -- Disband party once gil trigger has happened
-            -- LogInfo("[KupoBox] Disbanding party")
-            -- PartyDisband()
+            if party_invite then
+                LogInfo("[KupoBox] Disbanding party")
+                PartyDisband()
+            end
 
             -- Alt character handling to go home
             -- [2] return_home options: 0 = no, 1 = yes

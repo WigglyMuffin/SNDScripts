@@ -1,38 +1,35 @@
--- This file needs to be dropped inside %appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\
--- So it should look like this %appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\vac_functions.lua
--- It contains the functions required to make the scripts work
+--[[ 
+This file needs to be dropped inside %appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\
+So it should look like this %appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\vac_functions.lua
+It contains the functions required to make the scripts work
 
---[[################
+####################
 ##    Version     ##
 ##     1.0.0      ##
 ####################
 
 -> 1.0.0: Initial release
 
+#################
+## TO DO STUFF ##
+#################
 
+Full quest list with both quest IDs and key IDs
+Dungeon ID list
+IsQuestNameAccepted() function
+EatFood() function
+UseItem() function
+Closest aetheryte to player and distance calculations
+Add flight to Movement() function
+Refactor Teleporter() function
+Add fate related functions
+Convert over to /callback from /pcall
+Add error handling for nil/"" and convert lowercase or tostring/tonumber etc
 
-]]
-
--- ###############
--- # TO DO STUFF #
--- ###############
-
--- Full quest list with both quest IDs and key IDs
--- Dungeon ID list
--- IsQuestNameAccepted() function
--- EatFood() function
--- UseItem() function
--- Closest aetheryte to player and distance calculations
--- Add flight to Movement() function
--- Refactor Teleporter() function
--- Add fate related functions
--- Convert over to /callback from /pcall
--- Add error handling for nil/"" and convert lowercase or tostring/tonumber etc
-
--- #####################################
--- #####################################
--- #####################################
--- #####################################
+#####################################
+#####################################
+#####################################
+###################################]]
 
 function LoadFileCheck()
     LogInfo("[VAC] Successfully loaded the vac functions file")
