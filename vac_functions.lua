@@ -1117,9 +1117,6 @@ end
 function DoGcRankUp()
     yield("/at e")
     local gc_id = GetPlayerGC()
-    local gc_rank_9_mission_complete = false
-    local gc_rank_8_mission_complete = false
-    local can_rankup, next_rank = CanGCRankUp()
 
     local gc_officer_names = {
         [1] = "Storm Personnel Officer",
@@ -1152,52 +1149,8 @@ function DoGcRankUp()
         yield("/pcall GrandCompanyRankUp true 0")
     end
 
-    if gc_id == 1 then -- checks if gc is maelstrom and checks if the quests are done
-        gc_rank_8_mission_complete = IsQuestComplete(66664)
-        gc_rank_9_mission_complete = IsQuestComplete(66667)
-    elseif gc_id == 2 then -- checks if gc is twin adder and checks if the quests are done
-        gc_rank_8_mission_complete = IsQuestComplete(66665)
-        gc_rank_9_mission_complete = IsQuestComplete(66668)
-    elseif gc_id == 3 then -- checks if gc is immortal flames and checks if the quests are done
-        gc_rank_8_mission_complete = IsQuestComplete(66666)
-        gc_rank_9_mission_complete = IsQuestComplete(66669)
-    end
-
-    if can_rankup then
-        if next_rank == 5 then
-            local log_rank_1_complete = IsHuntLogComplete(9, 0)
-
-            if log_rank_1_complete then
-                OpenAndAttemptRankup()
-            else
-                Echo("You need to finish GC hunting log 1 to rank up more")
-                return
-            end
-        elseif next_rank == 8 then
-            if not gc_rank_8_mission_complete then
-                Echo('You need to finish the quest "Shadows Uncast" to rank up more')
-            else
-                OpenAndAttemptRankup()
-            end
-            return
-        elseif next_rank == 9 then
-            local log_rank_2_complete = IsHuntLogComplete(9, 1)
-            if log_rank_2_complete and gc_rank_9_mission_complete then
-                OpenAndAttemptRankup()
-            else
-                if not log_rank_2_complete then
-                    Echo("You need to finish GC hunting log 2 to rank up more")
-                end
-                if not gc_rank_9_mission_complete then
-                    Echo('You need to finish the quest "Gilding The Bilious" to rank up more')
-                end
-            end
-            return
-        else
-            OpenAndAttemptRankup()
-        end
-    end
-
+    OpenAndAttemptRankup()
+    
     Sleep(1.0)
 
     repeat
@@ -1209,6 +1162,9 @@ end
 --
 -- returns true and the next rank if you can rank up, returns false if you can't
 function CanGCRankUp()
+    local gc_rank_9_mission_complete = false
+    local gc_rank_8_mission_complete = false
+    local can_rankup = false
     local gc_rank = 0
     local gc_id = GetPlayerGC()
     local current_seals = 0
@@ -1225,6 +1181,17 @@ function CanGCRankUp()
         [10] = 10000
     }
 
+    if gc_id == 1 then -- checks if gc is maelstrom and checks if the quests are done
+        gc_rank_8_mission_complete = IsQuestComplete(66664)
+        gc_rank_9_mission_complete = IsQuestComplete(66667)
+    elseif gc_id == 2 then -- checks if gc is twin adder and checks if the quests are done
+        gc_rank_8_mission_complete = IsQuestComplete(66665)
+        gc_rank_9_mission_complete = IsQuestComplete(66668)
+    elseif gc_id == 3 then -- checks if gc is immortal flames and checks if the quests are done
+        gc_rank_8_mission_complete = IsQuestComplete(66666)
+        gc_rank_9_mission_complete = IsQuestComplete(66669)
+    end
+
     if gc_id == 1 then -- checks if gc is maelstrom and adds seal amount to current_seals
         current_seals = GetItemCount(20)
         gc_rank = GetMaelstromGCRank()
@@ -1236,9 +1203,38 @@ function CanGCRankUp()
         gc_rank = GetFlamesGCRank()
     end
 
+    if next_rank == 5 then
+        local log_rank_1_complete = IsHuntLogComplete(9, 0)
+        if log_rank_1_complete then
+            can_rankup = true
+        else
+            Echo("You need to finish GC hunting log 1 to rank up more")
+            return
+        end
+    elseif next_rank == 8 then
+        if not gc_rank_8_mission_complete then
+            Echo('You need to finish the quest "Shadows Uncast" to rank up more')
+        else
+            can_rankup = true
+        end
+        return
+    elseif next_rank == 9 then
+        local log_rank_2_complete = IsHuntLogComplete(9, 1)
+        if log_rank_2_complete and gc_rank_9_mission_complete then
+            can_rankup = true
+        else
+            if not log_rank_2_complete then
+                Echo("You need to finish GC hunting log 2 to rank up more")
+            end
+            if not gc_rank_9_mission_complete then
+                Echo('You need to finish the quest "Gilding The Bilious" to rank up more')
+            end
+        end
+    end
+
     local next_rank = gc_rank + 1 -- adds one so we know which gc rank we're attempting to rank up total
 
-    if current_seals > gc_ranks[next_rank] and next_rank <= 9 then -- excludes rank 10 and above as we don't handle that atm
+    if current_seals > gc_ranks[next_rank] and next_rank <= 9 and can_rankup then -- excludes rank 10 and above as we don't handle that atm
         return true, next_rank
     else
         return false, next_rank
