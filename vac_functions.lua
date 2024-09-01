@@ -1236,10 +1236,9 @@ function CanGCRankUp()
         gc_rank = GetFlamesGCRank()
     end
 
-    local next_rank = gc_rank +
-    1                                                              -- adds one so we know which gc rank we're attempting to rank up total
+    local next_rank = gc_rank + 1 -- adds one so we know which gc rank we're attempting to rank up total
 
-    if current_seals > gc_ranks[next_rank] and next_rank < 10 then -- excludes rank 10 and above as we don't handle that atm
+    if current_seals > gc_ranks[next_rank] and next_rank <= 9 then -- excludes rank 10 and above as we don't handle that atm
         return true, next_rank
     else
         return false, next_rank
