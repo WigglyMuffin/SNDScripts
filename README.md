@@ -2,6 +2,11 @@
 
 Files that work:
 
+## Job Unlocker
+1. `job unlocker.lua` is the script used to either do GC related tasks such as hunt log or unlock and do quests related to GC/FC things.
+
+This script allows you to complete quests, hunt logs and other various things for maintaining GC, FC and retainer related actions.
+
 ## Item trading
 1. `Post Moogle.lua` is the supplying part of the item trading duo script, has configurable options and can be configured easily using `Post Moogle CharListGen.lua`.
 2. `Kupo Box.lua` is the receiving part of the item trading duo script, has configurable options and can be configured easily using `Kupo Box CharListGen.lua`.
