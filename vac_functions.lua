@@ -155,7 +155,7 @@ end
 -- Usage: IsInParty()
 -- Checks if player is in a party, returns true if in party, returns false if not in party
 function IsInParty()
-    return GetPartyMemberName(0) ~= nil and GetPartyMemberName(0) ~= ""
+    return GetPartyMemberName(0) ~= nil and GetPartyMemberName(0) ~= "" and not GetCharacterCondition(45)
 end
 
 -- Usage: ZoneCheck("Limsa Lominsa Lower Decks")
@@ -1210,7 +1210,7 @@ function CanGCRankUp()
     end
 
     local next_rank = gc_rank + 1 -- adds one so we know which gc rank we're attempting to rank up total
-    
+
     if next_rank == 5 then
         local log_rank_1_complete = IsHuntLogComplete(9, 0)
         if log_rank_1_complete then
