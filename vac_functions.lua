@@ -155,7 +155,7 @@ end
 -- Usage: IsInParty()
 -- Checks if player is in a party, returns true if in party, returns false if not in party
 function IsInParty()
-    return GetPartyMemberName(0) ~= nil and GetPartyMemberName(0) ~= ""
+    return GetPartyMemberName(0) ~= nil and GetPartyMemberName(0) ~= "" and not GetCharacterCondition(45)
 end
 
 -- Usage: ZoneCheck("Limsa Lominsa Lower Decks")
@@ -1177,7 +1177,6 @@ function CanGCRankUp()
     local gc_rank = 0
     local gc_id = GetPlayerGC()
     local current_seals = 0
-    local next_rank = gc_rank + 1 -- adds one so we know which gc rank we're attempting to rank up total
     local gc_ranks = {
         [1] = 0,
         [2] = 2000,
@@ -1213,6 +1212,8 @@ function CanGCRankUp()
         gc_rank = GetFlamesGCRank()
     end
 
+    local next_rank = gc_rank + 1 -- adds one so we know which gc rank we're attempting to rank up total
+    
     if next_rank == 5 then
         local log_rank_1_complete = IsHuntLogComplete(9, 0)
         if log_rank_1_complete then
@@ -1240,7 +1241,10 @@ function CanGCRankUp()
                 Echo('You need to finish the quest "Gilding The Bilious" to rank up more')
             end
         end
+    else
+        can_rankup = true -- bandaid fix for an issue i caused
     end
+        
 
     if current_seals > gc_ranks[next_rank] and next_rank <= 9 and can_rankup then -- excludes rank 10 and above as we don't handle that atm
         return true, next_rank
