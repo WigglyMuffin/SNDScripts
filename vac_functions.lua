@@ -854,7 +854,7 @@ function Movement(x_position, y_position, z_position, range)
     local max_retries = 10               -- Max number of retries to start moving
     local stuck_check_interval = 0.5     -- Interval in seconds to check if stuck
     local stuck_threshold_seconds = 1.5  -- Time in seconds before considering the player stuck
-    local min_progress_distance = 0.1    -- Minimum distance to be considered as making progress when pathing
+    local min_progress_distance = 0.05   -- Minimum distance to be considered as making progress when pathing
     local min_distance_for_mounting = 20 -- Distance threshold for deciding to mount
 
     -- Floor the target positions to the nearest integer
