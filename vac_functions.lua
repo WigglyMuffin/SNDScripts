@@ -1961,43 +1961,65 @@ end
 -- Usage: IsQuestDone("Hallo Halatali")
 -- Checks if you have completed the specified quest
 function IsQuestDone(quest_done_name)
-    -- Look up the quest by name
-    local quest = QuestNameList[quest_done_name]
+    -- Initialize a variable to store the quest_key
+    local quest_key = nil
 
-    -- Check if the quest exists
-    if quest then
-        return IsQuestComplete(quest.quest_key)
+    -- Search for the quest in Quest_List by name
+    for key, quest in pairs(Quest_List) do
+        if quest['Name'] == quest_done_name then
+            quest_key = key
+            break
+        end
     end
+
+    -- If the quest is found, check if it is complete
+    if quest_key then
+        return IsQuestComplete(tonumber(quest_key))
+    end
+
+    -- Return false if the quest is not found or not completed
+    return false
 end
+
 
 -- NEEDS excel browser adding
 -- Usage: DoQuest("Hallo Halatali")
 -- Checks if you have completed the specified quest and starts if you have not
 function DoQuest(quest_do_name)
-    -- Look up the quest by name
-    local quest = QuestNameList[quest_do_name]
+    -- Initialize variables to store quest information
+    local quest_id = nil
+    local quest_key = nil
 
-    -- If the quest not found, echo and return false
-    if not quest then
+    -- Search for the quest in Quest_List by name
+    for key, quest in pairs(Quest_List) do
+        if quest['Name'] == quest_do_name then
+            quest_id = quest['ID']
+            quest_key = key
+            break
+        end
+    end
+
+    -- If the quest is not found, echo and return false
+    if not quest_id or not quest_key then
         Echo('Quest "' .. quest_do_name .. '" not found.')
         return false
     end
 
     -- Check if the quest is already completed
-    if IsQuestComplete(quest.quest_key) then
+    if IsQuestComplete(tonumber(quest_key)) then
         Echo('You have already completed the "' .. quest_do_name .. '" quest.')
         return true
     end
 
     -- Start the quest
-    yield("/qst next " .. quest.quest_id)
+    yield("/qst next " .. quest_id)
     Sleep(0.5)
     yield("/qst start")
 
     -- Wait until the quest is complete, with condition checking since some NPCs talk too long
     repeat
         Sleep(0.1)
-    until IsQuestComplete(quest.quest_key) and IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32)
+    until IsQuestComplete(tonumber(quest_key)) and IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32)
 
     Sleep(0.5)
 
