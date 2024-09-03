@@ -1210,7 +1210,7 @@ function CanGCRankUp()
     end
 
     local next_rank = gc_rank + 1 -- adds one so we know which gc rank we're attempting to rank up total
-
+    
     if next_rank == 5 then
         local log_rank_1_complete = IsHuntLogComplete(9, 0)
         if log_rank_1_complete then
@@ -1238,7 +1238,10 @@ function CanGCRankUp()
                 Echo('You need to finish the quest "Gilding The Bilious" to rank up more')
             end
         end
+    else
+        can_rankup = true -- bandaid fix for an issue i caused
     end
+        
 
     if current_seals > gc_ranks[next_rank] and next_rank <= 9 and can_rankup then -- excludes rank 10 and above as we don't handle that atm
         return true, next_rank
