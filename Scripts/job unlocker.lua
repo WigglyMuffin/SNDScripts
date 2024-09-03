@@ -188,35 +188,6 @@ local MaelstromEnemiesLog3 = {
     "Giant Bavarois"       -- maelstrom_30 "The Wanderer's Palace"
 }
 
--- Will eventually be made into an excel function and put into functions
--- Only these quests work, all will work once excel integration is done
-QuestNameList = {
-    -- Dungeons
-    ["Hallo Halatali"]                         = {quest_id =  697, quest_key = 66233}, -- Halatali
-    ["Braving New Depths"]                     = {quest_id =  764, quest_key = 66300}, -- The Sunken Temple of Qarn
-    ["Shadows Uncast (Maelstrom)"]             = {quest_id = 1128, quest_key = 66664}, -- Dzemael Darkhold
-    ["Gilding the Bilious (Maelstrom)"]        = {quest_id = 1131, quest_key = 66667}, -- The Aurum Vale
-    -- Housing
-    ["Where the Heart Is (The Lavender Beds)"] = {quest_id = 1212, quest_key = 66748}, -- The Lavender Beds
-    ["Where the Heart Is (The Goblet)"]        = {quest_id = 1213, quest_key = 66749}, -- The Goblet
-    ["Where the Heart Is (Mist)"]              = {quest_id = 1214, quest_key = 66750}, -- Mist
-    -- DoL (Disciples of the Land)
-    ["Way of the Miner"]                       = {quest_id =  597, quest_key = 66133}, -- Miner
-    ["Way of the Botanist"]                    = {quest_id =    3, quest_key = 65539}, -- Botanist
-    ["Way of the Fisher"]                      = {quest_id = 1107, quest_key = 66643}, -- Fisher
-    -- Mount
-    ["My Little Chocobo (Twin Adder)"]         = {quest_id =  700, quest_key = 66236}, -- Twin Adder Chocobo
-    ["My Little Chocobo (Maelstrom)"]          = {quest_id =  701, quest_key = 66237}, -- Maelstrom Chocobo
-    ["My Little Chocobo (Immortal Flames)"]    = {quest_id =  702, quest_key = 66238}, -- Immortal Flames Chocobo
-    -- Job Quests
-    ["My First Grimoire"]                      = {quest_id =  454, quest_key = 65990}, -- Arcanist Quest 01
-    ["What's in the Box"]                      = {quest_id =  455, quest_key = 65991}, -- Arcanist Quest 02
-    ["Tactical Planning"]                      = {quest_id =  457, quest_key = 65993}, -- Arcanist Quest 03
-    ["My First Bow"]                           = {quest_id =  219, quest_key = 65755}, -- Archer Quest 01
-    ["A Matter of Perspective"]                = {quest_id =   46, quest_key = 65582}, -- Archer Quest 02
-    ["Training with Leih"]                     = {quest_id =  134, quest_key = 65670}  -- Archer Quest 03
-}
-
 -- Edit char_list.lua file for configuring characters
 char_list = "vac_char_list.lua"
 
