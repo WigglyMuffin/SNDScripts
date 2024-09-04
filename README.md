@@ -1,6 +1,5 @@
 # EVERYTHING HERE IS WIP
-
-# Files that work:
+But despite being WIP a lot of things here work, like the trading scripts Kupo Box and Post Moogle should work completely, and they're very fast/efficient
 
 ## Job Unlocker
 1. `job unlocker.lua` is the script used to either do GC related tasks such as hunt log or unlock and do quests related to GC/FC things.
