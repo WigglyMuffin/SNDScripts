@@ -172,7 +172,7 @@ for _, char in ipairs(chars) do
                 until IsPlayerAvailable()
                 -- specific stuff to deal with an instance where it has to kill a boulder
                 if DoesObjectExist("Large Boulder") then
-                    yield("/rsr manufal")
+                    yield("/rsr manual")
                     yield("/rotation settings aoetype 0")
                     yield("/bmrai on")
                     yield("/bmrai followtarget on")
