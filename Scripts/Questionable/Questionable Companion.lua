@@ -6,9 +6,10 @@
 
 ####################
 ##    Version     ##
-##     0.0.3      ##
+##     0.0.4      ##
 ####################
 
+-> 0.0.4: Added some extra checks which should cause it to no longer fail to queue into duties
 -> 0.0.3: Should no longer vnav rebuild after short periods of time, should now be about 8 seconds
 -> 0.0.2: Questionable should now start again after a duty ends
 -> 0.0.1: Initial release, it is not tested properly so it might not work as intended. Consider it a testing version of sorts.
@@ -143,7 +144,12 @@ for _, char in ipairs(chars) do
         -- Duty helper
         if IsAddonReady("ContentsFinder") and DoesObjectExist("Entrance") then
             Sleep(1)
-            AutoDutyRun(GetNodeText("JournalDetail", 19))
+            repeat
+                Sleep(1)
+            until IsAddonReady("JournalDetail")
+            Sleep(2) -- to really make sure it's ready to pull the duty name
+            local duty = GetNodeText("JournalDetail", 19)
+            AutoDutyRun(duty)
             Sleep(30)
             repeat
                 Sleep(1)
