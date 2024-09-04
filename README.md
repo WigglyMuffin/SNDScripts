@@ -1,7 +1,5 @@
 # EVERYTHING HERE IS WIP
 
-# Files that work:
-
 ## Job Unlocker
 1. `job unlocker.lua` is the script used to either do GC related tasks such as hunt log or unlock and do quests related to GC/FC things.
 
