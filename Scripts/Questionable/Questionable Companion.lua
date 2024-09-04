@@ -6,9 +6,10 @@
 
 ####################
 ##    Version     ##
-##     0.0.4      ##
+##     0.0.5      ##
 ####################
 
+-> 0.0.5: Solo instances should be working properly again?
 -> 0.0.4: Added some extra checks which should cause it to no longer fail to queue into duties
 -> 0.0.3: Should no longer vnav rebuild after short periods of time, should now be about 8 seconds
 -> 0.0.2: Questionable should now start again after a duty ends
@@ -161,7 +162,7 @@ for _, char in ipairs(chars) do
         end
 
         -- Instance helper
-        if IsAddonReady("SelectYesno") or IsAddonReady("DifficultySelectYesNo") and DoesObjectExist("Entrance") then
+        if IsAddonReady("SelectYesno") or IsAddonReady("DifficultySelectYesNo") then
             Sleep(3)
             local text1 = GetNodeText("SelectYesno", 15)
             local text2 = GetNodeText("DifficultySelectYesNo", 13)
