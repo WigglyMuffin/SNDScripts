@@ -6,9 +6,10 @@
 
 ####################
 ##    Version     ##
-##     0.0.2      ##
+##     0.0.3      ##
 ####################
 
+-> 0.0.3: Should no longer vnav rebuild after short periods of time, should now be about 8 seconds
 -> 0.0.2: Questionable should now start again after a duty ends
 -> 0.0.1: Initial release, it is not tested properly so it might not work as intended. Consider it a testing version of sorts.
 
@@ -73,7 +74,6 @@ for _, char in ipairs(chars) do
     yield("/at e")
     yield("/qst start")
     while not finished do
-        local timesnap = os.time()
         -- stuck checker
         if PathIsRunning() then
             local function rounded_distance(x1, y1, z1, x2, y2, z2)
@@ -99,6 +99,7 @@ for _, char in ipairs(chars) do
                     return false
                 end
             end
+            local retry_timer = 0
             while PathIsRunning() do
                 local success1, x1 = pcall(GetPlayerRawXPos)
                 local success2, y1 = pcall(GetPlayerRawYPos)
@@ -111,19 +112,20 @@ for _, char in ipairs(chars) do
                 local success5, y2 = pcall(GetPlayerRawYPos)
                 local success6, z2 = pcall(GetPlayerRawZPos)
                 if not (success4 and success5 and success6) then
-                    Sleep(0.3)
                     goto continue
                 end
                 if within_three_units(x1, y1, z1, x2, y2, z2) and PathIsRunning() then
                     yield("/qst stop")
-                    if os.time() - timesnap >= 6 then
+                    retry_timer = retry_timer + 1
+                    if retry_timer > 4 then -- 4 would be about 8 seconds, with some extra time since it waits a second after reloading
                         yield("/vnav rebuild")
                     else
                         yield("/vnav reload")
                     end
                     Sleep(1)
                     yield("/qst start")
-                    timesnap = os.time()
+                else
+                    retry_timer = 0
                 end
                 ::continue::
             end
