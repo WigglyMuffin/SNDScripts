@@ -6,9 +6,10 @@
 
 ####################
 ##    Version     ##
-##     0.0.6      ##
+##     0.0.7      ##
 ####################
 
+-> 0.0.7: Added a duty whitelist so it won't try to queue duties that don't have duty support
 -> 0.0.6: Added unexpected combat handler
 -> 0.0.5: Solo instances should be working properly again
 -> 0.0.4: Added some extra checks which should cause it to no longer fail to queue into duties
@@ -61,6 +62,89 @@ LoadFunctions = loadfile(LoadFunctionsFileLocation)
 LoadFunctions()
 LoadFileCheck()
 
+local whitelisted_duties = {
+    "Sastasha",
+    "The Tam-Tara Deepcroft",
+    "Copperbell Mines",
+    "The Bowl of Embers",
+    "The Thousand Maws of Toto-Rak",
+    "Haukke Manor",
+    "Brayflox's Longstop",
+    "The Navel",
+    "The Stone Vigil",
+    "The Howling Eye",
+    "Castrum Meridianum",
+    "The Praetorium",
+    "The Porta Decumana",
+    "Snowcloak",
+    "The Keeper of the Lake",
+    "Sohm Al",
+    "The Aery",
+    "The Vault",
+    "The Great Gubal Library",
+    "The Aetherochemical Research Facility",
+    "The Antitower",
+    "Sohr Khai",
+    "Xelphatol",
+    "Baelsar's Wall",
+    "The Sirensong Sea",
+    "Bardam's Mettle",
+    "Doma Castle",
+    "Castrum Abania",
+    "Ala Mhigo",
+    "The Drowned City of Skalla",
+    "The Burn",
+    "The Ghimlyt Dark",
+    "Holminster Switch",
+    "Dohn Mheg",
+    "The Qitana Ravel",
+    "Malikah's Well",
+    "Mt. Gulg",
+    "Amaurot",
+    "The Grand Cosmos",
+    "Anamnesis Anyder",
+    "The Heroes' Gauntlet",
+    "Matoya's Relict",
+    "Paglth'an",
+    "The Tower of Zot",
+    "The Tower of Babil",
+    "Vanaspati",
+    "Ktisis Hyperboreia",
+    "The Aitiascope",
+    "The Mothercrystal",
+    "The Dead Ends",
+    "Alzadaal's Legacy",
+    "The Fell Court of Troia",
+    "Lapis Manalis",
+    "The Aetherfont",
+    "The Lunar Subterrane",
+    "Ihuykatumu",
+    "Worqor Zormor",
+    "Worqor Lar Dor",
+    "The Skydeep Cenote",
+    "Vanguard",
+    "Origenics",
+    "Everkeep",
+    "Alexandria"
+}
+
+function IsDutyWhitelisted(duty_name)
+    -- replaces the dashes square uses with normal ones, just to be extra sure
+    local function ReplaceDashes(s)
+        return s:gsub("–", "-"):gsub("—", "-"):gsub("‑", "-"):gsub("‐", "-")
+    end
+    
+    -- lowers the string in case there's inconsistencies
+    local duty_name_lower = ReplaceDashes(string.lower(duty_name))
+
+    for _, whitelisted_duty in ipairs(whitelisted_duties) do
+        local whitelisted_duty_lower = ReplaceDashes(string.lower(whitelisted_duty))
+        if whitelisted_duty_lower == duty_name_lower then
+            return true
+        end
+    end
+    return false
+end
 
 for _, char in ipairs(chars) do
     local finished = false
@@ -166,21 +250,28 @@ for _, char in ipairs(chars) do
 
         -- Duty helper
         if IsAddonReady("ContentsFinder") and DoesObjectExist("Entrance") then
-            Sleep(1)
             repeat
                 Sleep(1)
             until IsAddonReady("JournalDetail")
             Sleep(2) -- to really make sure it's ready to pull the duty name
             local duty = GetNodeText("JournalDetail", 19)
-            AutoDutyRun(duty)
-            Sleep(30)
-            repeat
-                Sleep(1)
-            until not GetCharacterCondition(34) and not GetCharacterCondition(45) and IsPlayerAvailable()
-            Sleep(8) -- redundant but i just want to make sure the player is actually available
-            yield("/rsr manual")
-            yield("/bmrai off")
-            yield("/qst start")
+            if IsDutyWhitelisted(duty) then
+                AutoDutyRun(duty)
+                Sleep(30)
+                repeat
+                    Sleep(1)
+                until not GetCharacterCondition(34) and not GetCharacterCondition(45) and IsPlayerAvailable()
+                Sleep(8) -- redundant but i just want to make sure the player is actually available
+                yield("/rsr manual")
+                yield("/bmrai off")
+                yield("/qst start")
+            else
+                Echo(duty.." is not on the duty whitelist")
+                repeat
+                    yield("/pcall ContentsFinder true -1")
+                    Sleep(1)
+                until not IsAddonVisible("ContentsFinder")
+            end
         end
 
         -- Instance helper
