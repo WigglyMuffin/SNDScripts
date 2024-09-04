@@ -80,7 +80,7 @@ for _, char in ipairs(chars) do
     while not finished do
         -- unexpected combat handler
         if GetCharacterCondition(26) and not GetCharacterCondition(34) then
-            if not QuestionableIsrunning() then
+            if not QuestionableIsRunning() then
                 yield("/rsr manual")
                 yield("/bmrai on")
                 repeat
