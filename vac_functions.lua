@@ -320,7 +320,7 @@ function FindDistanceToObject(object_name)
     local object_z_pos = GetObjectRawZPos(object_name)
 
     local function floor_position(pos)
-        return math.floor(pos + 0.49999999999999994)
+        return math.floor(pos + 0.5)
     end
 
     local object_x_position_floored = floor_position(object_x_pos)
@@ -349,7 +349,7 @@ end
 -- Returns the distance from the player to a position
 function FindDistanceToPos(pos_x, pos_y, pos_z)
     local function floor_position(pos)
-        return math.floor(pos + 0.49999999999999994)
+        return math.floor(pos + 0.5)
     end
 
     local object_x_position_floored = floor_position(pos_x)
@@ -858,9 +858,9 @@ function Movement(x_position, y_position, z_position, range)
     local min_distance_for_mounting = 20 -- Distance threshold for deciding to mount
 
     -- Floor the target positions to the nearest integer
-    local x_position_floored = math.floor(x_position + 0.49999999999999994)
-    local y_position_floored = math.floor(y_position + 0.49999999999999994)
-    local z_position_floored = math.floor(z_position + 0.49999999999999994)
+    local x_position_floored = math.floor(x_position + 0.5)
+    local y_position_floored = math.floor(y_position + 0.5)
+    local z_position_floored = math.floor(z_position + 0.5)
 
     -- Calculate the squared distance from the current position to the target
     local function GetSquaredDistanceToTarget(xpos, ypos, zpos)
@@ -889,9 +889,9 @@ function Movement(x_position, y_position, z_position, range)
         repeat
             Sleep(0.05)
             -- Get player current position
-            local xpos = math.floor(GetPlayerRawXPos() + 0.49999999999999994)
-            local ypos = math.floor(GetPlayerRawYPos() + 0.49999999999999994)
-            local zpos = math.floor(GetPlayerRawZPos() + 0.49999999999999994)
+            local xpos = math.floor(GetPlayerRawXPos() + 0.5)
+            local ypos = math.floor(GetPlayerRawYPos() + 0.5)
+            local zpos = math.floor(GetPlayerRawZPos() + 0.5)
 
             -- Calculate squared distance to target
             local squared_distance_to_target = GetSquaredDistanceToTarget(xpos, ypos, zpos)
@@ -923,9 +923,9 @@ function Movement(x_position, y_position, z_position, range)
         -- Check whether player is not currently teleporting or in a state where movement is disabled
         if not GetCharacterCondition(45) then
             -- Get player current position
-            local xpos = math.floor(GetPlayerRawXPos() + 0.49999999999999994)
-            local ypos = math.floor(GetPlayerRawYPos() + 0.49999999999999994)
-            local zpos = math.floor(GetPlayerRawZPos() + 0.49999999999999994)
+            local xpos = math.floor(GetPlayerRawXPos() + 0.5)
+            local ypos = math.floor(GetPlayerRawYPos() + 0.5)
+            local zpos = math.floor(GetPlayerRawZPos() + 0.5)
             Sleep(0.05)
 
             -- Calculate the current squared distance to the target
@@ -942,9 +942,9 @@ function Movement(x_position, y_position, z_position, range)
                 yield("/vnav stop")
                 
                 -- Check to ensure the player is within range
-                xpos = math.floor(GetPlayerRawXPos() + 0.49999999999999994)
-                ypos = math.floor(GetPlayerRawYPos() + 0.49999999999999994)
-                zpos = math.floor(GetPlayerRawZPos() + 0.49999999999999994)
+                xpos = math.floor(GetPlayerRawXPos() + 0.5)
+                ypos = math.floor(GetPlayerRawYPos() + 0.5)
+                zpos = math.floor(GetPlayerRawZPos() + 0.5)
                 
                 if not IsWithinRange(xpos, ypos, zpos) then
                     NavToDestination() -- Retry movement if still not in range
@@ -980,7 +980,6 @@ function Movement(x_position, y_position, z_position, range)
             if stuck_timer >= stuck_threshold_seconds and not GetCharacterCondition(45) then
                 DoGeneralAction("Jump") -- Attempt to get unstuck by jumping
                 Sleep(0.1)
-                DoGeneralAction("Jump")
                 NavReload() -- Reload vnavmesh
 
                 -- Wait until vnavmesh is ready again
