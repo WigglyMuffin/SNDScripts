@@ -177,7 +177,7 @@ for _, char in ipairs(chars) do
             repeat
                 Sleep(1)
             until not GetCharacterCondition(34) and not GetCharacterCondition(45) and IsPlayerAvailable()
-            Sleep(3) -- redundant but i just want to make sure the player is actually available
+            Sleep(8) -- redundant but i just want to make sure the player is actually available
             yield("/rsr manual")
             yield("/bmrai off")
             yield("/qst start")
