@@ -14,9 +14,6 @@ It contains the functions required to make the scripts work
 ## TO DO STUFF ##
 #################
 
-Full quest list with both quest IDs and key IDs
-Dungeon ID list
-IsQuestNameAccepted() function
 EatFood() function
 UseItem() function
 Closest aetheryte to player and distance calculations
@@ -1954,17 +1951,16 @@ function DoTargetLockon(target_lockon_name)
     yield("/lockon")
 end
 
--- NEEDS excel browser adding
--- Usage: IsQuestDone("Hallo Halatali")
+-- Usage: IsQuestDone("Hello Halatali")
 -- Checks if you have completed the specified quest
 function IsQuestDone(quest_done_name)
-    -- Look up the quest by name
-    local quest = QuestNameList[quest_done_name]
-
-    -- Check if the quest exists
-    if quest then
-        return IsQuestComplete(quest.quest_key)
+    -- Look up the quest by name (case-insensitive)
+    for key, entry in pairs(Quest_List) do
+        if string.lower(entry['Name']) == string.lower(quest_done_name) then
+            return IsQuestComplete(tonumber(key))
+        end
     end
+    return nil -- Return nil if the name isn't found
 end
 
 -- NEEDS excel browser adding
@@ -1972,29 +1968,34 @@ end
 -- Checks if you have completed the specified quest and starts if you have not
 function DoQuest(quest_do_name)
     -- Look up the quest by name
-    local quest = QuestNameList[quest_do_name]
+    local quest_id
+    for key, entry in pairs(Quest_List) do
+        if string.lower(entry['Name']) == string.lower(quest_do_name) then
+            quest_id = tonumber(key)
+        end
+    end
 
     -- If the quest not found, echo and return false
-    if not quest then
+    if not quest_id then
         Echo('Quest "' .. quest_do_name .. '" not found.')
         return false
     end
 
     -- Check if the quest is already completed
-    if IsQuestComplete(quest.quest_key) then
+    if IsQuestComplete(quest_id) then
         Echo('You have already completed the "' .. quest_do_name .. '" quest.')
         return true
     end
 
     -- Start the quest
-    yield("/qst next " .. quest.quest_id)
+    yield("/qst next " .. quest_id)
     Sleep(0.5)
     yield("/qst start")
 
     -- Wait until the quest is complete, with condition checking since some NPCs talk too long
     repeat
         Sleep(0.1)
-    until IsQuestComplete(quest.quest_key) and IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32)
+    until IsQuestComplete(quest_id) and IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32)
 
     Sleep(0.5)
 
@@ -2278,13 +2279,15 @@ function DropboxClearAll()
     end
 end
 
--- Usage: IsQuestNameAccepted()
+-- Usage: IsQuestNameAccepted("Hello Halatali.")
 -- Checks if quest name is accepted
--- NEEDS doing
-function IsQuestNameAccepted()
-    -- stuff can go here
-    -- check IsQuestDone() for example
-    -- do when have actual quest list from csv
+function IsQuestNameAccepted(quest_accepted_name)
+    for key, entry in pairs(Quest_List) do
+        if string.lower(entry['Name']) == string.lower(quest_accepted_name) then
+            return IsQuestAccepted(tonumber(key))
+        end
+    end
+    return nil -- Return nil if the name isn't found
 end
 
 -- Usage: IsHuntLogComplete(9, 0) or IsHuntLogComplete(0, 1)

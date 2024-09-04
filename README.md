@@ -1,6 +1,6 @@
-# WIP
+# EVERYTHING HERE IS WIP
 
-Files that work:
+# Files that work:
 
 ## Job Unlocker
 1. `job unlocker.lua` is the script used to either do GC related tasks such as hunt log or unlock and do quests related to GC/FC things.
@@ -23,7 +23,7 @@ The CharListGen scripts can be found under the tools folder.
 
 These scripts allow you to easily level up DoL jobs, and at scale.
 
-### All files use `vac_functions.lua`, `vac_lists.lua` and optionally, but used by default, `vac_char_list.lua`.
+### All files use `vac_functions.lua`, `vac_lists.lua` and optionally, but used by most by default, `vac_char_list.lua`.
 The above files need to be places in your Something Need Doing config directory, which will be located at %appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\
 
 
