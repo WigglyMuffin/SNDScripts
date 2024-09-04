@@ -1444,15 +1444,24 @@ end
 --
 -- returns the id of the duty you search for, if the search is vague enough it'll return any of the ones that it finds, so try to be specific
 function FindDutyID(duty_name)
-    local duty_name_lower = string.lower(duty_name)
-
+    -- this needs to be here to replace funky dashes since square is funny
+    local function replaceDashes(s)
+        return s:gsub("–", "-"):gsub("—", "-"):gsub("‑", "-"):gsub("‐", "-")
+    end
+    local duty_name_lower = replaceDashes(string.lower(duty_name))
     for key, value in pairs(Zone_List) do
-        if string.lower(value["Duty"]) == duty_name_lower then
+        local duty_value_lower = replaceDashes(string.lower(value["Duty"]))
+
+        if duty_value_lower == duty_name_lower then
             return key
         end
     end
+
     return nil
 end
+
+
+
 
 -- Usage: FindZoneID("Limsa Lominsa Lower Decks")
 --
@@ -1507,12 +1516,12 @@ end
 -- 
 -- Will return the name of the aetheryte with the given id, or nil if not found
 function FindAetheryteNameByID(aetheryte_id)
-    aetheryte_id = tostring(aetheryte_id)
-    for _, zone in pairs(Zone_List) do
-        if zone["Aetherytes"] then
-            for _, aetheryte in ipairs(zone["Aetherytes"]) do
-                if aetheryte["ID"] == aetheryte_id then
-                    return aetheryte["Name"]
+    aetheryte_id = tonumber(aetheryte_id) -- make sure the id is a number
+    for _, zone in pairs(Zone_List) do -- iterate over the zone list
+        if zone["Aetherytes"] then -- checks if the aetheryte section is present
+            for _, aetheryte in ipairs(zone["Aetherytes"]) do -- iterates over each aetheryte inside the zone
+                if tonumber(aetheryte["ID"]) == aetheryte_id then -- converts the aetheryte id to number and checks it against the provided id
+                    return aetheryte["Name"] -- returns the correct aetheryte name
                 end
             end
         end
@@ -1520,17 +1529,18 @@ function FindAetheryteNameByID(aetheryte_id)
     return nil  -- Return nil if not found
 end
 
+
 -- Function to find the ID of an aetheryte by name
 -- Usage: local id = FindAetheryteIDByName("Aleport")
 -- 
 -- Will return the ID of the aetheryte with the given name, or nil if not found
 function FindAetheryteIDByName(aetheryte_name)
-    aetheryte_name = tostring(aetheryte_name)
-    for _, zone in pairs(Zone_List) do
-        if zone["Aetherytes"] then
-            for _, aetheryte in ipairs(zone["Aetherytes"]) do
-                if aetheryte["Name"] == aetheryte_name then
-                    return tonumber(aetheryte["ID"])
+    aetheryte_name = tostring(aetheryte_name):lower()  -- Convert input name to lower case
+    for _, zone in pairs(Zone_List) do -- iterate over the zone list
+        if zone["Aetherytes"] then -- checks if the aetheryte section is present
+            for _, aetheryte in ipairs(zone["Aetherytes"]) do -- iterates over each aetheryte inside the zone
+                if aetheryte["Name"]:lower() == aetheryte_name then  -- converts aetheryte name to lower case and checks it against the provided name
+                    return tonumber(aetheryte["ID"]) -- returns the correct aetheryte id
                 end
             end
         end
@@ -1984,7 +1994,7 @@ function DoQuest(quest_do_name)
     end
 
     -- Check if the quest is already completed
-    if IsQuestComplete(tonumber(quest_key)) then
+    if IsQuestComplete(tonumber(quest_id)) then
         Echo('You have already completed the "' .. quest_do_name .. '" quest.')
         return true
     end
