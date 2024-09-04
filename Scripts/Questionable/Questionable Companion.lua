@@ -6,9 +6,10 @@
 
 ####################
 ##    Version     ##
-##     0.0.1      ##
+##     0.0.2      ##
 ####################
 
+-> 0.0.2: Questionable should now start again after a duty ends
 -> 0.0.1: Initial release, it is not tested properly so it might not work as intended. Consider it a testing version of sorts.
 
 ####################################################
@@ -86,7 +87,7 @@ for _, char in ipairs(chars) do
                 if success then
                     return result
                 else
-                    
+
                     return nil
                 end
             end
@@ -144,7 +145,11 @@ for _, char in ipairs(chars) do
             Sleep(30)
             repeat
                 Sleep(1)
-            until not GetCharacterCondition(34) and IsPlayerAvailable()
+            until not GetCharacterCondition(34) and not GetCharacterCondition(45) and IsPlayerAvailable()
+            Sleep(3) -- redundant but i just want to make sure the player is actually available
+            yield("/rsr auto")
+            yield("/bmrai on")
+            yield("/qst start")
         end
 
         -- Instance helper
@@ -200,11 +205,8 @@ for _, char in ipairs(chars) do
                 end
                 repeat
                     Sleep(1)
-                until not GetCharacterCondition(34)
-                repeat
-                    Sleep(1)
-                until IsPlayerAvailable()
-                Sleep(3)
+                until not GetCharacterCondition(34) and not GetCharacterCondition(45) and IsPlayerAvailable()
+                Sleep(3)-- redundant but i just want to make sure the player is actually available
                 yield("/rsr auto")
                 yield("/bmrai on")
                 yield("/qst start")
