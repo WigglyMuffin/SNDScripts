@@ -6,10 +6,11 @@
 
 ####################
 ##    Version     ##
-##     0.0.5      ##
+##     0.0.6      ##
 ####################
 
--> 0.0.5: Solo instances should be working properly again?
+-> 0.0.6: Added unexpected combat handler
+-> 0.0.5: Solo instances should be working properly again
 -> 0.0.4: Added some extra checks which should cause it to no longer fail to queue into duties
 -> 0.0.3: Should no longer vnav rebuild after short periods of time, should now be about 8 seconds
 -> 0.0.2: Questionable should now start again after a duty ends
@@ -75,7 +76,28 @@ for _, char in ipairs(chars) do
     until IsPlayerAvailable()
     yield("/at e")
     yield("/qst start")
+    yield("/rsr manual")
     while not finished do
+        -- unexpected combat handler
+        if GetCharacterCondition(26) and not GetCharacterCondition(34) then
+            if not QuestionableIsrunning() then
+                yield("/rsr manual")
+                yield("/bmrai on")
+                repeat
+                    yield("/battletarget")
+                    Sleep(0.1)
+                until GetTargetName() ~= "" or not GetCharacterCondition(26)
+                repeat
+                    while GetTargetName() ~= "" and GetCharacterCondition(26) do
+                        Sleep(0.1)
+                    end
+                    yield("/battletarget")
+                    Sleep(1)
+                until not GetCharacterCondition(26)
+                yield("/bmrai off")
+                yield("/qst start")
+            end
+        end
         -- stuck checker
         if PathIsRunning() then
             local function rounded_distance(x1, y1, z1, x2, y2, z2)
@@ -156,8 +178,8 @@ for _, char in ipairs(chars) do
                 Sleep(1)
             until not GetCharacterCondition(34) and not GetCharacterCondition(45) and IsPlayerAvailable()
             Sleep(3) -- redundant but i just want to make sure the player is actually available
-            yield("/rsr auto")
-            yield("/bmrai on")
+            yield("/rsr manual")
+            yield("/bmrai off")
             yield("/qst start")
         end
 
@@ -178,12 +200,9 @@ for _, char in ipairs(chars) do
                         Sleep(1)
                     until not IsAddonVisible("DifficultySelectYesNo")
                 end
-                repeat
-                    Sleep(1)
-                until GetCharacterCondition(34)
-                repeat
-                    Sleep(0.1)
-                until IsPlayerAvailable()
+                ZoneTransitions() -- make sure to wait properly for the transition
+
+
                 -- specific stuff to deal with an instance where it has to kill a boulder
                 if DoesObjectExist("Large Boulder") then
                     yield("/rsr manual")
@@ -208,6 +227,7 @@ for _, char in ipairs(chars) do
                     yield("/bmrai followtarget off")
                     yield("/rotation settings aoetype 2")
                 else
+                    Sleep(1)
                     yield("/rsr auto")
                     Sleep(0.5)
                     yield("/bmrai on")
@@ -215,9 +235,9 @@ for _, char in ipairs(chars) do
                 repeat
                     Sleep(1)
                 until not GetCharacterCondition(34) and not GetCharacterCondition(45) and IsPlayerAvailable()
-                Sleep(3)-- redundant but i just want to make sure the player is actually available
-                yield("/rsr auto")
-                yield("/bmrai on")
+                Sleep(8) -- redundant but i just want to make sure the player is actually available
+                yield("/rsr manual")
+                yield("/bmrai off")
                 yield("/qst start")
             end
         end
