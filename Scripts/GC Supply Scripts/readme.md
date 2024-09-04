@@ -87,14 +87,14 @@ Make sure the `Trade GC items to alts.lua` file has the `SNDAltConfigFolder` nea
 Make sure you roughly follow this file tree structure for these scripts to work. If you run from a single %appdata% then it would be closer to the alt account file tree.
 `list_to_gather.txt` and `provisioning_list.lua` will be automatically generated once you run the scripts.
 ```bash
-C:\Users\Main Account\AppData\Roaming\XIVLauncher\pluginConfigs\SomethingNeedDoing\/
+C:\Users\Main Account\AppData\Roaming\XIVLauncher\pluginConfigs\SomethingNeedDoing\
 ├── vac_char_list.lua
 ├── vac_functions.lua
 └── vac_lists.lua
 
-C:\Users\Alt Account\AppData\Roaming\XIVLauncher\pluginConfigs\SomethingNeedDoing\/
-├── VAC/
-│   └── GC/
+C:\Users\Alt Account\AppData\Roaming\XIVLauncher\pluginConfigs\SomethingNeedDoing\
+├── VAC
+│   └── GC
 │       ├── list_to_gather.txt
 │       └── provisioning_list.lua
 ├── vac_char_list.lua
