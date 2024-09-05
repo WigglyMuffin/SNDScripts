@@ -6,10 +6,11 @@
 
 ####################
 ##    Version     ##
-##     0.1.0      ##
+##     0.1.1      ##
 ####################
 
--> 0.1.0: fixed a bug in the qst reloader, and added temporary rsr auto calls to make sure it actually starts properly once entering instances
+-> 0.1.1: Potentially made certain things more robust. Make sure to update your VAC_Functions.lua
+-> 0.1.0: Fixed a bug in the qst reloader, and added temporary rsr auto calls to make sure it actually starts properly once entering instances
 -> 0.0.9: Some minor changes for consistency, and qst now should start properly again after instances/dungeons
 -> 0.0.8: Added the experimental features section, and added an experimental qst reloader which will reload if it finds questionable being stuck
 -> 0.0.7: Added a duty whitelist so it won't try to queue duties that don't have duty support
@@ -192,7 +193,7 @@ local function WaitforInstanceFinishAndStartQst()
         Sleep(0.1)
     until IsPlayerAvailable()
     Sleep(1)
-    local qst_start_retry_timer
+    local qst_start_retry_timer = 0
     repeat
         qst_start_retry_timer = qst_start_retry_timer + 1
         yield("/qst start")
@@ -258,13 +259,17 @@ for _, char in ipairs(chars) do
                     yield("/battletarget")
                     Sleep(1)
                 until not GetCharacterCondition(26)
+                Sleep(2)
                 yield("/bmrai off")
+                Sleep(0.5)
+                yield("/qst reload")
+                Sleep(1)
                 yield("/qst start")
             end
         end
 
         -- Qst reloader
-        if qst_reloader_enabled and QuestionableIsRunning() and not GetCharacterCondition(26) and IsPlayerAvailable() then
+        if qst_reloader_enabled and QuestionableIsRunning() and not GetCharacterCondition(26) and IsPlayerAvailable() and NavIsReady() then
 
             if qst_reloader_counter % 2 == 0 then
                 qst_success_1, qst_reloader_player_pos_x = pcall(GetPlayerRawXPos)
@@ -274,17 +279,19 @@ for _, char in ipairs(chars) do
                 local qst_success_4, x1 = pcall(GetPlayerRawXPos)
                 local qst_success_5, y1 = pcall(GetPlayerRawYPos)
                 local qst_success_6, z1 = pcall(GetPlayerRawZPos)
-                if (qst_success_1 and qst_success_2 and qst_success_3 and qst_success_4 and qst_success_5 and qst_success_6) then
+                if not (qst_success_1 and qst_success_2 and qst_success_3 and qst_success_4 and qst_success_5 and qst_success_6) then
+                    -- do nothing
+                else
                     if WithinThreeUnits(qst_reloader_player_pos_x, qst_reloader_player_pos_y, qst_reloader_player_pos_z, x1, y1, z1) then
                         qst_reloader_timer = qst_reloader_timer + 1
                         if qst_reloader_timer > 10 then
                             yield("/qst reload")
+                            Echo("Questionable seems stuck, reloading")
                             qst_reloader_timer = 0
                         end
                     else
                         qst_reloader_timer = 0
                     end
-                else
                 end
             end
             qst_reloader_counter = qst_reloader_counter + 1
