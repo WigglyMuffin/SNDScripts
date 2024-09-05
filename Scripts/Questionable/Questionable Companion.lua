@@ -6,9 +6,10 @@
 
 ####################
 ##    Version     ##
-##     0.0.8      ##
+##     0.0.9      ##
 ####################
 
+-> 0.0.9: Some minor changes for consistency, and qst now should start properly again after instances/dungeons
 -> 0.0.8: Added the experimental features section, and added an experimental qst reloader which will reload if it finds questionable being stuck
 -> 0.0.7: Added a duty whitelist so it won't try to queue duties that don't have duty support
 -> 0.0.6: Added unexpected combat handler
@@ -157,13 +158,13 @@ function IsDutyWhitelisted(duty_name)
     return false
 end
 
-local function rounded_distance(x1, y1, z1, x2, y2, z2)
+local function SquaredDistance(x1, y1, z1, x2, y2, z2)
     local success, result = pcall(function()
         local dx = x2 - x1
         local dy = y2 - y1
         local dz = z2 - z1
         local dist = math.sqrt(dx * dx + dy * dy + dz * dz)
-        return math.floor(dist + 0.49999999999999994)
+        return math.floor(dist + 0.5)
     end)
     if success then
         return result
@@ -173,12 +174,39 @@ local function rounded_distance(x1, y1, z1, x2, y2, z2)
     end
 end
 
-local function within_three_units(x1, y1, z1, x2, y2, z2)
-    local dist = rounded_distance(x1, y1, z1, x2, y2, z2)
+local function WithinThreeUnits(x1, y1, z1, x2, y2, z2)
+    local dist = SquaredDistance(x1, y1, z1, x2, y2, z2)
     if dist then
         return dist <= 3
     else
         return false
+    end
+end
+
+local function WaitforInstanceFinishAndStartQst()
+    repeat
+        Sleep(1)
+    until not GetCharacterCondition(34) and not GetCharacterCondition(56) and not GetCharacterCondition(45) and not GetCharacterCondition(51)
+    repeat
+        Sleep(0.1)
+    until IsPlayerAvailable()
+    Sleep(1)
+    local qst_start_retry_timer
+    repeat
+        qst_start_retry_timer = qst_start_retry_timer + 1
+        yield("/qst start")
+        Sleep(2)
+        if qst_start_retry_timer == 5 and not QuestionableIsRunning() then
+            yield("/qst reload")
+        end
+    until QuestionableIsRunning() or qst_start_retry_timer > 10
+    Sleep(0.5)
+    yield("/rsr manual")
+    Sleep(0.5)
+    if bossmod_ai_outside_of_instances then
+        yield("/bmrai on")
+    else
+        yield("/bmrai off")
     end
 end
 
@@ -245,7 +273,7 @@ for _, char in ipairs(chars) do
                 local success1, x1 = pcall(GetPlayerRawXPos)
                 local success2, y1 = pcall(GetPlayerRawYPos)
                 local success3, z1 = pcall(GetPlayerRawZPos)
-                if within_three_units(qst_reloader_player_pos_x, qst_reloader_player_pos_y, qst_reloader_player_pos_z, x1, y1, z1) then
+                if WithinThreeUnits(qst_reloader_player_pos_x, qst_reloader_player_pos_y, qst_reloader_player_pos_z, x1, y1, z1) then
                     qst_reloader_timer = qst_reloader_timer + 1
                     if qst_reloader_timer > 10 then
                         yield("/qst reload")
@@ -275,7 +303,7 @@ for _, char in ipairs(chars) do
                 if not (success4 and success5 and success6) then
                     goto continue
                 end
-                if within_three_units(x1, y1, z1, x2, y2, z2) and PathIsRunning() then
+                if WithinThreeUnits(x1, y1, z1, x2, y2, z2) and PathIsRunning() then
                     yield("/qst stop")
                     retry_timer = retry_timer + 1
                     if retry_timer > 4 then -- 4 would be about 8 seconds, with some extra time since it waits a second after reloading
@@ -311,17 +339,7 @@ for _, char in ipairs(chars) do
             if IsDutyWhitelisted(duty) then
                 AutoDutyRun(duty)
                 Sleep(30)
-                repeat
-                    Sleep(1)
-                until not GetCharacterCondition(34) and not GetCharacterCondition(45) and IsPlayerAvailable()
-                Sleep(8) -- redundant but i just want to make sure the player is actually available
-                yield("/rsr manual")
-                if bossmod_ai_outside_of_instances then
-                    yield("/bmrai on")
-                else
-                    yield("/bmrai off")
-                end
-                yield("/qst start")
+                WaitforInstanceFinishAndStartQst()
             else
                 Echo(duty.." is not on the duty whitelist")
                 repeat
@@ -380,17 +398,7 @@ for _, char in ipairs(chars) do
                     Sleep(0.5)
                     yield("/bmrai on")
                 end
-                repeat
-                    Sleep(1)
-                until not GetCharacterCondition(34) and not GetCharacterCondition(45) and IsPlayerAvailable()
-                Sleep(8) -- redundant but i just want to make sure the player is actually available
-                yield("/rsr manual")
-                if bossmod_ai_outside_of_instances then
-                    yield("/bmrai on")
-                else
-                    yield("/bmrai off")
-                end
-                yield("/qst start")
+                WaitforInstanceFinishAndStartQst()
             end
         end
         Sleep(1)
