@@ -2295,6 +2295,10 @@ end
 -- Usage: IsQuestNameAccepted("Hello Halatali.")
 -- Checks if quest name is accepted
 function IsQuestNameAccepted(quest_accepted_name)
+    if not quest_accepted_name or quest_accepted_name == "" then
+        return nil -- Return nil if the quest_accepted_name is nil or an empty string
+    end
+
     for key, entry in pairs(Quest_List) do
         if string.lower(entry['Name']) == string.lower(quest_accepted_name) then
             return IsQuestAccepted(tonumber(key))
@@ -2302,6 +2306,7 @@ function IsQuestNameAccepted(quest_accepted_name)
     end
     return nil -- Return nil if the name isn't found
 end
+
 
 -- Usage: IsHuntLogComplete(9, 0) or IsHuntLogComplete(0, 1)
 -- Checks if player has the hunt log rank completed
