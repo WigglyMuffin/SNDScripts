@@ -1104,8 +1104,9 @@ end
 -- Usage: Target("Storm Quartermaster")
 -- TODO: target checking for consistency and speed
 function Target(target)
+    target_command = "/target \"" .. target .. "\""
     repeat
-        yield('/target "' .. target .. '"')
+        yield(target_command)
         Sleep(0.1)
     until string.lower(GetTargetName()) == string.lower(target)
 end
