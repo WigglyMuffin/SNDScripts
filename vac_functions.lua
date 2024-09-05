@@ -1104,7 +1104,7 @@ end
 -- Usage: Target("Storm Quartermaster")
 -- TODO: target checking for consistency and speed
 function Target(target)
-    target_command = "/target \"" .. target .. "\""
+    local target_command = "/target \"" .. target .. "\""
     repeat
         yield(target_command)
         Sleep(0.1)
