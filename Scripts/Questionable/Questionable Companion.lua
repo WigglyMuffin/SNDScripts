@@ -6,9 +6,10 @@
 
 ####################
 ##    Version     ##
-##     0.0.9      ##
+##     0.1.0      ##
 ####################
 
+-> 0.1.0: fixed a bug in the qst reloader, and added temporary rsr auto calls to make sure it actually starts properly once entering instances
 -> 0.0.9: Some minor changes for consistency, and qst now should start properly again after instances/dungeons
 -> 0.0.8: Added the experimental features section, and added an experimental qst reloader which will reload if it finds questionable being stuck
 -> 0.0.7: Added a duty whitelist so it won't try to queue duties that don't have duty support
@@ -45,7 +46,7 @@ Also has a stuck checker that reloads vnav and if stuck for long enough, rebuild
 ##################################################]]
 
 -- leave this empty if you don't want the chars to stop at any specific quest, but this will cause it to never try to rotate to another char
-local QuestNameToStopAt = ""
+local quest_name_to_stop_at = ""
 
 -- Toggle if you want bossmod ai to be enabled all the time or only when it's required
 local bossmod_ai_outside_of_instances = true
@@ -216,6 +217,9 @@ local qst_reloader_player_pos_y = GetPlayerRawYPos()
 local qst_reloader_player_pos_z = GetPlayerRawZPos()
 local qst_reloader_counter = 0
 local qst_reloader_timer = 0
+local qst_success_1
+local qst_success_2
+local qst_success_3
 
 for _, char in ipairs(chars) do
     local finished = false
@@ -261,26 +265,26 @@ for _, char in ipairs(chars) do
 
         -- Qst reloader
         if qst_reloader_enabled and QuestionableIsRunning() and not GetCharacterCondition(26) and IsPlayerAvailable() then
-            if qst_reloader_counter % 2 == 0 then
-                local qst_success_1 -- i just don't like them not being locals
-                local qst_success_2 -- i just don't like them not being locals
-                local qst_success_3 -- i just don't like them not being locals
 
+            if qst_reloader_counter % 2 == 0 then
                 qst_success_1, qst_reloader_player_pos_x = pcall(GetPlayerRawXPos)
                 qst_success_2, qst_reloader_player_pos_y = pcall(GetPlayerRawYPos)
                 qst_success_3, qst_reloader_player_pos_z = pcall(GetPlayerRawZPos)
             elseif qst_reloader_counter % 2 == 1 then
-                local success1, x1 = pcall(GetPlayerRawXPos)
-                local success2, y1 = pcall(GetPlayerRawYPos)
-                local success3, z1 = pcall(GetPlayerRawZPos)
-                if WithinThreeUnits(qst_reloader_player_pos_x, qst_reloader_player_pos_y, qst_reloader_player_pos_z, x1, y1, z1) then
-                    qst_reloader_timer = qst_reloader_timer + 1
-                    if qst_reloader_timer > 10 then
-                        yield("/qst reload")
+                local qst_success_4, x1 = pcall(GetPlayerRawXPos)
+                local qst_success_5, y1 = pcall(GetPlayerRawYPos)
+                local qst_success_6, z1 = pcall(GetPlayerRawZPos)
+                if (qst_success_1 and qst_success_2 and qst_success_3 and qst_success_4 and qst_success_5 and qst_success_6) then
+                    if WithinThreeUnits(qst_reloader_player_pos_x, qst_reloader_player_pos_y, qst_reloader_player_pos_z, x1, y1, z1) then
+                        qst_reloader_timer = qst_reloader_timer + 1
+                        if qst_reloader_timer > 10 then
+                            yield("/qst reload")
+                            qst_reloader_timer = 0
+                        end
+                    else
                         qst_reloader_timer = 0
                     end
                 else
-                    qst_reloader_timer = 0
                 end
             end
             qst_reloader_counter = qst_reloader_counter + 1
@@ -321,7 +325,7 @@ for _, char in ipairs(chars) do
         end
 
         -- Quest checker
-        if IsQuestNameAccepted(QuestNameToStopAt) then
+        if IsQuestNameAccepted(quest_name_to_stop_at) then
             repeat
                 Sleep(0.1)
             until IsPlayerAvailable()
@@ -339,6 +343,9 @@ for _, char in ipairs(chars) do
             if IsDutyWhitelisted(duty) then
                 AutoDutyRun(duty)
                 Sleep(30)
+                yield("/rsr auto")
+                Sleep(1)
+                yield("/rsr auto")
                 WaitforInstanceFinishAndStartQst()
             else
                 Echo(duty.." is not on the duty whitelist")
@@ -393,7 +400,9 @@ for _, char in ipairs(chars) do
                     yield("/bmrai followtarget off")
                     yield("/rotation settings aoetype 2")
                 else
-                    Sleep(1)
+                    Sleep(3)
+                    yield("/rsr auto")
+                    Sleep(0.5)
                     yield("/rsr auto")
                     Sleep(0.5)
                     yield("/bmrai on")
