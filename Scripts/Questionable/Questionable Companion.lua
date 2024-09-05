@@ -6,9 +6,10 @@
 
 ####################
 ##    Version     ##
-##     0.0.7      ##
+##     0.0.8      ##
 ####################
 
+-> 0.0.8: Added the experimental features section, and added an experimental qst reloader which will reload if it finds questionable being stuck
 -> 0.0.7: Added a duty whitelist so it won't try to queue duties that don't have duty support
 -> 0.0.6: Added unexpected combat handler
 -> 0.0.5: Solo instances should be working properly again
@@ -43,7 +44,10 @@ Also has a stuck checker that reloads vnav and if stuck for long enough, rebuild
 ##################################################]]
 
 -- leave this empty if you don't want the chars to stop at any specific quest, but this will cause it to never try to rotate to another char
-QuestNameToStopAt = ""
+local QuestNameToStopAt = ""
+
+-- Toggle if you want bossmod ai to be enabled all the time or only when it's required
+local bossmod_ai_outside_of_instances = true
 
 -- Here you provide it a character list to go through, this used alongside the above option will let you get a lot of different character to X quest
 local chars = {
@@ -51,6 +55,13 @@ local chars = {
     "EXAMPLE CHARACTER@WORLD",
     "EXAMPLE CHARACTER@WORLD"
 }
+
+--[[################################################
+##              Experimental Features             ##
+##################################################]]
+
+-- will attempt to reload qst whenever it detects it's stuck on a step
+local qst_reloader_enabled = false
 
 
 --[[################################################
@@ -146,6 +157,38 @@ function IsDutyWhitelisted(duty_name)
     return false
 end
 
+local function rounded_distance(x1, y1, z1, x2, y2, z2)
+    local success, result = pcall(function()
+        local dx = x2 - x1
+        local dy = y2 - y1
+        local dz = z2 - z1
+        local dist = math.sqrt(dx * dx + dy * dy + dz * dz)
+        return math.floor(dist + 0.49999999999999994)
+    end)
+    if success then
+        return result
+    else
+
+        return nil
+    end
+end
+
+local function within_three_units(x1, y1, z1, x2, y2, z2)
+    local dist = rounded_distance(x1, y1, z1, x2, y2, z2)
+    if dist then
+        return dist <= 3
+    else
+        return false
+    end
+end
+
+-- Qst reloader stuff
+local qst_reloader_player_pos_x = GetPlayerRawXPos()
+local qst_reloader_player_pos_y = GetPlayerRawYPos()
+local qst_reloader_player_pos_z = GetPlayerRawZPos()
+local qst_reloader_counter = 0
+local qst_reloader_timer = 0
+
 for _, char in ipairs(chars) do
     local finished = false
     if GetCharacterName(true) == char then
@@ -161,8 +204,13 @@ for _, char in ipairs(chars) do
     yield("/at e")
     yield("/qst start")
     yield("/rsr manual")
+    if bossmod_ai_outside_of_instances then
+        yield("/bmrai on")
+    else
+        yield("/bmrai off")
+    end
     while not finished do
-        -- unexpected combat handler
+        -- Unexpected combat handler
         if GetCharacterCondition(26) and not GetCharacterCondition(34) then
             if not QuestionableIsRunning() then
                 yield("/rsr manual")
@@ -182,31 +230,36 @@ for _, char in ipairs(chars) do
                 yield("/qst start")
             end
         end
+
+        -- Qst reloader
+        if qst_reloader_enabled and QuestionableIsRunning() then
+            if qst_reloader_counter % 2 == 0 then
+                local qst_success_1 -- i just don't like them not being locals
+                local qst_success_2 -- i just don't like them not being locals
+                local qst_success_3 -- i just don't like them not being locals
+
+                qst_success_1, qst_reloader_player_pos_x = pcall(GetPlayerRawXPos)
+                qst_success_2, qst_reloader_player_pos_y = pcall(GetPlayerRawYPos)
+                qst_success_3, qst_reloader_player_pos_z = pcall(GetPlayerRawZPos)
+            elseif qst_reloader_counter % 2 == 1 then
+                local success1, x1 = pcall(GetPlayerRawXPos)
+                local success2, y1 = pcall(GetPlayerRawYPos)
+                local success3, z1 = pcall(GetPlayerRawZPos)
+                if within_three_units(qst_reloader_player_pos_x, qst_reloader_player_pos_y, qst_reloader_player_pos_z, x1, y1, z1) then
+                    qst_reloader_timer = qst_reloader_timer + 1
+                    if qst_reloader_timer > 10 then
+                        yield("/qst reload")
+                        qst_reloader_timer = 0
+                    end
+                else
+                    qst_reloader_timer = 0
+                end
+            end
+            qst_reloader_counter = qst_reloader_counter + 1
+        end
+
         -- stuck checker
         if PathIsRunning() then
-            local function rounded_distance(x1, y1, z1, x2, y2, z2)
-                local success, result = pcall(function()
-                    local dx = x2 - x1
-                    local dy = y2 - y1
-                    local dz = z2 - z1
-                    local dist = math.sqrt(dx * dx + dy * dy + dz * dz)
-                    return math.floor(dist + 0.49999999999999994)
-                end)
-                if success then
-                    return result
-                else
-
-                    return nil
-                end
-            end
-            local function within_three_units(x1, y1, z1, x2, y2, z2)
-                local dist = rounded_distance(x1, y1, z1, x2, y2, z2)
-                if dist then
-                    return dist <= 3
-                else
-                    return false
-                end
-            end
             local retry_timer = 0
             while PathIsRunning() do
                 local success1, x1 = pcall(GetPlayerRawXPos)
@@ -263,7 +316,11 @@ for _, char in ipairs(chars) do
                 until not GetCharacterCondition(34) and not GetCharacterCondition(45) and IsPlayerAvailable()
                 Sleep(8) -- redundant but i just want to make sure the player is actually available
                 yield("/rsr manual")
-                yield("/bmrai off")
+                if bossmod_ai_outside_of_instances then
+                    yield("/bmrai on")
+                else
+                    yield("/bmrai off")
+                end
                 yield("/qst start")
             else
                 Echo(duty.." is not on the duty whitelist")
@@ -328,7 +385,11 @@ for _, char in ipairs(chars) do
                 until not GetCharacterCondition(34) and not GetCharacterCondition(45) and IsPlayerAvailable()
                 Sleep(8) -- redundant but i just want to make sure the player is actually available
                 yield("/rsr manual")
-                yield("/bmrai off")
+                if bossmod_ai_outside_of_instances then
+                    yield("/bmrai on")
+                else
+                    yield("/bmrai off")
+                end
                 yield("/qst start")
             end
         end
