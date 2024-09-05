@@ -232,7 +232,7 @@ for _, char in ipairs(chars) do
         end
 
         -- Qst reloader
-        if qst_reloader_enabled and QuestionableIsRunning() then
+        if qst_reloader_enabled and QuestionableIsRunning() and not GetCharacterCondition(26) and IsPlayerAvailable() then
             if qst_reloader_counter % 2 == 0 then
                 local qst_success_1 -- i just don't like them not being locals
                 local qst_success_2 -- i just don't like them not being locals
