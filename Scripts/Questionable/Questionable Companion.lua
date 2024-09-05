@@ -6,9 +6,10 @@
 
 ####################
 ##    Version     ##
-##     0.1.1      ##
+##     0.1.2      ##
 ####################
 
+-> 0.1.2: Changed how combat is handled, a lot of rsr settings will be modified to ensure consistency. Should also now equip recommended gear after duties/instances.
 -> 0.1.1: Potentially made certain things more robust. Make sure to update your VAC_Functions.lua
 -> 0.1.0: Fixed a bug in the qst reloader, and added temporary rsr auto calls to make sure it actually starts properly once entering instances
 -> 0.0.9: Some minor changes for consistency, and qst now should start properly again after instances/dungeons
@@ -25,8 +26,10 @@
 ##                  Description                   ##
 ####################################################
 
-Just a simple script you can run alongside questionable to have it automatically queue and finish dungeons and instances.
+Just a simple script you can run alongside questionable to have it automatically queue and finish dungeons, it will enter and try to do instances but not every instance is doable.
 Also has a stuck checker that reloads vnav and if stuck for long enough, rebuilds the zone entirely.
+ 
+Will also modify a lot of settings inside of Rotation solver so beware of that before using.
 
 ####################################################
 ##                  Requirements                  ##
@@ -193,6 +196,7 @@ local function WaitforInstanceFinishAndStartQst()
         Sleep(0.1)
     until IsPlayerAvailable()
     Sleep(1)
+    EquipRecommendedGear()
     local qst_start_retry_timer = 0
     repeat
         qst_start_retry_timer = qst_start_retry_timer + 1
@@ -203,8 +207,9 @@ local function WaitforInstanceFinishAndStartQst()
         end
     until QuestionableIsRunning() or qst_start_retry_timer > 10
     Sleep(0.5)
-    yield("/rsr manual")
-    Sleep(0.5)
+    yield("/rotation off")
+    Sleep(1)
+    yield("/rotation auto")
     if bossmod_ai_outside_of_instances then
         yield("/bmrai on")
     else
@@ -236,7 +241,22 @@ for _, char in ipairs(chars) do
     until IsPlayerAvailable()
     yield("/at e")
     yield("/qst start")
-    yield("/rsr manual")
+    Sleep(0.5)
+    yield("/rotation off")
+    Sleep(0.5)
+    yield("/rotation auto")
+    -- rsr settings
+    yield("/rotation Settings AutoOffBetweenArea False")
+    yield("/rotation Settings AutoOffSwitchClass False")
+    yield("/rotation Settings AutoOffWhenDutyCompleted True")
+    yield("/rotation Settings AutoOffCutScene False")
+    yield("/rotation Settings AddEnemyListToHostile True")
+    yield("/rotation Settings OnlyAttackInEnemyList False")
+    yield("/rotation Settings AutoOffAfterCombat False")
+    yield("/rotation Settings AutoOffWhenDead False")
+    yield("/rotation Settings AutoOffWhenDutyCompleted False")
+    yield("/rotation Settings AoEType Full")
+    yield("/rotation Settings HostileType AllTargetsWhenSoloInDuty")
     if bossmod_ai_outside_of_instances then
         yield("/bmrai on")
     else
@@ -246,21 +266,15 @@ for _, char in ipairs(chars) do
         -- Unexpected combat handler
         if GetCharacterCondition(26) and not GetCharacterCondition(34) then
             if not QuestionableIsRunning() then
-                yield("/rsr manual")
                 yield("/bmrai on")
                 repeat
-                    yield("/battletarget")
-                    Sleep(0.1)
-                until GetTargetName() ~= "" or not GetCharacterCondition(26)
-                repeat
-                    while GetTargetName() ~= "" and GetCharacterCondition(26) do
-                        Sleep(0.1)
-                    end
-                    yield("/battletarget")
                     Sleep(1)
                 until not GetCharacterCondition(26)
-                Sleep(2)
-                yield("/bmrai off")
+                if bossmod_ai_outside_of_instances then
+                    yield("/bmrai on")
+                else
+                    yield("/bmrai off")
+                end
                 Sleep(0.5)
                 yield("/qst reload")
                 Sleep(1)
@@ -297,7 +311,7 @@ for _, char in ipairs(chars) do
             qst_reloader_counter = qst_reloader_counter + 1
         end
 
-        -- stuck checker
+        -- Stuck checker
         if PathIsRunning() then
             local retry_timer = 0
             while PathIsRunning() do
@@ -350,9 +364,6 @@ for _, char in ipairs(chars) do
             if IsDutyWhitelisted(duty) then
                 AutoDutyRun(duty)
                 Sleep(30)
-                yield("/rsr auto")
-                Sleep(1)
-                yield("/rsr auto")
                 WaitforInstanceFinishAndStartQst()
             else
                 Echo(duty.." is not on the duty whitelist")
@@ -408,10 +419,6 @@ for _, char in ipairs(chars) do
                     yield("/rotation settings aoetype 2")
                 else
                     Sleep(3)
-                    yield("/rsr auto")
-                    Sleep(0.5)
-                    yield("/rsr auto")
-                    Sleep(0.5)
                     yield("/bmrai on")
                 end
                 WaitforInstanceFinishAndStartQst()
