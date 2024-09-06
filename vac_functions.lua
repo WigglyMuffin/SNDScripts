@@ -1111,7 +1111,7 @@ function Target(target)
     until string.lower(GetTargetName()) == string.lower(target)
 end
 
--- Usage: GcRankUp()
+-- Usage: DoGcRankUp()
 --
 -- Checks if you can rank up in your current gc, then it'll attempt to rank you up
 function DoGcRankUp()
@@ -1210,22 +1210,20 @@ function CanGCRankUp()
     end
 
     local next_rank = gc_rank + 1 -- adds one so we know which gc rank we're attempting to rank up total
-    
     if next_rank == 5 then
         local log_rank_1_complete = IsHuntLogComplete(9, 0)
         if log_rank_1_complete then
             can_rankup = true
         else
             Echo("You need to finish GC hunting log 1 to rank up more")
-            return
         end
     elseif next_rank == 8 then
         if not gc_rank_8_mission_complete then
             Echo('You need to finish the quest "Shadows Uncast" to rank up more')
         else
+            Echo("can")
             can_rankup = true
         end
-        return
     elseif next_rank == 9 then
         local log_rank_2_complete = IsHuntLogComplete(9, 1)
         if log_rank_2_complete and gc_rank_9_mission_complete then
@@ -1239,9 +1237,8 @@ function CanGCRankUp()
             end
         end
     else
-        can_rankup = true -- bandaid fix for an issue i caused
+        can_rankup = true
     end
-        
 
     if current_seals > gc_ranks[next_rank] and next_rank <= 9 and can_rankup then -- excludes rank 10 and above as we don't handle that atm
         return true, next_rank
