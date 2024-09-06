@@ -1221,7 +1221,6 @@ function CanGCRankUp()
         if not gc_rank_8_mission_complete then
             Echo('You need to finish the quest "Shadows Uncast" to rank up more')
         else
-            Echo("can")
             can_rankup = true
         end
     elseif next_rank == 9 then
