@@ -9,7 +9,7 @@
 ##     0.1.4      ##
 ####################
 
--> 0.1.3: Added an extra option to toggle the chat output of quest reloader
+-> 0.1.4: Added an extra option to toggle the chat output of quest reloader
 -> 0.1.3: Added various log outputs and made some minor changes to the quest reloader. Also removed unneeded old code.
 -> 0.1.2: Changed how combat is handled, a lot of rsr settings will be modified to ensure consistency. Should also now equip recommended gear after duties/instances.
 -> 0.1.1: Potentially made certain things more robust. Make sure to update your VAC_Functions.lua
