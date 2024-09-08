@@ -6,9 +6,10 @@
 
 ####################
 ##    Version     ##
-##     0.1.2      ##
+##     0.1.3      ##
 ####################
 
+-> 0.1.3: Added various log outputs and made some minor changes to the quest reloader. Also removed unneeded old code.
 -> 0.1.2: Changed how combat is handled, a lot of rsr settings will be modified to ensure consistency. Should also now equip recommended gear after duties/instances.
 -> 0.1.1: Potentially made certain things more robust. Make sure to update your VAC_Functions.lua
 -> 0.1.0: Fixed a bug in the qst reloader, and added temporary rsr auto calls to make sure it actually starts properly once entering instances
@@ -68,7 +69,7 @@ local chars = {
 
 -- will attempt to reload qst whenever it detects it's stuck on a step
 local qst_reloader_enabled = false
-
+local qst_reloader_threshold = 20 -- this is how many seconds quest reloader will wait before it triggers a reload if it finds you being stuck, set this higher if you end up having issues with follow quests and similar
 
 --[[################################################
 ##                  Script Start                  ##
@@ -146,6 +147,7 @@ local whitelisted_duties = {
 }
 
 function IsDutyWhitelisted(duty_name)
+    LogInfo("[QSTC] Checking if " .. duty_name .. " is in the whitelist")
     -- replaces the dashes square uses with normal ones, just to be extra sure
     local function ReplaceDashes(s)
         return s:gsub("–", "-"):gsub("—", "-"):gsub("‑", "-"):gsub("‐", "-")
@@ -157,13 +159,16 @@ function IsDutyWhitelisted(duty_name)
     for _, whitelisted_duty in ipairs(whitelisted_duties) do
         local whitelisted_duty_lower = ReplaceDashes(string.lower(whitelisted_duty))
         if whitelisted_duty_lower == duty_name_lower then
+            LogInfo("[QSTC] " .. duty_name .. " is in the whitelist")
             return true
         end
     end
+    LogInfo("[QSTC] " .. duty_name .. " is not in the whitelist")
     return false
 end
 
 local function SquaredDistance(x1, y1, z1, x2, y2, z2)
+    LogInfo("[QSTC] Squaring distance " .. x1 .." " .. y1 .." " .. z1 .." against " .. x2 .." " .. y2 .." " .. z2)
     local success, result = pcall(function()
         local dx = x2 - x1
         local dy = y2 - y1
@@ -172,9 +177,10 @@ local function SquaredDistance(x1, y1, z1, x2, y2, z2)
         return math.floor(dist + 0.5)
     end)
     if success then
+        LogInfo("[QSTC] Successfully squared distance: " .. result)
         return result
     else
-
+        LogInfo("[QSTC] Failed to square distance " .. x1 .." " .. y1 .." " .. z1 .." against " .. x2 .." " .. y2 .." " .. z2)
         return nil
     end
 end
@@ -189,32 +195,45 @@ local function WithinThreeUnits(x1, y1, z1, x2, y2, z2)
 end
 
 local function WaitforInstanceFinishAndStartQst()
+    LogInfo("[QSTC] Wait for instance finish active")
     repeat
         Sleep(1)
+        LogInfo("[QSTC] Waiting for instance to finish...")
     until not GetCharacterCondition(34) and not GetCharacterCondition(56) and not GetCharacterCondition(45) and not GetCharacterCondition(51)
     repeat
         Sleep(0.1)
     until IsPlayerAvailable()
+    LogInfo("[QSTC] Out of instance")
     Sleep(1)
     EquipRecommendedGear()
     local qst_start_retry_timer = 0
     repeat
         qst_start_retry_timer = qst_start_retry_timer + 1
+        LogInfo("[QSTC] Out of duty, starting Questionable")
         yield("/qst start")
         Sleep(2)
         if qst_start_retry_timer == 5 and not QuestionableIsRunning() then
+            LogInfo("[QSTC] Questionable still not started, attempting reload")
             yield("/qst reload")
         end
     until QuestionableIsRunning() or qst_start_retry_timer > 10
-    Sleep(0.5)
+    if qst_start_retry_timer > 10 then
+        LogInfo("[QSTC] Questionable seems to have failed to start")
+    end
+    Sleep(0)
+    LogInfo("[QSTC] Setting rsr to off")
     yield("/rotation off")
     Sleep(1)
+    LogInfo("[QSTC] Setting rsr to auto")
     yield("/rotation auto")
     if bossmod_ai_outside_of_instances then
+        LogInfo("[QSTC] Setting bmrai to on")
         yield("/bmrai on")
     else
+        LogInfo("[QSTC] Setting bmrai to off")
         yield("/bmrai off")
     end
+    LogInfo("[QSTC] Wait for instance finish no longer active")
 end
 
 -- Qst reloader stuff
@@ -226,16 +245,19 @@ local qst_reloader_timer = 0
 local qst_success_1
 local qst_success_2
 local qst_success_3
-
+LogInfo("[QSTC] Questionable companion started successfully")
 for _, char in ipairs(chars) do
     local finished = false
     if GetCharacterName(true) == char then
         -- continue, no relogging needed
     else
+        LogInfo("[QSTC] Logging into character: "..char)
         RelogCharacter(char)
         Sleep(23.0)
         LoginCheck()
+        LogInfo("[QSTC] Logged in successfully")
     end
+    LogInfo("[QSTC] Changing all needed settings on character: "..char)
     repeat
         Sleep(0.1)
     until IsPlayerAvailable()
@@ -262,29 +284,35 @@ for _, char in ipairs(chars) do
     else
         yield("/bmrai off")
     end
+    LogInfo("[QSTC] All settings set, going into main loop")
     while not finished do
         -- Unexpected combat handler
         if GetCharacterCondition(26) and not GetCharacterCondition(34) then
+            LogInfo("[QSTC] Unexpected combat handler active")
             if not QuestionableIsRunning() then
+                LogInfo("[QSTC] Unexpected combat handler: Turning bmrai on")
                 yield("/bmrai on")
                 repeat
                     Sleep(1)
                 until not GetCharacterCondition(26)
+                LogInfo("[QSTC] Unexpected combat handler: Setting bmr back to configured setting")
                 if bossmod_ai_outside_of_instances then
                     yield("/bmrai on")
                 else
                     yield("/bmrai off")
                 end
                 Sleep(0.5)
+                LogInfo("[QSTC] Unexpected combat handler: Reloading questionable")
                 yield("/qst reload")
                 Sleep(1)
+                LogInfo("[QSTC] Unexpected combat handler: Starting questionable")
                 yield("/qst start")
             end
+            LogInfo("[QSTC] Unexpected combat handler no longer active")
         end
 
         -- Qst reloader
-        if qst_reloader_enabled and QuestionableIsRunning() and not GetCharacterCondition(26) and IsPlayerAvailable() and NavIsReady() then
-
+        if qst_reloader_enabled and not GetCharacterCondition(26) and not GetCharacterCondition(34) and IsPlayerAvailable() and NavIsReady() then
             if qst_reloader_counter % 2 == 0 then
                 qst_success_1, qst_reloader_player_pos_x = pcall(GetPlayerRawXPos)
                 qst_success_2, qst_reloader_player_pos_y = pcall(GetPlayerRawYPos)
@@ -298,12 +326,16 @@ for _, char in ipairs(chars) do
                 else
                     if WithinThreeUnits(qst_reloader_player_pos_x, qst_reloader_player_pos_y, qst_reloader_player_pos_z, x1, y1, z1) then
                         qst_reloader_timer = qst_reloader_timer + 1
-                        if qst_reloader_timer > 10 then
+                        Echo("Quest reloader timer incremented to " .. qst_reloader_timer)
+                        if qst_reloader_timer > qst_reloader_threshold then
                             yield("/qst reload")
-                            Echo("Questionable seems stuck, reloading")
+                            Echo("Questionable seems stuck, reloading and attempting to start it again")
+                            Sleep(2)
+                            yield("/qst start")
                             qst_reloader_timer = 0
                         end
                     else
+                        Echo("Quest reloader timer reset")
                         qst_reloader_timer = 0
                     end
                 end
@@ -329,14 +361,18 @@ for _, char in ipairs(chars) do
                     goto continue
                 end
                 if WithinThreeUnits(x1, y1, z1, x2, y2, z2) and PathIsRunning() then
+                    LogInfo("[QSTC] Stuck checker active, stopping questionable and attempting reload unstuck")
                     yield("/qst stop")
                     retry_timer = retry_timer + 1
                     if retry_timer > 4 then -- 4 would be about 8 seconds, with some extra time since it waits a second after reloading
+                        LogInfo("[QSTC] Stuck checker: Stuck for too long, attempting rebuild")
                         yield("/vnav rebuild")
                     else
+                        LogInfo("[QSTC] Stuck checker: Reloading vnav")
                         yield("/vnav reload")
                     end
                     Sleep(1)
+                    LogInfo("[QSTC] Stuck checker: Starting questionable again")
                     yield("/qst start")
                 else
                     retry_timer = 0
@@ -347,85 +383,76 @@ for _, char in ipairs(chars) do
 
         -- Quest checker
         if IsQuestNameAccepted(quest_name_to_stop_at) then
+            LogInfo("[QSTC] Quest checker active, time to stop questionable and move on to next character")
             repeat
                 Sleep(0.1)
             until IsPlayerAvailable()
             yield("/qst stop")
             finished = true
+            LogInfo("[QSTC] Quest checker not longer active")
         end
 
         -- Duty helper
         if IsAddonReady("ContentsFinder") and DoesObjectExist("Entrance") then
+            LogInfo("[QSTC] Duty helper active, attempting to pull the duty name from JournalDetail")
             repeat
                 Sleep(1)
             until IsAddonReady("JournalDetail")
             Sleep(2) -- to really make sure it's ready to pull the duty name
             local duty = GetNodeText("JournalDetail", 19)
+            LogInfo("[QSTC] Duty helper: JournalDetail 19 is " .. duty)
+            LogInfo("[QSTC] Duty helper: Checking if "..duty.." is on the whitelist")
             if IsDutyWhitelisted(duty) then
+                LogInfo("[QSTC] Duty helper: "..duty.." is on the whitelist, queueing it with supports")
                 AutoDutyRun(duty)
+                LogInfo("[QSTC] Duty helper: Waiting 30 seconds to make sure we're properly in the duty")
                 Sleep(30)
                 WaitforInstanceFinishAndStartQst()
             else
                 Echo(duty.." is not on the duty whitelist")
+                LogInfo("[QSTC] Duty helper: "..duty.." is not on the whitelist, closing duty finder")
                 repeat
                     yield("/pcall ContentsFinder true -1")
                     Sleep(1)
                 until not IsAddonVisible("ContentsFinder")
             end
+            LogInfo("[QSTC] Duty helper no longer active")
         end
 
         -- Instance helper
         if IsAddonReady("SelectYesno") or IsAddonReady("DifficultySelectYesNo") then
+            LogInfo("[QSTC] Instance helper active")
             Sleep(3)
             local text1 = GetNodeText("SelectYesno", 15)
+            LogInfo("[QSTC] Instance helper: SelectYesno 15 is "..tostring(text1))
             local text2 = GetNodeText("DifficultySelectYesNo", 13)
+            LogInfo("[QSTC] Instance helper: DifficultySelectYesNo 13 is "..tostring(text2))
             if string.find(text1, "Commence") or string.find(text2, "Commence") then
                 if string.find(text1, "Commence") then
                     repeat
+                        LogInfo("[QSTC] Instance helper: Commence under SelectYesno found, attempting to start the instance")
                         yield("/pcall SelectYesno true 0")
                         Sleep(1)
                     until not IsAddonVisible("SelectYesno")
                 elseif string.find(text2, "Commence") then
                     repeat
+                        LogInfo("[QSTC] Instance helper: Commence under DifficultySelectYesNo found, attempting to start the instance")
                         yield("/pcall DifficultySelectYesNo true 0")
                         Sleep(1)
                     until not IsAddonVisible("DifficultySelectYesNo")
                 end
                 ZoneTransitions() -- make sure to wait properly for the transition
-
-
-                -- specific stuff to deal with an instance where it has to kill a boulder
-                if DoesObjectExist("Large Boulder") then
-                    yield("/rsr manual")
-                    yield("/rotation settings aoetype 0")
-                    yield("/bmrai on")
-                    yield("/bmrai followtarget on")
-                    yield("/bmrai maxdistancetarget 2.5")
-                    Sleep(0.5)
-                    repeat
-                        yield("/target Large Boulder")
-                    until GetTargetName() == "Large Boulder"
-                    local auto_attack_triggered = false
-                    repeat
-                        if GetDistanceToTarget() <= 4 and not auto_attack_triggered then
-                            DoAction("Auto-attack")
-                            Sleep(0.1)
-                            if IsTargetInCombat() and GetCharacterCondition(26) then
-                                auto_attack_triggered = true
-                            end
-                        end
-                    until GetTargetHP() <= 0
-                    yield("/bmrai followtarget off")
-                    yield("/rotation settings aoetype 2")
-                else
-                    Sleep(3)
-                    yield("/bmrai on")
-                end
-                WaitforInstanceFinishAndStartQst()
+                Sleep(3)
+                LogInfo("[QSTC] Instance helper: Inside instance, setting bmrai to on")
+                yield("/bmrai on")
+                WaitforInstanceFinishAndStartQst()  
+                LogInfo("[QSTC] Instance helper no longer active")
             end
         end
+        LogInfo("[QSTC] Waiting for 1 second...")
         Sleep(1)
     end
+    LogInfo("[QSTC] " .. char .. " is finished! Moving on")
     finished = false
     Teleporter("Limsa", "tp")
 end
