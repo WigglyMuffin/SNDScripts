@@ -6,9 +6,10 @@
 
 ####################
 ##    Version     ##
-##     0.1.3      ##
+##     0.1.4      ##
 ####################
 
+-> 0.1.3: Added an extra option to toggle the chat output of quest reloader
 -> 0.1.3: Added various log outputs and made some minor changes to the quest reloader. Also removed unneeded old code.
 -> 0.1.2: Changed how combat is handled, a lot of rsr settings will be modified to ensure consistency. Should also now equip recommended gear after duties/instances.
 -> 0.1.1: Potentially made certain things more robust. Make sure to update your VAC_Functions.lua
@@ -70,6 +71,8 @@ local chars = {
 -- will attempt to reload qst whenever it detects it's stuck on a step
 local qst_reloader_enabled = false
 local qst_reloader_threshold = 20 -- this is how many seconds quest reloader will wait before it triggers a reload if it finds you being stuck, set this higher if you end up having issues with follow quests and similar
+local qst_reloader_echo = true -- set this to false if you want to disable quest reloader outputting timer info into the chat
+
 
 --[[################################################
 ##                  Script Start                  ##
@@ -326,7 +329,9 @@ for _, char in ipairs(chars) do
                 else
                     if WithinThreeUnits(qst_reloader_player_pos_x, qst_reloader_player_pos_y, qst_reloader_player_pos_z, x1, y1, z1) then
                         qst_reloader_timer = qst_reloader_timer + 1
-                        Echo("Quest reloader timer incremented to " .. qst_reloader_timer)
+                        if qst_reloader_echo then
+                            Echo("Quest reloader timer incremented to " .. qst_reloader_timer)
+                        end
                         if qst_reloader_timer > qst_reloader_threshold then
                             yield("/qst reload")
                             Echo("Questionable seems stuck, reloading and attempting to start it again")
@@ -335,7 +340,9 @@ for _, char in ipairs(chars) do
                             qst_reloader_timer = 0
                         end
                     else
-                        Echo("Quest reloader timer reset")
+                        if qst_reloader_echo then
+                            Echo("Quest reloader timer reset")
+                        end
                         qst_reloader_timer = 0
                     end
                 end
