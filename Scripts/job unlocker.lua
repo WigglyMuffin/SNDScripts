@@ -813,9 +813,11 @@ function MaelstromRank1()
         ZoneTransitions()
         Movement(468.13, 232.79, 321.85)
         DoHuntLog(MaelstromEnemiesLog1[10], 2500, 9, 0)
-        Movement(224.32, 301.51, -142.16)
-        Movement(229.20, 312.91, -235.02)
-        AttuneAetheryte()
+        if not IsAetheryteAttuned("Camp Dragonhead") then
+            Movement(224.32, 301.51, -142.16)
+            Movement(229.20, 312.91, -235.02)
+            AttuneAetheryte()
+        end
     end
     
     -- if not PandoraGetFeatureEnabled("Auto-Sync FATEs") then

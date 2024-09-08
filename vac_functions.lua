@@ -2033,7 +2033,7 @@ end
 function AutoDutyRun(duty)
     duty = tostring(duty)
     local duty_id = FindDutyID(duty)
-    yield("/autoduty run " .. duty_id .. " 1 true")
+    yield("/autoduty run support " .. duty_id .. " 1")
 end
 
 -- NEEDS some kind of translation so you can just do "Sastasha" than needing to do 1

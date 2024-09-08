@@ -27,7 +27,7 @@
 ####################################################
 
 Just a simple script you can run alongside questionable to have it automatically queue and finish dungeons, it will enter and try to do instances but not every instance is doable.
-Also has a stuck checker that reloads vnav and if stuck for long enough, rebuilds the zone entirely.
+Also has a stuck checker that reloads vnav, and if stuck for long enough, rebuilds the zone entirely.
  
 Will also modify a lot of settings inside of Rotation solver so beware of that before using.
 
