@@ -1864,6 +1864,7 @@ end
 -- Usage: EquipRecommendedGear()
 -- Equips recommended gear if any available
 function EquipRecommendedGear()
+    LogInfo("[VAC] Equipping recommended gear")
     repeat
         Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
