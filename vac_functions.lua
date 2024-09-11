@@ -844,14 +844,14 @@ end
 
 -- Usage: Movement(674.92, 19.37, 436.02) // Movement(674.92, 19.37, 436.02, 15)
 -- Moves player to specified x y z coordinates with optional distance value to stop movement when player is within specified distance
--- Will automatically mount, unstuck the player if player is stuck and stop within 2.4494898 distance of the destination
+-- Will automatically mount, unstuck the player if player is stuck and stop within 2.5 distance of the destination
 function Movement(x_position, y_position, z_position, range)
-    range = range or 2.4494898           -- Default stopping range if not provided
+    range = range or 2.5           -- Default stopping range if not provided
     local stop_buffer = 1                -- Additional buffer to account for overshooting
     local max_retries = 10               -- Max number of retries to start moving
     local stuck_check_interval = 0.5     -- Interval in seconds to check if stuck
-    local stuck_threshold_seconds = 1.5  -- Time in seconds before considering the player stuck
-    local min_progress_distance = 0.05   -- Minimum distance to be considered as making progress when pathing
+    local stuck_threshold_seconds = 2.0  -- Time in seconds before considering the player stuck
+    local min_progress_distance = 0.1    -- Minimum distance to be considered as making progress when pathing
     local min_distance_for_mounting = 20 -- Distance threshold for deciding to mount
 
     -- Floor the target positions to the nearest integer
@@ -2015,17 +2015,124 @@ function DoQuest(quest_do_name)
         return true
     end
 
-    -- Start the quest
-    yield("/qst next " .. quest_id)
-    Sleep(0.5)
-    yield("/qst start")
-
-    -- Wait until the quest is complete, with condition checking since some NPCs talk too long
+    -- Checks if player is ready and not inbetween zones before starting questionable
     repeat
         Sleep(0.1)
-    until IsQuestComplete(tonumber(quest_key)) and IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32)
+    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not (GetCharacterCondition(45) or GetCharacterCondition(51))
 
+    -- Start the quest
+    yield("/qst next " .. quest_id)
+
+    repeat
+        Sleep(0.1)
+    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
+
+    yield("/qst start")
+
+    -- Initialize variables for stuck checker
+    local stuck_check_interval = 0.25   -- Interval in seconds to check if stuck
+    local stuck_threshold_seconds = 4.0 -- Time in seconds before considering the player stuck
+    local min_progress_distance = 1.0   -- Minimum distance to be considered as making progress when pathing
+
+    local stuck_timer = 0
+    local previous_position = {
+        x = GetPlayerRawXPos(),
+        y = GetPlayerRawYPos(),
+        z = GetPlayerRawZPos()
+    }
+
+    -- Function to handle checking if the player is stuck
+    local function CheckIfStuck()
+        while not IsQuestComplete(tonumber(quest_key)) do
+            Sleep(stuck_check_interval)
+
+            -- Skip stuck checking if the player is busy, talking to NPCs or casting
+            if not IsPlayerAvailable() or IsPlayerCasting() or GetCharacterCondition(26) or GetCharacterCondition(32) then
+                stuck_timer = 0 -- Reset stuck timer if player is busy
+                previous_position = {
+                    x = GetPlayerRawXPos(),
+                    y = GetPlayerRawYPos(),
+                    z = GetPlayerRawZPos()
+                }
+                -- Skip further stuck checks until the player is available again
+                repeat
+                    Sleep(0.1)
+                until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32)
+            end
+
+            -- Check if the player is changing zones or teleporting
+            if GetCharacterCondition(45) or GetCharacterCondition(51) then
+                -- Player is changing zones, reset position tracking
+                previous_position = {
+                    x = GetPlayerRawXPos(),
+                    y = GetPlayerRawYPos(),
+                    z = GetPlayerRawZPos()
+                }
+                stuck_timer = 0 -- Reset stuck timer
+
+                repeat
+                    Sleep(0.1)
+                until not GetCharacterCondition(45) and not GetCharacterCondition(51) -- Wait until the player finishes zoning
+
+                NavReload() -- Reload Navmesh after zoning
+                yield("/qst reload") -- Reload qst after zoning
+            end
+
+            -- Get the player's current position after checking for zoning
+            local current_position = {
+                x = GetPlayerRawXPos(),
+                y = GetPlayerRawYPos(),
+                z = GetPlayerRawZPos()
+            }
+
+            -- Check for stuck
+            local dx = current_position.x - previous_position.x
+            local dy = current_position.y - previous_position.y
+            local dz = current_position.z - previous_position.z
+            local distance_moved_squared = dx * dx + dy * dy + dz * dz
+
+            if distance_moved_squared < min_progress_distance * min_progress_distance then
+                stuck_timer = stuck_timer + stuck_check_interval
+            else
+                stuck_timer = 0 -- Reset the stuck timer if progress is made
+            end
+
+            -- If the stuck timer exceeds the threshold, take action to get unstuck
+            if stuck_timer >= stuck_threshold_seconds then
+                DoGeneralAction("Jump") -- Attempt to get unstuck by jumping
+                Sleep(0.1)
+                NavReload() -- Reload Navmesh
+                yield("/qst reload") -- Reload qst
+
+                -- Wait until vnavmesh is ready or Questionable is running
+                repeat
+                    Sleep(0.05)
+                until NavIsReady() or QuestionableIsRunning()
+
+                -- Reset the stuck timer after reloading
+                stuck_timer = 0
+            end
+
+            previous_position = current_position
+        end
+    end
+
+    -- Run the stuck checker while waiting for the quest to complete
+    while not IsQuestComplete(tonumber(quest_key)) do
+        Sleep(0.1)
+
+        -- Check if player is available and not casting or under certain conditions
+        if IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32) then
+            CheckIfStuck() -- Call the stuck checker to ensure the player isn't stuck while completing the quest
+        end
+    end
+
+    -- Ensure the quest is fully completed
     Sleep(0.5)
+
+    -- Reset quest id and quest key
+    quest_id = nil
+    quest_key = nil
 
     return true
 end

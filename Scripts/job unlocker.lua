@@ -1196,7 +1196,7 @@ function MistUnlock()
             else
                 Teleporter("Limsa Lominsa Lower Decks", "tp")
                 Teleporter("Tempest Gate", "li")
-                Movementer(154.31, 14.10, 666.92)
+                Movement(154.31, 14.10, 666.92)
                 AttuneAetheryte()
                 Teleporter("Limsa Lominsa Lower Decks", "tp")
                 Teleporter("Tempest Gate", "li")
