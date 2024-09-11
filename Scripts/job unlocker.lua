@@ -1092,7 +1092,32 @@ function TheLavenderBedsUnlock()
         return
     end
     
+    if not IsAetheryteAttuned("New Gridania") then
+        Echo("You do not have New Gridania aetheryte attuned.")
+        return
+    end
+    
     if not IsQuestDone("Where the Heart Is (The Lavender Beds)") then
+        if IsAetheryteAttuned("Bentbranch") then
+            if not ZoneCheck("Bentbranch") then
+                Teleporter("Bentbranch", "tp")
+            end
+        else
+            if ZoneCheck("New Gridania") then
+                Teleport("New Gridania", "tp")
+                Teleport("Blue Badger Gate", "li")
+                Movement(6.97, -1.21, 31.54)
+                AttuneAetheryte()
+            elseif ZoneCheck("Bentbranch") then
+                Movement(6.97, -1.21, 31.54)
+                AttuneAetheryte()
+            else
+                Teleport("New Gridania", "tp")
+                Teleport("Blue Badger Gate", "li")
+                Movement(6.97, -1.21, 31.54)
+                AttuneAetheryte()
+            end
+        end
         DoQuest("Where the Heart Is (The Lavender Beds)")
     else
         DoQuest("Where the Heart Is (The Lavender Beds)") -- This has the echo text inside
@@ -1105,7 +1130,32 @@ function TheGobletUnlock()
         return
     end
     
+    if not IsAetheryteAttuned("Ul'dah") then
+        Echo("You do not have Ul'dah aetheryte attuned.")
+        return
+    end
+    
     if not IsQuestDone("Where the Heart Is (The Goblet)") then
+        if IsAetheryteAttuned("Horizon") then
+            if not ZoneCheck("Horizon") then
+                Teleporter("Horizon", "tp")
+            end
+        else
+            if ZoneCheck("Ul'dah") then
+                Teleport("Ul'dah", "tp")
+                Teleport("Gate of the Sultana", "li")
+                Movement(69.83, 45.72, -223.40)
+                AttuneAetheryte()
+            elseif ZoneCheck("Horizon") then
+                Movement(69.83, 45.72, -223.40)
+                AttuneAetheryte()
+            else
+                Teleport("Ul'dah", "tp")
+                Teleport("Gate of the Sultana", "li")
+                Movement(69.83, 45.72, -223.40)
+                AttuneAetheryte()
+            end
+        end
         DoQuest("Where the Heart Is (The Goblet)")
     else
         DoQuest("Where the Heart Is (The Goblet)") -- This has the echo text inside
@@ -1118,7 +1168,39 @@ function MistUnlock()
         return
     end
     
+    if not IsAetheryteAttuned("Limsa Lominsa") then
+        Echo("You do not have Limsa Lominsa aetheryte attuned.")
+        return
+    end
+    
     if not IsQuestDone("Where the Heart Is (Mist)") then
+        if IsAetheryteAttuned("Moraby Drydocks") then
+            if not ZoneCheck("Moraby Drydocks") then
+                Teleport("Limsa Lominsa", "tp")
+                Teleport("Tempest Gate", "li")
+            end
+        else
+            if ZoneCheck("Limsa Lominsa") then
+                Teleport("Limsa Lominsa", "tp")
+                Teleport("Tempest Gate", "li")
+                Movement(154.31, 14.10, 666.92)
+                AttuneAetheryte()
+                Teleport("Limsa Lominsa", "tp")
+                Teleport("Tempest Gate", "li")
+            elseif ZoneCheck("Moraby Drydocks") then
+                Movement(154.31, 14.10, 666.92)
+                AttuneAetheryte()
+                Teleport("Limsa Lominsa", "tp")
+                Teleport("Tempest Gate", "li")
+            else
+                Teleport("Limsa Lominsa", "tp")
+                Teleport("Tempest Gate", "li")
+                Movement(154.31, 14.10, 666.92)
+                AttuneAetheryte()
+                Teleport("Limsa Lominsa", "tp")
+                Teleport("Tempest Gate", "li")
+            end
+        end
         DoQuest("Where the Heart Is (Mist)")
     else
         DoQuest("Where the Heart Is (Mist)") -- This has the echo text inside
