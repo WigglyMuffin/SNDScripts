@@ -121,7 +121,7 @@ function AttuneAetheryte()
     -- Wait until the player is ready to interact
     repeat
         Sleep(0.1)
-    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not IsMoving()
+    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not IsMoving() and not (GetCharacterCondition(45) or GetCharacterCondition(51))
 
     -- Target and interact with the Aetheryte
     Target("Aetheryte")
