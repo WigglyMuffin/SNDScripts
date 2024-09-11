@@ -1104,16 +1104,16 @@ function TheLavenderBedsUnlock()
             end
         else
             if ZoneCheck("New Gridania") then
-                Teleport("New Gridania", "tp")
-                Teleport("Blue Badger Gate", "li")
+                Teleporter("New Gridania", "tp")
+                Teleporter("Blue Badger Gate", "li")
                 Movement(6.97, -1.21, 31.54)
                 AttuneAetheryte()
             elseif ZoneCheck("Bentbranch") then
                 Movement(6.97, -1.21, 31.54)
                 AttuneAetheryte()
             else
-                Teleport("New Gridania", "tp")
-                Teleport("Blue Badger Gate", "li")
+                Teleporter("New Gridania", "tp")
+                Teleporter("Blue Badger Gate", "li")
                 Movement(6.97, -1.21, 31.54)
                 AttuneAetheryte()
             end
@@ -1142,16 +1142,16 @@ function TheGobletUnlock()
             end
         else
             if ZoneCheck("Ul'dah") then
-                Teleport("Ul'dah", "tp")
-                Teleport("Gate of the Sultana", "li")
+                Teleporter("Ul'dah", "tp")
+                Teleporter("Gate of the Sultana", "li")
                 Movement(69.83, 45.72, -223.40)
                 AttuneAetheryte()
             elseif ZoneCheck("Horizon") then
                 Movement(69.83, 45.72, -223.40)
                 AttuneAetheryte()
             else
-                Teleport("Ul'dah", "tp")
-                Teleport("Gate of the Sultana", "li")
+                Teleporter("Ul'dah", "tp")
+                Teleporter("Gate of the Sultana", "li")
                 Movement(69.83, 45.72, -223.40)
                 AttuneAetheryte()
             end
@@ -1176,29 +1176,29 @@ function MistUnlock()
     if not IsQuestDone("Where the Heart Is (Mist)") then
         if IsAetheryteAttuned("Moraby Drydocks") then
             if not ZoneCheck("Moraby Drydocks") then
-                Teleport("Limsa Lominsa", "tp")
-                Teleport("Tempest Gate", "li")
+                Teleporter("Limsa Lominsa", "tp")
+                Teleporter("Tempest Gate", "li")
             end
         else
             if ZoneCheck("Limsa Lominsa") then
-                Teleport("Limsa Lominsa", "tp")
-                Teleport("Tempest Gate", "li")
+                Teleporter("Limsa Lominsa", "tp")
+                Teleporter("Tempest Gate", "li")
                 Movement(154.31, 14.10, 666.92)
                 AttuneAetheryte()
-                Teleport("Limsa Lominsa", "tp")
-                Teleport("Tempest Gate", "li")
+                Teleporter("Limsa Lominsa", "tp")
+                Teleporter("Tempest Gate", "li")
             elseif ZoneCheck("Moraby Drydocks") then
                 Movement(154.31, 14.10, 666.92)
                 AttuneAetheryte()
-                Teleport("Limsa Lominsa", "tp")
-                Teleport("Tempest Gate", "li")
+                Teleporter("Limsa Lominsa", "tp")
+                Teleporter("Tempest Gate", "li")
             else
-                Teleport("Limsa Lominsa", "tp")
-                Teleport("Tempest Gate", "li")
-                Movement(154.31, 14.10, 666.92)
+                Teleporter("Limsa Lominsa", "tp")
+                Teleporter("Tempest Gate", "li")
+                Movementer(154.31, 14.10, 666.92)
                 AttuneAetheryte()
-                Teleport("Limsa Lominsa", "tp")
-                Teleport("Tempest Gate", "li")
+                Teleporter("Limsa Lominsa", "tp")
+                Teleporter("Tempest Gate", "li")
             end
         end
         DoQuest("Where the Heart Is (Mist)")
