@@ -6,9 +6,10 @@
 
 ####################
 ##    Version     ##
-##     0.1.4      ##
+##     0.1.5      ##
 ####################
 
+-> 0.1.5: Changed to using the rsr ipc for hopefully more consistency, also redid how combat is handled in the overworld, hopefully this works better in practice. A bug where the script sometimes would crash going between zones should also be fixed
 -> 0.1.4: Added an extra option to toggle the chat output of quest reloader
 -> 0.1.3: Added various log outputs and made some minor changes to the quest reloader. Also removed unneeded old code.
 -> 0.1.2: Changed how combat is handled, a lot of rsr settings will be modified to ensure consistency. Should also now equip recommended gear after duties/instances.
@@ -172,6 +173,10 @@ end
 
 local function SquaredDistance(x1, y1, z1, x2, y2, z2)
     LogInfo("[QSTC] Squaring distance " .. x1 .." " .. y1 .." " .. z1 .." against " .. x2 .." " .. y2 .." " .. z2)
+    if GetCharacterCondition(45) then
+        LogInfo("[QSTC] Cancelling distance squaring due to zone transition, returning nil")
+        return nil
+    end
     local success, result = pcall(function()
         local dx = x2 - x1
         local dy = y2 - y1
@@ -225,10 +230,10 @@ local function WaitforInstanceFinishAndStartQst()
     end
     Sleep(0)
     LogInfo("[QSTC] Setting rsr to off")
-    yield("/rotation off")
+    ChangeOperatingMode(0)
     Sleep(1)
     LogInfo("[QSTC] Setting rsr to auto")
-    yield("/rotation auto")
+    ChangeOperatingMode(1)
     if bossmod_ai_outside_of_instances then
         LogInfo("[QSTC] Setting bmrai to on")
         yield("/bmrai on")
@@ -266,11 +271,8 @@ for _, char in ipairs(chars) do
     until IsPlayerAvailable()
     yield("/at e")
     yield("/qst start")
-    Sleep(0.5)
-    yield("/rotation off")
-    Sleep(0.5)
-    yield("/rotation auto")
     -- rsr settings
+    ChangeOperatingMode(1)
     yield("/rotation Settings AutoOffBetweenArea False")
     yield("/rotation Settings AutoOffSwitchClass False")
     yield("/rotation Settings AutoOffWhenDutyCompleted True")
@@ -289,28 +291,34 @@ for _, char in ipairs(chars) do
     end
     LogInfo("[QSTC] All settings set, going into main loop")
     while not finished do
+
+        -- Disables bmr while vnav is moving so it doesn't break movement, but only if in combat
+        if PathIsRunning() and not GetCharacterCondition(34) and GetCharacterCondition(26) then
+            yield("/bmrai off")
+        end
+
         -- Unexpected combat handler
-        if GetCharacterCondition(26) and not GetCharacterCondition(34) then
+        if GetCharacterCondition(26) and not GetCharacterCondition(34) and not PathIsRunning() then
             LogInfo("[QSTC] Unexpected combat handler active")
-            if not QuestionableIsRunning() then
-                LogInfo("[QSTC] Unexpected combat handler: Turning bmrai on")
-                yield("/bmrai on")
-                repeat
-                    Sleep(1)
-                until not GetCharacterCondition(26)
-                LogInfo("[QSTC] Unexpected combat handler: Setting bmr back to configured setting")
-                if bossmod_ai_outside_of_instances then
-                    yield("/bmrai on")
-                else
-                    yield("/bmrai off")
-                end
-                Sleep(0.5)
-                LogInfo("[QSTC] Unexpected combat handler: Reloading questionable")
-                yield("/qst reload")
+            -- if not QuestionableIsRunning() then
+            LogInfo("[QSTC] Unexpected combat handler: Turning bmrai on")
+            yield("/bmrai on")
+            repeat
                 Sleep(1)
-                LogInfo("[QSTC] Unexpected combat handler: Starting questionable")
-                yield("/qst start")
+            until not GetCharacterCondition(26)
+            LogInfo("[QSTC] Unexpected combat handler: Setting bmr back to configured setting")
+            if bossmod_ai_outside_of_instances then
+                yield("/bmrai on")
+            else
+                yield("/bmrai off")
             end
+            Sleep(0.5)
+            LogInfo("[QSTC] Unexpected combat handler: Reloading questionable")
+            yield("/qst reload")
+            Sleep(1)
+            LogInfo("[QSTC] Unexpected combat handler: Starting questionable")  
+            yield("/qst start")
+            --end
             LogInfo("[QSTC] Unexpected combat handler no longer active")
         end
 
@@ -327,23 +335,25 @@ for _, char in ipairs(chars) do
                 if not (qst_success_1 and qst_success_2 and qst_success_3 and qst_success_4 and qst_success_5 and qst_success_6) then
                     -- do nothing
                 else
-                    if WithinThreeUnits(qst_reloader_player_pos_x, qst_reloader_player_pos_y, qst_reloader_player_pos_z, x1, y1, z1) then
-                        qst_reloader_timer = qst_reloader_timer + 1
-                        if qst_reloader_echo then
-                            Echo("Quest reloader timer incremented to " .. qst_reloader_timer)
-                        end
-                        if qst_reloader_timer > qst_reloader_threshold then
-                            yield("/qst reload")
-                            Echo("Questionable seems stuck, reloading and attempting to start it again")
-                            Sleep(2)
-                            yield("/qst start")
+                    if not GetCharacterCondition(45) and IsPlayerAvailable() then
+                        if WithinThreeUnits(qst_reloader_player_pos_x, qst_reloader_player_pos_y, qst_reloader_player_pos_z, x1, y1, z1) then
+                            qst_reloader_timer = qst_reloader_timer + 1
+                            if qst_reloader_echo then
+                                Echo("Quest reloader timer incremented to " .. qst_reloader_timer)
+                            end
+                            if qst_reloader_timer > qst_reloader_threshold then
+                                yield("/qst reload")
+                                Echo("Questionable seems stuck, reloading and attempting to start it again")
+                                Sleep(2)
+                                yield("/qst start")
+                                qst_reloader_timer = 0
+                            end
+                        else
+                            if qst_reloader_echo then
+                                Echo("Quest reloader timer reset")
+                            end
                             qst_reloader_timer = 0
                         end
-                    else
-                        if qst_reloader_echo then
-                            Echo("Quest reloader timer reset")
-                        end
-                        qst_reloader_timer = 0
                     end
                 end
             end
@@ -413,6 +423,7 @@ for _, char in ipairs(chars) do
                 LogInfo("[QSTC] Duty helper: "..duty.." is on the whitelist, queueing it with supports")
                 AutoDutyRun(duty)
                 LogInfo("[QSTC] Duty helper: Waiting 30 seconds to make sure we're properly in the duty")
+                yield("/bmrai on")
                 Sleep(30)
                 WaitforInstanceFinishAndStartQst()
             else
@@ -452,7 +463,7 @@ for _, char in ipairs(chars) do
                 Sleep(3)
                 LogInfo("[QSTC] Instance helper: Inside instance, setting bmrai to on")
                 yield("/bmrai on")
-                WaitforInstanceFinishAndStartQst()  
+                WaitforInstanceFinishAndStartQst()
                 LogInfo("[QSTC] Instance helper no longer active")
             end
         end
