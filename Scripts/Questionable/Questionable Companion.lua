@@ -6,9 +6,10 @@
 
 ####################
 ##    Version     ##
-##     0.1.5      ##
+##     0.1.6      ##
 ####################
 
+-> 0.1.6: Hopefully finally actually fixed the bug with z2. And added extra rsr calls once inside an instance to see if that helps with it not starting properly.
 -> 0.1.5: Changed to using the rsr ipc for hopefully more consistency, also redid how combat is handled in the overworld, hopefully this works better in practice. A bug where the script sometimes would crash going between zones should also be fixed
 -> 0.1.4: Added an extra option to toggle the chat output of quest reloader
 -> 0.1.3: Added various log outputs and made some minor changes to the quest reloader. Also removed unneeded old code.
@@ -172,11 +173,20 @@ function IsDutyWhitelisted(duty_name)
 end
 
 local function SquaredDistance(x1, y1, z1, x2, y2, z2)
-    LogInfo("[QSTC] Squaring distance " .. x1 .." " .. y1 .." " .. z1 .." against " .. x2 .." " .. y2 .." " .. z2)
+
+    if type(x1) ~= "number" or type(y1) ~= "number" or type(z1) ~= "number" or
+       type(x2) ~= "number" or type(y2) ~= "number" or type(z2) ~= "number" then
+        LogInfo("[QSTC] invalid input type in squared distance, returning nil")
+        return nil
+    end
+
+    LogInfo("[QSTC] Squaring distance " .. x1 .. " " .. y1 .. " " .. z1 .. " against " .. x2 .. " " .. y2 .. " " .. z2)
+
     if GetCharacterCondition(45) then
         LogInfo("[QSTC] Cancelling distance squaring due to zone transition, returning nil")
         return nil
     end
+
     local success, result = pcall(function()
         local dx = x2 - x1
         local dy = y2 - y1
@@ -184,14 +194,16 @@ local function SquaredDistance(x1, y1, z1, x2, y2, z2)
         local dist = math.sqrt(dx * dx + dy * dy + dz * dz)
         return math.floor(dist + 0.5)
     end)
+
     if success then
         LogInfo("[QSTC] Successfully squared distance: " .. result)
         return result
     else
-        LogInfo("[QSTC] Failed to square distance " .. x1 .." " .. y1 .." " .. z1 .." against " .. x2 .." " .. y2 .." " .. z2)
+        LogInfo("[QSTC] Failed to square distance " .. x1 .. " " .. y1 .. " " .. z1 .. " against " .. x2 .. " " .. y2 .. " " .. z2)
         return nil
     end
 end
+
 
 local function WithinThreeUnits(x1, y1, z1, x2, y2, z2)
     local dist = SquaredDistance(x1, y1, z1, x2, y2, z2)
@@ -424,7 +436,9 @@ for _, char in ipairs(chars) do
                 AutoDutyRun(duty)
                 LogInfo("[QSTC] Duty helper: Waiting 30 seconds to make sure we're properly in the duty")
                 yield("/bmrai on")
-                Sleep(30)
+                ZoneTransitions()
+                Sleep(2)
+                ChangeOperatingMode(1)
                 WaitforInstanceFinishAndStartQst()
             else
                 Echo(duty.." is not on the duty whitelist")
@@ -461,6 +475,7 @@ for _, char in ipairs(chars) do
                 end
                 ZoneTransitions() -- make sure to wait properly for the transition
                 Sleep(3)
+                ChangeOperatingMode(1)
                 LogInfo("[QSTC] Instance helper: Inside instance, setting bmrai to on")
                 yield("/bmrai on")
                 WaitforInstanceFinishAndStartQst()
