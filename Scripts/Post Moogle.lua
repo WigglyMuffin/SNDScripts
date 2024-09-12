@@ -404,11 +404,8 @@ local function Main(character_list_postmoogle)
                         local item = items_to_trade_inventory_amount[s]
                         local item_id = item.id
                         local expected_amount = item.amount
-                        LogInfo("[PostMoogle] "..tostring(item_id))
-                        LogInfo("[PostMoogle] "..tostring(expected_amount))
                         -- Get the current count of the item in the inventory
                         local current_count = GetItemCount(item_id, true)
-                        LogInfo("[PostMoogle] "..tostring(current_count))
 
                         -- Check if the current item amount is less than the expected amount
                         if current_count < expected_amount or current_count == 0 then
