@@ -301,9 +301,7 @@ local function ProcessAltCharacters(character_list_kupobox)
             -- [3] return_location options: 0 = do nothing, 1 = limsa, 2 = limsa bell, 3 = nearby bell, 4 = fc
             if return_home then
                 LogInfo("[KupoBox] Returning home")
-                if return_location == 1 then
-                    ReturnHomeWorld()
-                end
+                ReturnHomeWorld()
 
                 -- Limsa stuff
                 if return_location == 1 then
