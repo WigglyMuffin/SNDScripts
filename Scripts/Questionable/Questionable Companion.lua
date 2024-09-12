@@ -6,9 +6,10 @@
 
 ####################
 ##    Version     ##
-##     0.1.6      ##
+##     0.1.7      ##
 ####################
 
+-> 0.1.7: Unexpected combat should be fixed
 -> 0.1.6: Hopefully finally actually fixed the bug with z2. And added extra rsr calls once inside an instance to see if that helps with it not starting properly.
 -> 0.1.5: Changed to using the rsr ipc for hopefully more consistency, also redid how combat is handled in the overworld, hopefully this works better in practice. A bug where the script sometimes would crash going between zones should also be fixed
 -> 0.1.4: Added an extra option to toggle the chat output of quest reloader
@@ -312,25 +313,25 @@ for _, char in ipairs(chars) do
         -- Unexpected combat handler
         if GetCharacterCondition(26) and not GetCharacterCondition(34) and not PathIsRunning() then
             LogInfo("[QSTC] Unexpected combat handler active")
-            -- if not QuestionableIsRunning() then
-            LogInfo("[QSTC] Unexpected combat handler: Turning bmrai on")
             yield("/bmrai on")
+            LogInfo("[QSTC] Unexpected combat handler: Turning bmrai on")
             repeat
                 Sleep(1)
             until not GetCharacterCondition(26)
+            if not QuestionableIsRunning() then
+                Sleep(0.5)
+                LogInfo("[QSTC] Unexpected combat handler: Reloading questionable")
+                yield("/qst reload")
+                Sleep(1)
+                LogInfo("[QSTC] Unexpected combat handler: Starting questionable")  
+                yield("/qst start")
+            end 
             LogInfo("[QSTC] Unexpected combat handler: Setting bmr back to configured setting")
             if bossmod_ai_outside_of_instances then
                 yield("/bmrai on")
             else
                 yield("/bmrai off")
             end
-            Sleep(0.5)
-            LogInfo("[QSTC] Unexpected combat handler: Reloading questionable")
-            yield("/qst reload")
-            Sleep(1)
-            LogInfo("[QSTC] Unexpected combat handler: Starting questionable")  
-            yield("/qst start")
-            --end
             LogInfo("[QSTC] Unexpected combat handler no longer active")
         end
 
@@ -416,7 +417,10 @@ for _, char in ipairs(chars) do
             repeat
                 Sleep(0.1)
             until IsPlayerAvailable()
-            yield("/qst stop")
+            repeat
+                yield("/qst stop")
+                Sleep(2)
+            until not QuestionableIsRunning()
             finished = true
             LogInfo("[QSTC] Quest checker not longer active")
         end
