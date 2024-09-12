@@ -313,24 +313,24 @@ for _, char in ipairs(chars) do
         -- Unexpected combat handler
         if GetCharacterCondition(26) and not GetCharacterCondition(34) and not PathIsRunning() then
             LogInfo("[QSTC] Unexpected combat handler active")
-            yield("/bmrai on")
-            LogInfo("[QSTC] Unexpected combat handler: Turning bmrai on")
-            repeat
-                Sleep(1)
-            until not GetCharacterCondition(26)
             if not QuestionableIsRunning() then
+                LogInfo("[QSTC] Unexpected combat handler: Turning bmrai on")
+                yield("/bmrai on")
+                repeat
+                    Sleep(1)
+                until not GetCharacterCondition(26)
+                LogInfo("[QSTC] Unexpected combat handler: Setting bmr back to configured setting")
+                if bossmod_ai_outside_of_instances then
+                    yield("/bmrai on")
+                else
+                    yield("/bmrai off")
+                end
                 Sleep(0.5)
                 LogInfo("[QSTC] Unexpected combat handler: Reloading questionable")
                 yield("/qst reload")
                 Sleep(1)
                 LogInfo("[QSTC] Unexpected combat handler: Starting questionable")  
                 yield("/qst start")
-            end 
-            LogInfo("[QSTC] Unexpected combat handler: Setting bmr back to configured setting")
-            if bossmod_ai_outside_of_instances then
-                yield("/bmrai on")
-            else
-                yield("/bmrai off")
             end
             LogInfo("[QSTC] Unexpected combat handler no longer active")
         end
