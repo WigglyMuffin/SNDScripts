@@ -1964,6 +1964,10 @@ end
 -- Usage: IsQuestDone("Hello Halatali")
 -- Checks if you have completed the specified quest
 function IsQuestDone(quest_done_name)
+    if not quest_done_name or quest_done_name == "" then
+        return nil -- Return nil if the quest_done_name is nil or an empty string
+    end
+
     -- Initialize a variable to store the quest_key
     local quest_key = nil
 
@@ -1988,6 +1992,12 @@ end
 -- Usage: DoQuest("Hallo Halatali")
 -- Checks if you have completed the specified quest and starts if you have not
 function DoQuest(quest_do_name)
+    -- If input is nil or an empty string
+    if not quest_do_name or quest_do_name == "" then
+        LogInfo("[VAC] (DoQuest) quest_do_name is nil or an empty string")
+        return nil -- Return nil if the quest_do_name is nil or an empty string
+    end
+
     -- Initialize variables to store quest information
     local quest_id = nil
     local quest_key = nil
@@ -2015,24 +2025,31 @@ function DoQuest(quest_do_name)
         return true
     end
 
-    -- Checks if player is ready and not inbetween zones before starting questionable
+    -- Ensure the player is available and not in the middle of zone transition before starting the quest
     repeat
         Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not (GetCharacterCondition(45) or GetCharacterCondition(51))
 
-    -- Start the quest
+    -- Readies the quest
     yield("/qst next " .. quest_id)
 
+    -- Wait for player availability again after quest initiation, also acts as a small sleep
     repeat
         Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
 
+    -- Start the quest
     yield("/qst start")
+    
+    -- Ensure Questionable is running before checking for stuck issues
+    repeat
+        Sleep(0.1)
+    until QuestionableIsRunning() -- Wait for quest to fully start
 
-    -- Initialize variables for stuck checker
-    local stuck_check_interval = 0.25   -- Interval in seconds to check if stuck
-    local stuck_threshold_seconds = 4.0 -- Time in seconds before considering the player stuck
-    local min_progress_distance = 1.0   -- Minimum distance to be considered as making progress when pathing
+    -- Initialize stuck checker variables
+    local stuck_check_interval = 0.25   -- Time between stuck checks
+    local stuck_threshold_seconds = 4.0 -- Time before considering stuck
+    local min_progress_distance = 1.0   -- Minimum distance to be considered as progress
 
     local stuck_timer = 0
     local previous_position = {
@@ -2041,78 +2058,104 @@ function DoQuest(quest_do_name)
         z = GetPlayerRawZPos()
     }
 
-    -- Function to handle checking if the player is stuck
+    -- Function to handle stuck checks
     local function CheckIfStuck()
+        -- Loop continuously while the quest is incomplete
         while not IsQuestComplete(tonumber(quest_key)) do
             Sleep(stuck_check_interval)
 
-            -- Skip stuck checking if the player is busy, talking to NPCs or casting
+            -- If player is busy or in a zone transition, reset the stuck timer and skip
             if not IsPlayerAvailable() or IsPlayerCasting() or GetCharacterCondition(26) or GetCharacterCondition(32) then
-                stuck_timer = 0 -- Reset stuck timer if player is busy
-                previous_position = {
+                stuck_timer = 0 -- Reset stuck timer
+                previous_position = { -- Reset position for next check
                     x = GetPlayerRawXPos(),
                     y = GetPlayerRawYPos(),
                     z = GetPlayerRawZPos()
                 }
-                -- Skip further stuck checks until the player is available again
+                -- Wait for the player to be available again
                 repeat
                     Sleep(0.1)
                 until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32)
             end
 
-            -- Check if the player is changing zones or teleporting
+            -- Handle zone transitions (conditions 45 or 51)
             if GetCharacterCondition(45) or GetCharacterCondition(51) then
-                -- Player is changing zones, reset position tracking
-                previous_position = {
+                previous_position = { -- Reset position tracking
                     x = GetPlayerRawXPos(),
                     y = GetPlayerRawYPos(),
                     z = GetPlayerRawZPos()
                 }
                 stuck_timer = 0 -- Reset stuck timer
 
+                -- Wait until the player finishes zoning
                 repeat
                     Sleep(0.1)
-                until not GetCharacterCondition(45) and not GetCharacterCondition(51) -- Wait until the player finishes zoning
+                until not GetCharacterCondition(45) and not GetCharacterCondition(51)
 
-                NavReload() -- Reload Navmesh after zoning
-                yield("/qst reload") -- Reload qst after zoning
+                -- After zoning, reload navmesh and questionable
+                NavReload()
+                
+                -- Check if the quest has been accepted and reloads, otherwise it will loop forever
+                if IsQuestNameAccepted(quest_do_name) then
+                    yield("/qst reload")
+                else
+                    -- Retry quest start if it hasn't been accepted yet
+                    yield("/qst next " .. quest_id)
+                    
+                    repeat
+                        Sleep(0.1)
+                    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
+                    
+                    yield("/qst start")
+                end
             end
 
-            -- Get the player's current position after checking for zoning
+            -- Calculate player's movement since last check
             local current_position = {
                 x = GetPlayerRawXPos(),
                 y = GetPlayerRawYPos(),
                 z = GetPlayerRawZPos()
             }
-
-            -- Check for stuck
             local dx = current_position.x - previous_position.x
             local dy = current_position.y - previous_position.y
             local dz = current_position.z - previous_position.z
             local distance_moved_squared = dx * dx + dy * dy + dz * dz
 
+            -- If the player hasn't moved far enough, increase the stuck timer
             if distance_moved_squared < min_progress_distance * min_progress_distance then
                 stuck_timer = stuck_timer + stuck_check_interval
             else
-                stuck_timer = 0 -- Reset the stuck timer if progress is made
+                stuck_timer = 0 -- Reset stuck timer if progress is made
             end
 
-            -- If the stuck timer exceeds the threshold, take action to get unstuck
+            -- If stuck for too long, attempt to resolve by jumping and reloading quest data
             if stuck_timer >= stuck_threshold_seconds then
-                DoGeneralAction("Jump") -- Attempt to get unstuck by jumping
+                DoGeneralAction("Jump") -- Try jumping to get unstuck
                 Sleep(0.1)
                 NavReload() -- Reload Navmesh
-                yield("/qst reload") -- Reload qst
+                
+                -- Check if the quest has been accepted, otherwise it will loop forever
+                if IsQuestNameAccepted(quest_do_name) then
+                    NavReload() -- Reload Navmesh
+                    yield("/qst reload") -- Reload quest data
+                else
+                    -- If the quest hasn't been accepted, retry quest start
+                    yield("/qst next " .. quest_id)
+                    repeat
+                        Sleep(0.1)
+                    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
+                    yield("/qst start")
+                end
 
-                -- Wait until vnavmesh is ready or Questionable is running
+                -- Wait until navigation and quest are ready
                 repeat
                     Sleep(0.05)
                 until NavIsReady() or QuestionableIsRunning()
 
-                -- Reset the stuck timer after reloading
-                stuck_timer = 0
+                stuck_timer = 0 -- Reset stuck timer after reloading
             end
 
+            -- Update the previous position for the next check
             previous_position = current_position
         end
     end
@@ -2121,16 +2164,16 @@ function DoQuest(quest_do_name)
     while not IsQuestComplete(tonumber(quest_key)) do
         Sleep(0.1)
 
-        -- Check if player is available and not casting or under certain conditions
+        -- Check if the player is available and not busy before running the stuck checker
         if IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32) then
-            CheckIfStuck() -- Call the stuck checker to ensure the player isn't stuck while completing the quest
+            CheckIfStuck() -- Run the stuck checker
         end
     end
 
-    -- Ensure the quest is fully completed
+    -- Ensure the quest is fully completed before ending
     Sleep(0.5)
 
-    -- Reset quest id and quest key
+    -- Clear the quest values after completion
     quest_id = nil
     quest_key = nil
 
@@ -2428,7 +2471,6 @@ function IsQuestNameAccepted(quest_accepted_name)
     end
     return nil -- Return nil if the name isn't found
 end
-
 
 -- Usage: IsHuntLogComplete(9, 0) or IsHuntLogComplete(0, 1)
 -- Checks if player has the hunt log rank completed
