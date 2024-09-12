@@ -54,7 +54,7 @@ function ItemsForFcRank6()
         [3] = 15300,     -- Rank 3 credits
         [4] = 33300,     -- Rank 4 credits
         [5] = 59300,     -- Rank 5 credits
-        [6] = 90000      -- Rank 6 credits
+        [6] = 89300      -- Rank 6 credits
     }
 
     -- Ensure the correct current credits value
