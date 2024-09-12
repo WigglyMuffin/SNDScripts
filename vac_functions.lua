@@ -2078,7 +2078,7 @@ function DoQuest(quest_do_name)
                 until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32)
             end
 
-            -- Handle zone transitions (conditions 45 or 51)
+            -- Handle zone transitions
             if GetCharacterCondition(45) or GetCharacterCondition(51) then
                 previous_position = { -- Reset position tracking
                     x = GetPlayerRawXPos(),
@@ -2614,4 +2614,26 @@ function IsAetheryteAttuned(aetheryte_attuned_name)
     else
         return false
     end
+end
+
+-- Usage: GetLocalTime()
+-- Returns local time in HH:MM:SS format
+function GetLocalTime()
+    return os.date("%H:%M:%S")
+end
+
+-- Usage: GetServerTime()
+-- Returns UTC time in HH:MM:SS format
+function GetServerTime()
+    return os.date("!%H:%M:%S")
+end
+
+-- Usage: GetEorzeanTime()
+-- Returns Eorzean Time in HH:MM:SS format
+function GetEorzeanTime()
+    local eorzean_time = os.time() * 3600 / 175
+    return string.format("%02d:%02d:%02d", 
+        math.floor(eorzean_time / 3600) % 24, 
+        math.floor(eorzean_time / 60) % 60, 
+        math.floor(eorzean_time) % 60)
 end
