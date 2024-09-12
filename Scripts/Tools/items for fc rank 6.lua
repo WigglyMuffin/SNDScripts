@@ -2,29 +2,60 @@ function ItemsForFcRank6()
     local ilvl = 640   -- Item level
     local is_hq = true -- Options: true = HQ, false = NQ
 
-    -- Execute the Free Company command to update credits info
+    -- Check if ilvl is correctly selected
+    if not ilvl or ilvl <= 0 then
+        yield("/e Invalid item level.")
+        yield("/e Stopping script.")
+        return nil
+    end
+
+    -- Check if is_hq is correctly selected
+    if is_hq ~= true and is_hq ~= false then
+        yield("/e Invalid HQ value, defaulting to NQ.")
+        is_hq = false
+    end
+
+    -- Check if the player is on their home world
+    if GetCurrentWorld() ~= GetHomeWorld() then
+        yield("/e You are not on your home world.")
+        yield("/e Stopping script.")
+        return nil
+    end
+
+    -- Check if the player is in a Free Company
+    local fc_rank = GetFCRank()
+    if not fc_rank or fc_rank < 1 then
+        yield("/e You are not in an FC.")
+        yield("/e Stopping script.")
+        return nil
+    end
+
+    -- Open the Free Company menu to update Company Credit amount
     repeat
         yield("/freecompanycmd")
         yield("/wait 0.1")
     until IsAddonVisible("FreeCompany")
-    
+
     yield("/wait 0.5")
 
     -- Fetch current Free Company credits
     local fc_node_credits = tonumber(((GetNodeText("FreeCompany", 15) or ""):gsub(",", ""))) or 0
 
+    -- Close the Free Company menu
+    repeat
+        yield("/freecompanycmd")
+        yield("/wait 0.1")
+    until not IsAddonVisible("FreeCompany")
+
     -- Define the credit amounts required for each rank (Rank 1 to Rank 6)
     local fc_rank_credits = {
         [1] = 0,         -- Rank 1 credits
-        [2] = 4043,      -- Rank 2 credits
-        [3] = 16173,     -- Rank 3 credits
-        [4] = 36389,     -- Rank 4 credits
-        [5] = 64691,     -- Rank 5 credits
-        [6] = 98228      -- Rank 6 credits
+        [2] = 3700,      -- Rank 2 credits
+        [3] = 15300,     -- Rank 3 credits
+        [4] = 33300,     -- Rank 4 credits
+        [5] = 59300,     -- Rank 5 credits
+        [6] = 90000      -- Rank 6 credits
     }
-    
-    -- Get the current FC rank and credits
-    local fc_rank = GetFCRank()
 
     -- Ensure the correct current credits value
     local current_credits = fc_node_credits
@@ -81,4 +112,8 @@ function ItemsForFcRank6()
     return math.ceil(items_needed)
 end
 
-yield("/e Items needed: " .. ItemsForFcRank6())
+local items_needed = ItemsForFcRank6()
+
+if items_needed then
+    yield("/e Items needed: " .. items_needed)
+end
