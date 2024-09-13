@@ -917,6 +917,13 @@ function Movement(x_position, y_position, z_position, range)
     local previous_relative_position = nil -- Store player previous position relative to the target
 
     while true do
+        -- Check if player is teleporting or in a loading state
+        if GetCharacterCondition(45) or GetCharacterCondition(51) then
+            -- Stop if teleporting or loading
+            yield("/vnav stop")
+            break
+        end
+
         -- Get player current position
         local xpos = math.floor(GetPlayerRawXPos() + 0.5)
         local ypos = math.floor(GetPlayerRawYPos() + 0.5)
