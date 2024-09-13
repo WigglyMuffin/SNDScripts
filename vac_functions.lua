@@ -894,7 +894,7 @@ function Movement(x_position, y_position, z_position, range)
             local squared_distance_to_target = GetSquaredDistanceToTarget(xpos, ypos, zpos)
 
             -- Check if the player should mount based on distance and conditions
-            if squared_distance_to_target > min_distance_for_mounting * min_distance_for_mounting and TerritorySupportsMounting() then
+            if squared_distance_to_target > min_distance_for_mounting * min_distance_for_mounting and TerritorySupportsMounting() and (IsQuestComplete(66236) or IsQuestComplete(66237) or IsQuestComplete(66238)) then
                 -- Attempt to mount until successful
                 repeat
                     Mount()
