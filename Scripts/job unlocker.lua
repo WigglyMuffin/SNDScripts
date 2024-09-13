@@ -99,6 +99,9 @@ DO_THE_SUNKEN_TEMPLE_OF_QARN = false      -- Requires level 35. This is for unlo
 DO_DZEMAEL_DARKHOLD = false               -- Requires level 44, Storm Sergeant First Class. This is for unlocking GC rank by completing the dungeon
 DO_THE_AURUM_VALE = false                 -- Requires level 47, Chief Storm Sergeant. This is for unlocking GC rank by completing the dungeon
 
+-- This will run questionable on a fresh char until required level to unlock the housing ward for that area
+GET_LEVEL_FOR_HOUSING_WARD = false
+
 -- Housing unlocks
 DO_THE_LAVENDER_BEDS = false              -- This is for unlocking The Lavender Beds Housing
 DO_THE_GOBLET = false                     -- This is for unlocking The Goblet Housing
@@ -1081,14 +1084,52 @@ function TheAurumValeUnlock()
 end
 
 -- ###################
+-- #   GET TO LEVEL  #
+-- # NEEDED FOR WARDS#
+-- ###################
+function GetLevelForHousingWard()
+    yield("/at e")
+    local current_job = GetPlayerJob()
+
+    -- Gridania questline
+    if current_job == "LNC" or current_job == "ARC" or current_job == "CNJ" then
+        if GetLevel() > 10 then
+            Echo("Already above level 10.")
+            return
+        end
+        DoQuest("Coming to Gridania")
+        DoQuest("Close to Home")
+        DoQuest("To the Bannock")
+    
+    -- Limsa questline
+    elseif current_job == "MRD" or current_job == "ACN" then
+        if GetLevel() > 5 then
+            Echo("Already above level 5.")
+            return
+        end
+        DoQuest("Coming to Limsa Lominsa")
+        DoQuest("Close to Home")
+        DoQuest("On to Summerford")
+    
+    -- Ul'dah questline
+    elseif current_job == "GLA" or current_job == "PGL" then
+        if GetLevel() > 5 then
+            Echo("Already above level 5.")
+            return
+        end
+        DoQuest("Coming to Ul'dah")
+        DoQuest("Close to Home")
+        DoQuest("We Must Rebuild")
+    end
+end
+
+-- ###################
 -- # HOUSING UNLOCKS #
 -- ###################
 
--- Not tested if works
-
 function TheLavenderBedsUnlock()
-    if GetLevel() < 5 then
-        Echo("You do not have the level 5 requirement.")
+    if GetLevel() < 10 then
+        Echo("You do not have the level 10 requirement.")
         return
     end
     
@@ -1282,7 +1323,10 @@ function Main()
         { enabled = DO_THE_SUNKEN_TEMPLE_OF_QARN, func = TheSunkenTempleOfQarnUnlock },
         { enabled = DO_DZEMAEL_DARKHOLD, func = DzemaelDarkholdUnlock },
         { enabled = DO_THE_AURUM_VALE, func = TheAurumValeUnlock },
-        
+
+        -- Level 5
+        { enabled = GET_LEVEL_FOR_HOUSING_WARD, func = GetLevelForHousingWard },
+
         -- Housing unlocks
         { enabled = DO_THE_LAVENDER_BEDS, func = TheLavenderBedsUnlock },
         { enabled = DO_THE_GOBLET, func = TheGobletUnlock },
