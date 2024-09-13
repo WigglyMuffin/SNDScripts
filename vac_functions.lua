@@ -846,12 +846,12 @@ end
 -- Moves player to specified x y z coordinates with optional distance value to stop movement when player is within specified distance
 -- Will automatically mount, unstuck the player if player is stuck and stop within 2.5 distance of the destination
 function Movement(x_position, y_position, z_position, range)
-    range = range or 2.5           -- Default stopping range if not provided
-    local stop_buffer = 1                -- Additional buffer to account for overshooting
+    range = range or 2.5                 -- Default stopping range if not provided
+    local stop_buffer = 0.5              -- Buffer to account for overshooting
     local max_retries = 10               -- Max number of retries to start moving
     local stuck_check_interval = 0.5     -- Interval in seconds to check if stuck
-    local stuck_threshold_seconds = 2.0  -- Time in seconds before considering the player stuck
-    local min_progress_distance = 0.1    -- Minimum distance to be considered as making progress when pathing
+    local stuck_threshold_seconds = 2.0  -- Time before considering the player stuck
+    local min_progress_distance = 0.1    -- Minimum distance considered progress
     local min_distance_for_mounting = 20 -- Distance threshold for deciding to mount
 
     -- Floor the target positions to the nearest integer
@@ -859,7 +859,7 @@ function Movement(x_position, y_position, z_position, range)
     local y_position_floored = math.floor(y_position + 0.5)
     local z_position_floored = math.floor(z_position + 0.5)
 
-    -- Calculate the squared distance from the current position to the target
+    -- Function to calculate the squared distance from the current position to the target
     local function GetSquaredDistanceToTarget(xpos, ypos, zpos)
         local dx = xpos - x_position_floored
         local dy = ypos - y_position_floored
@@ -894,7 +894,7 @@ function Movement(x_position, y_position, z_position, range)
             local squared_distance_to_target = GetSquaredDistanceToTarget(xpos, ypos, zpos)
 
             -- Check if the player should mount based on distance and conditions
-            if squared_distance_to_target > min_distance_for_mounting * min_distance_for_mounting and TerritorySupportsMounting() and (IsQuestComplete(66236) or IsQuestComplete(66237) or IsQuestComplete(66238)) then
+            if squared_distance_to_target > min_distance_for_mounting * min_distance_for_mounting and TerritorySupportsMounting() then
                 -- Attempt to mount until successful
                 repeat
                     Mount()
@@ -917,83 +917,50 @@ function Movement(x_position, y_position, z_position, range)
     local previous_relative_position = nil -- Store player previous position relative to the target
 
     while true do
-        -- Check whether player is not currently teleporting or in a state where movement is disabled
-        if not GetCharacterCondition(45) then
-            -- Get player current position
-            local xpos = math.floor(GetPlayerRawXPos() + 0.5)
-            local ypos = math.floor(GetPlayerRawYPos() + 0.5)
-            local zpos = math.floor(GetPlayerRawZPos() + 0.5)
-            Sleep(0.05)
+        -- Get player current position
+        local xpos = math.floor(GetPlayerRawXPos() + 0.5)
+        local ypos = math.floor(GetPlayerRawYPos() + 0.5)
+        local zpos = math.floor(GetPlayerRawZPos() + 0.5)
+        Sleep(0.05)
 
-            -- Calculate the current squared distance to the target
-            local current_squared_distance_to_target = GetSquaredDistanceToTarget(xpos, ypos, zpos)
-            -- Calculate player current relative position to the target
-            local current_relative_position = {
-                x = xpos - x_position_floored,
-                y = ypos - y_position_floored,
-                z = zpos - z_position_floored
-            }
+        -- Calculate the current squared distance to the target
+        local current_squared_distance_to_target = GetSquaredDistanceToTarget(xpos, ypos, zpos)
 
-            -- If the player is within the target range, stop movement
-            if IsWithinRange(xpos, ypos, zpos) and not GetCharacterCondition(45) then
-                yield("/vnav stop")
-                
-                -- Check to ensure the player is within range
-                xpos = math.floor(GetPlayerRawXPos() + 0.5)
-                ypos = math.floor(GetPlayerRawYPos() + 0.5)
-                zpos = math.floor(GetPlayerRawZPos() + 0.5)
-                
-                if not IsWithinRange(xpos, ypos, zpos) then
-                    NavToDestination() -- Retry movement if still not in range
-                else
-                    break
-                end
-            end
-
-            -- If there was a previous position, check if the player is stuck
-            if previous_relative_position and previous_squared_distance_to_target and not GetCharacterCondition(45) then
-                -- Calculate the squared distance traveled since the last check
-                local dx = current_relative_position.x - previous_relative_position.x
-                local dy = current_relative_position.y - previous_relative_position.y
-                local dz = current_relative_position.z - previous_relative_position.z
-                local squared_distance_traveled = dx * dx + dy * dy + dz * dz
-
-                -- Check if the player has made sufficient progress
-                if current_squared_distance_to_target >= previous_squared_distance_to_target - min_progress_distance * min_progress_distance and squared_distance_traveled < min_progress_distance * min_progress_distance then
-                    stuck_timer = stuck_timer + stuck_check_interval -- Increment the stuck timer if no progress
-                else
-                    stuck_timer = stuck_timer - stuck_check_interval / 2 -- Decrease stuck timer if progress is made
-                    if stuck_timer < 0 then -- Ensure stuck timer can't go negative
-                        stuck_timer = 0 
-                    end
-                end
-            end
-
-            -- Update the previous distance and position for the next iteration
-            previous_squared_distance_to_target = current_squared_distance_to_target
-            previous_relative_position = current_relative_position
-
-            -- If the stuck timer exceeds the threshold, do actions to get unstuck
-            if stuck_timer >= stuck_threshold_seconds and not GetCharacterCondition(45) then
-                DoGeneralAction("Jump") -- Attempt to get unstuck by jumping
-                Sleep(0.1)
-                NavReload() -- Reload vnavmesh
-
-                -- Wait until vnavmesh is ready again
-                repeat
-                    Sleep(0.05)
-                until NavIsReady()
-
-                NavToDestination() -- Retry pathing to the destination
-                stuck_timer = 0 -- Reset the stuck timer
-            end
-
-            Sleep(0.05)
+        -- If the player is within the target range, stop movement
+        if IsWithinRange(xpos, ypos, zpos) then
+            yield("/vnav stop")
+            break -- Stop the loop once the player is within range
         end
-        -- Exit the loop if the player is teleporting or in a state where movement is disabled
-        if GetCharacterCondition(45) then
-            break
+
+        -- Stuck check logic
+        if previous_squared_distance_to_target and previous_relative_position then
+            local dx = xpos - previous_relative_position.x
+            local dy = ypos - previous_relative_position.y
+            local dz = zpos - previous_relative_position.z
+            local squared_distance_traveled = dx * dx + dy * dy + dz * dz
+
+            -- If player is not making sufficient progress, increase the stuck timer
+            if current_squared_distance_to_target >= previous_squared_distance_to_target - min_progress_distance * min_progress_distance and squared_distance_traveled < min_progress_distance * min_progress_distance then
+                stuck_timer = stuck_timer + stuck_check_interval
+            else
+                stuck_timer = math.max(0, stuck_timer - stuck_check_interval / 2)
+            end
         end
+
+        -- If stuck timer exceeds threshold, attempt to get unstuck
+        if stuck_timer >= stuck_threshold_seconds then
+            DoGeneralAction("Jump") -- Attempt to get unstuck by jumping
+            Sleep(0.1)
+            NavReload() -- Reload vnavmesh
+            NavToDestination() -- Retry pathing to the destination
+            stuck_timer = 0 -- Reset stuck timer
+        end
+
+        -- Update previous distance and position
+        previous_squared_distance_to_target = current_squared_distance_to_target
+        previous_relative_position = { x = xpos, y = ypos, z = zpos }
+
+        Sleep(0.05)
     end
 end
 
