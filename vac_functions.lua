@@ -849,10 +849,10 @@ function Movement(x_position, y_position, z_position, range)
     range = range or 2.5                 -- Default stopping range if not provided
     local stop_buffer = 0.5              -- Buffer to account for overshooting
     local max_retries = 10               -- Max number of retries to start moving
-    local stuck_check_interval = 0.5     -- Interval in seconds to check if stuck
+    local stuck_check_interval = 0.25    -- Interval in seconds to check if stuck
     local stuck_threshold_seconds = 2.0  -- Time before considering the player stuck
     local min_progress_distance = 0.1    -- Minimum distance considered progress
-    local min_distance_for_mounting = 20 -- Distance threshold for deciding to mount
+    local min_distance_for_mounting = 15 -- Distance threshold for deciding to mount
 
     -- Floor the target positions to the nearest integer
     local x_position_floored = math.floor(x_position + 0.5)
