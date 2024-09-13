@@ -849,8 +849,8 @@ function Movement(x_position, y_position, z_position, range)
     range = range or 2.5                 -- Default stopping range if not provided
     local stop_buffer = 0.5              -- Buffer to account for overshooting
     local max_retries = 10               -- Max number of retries to start moving
-    local stuck_check_interval = 0.25    -- Interval in seconds to check if stuck
-    local stuck_threshold_seconds = 2.0  -- Time before considering the player stuck
+    local stuck_check_interval = 0.50    -- Interval in seconds to check if stuck
+    local stuck_threshold_seconds = 4.0  -- Time before considering the player stuck
     local min_progress_distance = 0.1    -- Minimum distance considered progress
     local min_distance_for_mounting = 15 -- Distance threshold for deciding to mount
 
@@ -2021,9 +2021,9 @@ function DoQuest(quest_do_name)
     until QuestionableIsRunning() -- Wait for quest to fully start
 
     -- Initialize stuck checker variables
-    local stuck_check_interval = 0.25   -- Time between stuck checks
+    local stuck_check_interval = 0.50   -- Time between stuck checks
     local stuck_threshold_seconds = 4.0 -- Time before considering stuck
-    local min_progress_distance = 1.0   -- Minimum distance to be considered as progress
+    local min_progress_distance = 0.1   -- Minimum distance to be considered as progress
 
     local stuck_timer = 0
     local previous_position = {

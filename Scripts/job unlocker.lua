@@ -100,19 +100,19 @@ DO_DZEMAEL_DARKHOLD = false               -- Requires level 44, Storm Sergeant F
 DO_THE_AURUM_VALE = false                 -- Requires level 47, Chief Storm Sergeant. This is for unlocking GC rank by completing the dungeon
 
 -- This will run questionable on a fresh char until required level to unlock the housing ward for that area
-GET_LEVEL_FOR_HOUSING_WARD = false
+GET_LEVEL_FOR_HOUSING_WARD = true
 
 -- Housing unlocks
 DO_THE_LAVENDER_BEDS = false              -- This is for unlocking The Lavender Beds Housing
 DO_THE_GOBLET = false                     -- This is for unlocking The Goblet Housing
-DO_MIST = false                           -- This is for unlocking Mist Housing
+DO_MIST = true                           -- This is for unlocking Mist Housing
 
 -- Retainer unlock
 DO_RETAINER = false                       -- This is for unlocking Retainers and Ventures
 
 local use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being char_list.lua, false = use the list you put in this file 
 
-local multi_char = true                  -- Options: true = cycles through character list, false = single character
+local multi_char = false                  -- Options: true = cycles through character list, false = single character
 
 -- This is where you put your character list if you choose to not use the external one
 -- If use_external_character_list or multi_char is set to false then this list is completely skipped
@@ -228,22 +228,27 @@ end
 -- NEEDS fixing
 -- Limsa Arcanists' First Quest Level 1 "Way of the Arcanist"
 function Arcanist1()
-    if not IsQuestDone("My First Grimoire") then
-        if not ZoneCheck("Limsa") then
-            Teleporter("Limsa", "tp")
-            Teleporter("Arcanist", "li")
+    if not IsQuestDone("Way of the Arcanist") then
+        if not (ZoneCheck("Limsa Lominsa Lower") or ZoneCheck("Limsa Lominsa Upper")) then
+            -- needs teleport unlocked check here
+            Teleporter("Limsa Lominsa", "tp")
+            --Teleporter("Arcanist", "li")
         end
         
+        Movement(-335.28, 12.90, 3.93)
+        Target("Murie")
+        InteractAndWait()
         Movement(-327.86, 12.89, 9.79)
         Target("Thubyrgeim")
         QuestNPC("SelectYesno", true, 0)
         Movement(-335.29, 11.99, 54.45)
         Teleporter("Tempest", "li")
         Movement(14.71, 64.52, 87.16)
-        --QuestChecker(ArcanistEnemies[1], 25, "_ToDoList", 13, 3, x, x, x, "Slay wharf rats.")
-        --QuestChecker(ArcanistEnemies[3], 25, "_ToDoList", 15, 3, x, x, x, "Slay little ladybugs.")
+        QuestChecker(ArcanistEnemies[1], 9999, "_ToDoList", "Slay wharf rats.")
+        QuestChecker(ArcanistEnemies[3], 9999, "_ToDoList", "Slay little ladybugs.")
         Movement(232.67, 40.64, 57.39)
-        --QuestChecker(ArcanistEnemies[2], 25, "_ToDoList", 13, 3, x, x, x, "Report to Thubyrgeim at the Arcanists' Guild.")
+        QuestChecker(ArcanistEnemies[2], 9999, "_ToDoList", "Slay aureliae.")
+        -- needs teleport unlocked check here
         Teleporter("Limsa", "tp")
         Teleporter("Arcanist", "li")
         Movement(-327.86, 12.89, 9.79)
@@ -1083,10 +1088,10 @@ function TheAurumValeUnlock()
     end
 end
 
--- ###################
--- #   GET TO LEVEL  #
--- # NEEDED FOR WARDS#
--- ###################
+-- ####################
+-- #   GET TO LEVEL   #
+-- # NEEDED FOR WARDS #
+-- ####################
 function GetLevelForHousingWard()
     yield("/at e")
     local current_job = GetPlayerJob()
@@ -1097,9 +1102,9 @@ function GetLevelForHousingWard()
             Echo("Already above level 10.")
             return
         end
+        
         DoQuest("Coming to Gridania")
         DoQuest("Close to Home")
-        DoQuest("To the Bannock")
     
     -- Limsa questline
     elseif current_job == "MRD" or current_job == "ACN" then
@@ -1107,9 +1112,23 @@ function GetLevelForHousingWard()
             Echo("Already above level 5.")
             return
         end
+        
         DoQuest("Coming to Limsa Lominsa")
-        DoQuest("Close to Home")
-        DoQuest("On to Summerford")
+        DoQuest("Close to Home") -- needs job checking adding to this as it has several, rerun the script if it says locked until it works
+        
+        if GetLevel() < 5 then
+            Movement(15.47, 40.00, 70.98)
+            Teleporter("Zephyr", "li")
+            Movement(102.11, 48.67, 11.91)
+            
+            while GetLevel() < 5 do
+                FindAndKillTarget("Goblin Fisher", 9999)
+                Sleep(1.0)
+            end
+        end
+        
+        Movement(222.01, 113.10, -257.97)
+        AttuneAetheryte()
     
     -- Ul'dah questline
     elseif current_job == "GLA" or current_job == "PGL" then
@@ -1117,9 +1136,9 @@ function GetLevelForHousingWard()
             Echo("Already above level 5.")
             return
         end
+        
         DoQuest("Coming to Ul'dah")
         DoQuest("Close to Home")
-        DoQuest("We Must Rebuild")
     end
 end
 
