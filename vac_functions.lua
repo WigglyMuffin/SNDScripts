@@ -2662,24 +2662,27 @@ function AttuneAethernetShard()
     Sleep(0.1)
     Interact()
 
-    -- Wait for interaction to complete
+    -- Wait for the interaction or attunement to complete
     repeat
         Sleep(0.1)
     until IsAddonVisible("TelepotTown") or GetCharacterCondition(32)
 
-    -- If already attuned, exit the menu
+    -- If the player is already attuned, close the menu
     if IsAddonVisible("TelepotTown") then
         yield("/pcall TelepotTown true 1")
-
+        
+        -- Wait until the menu is no longer visible
         repeat
             Sleep(0.1)
         until not IsAddonVisible("TelepotTown")
     end
 
-    -- Wait until the player is free from interaction conditions
+    -- Ensure the player is available before proceeding
     repeat
         Sleep(0.1)
-    until IsPlayerAvailable() and not (GetCharacterCondition(31) or GetCharacterCondition(32))
+    until IsPlayerAvailable() and not GetCharacterCondition(31) and not GetCharacterCondition(32)
+
+    Sleep(0.1) -- Small delay to ensure the interaction completes smoothly
 end
 
 -- Usage: GetCharacterLevel()

@@ -1137,7 +1137,9 @@ function GetLevelForHousingWard()
         
         if GetLevel() < 4 then
             if not ZoneCheck("Summerford Farms") then
-                Teleporter("Zephyr", "li")
+                --Teleporter("Zephyr", "li")
+                yield("/li Zephyr")
+                ZoneTransitions()
             end
             
             Movement(102.11, 48.67, 11.91)
@@ -1164,7 +1166,10 @@ function GetLevelForHousingWard()
         if not IsQuestNameAccepted("On to Summerford") then
             if not ZoneCheck("Limsa Lominsa Upper Decks") then
                 ReturnTeleport()
-                Teleporter("Aftcastle", "li")
+                --Teleporter("Aftcastle", "li")
+                yield("/li Aftcastle")
+                ZoneTransitions()
+
             end
             Movement(17.82, 40.22, -5.28)
             Target("Baderon")
@@ -1175,7 +1180,9 @@ function GetLevelForHousingWard()
             if ZoneCheck("Limsa Lominsa Upper Decks") then
                 PathToObject("Aethernet Shard")
                 AttuneAethernetShard()
-                Teleporter("Limsa Lominsa Aetheryte Plaza", "li")
+                --Teleporter("Limsa Lominsa Aetheryte Plaza", "li")
+                yield("/li Limsa Lominsa Aetheryte Plaza")
+                ZoneTransitions()
             else
                 ReturnTeleport()
             end
