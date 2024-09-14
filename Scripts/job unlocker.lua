@@ -99,13 +99,14 @@ DO_THE_SUNKEN_TEMPLE_OF_QARN = false      -- Requires level 35. This is for unlo
 DO_DZEMAEL_DARKHOLD = false               -- Requires level 44, Storm Sergeant First Class. This is for unlocking GC rank by completing the dungeon
 DO_THE_AURUM_VALE = false                 -- Requires level 47, Chief Storm Sergeant. This is for unlocking GC rank by completing the dungeon
 
--- This will run questionable on a fresh char until required level to unlock the housing ward for that area
-GET_LEVEL_FOR_HOUSING_WARD = true
+-- Levels character to required level for housing unlocks
+-- This assumes you are on a fresh level 1 character, everything in this section will assume you do not have things unlocked as if you would on a character that does
+GET_LEVEL_FOR_HOUSING_WARD = true         -- Requires fresh level 1 character
 
 -- Housing unlocks
 DO_THE_LAVENDER_BEDS = false              -- This is for unlocking The Lavender Beds Housing
-DO_THE_GOBLET = false                     -- This is for unlocking The Goblet Housing
 DO_MIST = true                           -- This is for unlocking Mist Housing
+DO_THE_GOBLET = false                     -- This is for unlocking The Goblet Housing
 
 -- Retainer unlock
 DO_RETAINER = false                       -- This is for unlocking Retainers and Ventures
@@ -1092,8 +1093,10 @@ end
 -- #   GET TO LEVEL   #
 -- # NEEDED FOR WARDS #
 -- ####################
+
+-- This assumes you are on a fresh level 1 character, everything in this section will assume you do not have things unlocked as if you would on a character that does
+-- Gridania and Ul'dah need doing
 function GetLevelForHousingWard()
-    yield("/at e")
     local current_job = GetPlayerJob()
 
     -- Gridania questline
@@ -1112,26 +1115,67 @@ function GetLevelForHousingWard()
             Echo("Already above level 5.")
             return
         end
+
+        yield("/qst start")
         
-        DoQuest("Coming to Limsa Lominsa")
-        DoQuest("Close to Home") -- needs job checking adding to this as it has several, rerun the script if it says locked until it works
+        while true do
+            local level = GetCharacterLevel()
+            
+            if level >= 3 then
+                break
+            end
+            
+            Sleep(0.1)
+        end
         
-        if GetLevel() < 5 then
+        yield("/qst stop")
+        
+        if not IsQuestNameAccepted("On to Summerford") then
             Movement(15.47, 40.00, 70.98)
-            Teleporter("Zephyr", "li")
+            AttuneAethernetShard()
+        end
+        
+        if GetLevel() < 4 then
+            if not ZoneCheck("Summerford Farms") then
+                Teleporter("Zephyr", "li")
+            end
+            
             Movement(102.11, 48.67, 11.91)
             
             while GetLevel() < 5 do
                 FindAndKillTarget("Goblin Fisher", 9999)
                 Sleep(1.0)
             end
+            
+            if not IsAetheryteAttuned("Summerford Farms") then
+                Movement(222.01, 113.10, -257.97)
+                AttuneAetheryte()
+            end
         end
         
-        Movement(222.01, 113.10, -257.97)
-        AttuneAetheryte()
-    
+        -- Since Questionable refuses to work without having MSQ active...
+        if not IsQuestNameAccepted("On to Summerford") then
+            if not ZoneCheck("Limsa Lominsa Upper Decks") then
+                ReturnTeleport()
+                Teleporter("Aftcastle", "li")
+                Movement(17.82, 40.22, -5.28)
+                Target("Baderon")
+                InteractAndWait()
+            end
+        end
+
+        if not ZoneCheck("Limsa Lominsa Lower Decks") then
+            if ZoneCheck("Limsa Lominsa Upper Decks") then
+                PathToObject("Aethernet Shard")
+                AttuneAethernetShard()
+                Teleporter("Limsa Lominsa Aetheryte Plaza", "li")
+            else
+                ReturnTeleport()
+            end
+        end
+        
     -- Ul'dah questline
-    elseif current_job == "GLA" or current_job == "PGL" then
+    elseif current_job == "GLA" or current_job == "PGL" or current_job == "THM" then
         if GetLevel() > 5 then
             Echo("Already above level 5.")
             return
@@ -1172,7 +1216,6 @@ function TheLavenderBedsUnlock()
                 Movement(6.97, -1.21, 31.54)
                 AttuneAetheryte()
             else
-                Echo("bleh")
                 Teleporter("New Gridania", "tp")
                 Teleporter("Blue Badger Gate", "li")
                 Movement(6.97, -1.21, 31.54)
@@ -1180,46 +1223,9 @@ function TheLavenderBedsUnlock()
             end
         end
         DoQuest("Where the Heart Is (The Lavender Beds)")
+        Teleporter("New Gridania", "tp")
     else
         DoQuest("Where the Heart Is (The Lavender Beds)") -- This has the echo text inside
-    end
-end
-
-function TheGobletUnlock()
-    if GetLevel() < 5 then
-        Echo("You do not have the level 5 requirement.")
-        return
-    end
-    
-    if not IsAetheryteAttuned("Ul'dah - Steps of Nald") then
-        Echo("You do not have Ul'dah - Steps of Nald aetheryte attuned.")
-        return
-    end
-    
-    if not IsQuestDone("Where the Heart Is (The Goblet)") then
-        if IsAetheryteAttuned("Horizon") then
-            if not ZoneCheck("Horizon") then
-                Teleporter("Horizon", "tp")
-            end
-        else
-            if ZoneCheck("Ul'dah - Steps of Nald") then
-                Teleporter("Ul'dah - Steps of Nald", "tp")
-                Teleporter("Gate of the Sultana", "li")
-                Movement(69.83, 45.72, -223.40)
-                AttuneAetheryte()
-            elseif ZoneCheck("Horizon") then
-                Movement(69.83, 45.72, -223.40)
-                AttuneAetheryte()
-            else
-                Teleporter("Ul'dah - Steps of Nald", "tp")
-                Teleporter("Gate of the Sultana", "li")
-                Movement(69.83, 45.72, -223.40)
-                AttuneAetheryte()
-            end
-        end
-        DoQuest("Where the Heart Is (The Goblet)")
-    else
-        DoQuest("Where the Heart Is (The Goblet)") -- This has the echo text inside
     end
 end
 
@@ -1263,8 +1269,48 @@ function MistUnlock()
             end
         end
         DoQuest("Where the Heart Is (Mist)")
+        Teleporter("Limsa Lominsa Lower Decks", "tp")
     else
         DoQuest("Where the Heart Is (Mist)") -- This has the echo text inside
+    end
+end
+
+function TheGobletUnlock()
+    if GetLevel() < 5 then
+        Echo("You do not have the level 5 requirement.")
+        return
+    end
+    
+    if not IsAetheryteAttuned("Ul'dah - Steps of Nald") then
+        Echo("You do not have Ul'dah - Steps of Nald aetheryte attuned.")
+        return
+    end
+    
+    if not IsQuestDone("Where the Heart Is (The Goblet)") then
+        if IsAetheryteAttuned("Horizon") then
+            if not ZoneCheck("Horizon") then
+                Teleporter("Horizon", "tp")
+            end
+        else
+            if ZoneCheck("Ul'dah - Steps of Nald") then
+                Teleporter("Ul'dah - Steps of Nald", "tp")
+                Teleporter("Gate of the Sultana", "li")
+                Movement(69.83, 45.72, -223.40)
+                AttuneAetheryte()
+            elseif ZoneCheck("Horizon") then
+                Movement(69.83, 45.72, -223.40)
+                AttuneAetheryte()
+            else
+                Teleporter("Ul'dah - Steps of Nald", "tp")
+                Teleporter("Gate of the Sultana", "li")
+                Movement(69.83, 45.72, -223.40)
+                AttuneAetheryte()
+            end
+        end
+        DoQuest("Where the Heart Is (The Goblet)")
+        Teleporter("Ul'dah - Steps of Nald", "tp")
+    else
+        DoQuest("Where the Heart Is (The Goblet)") -- This has the echo text inside
     end
 end
 
@@ -1348,8 +1394,8 @@ function Main()
 
         -- Housing unlocks
         { enabled = DO_THE_LAVENDER_BEDS, func = TheLavenderBedsUnlock },
-        { enabled = DO_THE_GOBLET, func = TheGobletUnlock },
         { enabled = DO_MIST, func = MistUnlock },
+        { enabled = DO_THE_GOBLET, func = TheGobletUnlock },
         
         -- Retainer unlocks
         { enabled = DO_RETAINER, func = RetainerUnlock },

@@ -112,7 +112,7 @@ function Interact()
     
     repeat
         Sleep(0.1)
-    until not IsPlayerCasting()
+    until not IsPlayerCasting() and not GetCharacterCondition(31)
 end
 
 -- Usage: AttuneAetheryte()
@@ -146,7 +146,9 @@ function AttuneAetheryte()
     -- Wait until player is available
     repeat
         Sleep(0.1)
-    until IsPlayerAvailable()
+    until IsPlayerAvailable() and not (GetCharacterCondition(31) or GetCharacterCondition(32))
+    
+    Sleep(1.0)
 end
 
 -- Usage: IsInParty()
@@ -2610,4 +2612,89 @@ function GetEorzeanTime()
         math.floor(eorzean_time / 3600) % 24, 
         math.floor(eorzean_time / 60) % 60, 
         math.floor(eorzean_time) % 60)
+end
+
+-- Usage: ReturnTeleport()
+-- Uses /return action to return to aetheryte location
+function ReturnTeleport()
+    -- Initial check to ensure player can teleport
+    repeat
+        Sleep(0.1)
+    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32)
+
+    yield("/return")
+        
+    repeat
+        yield("/pcall SelectYesno true 0")
+        Sleep(0.1)
+    until not IsAddonVisible("SelectYesno")
+    
+    repeat
+        Sleep(0.1)
+    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not (GetCharacterCondition(45) or GetCharacterCondition(51))
+    
+    Sleep(0.5)
+end
+
+-- Usage: IsTeleportUnlocked()
+-- Checks if player has teleport unlocked
+function IsTeleportUnlocked()
+    local aetheryte_list = GetAetheryteList()
+
+    -- Check if aetheryte_list is nil, empty, or has a count less than 2
+    if aetheryte_list and aetheryte_list.Count and aetheryte_list.Count >= 2 then
+        return true
+    else
+        return false
+    end
+end
+
+-- Usage: AttuneAethernetShard()
+-- Attunes with the Aethernet Shard, exits out of menus if already attuned
+function AttuneAethernetShard()
+    -- Wait until the player is ready to interact
+    repeat
+        Sleep(0.1)
+    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not IsMoving() and not (GetCharacterCondition(45) or GetCharacterCondition(51))
+
+    -- Target and interact with the Aethernet Shard
+    Target("Aethernet Shard")
+    Sleep(0.1)
+    Interact()
+    Sleep(1.0)
+
+    -- If the player is already attuned then exit the menu
+    if GetCharacterCondition(32) or IsAddonVisible("TelepotTown") then
+        repeat
+            Sleep(0.1)
+        until IsAddonVisible("TelepotTown")
+
+        Sleep(0.1)
+        yield("/pcall TelepotTown true 1")
+
+        repeat
+            Sleep(0.1)
+        until not IsAddonVisible("TelepotTown")
+    end
+
+    -- Wait until player is available
+    repeat
+        Sleep(0.1)
+    until IsPlayerAvailable() and not (GetCharacterCondition(31) or GetCharacterCondition(32))
+    
+    Sleep(1.0)
+end
+
+-- Usage: GetCharacterLevel()
+-- Encapsulates the GetLevel() snd function with better handling
+-- Returns the player level
+function GetCharacterLevel()
+    local player_level = GetLevel()
+
+    -- Check if we have a number, if not return nil
+    if type(player_level) ~= "number" then
+        return nil
+    end
+
+    return player_level
 end
