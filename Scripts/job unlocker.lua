@@ -108,9 +108,6 @@ DO_THE_LAVENDER_BEDS = false              -- This is for unlocking The Lavender 
 DO_MIST = true                           -- This is for unlocking Mist Housing
 DO_THE_GOBLET = false                     -- This is for unlocking The Goblet Housing
 
--- Retainer unlock
-DO_RETAINER = false                       -- This is for unlocking Retainers and Ventures
-
 local use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being char_list.lua, false = use the list you put in this file 
 
 local multi_char = false                  -- Options: true = cycles through character list, false = single character
@@ -1120,28 +1117,37 @@ function GetLevelForHousingWard()
         
         while true do
             local level = GetCharacterLevel()
-
+            
+            -- if HasStatus("The Road to 90") then
+                -- if level and level >= 4 then -- Only break if level is a valid number and >= 4
+                    -- break
+                -- end
+            -- else
+                -- if level and level >= 3 then -- Only break if level is a valid number and >= 3
+                    -- break
+                -- end
+            -- end
+            
             if level and level >= 3 then -- Only break if level is a valid number and >= 3
                 break
             end
-
+            
             Sleep(0.1)
         end
         
         yield("/qst stop") -- Stops Questionable since we can go elsewhere for unlocks to level up now and because we can't continue msq as not high enough level anyway
         
-        if not IsQuestNameAccepted("On to Summerford") then
+        if GetLevel() < 5 and not IsQuestNameAccepted("On to Summerford") then
             Movement(15.47, 40.00, 70.98)
             AttuneAethernetShard()
         end
         
-        if GetLevel() < 4 then
+        if GetLevel() < 5 then
             if not ZoneCheck("Summerford Farms") then
                 --Teleporter("Zephyr", "li")
                 yield("/li Zephyr")
                 ZoneTransitions()
             end
-            
             Movement(102.11, 48.67, 11.91)
             
             -- Find and kill targets until level 5
@@ -1155,31 +1161,40 @@ function GetLevelForHousingWard()
                 FindAndKillTarget("Goblin Fisher", 9999)
                 Sleep(1.0)
             end
-            
-            if not IsAetheryteAttuned("Summerford Farms") then
-                Movement(222.01, 113.10, -257.97)
-                AttuneAetheryte()
+        end
+        
+        if GetLevel() >= 5 and not IsAetheryteAttuned("Summerford Farms") then
+            if not ZoneCheck("Summerford Farms") then
+                --Teleporter("Zephyr", "li")
+                yield("/li Zephyr")
+                ZoneTransitions()
             end
+            
+            Movement(222.01, 113.10, -257.97)
+            AttuneAetheryte()
         end
         
         -- Since Questionable refuses to work without having MSQ active...
         if not IsQuestNameAccepted("On to Summerford") then
-            if not ZoneCheck("Limsa Lominsa Upper Decks") then
-                ReturnTeleport()
-                --Teleporter("Aftcastle", "li")
-                yield("/li Aftcastle")
-                ZoneTransitions()
-
+            -- Check if the player is not in Limsa Lominsa Upper or Lower Decks
+            if not ZoneCheck("Limsa Lominsa Upper Decks") and not ZoneCheck("Limsa Lominsa Lower Decks") then
+                ReturnTeleport() -- Use return teleport if not in the required zones
             end
+
+            -- Navigate to the Aetheryte and use the teleporter
+            PathToObject("Aetheryte", 5)
+            yield("/li Aftcastle") -- Teleport to "Aftcastle"
+            ZoneTransitions() -- Handle the zone transition if necessary
+
+            -- Move to the specified coordinates and interact with "Baderon"
             Movement(17.82, 40.22, -5.28)
             Target("Baderon")
             InteractAndWait()
         end
-
+        
         if not ZoneCheck("Limsa Lominsa Lower Decks") then
             if ZoneCheck("Limsa Lominsa Upper Decks") then
                 PathToObject("Aethernet Shard")
-                AttuneAethernetShard()
                 --Teleporter("Limsa Lominsa Aetheryte Plaza", "li")
                 yield("/li Limsa Lominsa Aetheryte Plaza")
                 ZoneTransitions()
@@ -1328,25 +1343,6 @@ function TheGobletUnlock()
     end
 end
 
--- ###################
--- # RETAINER UNLOCK #
--- ###################
-
--- Questionable does not support this yet, using alternative method
-function RetainerUnlock()
-    if GetLevel() < 17 then
-        Echo("You do not have the level 17 requirement.")
-        return
-    end
-    
-    if not IsQuestDone("An Ill-conceived Venture") then
-        -- stuff can go here
-        --DoQuest("An Ill-conceived Venture")
-    else
-        DoQuest("An Ill-conceived Venture") -- This has the echo text inside
-    end
-end
-
 -- ###############
 -- # MAIN SCRIPT #
 -- ###############
@@ -1410,9 +1406,6 @@ function Main()
         { enabled = DO_THE_LAVENDER_BEDS, func = TheLavenderBedsUnlock },
         { enabled = DO_MIST, func = MistUnlock },
         { enabled = DO_THE_GOBLET, func = TheGobletUnlock },
-        
-        -- Retainer unlocks
-        { enabled = DO_RETAINER, func = RetainerUnlock },
     }
     
     -- Loop through functions

@@ -127,17 +127,17 @@ function AttuneAetheryte()
     Target("Aetheryte")
     Sleep(0.1)
     Interact()
-    Sleep(1.0)
 
-    -- If the player is already attuned then exit the menu
-    if GetCharacterCondition(32) or IsAddonVisible("SelectString") then
+    -- If the player is already attuned, exit the menu
+    if (GetCharacterCondition(31) or GetCharacterCondition(32)) and IsAddonVisible("SelectString") then
         repeat
             Sleep(0.1)
         until IsAddonVisible("SelectString")
 
-        Sleep(0.1)
+        Sleep(0.5)
         yield("/pcall SelectString true 3")
 
+        -- Wait until the menu is no longer visible
         repeat
             Sleep(0.1)
         until not IsAddonVisible("SelectString")
@@ -146,7 +146,7 @@ function AttuneAetheryte()
     -- Wait until player is available
     repeat
         Sleep(0.1)
-    until IsPlayerAvailable() and not (GetCharacterCondition(31) or GetCharacterCondition(32))
+    until IsPlayerAvailable() and not IsPlayerCasting() and not (GetCharacterCondition(31) or GetCharacterCondition(32))
     
     Sleep(1.0)
 end
@@ -2054,7 +2054,7 @@ function DoQuest(quest_do_name)
                 -- Wait for the player to be available again
                 repeat
                     Sleep(0.1)
-                until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32)
+                until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32) and not (GetCharacterCondition(31) or GetCharacterCondition(32))
             end
 
             -- Handle zone transitions
@@ -2626,17 +2626,27 @@ function ReturnTeleport()
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32)
 
     yield("/return")
-        
+    
     repeat
-        yield("/pcall SelectYesno true 0")
+        Sleep(0.1)
+    until IsAddonVisible("SelectYesno")
+
+    yield("/pcall SelectYesno true 0")
+
+    repeat
         Sleep(0.1)
     until not IsAddonVisible("SelectYesno")
-    
+
     repeat
         Sleep(0.1)
-    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not (GetCharacterCondition(45) or GetCharacterCondition(51))
-    
-    Sleep(1.0)
+    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
+
+    -- Wait for a zone transition to complete
+    repeat
+        Sleep(0.1)
+    until GetCharacterCondition(45) or GetCharacterCondition(51)
+
+    Sleep(0.5)
 end
 
 -- Usage: IsTeleportUnlocked()
@@ -2658,34 +2668,34 @@ function AttuneAethernetShard()
     -- Wait until the player is ready to interact
     repeat
         Sleep(0.1)
-    until IsPlayerAvailable() and not IsPlayerCasting() and not IsMoving() and not GetCharacterCondition(26) and not GetCharacterCondition(45) and not GetCharacterCondition(51)
+    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not IsMoving() and not (GetCharacterCondition(45) or GetCharacterCondition(51))
 
     -- Target and interact with the Aethernet Shard
     Target("Aethernet Shard")
     Sleep(0.1)
     Interact()
 
-    -- Wait for the interaction or attunement to complete
-    repeat
-        Sleep(0.1)
-    until IsAddonVisible("TelepotTown") or GetCharacterCondition(32)
+    -- If the player is already attuned, exit the menu
+    if (GetCharacterCondition(31) or GetCharacterCondition(32)) and IsAddonVisible("TelepotTown") then
+        repeat
+            Sleep(0.1)
+        until IsAddonVisible("TelepotTown")
 
-    -- If the player is already attuned, close the menu
-    if IsAddonVisible("TelepotTown") then
+        Sleep(0.5)
         yield("/pcall TelepotTown true 1")
-        
+
         -- Wait until the menu is no longer visible
         repeat
             Sleep(0.1)
         until not IsAddonVisible("TelepotTown")
     end
 
-    -- Ensure the player is available before proceeding
+    -- Wait until player is available
     repeat
         Sleep(0.1)
-    until IsPlayerAvailable() and not GetCharacterCondition(31) and not GetCharacterCondition(32)
-
-    Sleep(0.1) -- Small delay to ensure the interaction completes smoothly
+    until IsPlayerAvailable() and not IsPlayerCasting() and not (GetCharacterCondition(31) or GetCharacterCondition(32))
+    
+    Sleep(1.0)
 end
 
 -- Usage: GetCharacterLevel()
