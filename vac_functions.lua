@@ -1889,7 +1889,7 @@ end
 
 -- Usage: GetPlayerPos()
 -- Finds and returns player x, y, z pos
-function GetPlayerPos()
+function GetPlayerPos() 
     -- Find and format player pos
     local x, y, z = GetPlayerRawXPos(), GetPlayerRawYPos(), GetPlayerRawZPos()
     local pos = string.format("%.2f, %.2f, %.2f", x, y, z)
@@ -1898,12 +1898,19 @@ function GetPlayerPos()
 end
 
 -- Usage: GetPlayerJob()
--- Returns the current player job abbreviation
-function GetPlayerJob()
+-- Returns the current player job abbreviation, or pass true if you want the full name
+function GetPlayerJob(boolean)
     -- Mapping for GetClassJobId()
     -- Find and return job ID
     local job_id = GetClassJobId()
-    return Job_List[job_id]["Abbreviation"] or "Unknown job"
+    -- check if true has been passed
+    if boolean == true then
+        -- returns the full name of the job
+        return Job_List[job_id]["Name"] or "Unknown job"
+    else
+        -- returns the job abbreviation
+        return Job_List[job_id]["Abbreviation"] or "Unknown job"
+    end
 end
 
 -- Usage: DoAction("Heavy Shot")
@@ -1983,7 +1990,7 @@ function DoQuest(quest_do_name)
 
     -- Search for the quest in Quest_List by name
     for key, quest in pairs(Quest_List) do
-        if string.lower(quest['Name']) == string.lower(quest_do_name) then
+        if string.lower(quest['Name']) == string.lower(quest_do_name) and string.lower(quest['ClassJobUnlock']) == string.lower(GetPlayerJob(true)) or string.lower(quest['ClassJobUnlock']) == string.lower("adventurer") then
             quest_id = tonumber(quest['ID'])
             quest_key = tonumber(key)
             break
