@@ -2633,7 +2633,7 @@ function ReturnTeleport()
         Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not (GetCharacterCondition(45) or GetCharacterCondition(51))
     
-    Sleep(0.5)
+    Sleep(1.0)
 end
 
 -- Usage: IsTeleportUnlocked()
@@ -2655,21 +2655,20 @@ function AttuneAethernetShard()
     -- Wait until the player is ready to interact
     repeat
         Sleep(0.1)
-    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not IsMoving() and not (GetCharacterCondition(45) or GetCharacterCondition(51))
+    until IsPlayerAvailable() and not IsPlayerCasting() and not IsMoving() and not GetCharacterCondition(26) and not GetCharacterCondition(45) and not GetCharacterCondition(51)
 
     -- Target and interact with the Aethernet Shard
     Target("Aethernet Shard")
     Sleep(0.1)
     Interact()
-    Sleep(1.0)
 
-    -- If the player is already attuned then exit the menu
-    if GetCharacterCondition(32) or IsAddonVisible("TelepotTown") then
-        repeat
-            Sleep(0.1)
-        until IsAddonVisible("TelepotTown")
-
+    -- Wait for interaction to complete
+    repeat
         Sleep(0.1)
+    until IsAddonVisible("TelepotTown") or GetCharacterCondition(32)
+
+    -- If already attuned, exit the menu
+    if IsAddonVisible("TelepotTown") then
         yield("/pcall TelepotTown true 1")
 
         repeat
@@ -2677,18 +2676,21 @@ function AttuneAethernetShard()
         until not IsAddonVisible("TelepotTown")
     end
 
-    -- Wait until player is available
+    -- Wait until the player is free from interaction conditions
     repeat
         Sleep(0.1)
     until IsPlayerAvailable() and not (GetCharacterCondition(31) or GetCharacterCondition(32))
-    
-    Sleep(1.0)
 end
 
 -- Usage: GetCharacterLevel()
 -- Encapsulates the GetLevel() snd function with better handling
 -- Returns the player level
 function GetCharacterLevel()
+    -- Check for conditions where the level might not be accessible due to changing zones
+    if GetCharacterCondition(45) or GetCharacterCondition(51) then
+        return nil -- Return nil if the player is changing zones
+    end
+
     local player_level = GetLevel()
 
     -- Check if we have a number, if not return nil

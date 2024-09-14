@@ -1120,15 +1120,15 @@ function GetLevelForHousingWard()
         
         while true do
             local level = GetCharacterLevel()
-            
-            if level >= 3 then
+
+            if level and level >= 3 then -- Only break if level is a valid number and >= 3
                 break
             end
-            
+
             Sleep(0.1)
         end
         
-        yield("/qst stop")
+        yield("/qst stop") -- Stops Questionable since we can go elsewhere for unlocks to level up now and because we can't continue msq as not high enough level anyway
         
         if not IsQuestNameAccepted("On to Summerford") then
             Movement(15.47, 40.00, 70.98)
@@ -1142,7 +1142,14 @@ function GetLevelForHousingWard()
             
             Movement(102.11, 48.67, 11.91)
             
-            while GetLevel() < 5 do
+            -- Find and kill targets until level 5
+            while true do
+                local level = GetCharacterLevel()
+                
+                if level and level >= 5 then
+                    break
+                end
+                
                 FindAndKillTarget("Goblin Fisher", 9999)
                 Sleep(1.0)
             end
@@ -1158,10 +1165,10 @@ function GetLevelForHousingWard()
             if not ZoneCheck("Limsa Lominsa Upper Decks") then
                 ReturnTeleport()
                 Teleporter("Aftcastle", "li")
-                Movement(17.82, 40.22, -5.28)
-                Target("Baderon")
-                InteractAndWait()
             end
+            Movement(17.82, 40.22, -5.28)
+            Target("Baderon")
+            InteractAndWait()
         end
 
         if not ZoneCheck("Limsa Lominsa Lower Decks") then
