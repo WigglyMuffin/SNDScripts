@@ -2722,6 +2722,11 @@ function ReturnTeleport()
         Sleep(0.1)
     until GetCharacterCondition(45) or GetCharacterCondition(51)
 
+    -- Once zone change has happened, wait until the conditions turn false
+    repeat
+        Sleep(0.1)
+    until not GetCharacterCondition(45) and not GetCharacterCondition(51)
+
     Sleep(0.5)
 end
 
