@@ -98,7 +98,7 @@ local valid_jobs = {
     THM = { class = "DoM", store_location = 1, itemID = 2055, retainer_job_positon = 7},     -- Weathered Scepter
     ACN = { class = "DoM", store_location = 6, itemID = 2142, retainer_job_positon = 8},     -- Weathered Grimoire
     MIN = { class = "DoL", store_location = 1, itemID = 2519, retainer_job_positon = 9},     -- Weathered Pickaxe
-    BOT = { class = "DoL", store_location = 3, itemID = 2545, retainer_job_positon = 10},     -- Weathered Hatchet
+    BTN = { class = "DoL", store_location = 3, itemID = 2545, retainer_job_positon = 10},     -- Weathered Hatchet
     FSH = { class = "DoL", store_location = 5, itemID = 2571, retainer_job_positon = 11},     -- Weathered Fishing Rod
 }
 
@@ -114,16 +114,17 @@ end
 
 function BuyRetainerJobItem(job, item_amount)
     local job_details = GetJobDetails(job)
+
     if not job_details then
         Echo("Job is not in any list?")
         return
     end
     -- Move to and target the right vendor for the class you're getting items for
     if job_details.class == "DoW" or job_details.class == "DoM" then
-        Movement(-236.34, 16.20, 40.77)
+        Movement(-236.34, 16.20, 40.77, 0.5)
         Target("Faezghim")
     else -- since it's not the two others the only option left is DoL
-        Movement(-245.87, 16.20, 40.59)
+        Movement(-245.87, 16.20, 40.59, 0.5)
         Target("Syneyhil")
     end
     Sleep(0.5)
@@ -143,15 +144,20 @@ function BuyRetainerJobItem(job, item_amount)
     repeat
         Sleep(0.1)
     until IsAddonReady("Shop")
-    BuyFromStore(job_details.store_location, item_amount)
+    for i = 1, item_amount do
+        BuyFromStoreSingle(job_details.store_location)
+    end
     yield("/pcall Shop true -1")
     repeat
         Sleep(0.1)
     until not IsAddonVisible("Shop")
+    repeat
+        Sleep(0.1)
+    until IsAddonVisible("SelectString")
     yield("/pcall SelectString true 5")
     repeat
         Sleep(0.1)
-    until not IsAddonVisible("SelectString") and IsPlayerAvailable()
+    until IsPlayerAvailable()
 end
 
 function CreateRetainerName()
@@ -232,7 +238,7 @@ function CreateRetainerName()
 
             -- Add a random suffix
             local suffix = suffixes[math.random(#suffixes)]
-            if IsValidSyllableTransition(name, suffix) and #name + #suffix < maxLength then
+            if IsValidSyllableTransition(name, suffix) and #name + #suffix < max_length then
                 name = name .. suffix
             end
 
@@ -324,13 +330,12 @@ function CreateRetainer()
 end
 
 function SetRetainerJobAndEquipItem(retainers)
-    -- A list which i can reference to find which button to press in the ui to select X job
-    Movement(-125.57, 18.00, 21.17)
+    Movement(-124.45, 18.00, 20.78, 0.5)
     Target("Summoning Bell")
     Interact()
     repeat
         Sleep(0.1)
-    until IsAddonVisible("RetainerList")
+    until IsAddonReady("RetainerList")
     -- Find how many total retainers we're going over
     local total_retainers = 0
     for j = 1, #retainers do
@@ -341,7 +346,8 @@ function SetRetainerJobAndEquipItem(retainers)
     end
     -- Loop over each retainer and set their weapons
     for j = 0, total_retainers - 1 do
-        local retainer = retainers[j]
+        local j_plus_one = j + 1 -- needed to make sure we pull the right thing from the retainer list
+        local retainer = retainers[j_plus_one]
         local retainer_job = retainer[1]
         local retainer_amount = retainer[2]
         local job_details = GetJobDetails(retainer_job)
@@ -350,9 +356,26 @@ function SetRetainerJobAndEquipItem(retainers)
             return
         end
         for k = 1, retainer_amount do
+            Sleep(1)
             local retainer_name_text = GetNodeText("RetainerList", 2, k, 13)
-            if string.len(retainer_name_text) > 1 then -- check if there's actually a retainer in that slot
+            if retainer_name_text then -- check if there's actually a retainer in that slot
                 yield("/pcall RetainerList true 2 " .. j)
+                repeat
+                    Sleep(0.1)
+                until IsAddonReady("SelectString")
+                -- We need to find which node "Assign retainer class." is under
+                local assign_class_node_id
+                for i = 1, 10 do
+                    local text = GetNodeText("SelectString", 2, i , 3)
+                    if text == "Assign retainer class." then
+                        assign_class_node_id = i - 1
+                        break  -- Exit the loop once the text is found
+                    end
+                    Sleep(0.0001)
+                end
+                
+                yield("/pcall SelectString true " .. assign_class_node_id)
+                Sleep(0.3)
                 repeat
                     Sleep(0.1)
                 until IsAddonReady("SelectString")
@@ -364,19 +387,29 @@ function SetRetainerJobAndEquipItem(retainers)
                 repeat
                     Sleep(0.1)
                 until IsAddonReady("SelectString")
-                yield("/pcall SelectString true 6")
+                -- We need to find which node "View retainer attributes and gear. (No main arm equipped)" is under
+                local gear_node_id
+                for i = 1, 10 do
+                    local text = GetNodeText("SelectString", 2, i , 3)
+                    if text == "View retainer attributes and gear. (No main arm equipped)" then
+                        gear_node_id = i - 1
+                        break  -- Exit the loop once the text is found
+                    end
+                    Sleep(0.0001)
+                end
+                yield("/pcall SelectString true " .. gear_node_id)
                 repeat
                     Sleep(0.1)
-                until IsAddonReady("RetainerCharacter")
+                until IsAddonVisible("RetainerCharacter")
                 -- make sure to move the right item, checks every inventory
                 MoveItemToContainer(job_details.itemID, 0, 11000)
-                Sleep(0.2)
+                Sleep(0.1)
                 MoveItemToContainer(job_details.itemID, 1, 11000)
-                Sleep(0.2)
+                Sleep(0.1)
                 MoveItemToContainer(job_details.itemID, 3, 11000)
-                Sleep(0.2)
+                Sleep(0.1)
                 MoveItemToContainer(job_details.itemID, 4, 11000)
-                Sleep(0.2)
+                Sleep(0.1)
                 MoveItemToContainer(job_details.itemID, 3500, 11000)
                 Sleep(0.5)
                 yield("/pcall RetainerCharacter true -1")
@@ -416,7 +449,6 @@ for i = 1, #chars do
     if MAKE_RETAINERS then
         -- Teleport and move to the retainer lady in limsa
         Teleporter("Limsa", "tp")
-        Movement(-142.93, 18.02, 20.52)
         Movement(-146.17, 18.21, 16.89)
         -- Attempt to create as many retainers as specified
         for j = 1, #retainers do
@@ -428,6 +460,8 @@ for i = 1, #chars do
             Sleep(0.0001)
         end
         -- Now attempt to buy all the items needed for the specified jobs
+        -- Move to West hawkers' alley
+        Movement(-231.61, 16.00, 45.49)
         for j = 1, #retainers do
             local retainer = retainers[j]
             local retainer_job = retainer[1]
@@ -435,10 +469,12 @@ for i = 1, #chars do
             BuyRetainerJobItem(retainer_job, retainer_amount)
             Sleep(0.0001)
         end
+        -- Move back to retainer place
+        Movement(-123.85, 18.00, 20.58)
     end
     -- Do the venture quest
     if DO_VENTURE_QUEST then
-        if not CheckPluginsEnabled("BossModReborn", "Questionable", "RotationSolver") then
+        if CheckPluginsEnabled("Questionable") and not IsQuestComplete(66969) then
             Teleporter("Limsa", "tp")
             -- Let questionable do the venture quest
             DoQuest(1433)
@@ -447,7 +483,7 @@ for i = 1, #chars do
             until IsQuestComplete(66969)
             yield("/qst stop")
         else
-            Echo("Skipping DO_VENTURE_QUEST since there's missing plugins")
+            Echo("Skipping venture quests since it's either completed or you're missing Questionable")
         end
     end
     -- Set job and equip the right items
