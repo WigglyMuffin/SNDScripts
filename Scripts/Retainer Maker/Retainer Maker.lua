@@ -16,7 +16,7 @@
 ##                  Description                   ##
 ####################################################
 
-This script rotates between provided characters and creates retainers for them using set settings, worth noting it makes all retainers in limsa
+This script rotates between provided characters and creates retainers for them using set settings, also buys and equips their needed weapon/tool. Worth noting it makes all retainers in limsa
 Optionally also does the venture quest afterwards, or if you want you can use this script to finish venture quests on characters with retainers already
 
 There is a list generator you can use for this in the Tools section of the repo, it will give you a quick base to edit.
