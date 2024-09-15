@@ -1976,10 +1976,10 @@ function IsQuestDone(quest_done_name)
     return false
 end
 
--- NEEDS excel browser adding
--- Usage: DoQuest("Hallo Halatali")
+-- Usage: DoQuest("Hallo Halatali") or DoQuest(1433)
 -- Checks if you have completed the specified quest and starts if you have not
 function DoQuest(quest_do_name)
+
     -- If input is nil or an empty string
     if not quest_do_name or quest_do_name == "" then
         LogInfo("[VAC] (DoQuest) quest_do_name is nil or an empty string")
@@ -1987,15 +1987,33 @@ function DoQuest(quest_do_name)
     end
 
     -- Initialize variables to store quest information
-    local quest_id = nil
     local quest_key = nil
+    local quest_id = nil
+
+    -- check if quest id was already provided by user directly
+    if type(quest_do_name) == "number" then
+        quest_id = quest_do_name
+    else
+        quest_id = nil
+    end
 
     -- Search for the quest in Quest_List by name
-    for key, quest in pairs(Quest_List) do
-        if string.lower(quest['Name']) == string.lower(quest_do_name) and string.lower(quest['ClassJobUnlock']) == string.lower(GetPlayerJob(true)) or string.lower(quest['ClassJobUnlock']) == string.lower("adventurer") then
-            quest_id = tonumber(quest['ID'])
-            quest_key = tonumber(key)
-            break
+    if not quest_id then
+        for key, quest in pairs(Quest_List) do
+            if string.lower(quest['Name']) == string.lower(quest_do_name) and (string.lower(quest['ClassJobUnlock']) == string.lower(GetPlayerJob(true)) or string.lower(quest['ClassJobUnlock'])) == string.lower("adventurer") then
+                quest_id = tonumber(quest['ID'])
+                Echo(quest_id)
+                quest_key = tonumber(key)
+                break
+            end
+        end
+    else
+    -- Search for the quest key by quest_id instead since quest_id was provided by user
+        for key, quest in pairs(Quest_List) do
+            if tonumber(quest['ID']) == quest_do_name then
+                quest_key = tonumber(key)
+                break
+            end
         end
     end
 

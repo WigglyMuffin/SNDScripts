@@ -101,7 +101,7 @@ DO_THE_AURUM_VALE = false                 -- Requires level 47, Chief Storm Serg
 
 -- Levels character to required level for housing unlocks
 -- This assumes you are on a fresh level 1 character, everything in this section will assume you do not have things unlocked as if you would on a character that does
-GET_LEVEL_FOR_HOUSING_WARD = true         -- Requires fresh level 1 character
+GET_LEVEL_FOR_HOUSING_WARD = false         -- Requires fresh level 1 character
 
 -- Housing unlocks
 DO_THE_LAVENDER_BEDS = false              -- This is for unlocking The Lavender Beds Housing
