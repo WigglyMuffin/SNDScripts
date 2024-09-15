@@ -1038,7 +1038,7 @@ end
 function BuyFromStore(number_in_list, amount)
     -- compensates for the top being 0
     number_in_list = number_in_list - 1
-    attempts = 0
+    local attempts = 0
 
     repeat
         attempts = attempts + 1
@@ -1057,7 +1057,51 @@ function BuyFromStore(number_in_list, amount)
         until IsAddonReady("SelectYesno")
 
         yield("/pcall SelectYesno true 0")
+        Sleep(0.5)
+        if IsAddonVisible("SelectYesno") then
+            yield("/pcall SelectYesno true 0")
+        end
 
+        repeat
+            Sleep(0.1)
+        until not IsAddonReady("SelectYesno")
+
+        Sleep(0.5)
+    end
+end
+
+-- Usage: BuyFromStoreSingle(1)
+--
+-- Buys one item
+-- number_in_list is which item you're buying from the list, top item is 1, 2 is below that, 3 is below that etc...
+-- only works for the "Store" addon window, i'd be careful calling it anywhere else
+function BuyFromStoreSingle(number_in_list)
+    -- compensates for the top being 0
+    number_in_list = number_in_list - 1
+    local attempts = 0
+
+    repeat
+        attempts = attempts + 1
+        Sleep(0.1)
+    until (IsAddonReady("Shop") or attempts >= 100)
+
+    -- attempts above 50 is about 5 seconds
+    if attempts >= 100 then
+        Echo("Waited too long, store window not found, moving on")
+    end
+
+    if IsAddonReady("Shop") and number_in_list then
+        yield("/pcall Shop True 0 " .. number_in_list .. " 1")
+        repeat
+            Sleep(0.1)
+        until IsAddonReady("SelectYesno")
+        
+        yield("/pcall SelectYesno true 0")
+        Sleep(0.5)
+        
+        if IsAddonVisible("SelectYesno") then
+            yield("/pcall SelectYesno true 0")
+        end
         repeat
             Sleep(0.1)
         until not IsAddonReady("SelectYesno")
