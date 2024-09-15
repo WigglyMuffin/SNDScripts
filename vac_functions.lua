@@ -186,16 +186,8 @@ end
 -- Usage: Sleep(0.1) or Sleep("0.1")
 --
 -- replaces yield wait spam, halts the script for X seconds
-function Sleep(n)
-    local t0 = os.clock()
-    while os.clock() - t0 <= n do
-        -- Check less frequently for longer sleeps
-        if n > 0.01 then
-            -- Sleep in shorter increments to allow for more responsiveness
-            local t1 = os.clock()
-            while os.clock() - t1 <= 0.01 do end
-        end
-    end
+function Sleep(time)
+    yield("/wait " .. tostring(time))
 end
 
 -- Usage: ZoneTransitions()
