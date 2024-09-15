@@ -27,12 +27,15 @@ There is a list generator you can use for this in the Tools section of the repo,
 
 -> Teleporter : In the default first party dalamud repository
 -> Pandora - https://love.puni.sh/ment.json
--> Questionable - https://plugins.carvel.li/
 -> Something Need Doing (Expanded Edition) - https://puni.sh/api/repository/croizat
 -> Textadvance - https://raw.githubusercontent.com/NightmareXIV/MyDalamudPlugins/main/pluginmaster.json
--> Rotation Solver Reborn - https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
 -> Vnavmesh - https://puni.sh/api/repository/veyn
+
+Optional but must haves if you want to use DO_VENTURE_QUEST
+
 -> Boss Mod - https://puni.sh/api/repository/veyn OR BossMod Reborn - https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
+-> Rotation Solver Reborn - https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
+-> Questionable - https://plugins.carvel.li/
 
 ####################################################
 ##                    Settings                    ##
