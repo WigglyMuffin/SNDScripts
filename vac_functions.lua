@@ -186,8 +186,16 @@ end
 -- Usage: Sleep(0.1) or Sleep("0.1")
 --
 -- replaces yield wait spam, halts the script for X seconds
-function Sleep(time)
-    yield("/wait " .. tostring(time))
+function Sleep(n)
+    local t0 = os.clock()
+    while os.clock() - t0 <= n do
+        -- Check less frequently for longer sleeps
+        if n > 0.01 then
+            -- Sleep in shorter increments to allow for more responsiveness
+            local t1 = os.clock()
+            while os.clock() - t1 <= 0.01 do end
+        end
+    end
 end
 
 -- Usage: ZoneTransitions()
@@ -848,6 +856,11 @@ end
 -- Moves player to specified x y z coordinates with optional distance value to stop movement when player is within specified distance
 -- Will automatically mount, unstuck the player if player is stuck and stop within 2.5 distance of the destination
 function Movement(x_position, y_position, z_position, range)
+    -- Wait until player doesn't have 45 or 51 conditions for zone changing
+    repeat
+        Sleep(0.1)
+    until not (GetCharacterCondition(45) and GetCharacterCondition(51))
+
     range = range or 2.5                 -- Default stopping range if not provided
     local stop_buffer = 1.0              -- Increased buffer to ensure stopping before reaching the exact target
     local max_retries = 10               -- Max number of retries to start moving
