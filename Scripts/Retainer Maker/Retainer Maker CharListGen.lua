@@ -1,6 +1,6 @@
 --[[
 ############################################################
-##                      Make retainers                    ##
+##                      Retainer Maker                    ##
 ##                 Character List Generator               ##
 ############################################################
 
@@ -16,8 +16,10 @@
 ##                  Description                   ##
 ####################################################
 
-Generates a character list you can insert into the make retainers script
+Generates a character list you can insert into the retainer maker script
 
+if outputs the list into %appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\VAC\Tools
+aka the snd config folder for that installation
 
 ####################################################
 ##                Required Plugins                ##

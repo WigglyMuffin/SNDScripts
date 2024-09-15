@@ -19,8 +19,6 @@
 This script rotates between provided characters and creates retainers for them using set settings, also buys and equips their needed weapon/tool. Worth noting it makes all retainers in limsa
 Optionally also does the venture quest afterwards, or if you want you can use this script to finish venture quests on characters with retainers already
 
-There is a character list generator in the same folder you can use to make a quick base list you can edit with all your chars.
-
 ####################################################
 ##                  Requirements                  ##
 ####################################################
@@ -43,10 +41,10 @@ These are only optional if you do not need to do the venture quest:
 -- Keep this on unless you intend on using the script to only finish the venture quests
 MAKE_RETAINERS = true
 
--- Does the venture quest
+-- Do the venture quest
 DO_VENTURE_QUEST = true
 
--- This is where you place your character list with configured retainers, you can generate a template list using the list generator provided in the Tools folder of this repo.
+-- This is where you place your character list with configured retainers, you can generate a list you can edit/use using the list generator provided in the same folder, or you can type it all out manually.
 -- It supports any job that a retainer can take, abbreviated.
 local chars = {
     {
