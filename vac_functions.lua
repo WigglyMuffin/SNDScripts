@@ -875,14 +875,15 @@ function Movement(x_position, y_position, z_position, range)
         NavReload() -- Reload vnavmesh to ensure it's ready
 
         -- Wait until vnavmesh is ready
-        repeat
-            Sleep(0.05)
-        until NavIsReady()
+        if not NavIsReady() then
+            repeat
+                Sleep(0.05)
+            until NavIsReady()
+        end
 
         local retries = 0 -- Initialize retry counter
 
         repeat
-            Sleep(0.05)
             -- Get player's current position
             local xpos = GetPlayerRawXPos()
             local ypos = GetPlayerRawYPos()
@@ -903,6 +904,7 @@ function Movement(x_position, y_position, z_position, range)
             -- Start moving towards the destination
             yield("/vnav moveto " .. x_position .. " " .. y_position .. " " .. z_position)
             retries = retries + 1
+            Sleep(0.05)
         until PathIsRunning() or retries >= max_retries -- Stop if path is running or max retries reached
 
         Sleep(0.05)

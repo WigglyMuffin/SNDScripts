@@ -1199,6 +1199,7 @@ function GetLevelForHousingWard()
                 --Teleporter("Limsa Lominsa Aetheryte Plaza", "li")
                 yield("/li Limsa Lominsa Aetheryte Plaza")
                 ZoneTransitions()
+                PathToObject("Aetheryte", 5)
             else
                 ReturnTeleport()
             end
