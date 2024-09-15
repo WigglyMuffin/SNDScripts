@@ -1057,6 +1057,10 @@ function BuyFromStore(number_in_list, amount)
         until IsAddonReady("SelectYesno")
 
         yield("/pcall SelectYesno true 0")
+        Sleep(0.5)
+        if IsAddonVisible("SelectYesno") then
+            yield("/pcall SelectYesno true 0")
+        end
 
         repeat
             Sleep(0.1)
@@ -1091,9 +1095,13 @@ function BuyFromStoreSingle(number_in_list)
         repeat
             Sleep(0.1)
         until IsAddonReady("SelectYesno")
-
+        
         yield("/pcall SelectYesno true 0")
-
+        Sleep(0.5)
+        
+        if IsAddonVisible("SelectYesno") then
+            yield("/pcall SelectYesno true 0")
+        end
         repeat
             Sleep(0.1)
         until not IsAddonReady("SelectYesno")
