@@ -2743,3 +2743,19 @@ function GetCharacterLevel()
 
     return player_level
 end
+
+-- Usage: ExitGame()
+-- Exits the game
+function ExitGame()
+    yield("/shutdown")
+
+    repeat
+        Sleep(0.1)
+    until IsAddonVisible("SelectYesno")
+
+    yield("/pcall SelectYesno true 0")
+
+    repeat
+        Sleep(0.1)
+    until not IsAddonVisible("SelectYesno")
+end

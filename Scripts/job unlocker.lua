@@ -101,7 +101,7 @@ DO_THE_AURUM_VALE = false                 -- Requires level 47, Chief Storm Serg
 
 -- Levels character to required level for housing unlocks
 -- This assumes you are on a fresh level 1 character, everything in this section will assume you do not have things unlocked as if you would on a character that does
-GET_LEVEL_FOR_HOUSING_WARD = false         -- Requires fresh level 1 character
+GET_LEVEL_FOR_HOUSING_WARD = true         -- Requires fresh level 1 character
 
 -- Housing unlocks
 DO_THE_LAVENDER_BEDS = false              -- This is for unlocking The Lavender Beds Housing
@@ -1118,18 +1118,14 @@ function GetLevelForHousingWard()
         while true do
             local level = GetCharacterLevel()
             
-            -- if HasStatus("The Road to 90") then
-                -- if level and level >= 4 then -- Only break if level is a valid number and >= 4
-                    -- break
-                -- end
-            -- else
-                -- if level and level >= 3 then -- Only break if level is a valid number and >= 3
-                    -- break
-                -- end
-            -- end
-            
-            if level and level >= 3 then -- Only break if level is a valid number and >= 3
-                break
+            if HasStatus("The Road to 90") then
+                if level and level >= 4 then -- Only break if level is a valid number and >= 4
+                    break
+                end
+            else
+                if level and level >= 3 then -- Only break if level is a valid number and >= 3
+                    break
+                end
             end
             
             Sleep(0.1)
