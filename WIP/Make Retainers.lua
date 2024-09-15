@@ -32,9 +32,7 @@ There is a list generator you can use for this in the Tools section of the repo,
 -> Vnavmesh - https://puni.sh/api/repository/veyn
 -> AutoRetainer : https://love.puni.sh/ment.json
 
-Optional but must haves if you want to use DO_VENTURE_QUEST
-
--> Boss Mod - https://puni.sh/api/repository/veyn OR BossMod Reborn - https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
+These are only optional if you do not need to do the venture quest:
 -> Rotation Solver Reborn - https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
 -> Questionable - https://plugins.carvel.li/
 
@@ -98,8 +96,8 @@ local valid_jobs = {
     THM = { class = "DoM", store_location = 1, itemID = 2055, retainer_job_positon = 7},     -- Weathered Scepter
     ACN = { class = "DoM", store_location = 6, itemID = 2142, retainer_job_positon = 8},     -- Weathered Grimoire
     MIN = { class = "DoL", store_location = 1, itemID = 2519, retainer_job_positon = 9},     -- Weathered Pickaxe
-    BTN = { class = "DoL", store_location = 3, itemID = 2545, retainer_job_positon = 10},     -- Weathered Hatchet
-    FSH = { class = "DoL", store_location = 5, itemID = 2571, retainer_job_positon = 11},     -- Weathered Fishing Rod
+    BTN = { class = "DoL", store_location = 3, itemID = 2545, retainer_job_positon = 10},    -- Weathered Hatchet
+    FSH = { class = "DoL", store_location = 5, itemID = 2571, retainer_job_positon = 11},    -- Weathered Fishing Rod
 }
 
 -- Function used to find details about the job in the valid_jobs list
@@ -402,16 +400,23 @@ function SetRetainerJobAndEquipItem(retainers)
                     Sleep(0.1)
                 until IsAddonVisible("RetainerCharacter")
                 -- make sure to move the right item, checks every inventory
-                MoveItemToContainer(job_details.itemID, 0, 11000)
-                Sleep(0.1)
-                MoveItemToContainer(job_details.itemID, 1, 11000)
-                Sleep(0.1)
-                MoveItemToContainer(job_details.itemID, 3, 11000)
-                Sleep(0.1)
-                MoveItemToContainer(job_details.itemID, 4, 11000)
-                Sleep(0.1)
-                MoveItemToContainer(job_details.itemID, 3500, 11000)
-                Sleep(0.5)
+                Sleep(1)
+
+                local item_inventory_amount = GetItemCount(job_details.itemID, true)
+
+                repeat
+                    Sleep(0.2)
+                    MoveItemToContainer(job_details.itemID, 0, 11000) -- Inventory tab 1
+                    Sleep(0.2)
+                    MoveItemToContainer(job_details.itemID, 1, 11000) -- Inventory tab 2
+                    Sleep(0.2)
+                    MoveItemToContainer(job_details.itemID, 2, 11000) -- Inventory tab 3
+                    Sleep(0.2)
+                    MoveItemToContainer(job_details.itemID, 3, 11000) -- Inventory tab 4
+                    Sleep(0.2)
+                    MoveItemToContainer(job_details.itemID, 3500, 11000) -- Armoury chest main hand
+                until GetItemCount(job_details.itemID, true) == item_inventory_amount - 1 or GetItemCount(job_details.itemID, true) == 0
+                Sleep(0.3)
                 yield("/pcall RetainerCharacter true -1")
                 repeat
                     Sleep(0.1)
