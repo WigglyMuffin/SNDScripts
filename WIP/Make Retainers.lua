@@ -30,6 +30,7 @@ There is a list generator you can use for this in the Tools section of the repo,
 -> Something Need Doing (Expanded Edition) - https://puni.sh/api/repository/croizat
 -> Textadvance - https://raw.githubusercontent.com/NightmareXIV/MyDalamudPlugins/main/pluginmaster.json
 -> Vnavmesh - https://puni.sh/api/repository/veyn
+-> AutoRetainer : https://love.puni.sh/ment.json
 
 Optional but must haves if you want to use DO_VENTURE_QUEST
 
@@ -77,7 +78,7 @@ LoadFunctions = loadfile(load_functions_file_location)
 LoadFunctions()
 LoadFileCheck()
 
-if not CheckPluginsEnabled() then
+if not CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "PandorasBox", "TextAdvance", "vnavmesh") then
     return -- Stops script as plugins not available
 end
 
@@ -273,6 +274,8 @@ function CreateRetainer()
     yield("/pcall _CharaMakeProgress true 0 13 0 Miqo'te 0")
     Sleep(0.5)
     yield("/pcall _CharaMakeFeature true -9 0")
+    Sleep(0.5)
+    yield("/pcall _CharaMakeFeature false 100")
     repeat
         Sleep(0.1)
     until IsAddonReady("SelectYesno")
@@ -435,13 +438,17 @@ for i = 1, #chars do
     end
     -- Do the venture quest
     if DO_VENTURE_QUEST then
-        Teleporter("Limsa", "tp")
-        -- Let questionable do the venture quest
-        DoQuest(1433)
-        repeat
-            Sleep(0.1)
-        until IsQuestComplete(66969)
-        yield("/qst stop")
+        if not CheckPluginsEnabled("BossModReborn", "Questionable", "RotationSolver") then
+            Teleporter("Limsa", "tp")
+            -- Let questionable do the venture quest
+            DoQuest(1433)
+            repeat
+                Sleep(0.1)
+            until IsQuestComplete(66969)
+            yield("/qst stop")
+        else
+            Echo("Skipping DO_VENTURE_QUEST since there's missing plugins")
+        end
     end
     -- Set job and equip the right items
     if MAKE_RETAINERS then

@@ -46,6 +46,7 @@ More information on what everything does will be listed near the toggle
 -> Teleporter - Base Dalamud
 -> Textadvance - https://raw.githubusercontent.com/NightmareXIV/MyDalamudPlugins/main/pluginmaster.json
 -> Vnavmesh - https://puni.sh/api/repository/veyn
+-> AutoRetainer : https://love.puni.sh/ment.json
 
 Other:
 char_list.lua file in the snd config folder with your characters configured properly unless you disable the external character list
