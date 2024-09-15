@@ -1038,7 +1038,7 @@ end
 function BuyFromStore(number_in_list, amount)
     -- compensates for the top being 0
     number_in_list = number_in_list - 1
-    attempts = 0
+    local attempts = 0
 
     repeat
         attempts = attempts + 1
@@ -1074,7 +1074,7 @@ end
 function BuyFromStoreSingle(number_in_list)
     -- compensates for the top being 0
     number_in_list = number_in_list - 1
-    attempts = 0
+    local attempts = 0
 
     repeat
         attempts = attempts + 1
