@@ -253,7 +253,8 @@ local function ProcessAltCharacters(character_list_kupobox)
 
             elseif destination_type == 2 then
                 -- If destination_type is 2, first go to the estate entrance, then to the main character
-                PathToEstateEntrance()
+                PathToObject("Entrance")
+                Target("Entrance")
                 Interact()
 
                 repeat
@@ -327,8 +328,6 @@ local function ProcessAltCharacters(character_list_kupobox)
                 if return_location == 4 then
                     LogInfo("[KupoBox] Attempting to go to FC Entrance")
                     Teleporter("Estate Hall (Free Company)", "tp")
-                    -- This likely needs some logic on nearest "Entrance" for nearby estates
-                    PathToEstateEntrance()
                 end
             end
         end
