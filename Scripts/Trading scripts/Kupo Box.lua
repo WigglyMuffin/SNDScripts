@@ -37,7 +37,7 @@ Currently the way it knows when the trades are done is by being traded 1 gil, ho
 -> Pandora's Box : https://love.puni.sh/ment.json
 -> vnavmesh : https://puni.sh/api/repository/veyn
 -> Dropbox : https://puni.sh/api/repository/kawaii
-    -> Recommended settings in dropbox are 4 frames delay between trades and 1000ms trade open command throttle.
+    -> Recommended settings in dropbox are 4 frames delay between trades and 1500ms trade open command throttle. (Ctrl + left click to specify exact values).
     -> You NEED to enable "Enable auto-accept trades." under the dropbox settings.
 
 #####################

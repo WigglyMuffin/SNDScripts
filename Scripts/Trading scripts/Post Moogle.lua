@@ -36,7 +36,7 @@ it's supposed to be used alongside Kupo Box where they will meet up, this will t
 -> Pandora's Box : https://love.puni.sh/ment.json
 -> vnavmesh : https://puni.sh/api/repository/veyn
 -> Dropbox : https://puni.sh/api/repository/kawaii
-    -> Recommended settings in dropbox are 4 frames delay between trades and 1000ms trade open command throttle.
+    -> Recommended settings in dropbox are 4 frames delay between trades and 1500ms trade open command throttle. (Ctrl + left click to specify exact values).
     -> You NEED to make sure the dropbox window is open on the Item Trade Queue tab when you start this script
 
 #####################

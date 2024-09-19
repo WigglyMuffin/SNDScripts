@@ -1,12 +1,38 @@
 --[[
+####################
+##    Version     ##
+##     1.0.0      ##
+####################
+
+-> 1.0.0: Initial release
+
+####################################################
+##                  Description                   ##
+####################################################
+
 This script is to be used on your main to automatically trade the right items to your alts as they show up
 The alts should be running the improved tony script to come and pick stuff up at the location you've set in that script
 It bases the trades off the order the character list was in so make sure it's all consistent
 if you have everything configured right it's just start the script, go afk and you have eventually delivered all items to your alts
 
-###########
-# CONFIGS #
-###########
+####################################################
+##                  Requirements                  ##
+####################################################
+
+-> AutoRetainer : https://love.puni.sh/ment.json
+-> Teleporter : In the default first party dalamud repository
+-> Lifestream : https://github.com/NightmareXIV/MyDalamudPlugins/raw/main/pluginmaster.json
+-> TextAdvance : https://github.com/NightmareXIV/MyDalamudPlugins/raw/main/pluginmaster.json
+-> Something Need Doing (Expanded Edition) : https://puni.sh/api/repository/croizat
+-> Pandora's Box : https://love.puni.sh/ment.json
+-> vnavmesh : https://puni.sh/api/repository/veyn
+-> Dropbox : https://puni.sh/api/repository/kawaii
+    -> Recommended settings in dropbox are 4 frames delay between trades and 1500ms trade open command throttle. (Ctrl + left click to specify exact values).
+    -> You NEED to make sure the dropbox window is open on the Item Trade Queue tab when you start this script
+
+#####################
+##    Settings     ##
+#####################
 ]]
 
 -- Set your alt accounts %appdata% config location otherwise it will not work

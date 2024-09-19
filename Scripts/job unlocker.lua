@@ -102,16 +102,16 @@ DO_THE_AURUM_VALE = false                 -- Requires level 47, Chief Storm Serg
 
 -- Levels character to required level for housing unlocks
 -- This assumes you are on a fresh level 1 character, everything in this section will assume you do not have things unlocked as if you would on a character that does
-GET_LEVEL_FOR_HOUSING_WARD = true         -- Requires fresh level 1 character
+GET_LEVEL_FOR_HOUSING_WARD = false         -- Requires fresh level 1 character
 
 -- Housing unlocks
 DO_THE_LAVENDER_BEDS = false              -- This is for unlocking The Lavender Beds Housing
-DO_MIST = true                           -- This is for unlocking Mist Housing
+DO_MIST = false                           -- This is for unlocking Mist Housing
 DO_THE_GOBLET = false                     -- This is for unlocking The Goblet Housing
 
 local use_external_character_list = true  -- Options: true = uses the external character list in the same folder, default name being char_list.lua, false = use the list you put in this file 
 
-local multi_char = false                  -- Options: true = cycles through character list, false = single character
+local multi_char = true                  -- Options: true = cycles through character list, false = single character
 
 -- This is where you put your character list if you choose to not use the external one
 -- If use_external_character_list or multi_char is set to false then this list is completely skipped
@@ -816,7 +816,7 @@ function MaelstromRank1()
             Teleporter("Fallgourd Float", "tp")
         end
         
-        Movement(-405, 9.5, 128)
+        Movement(-388.34, 3.04, 161.80)
         ZoneTransitions()
         Movement(468.13, 232.79, 321.85)
         DoHuntLog(MaelstromEnemiesLog1[10], 2500, 9, 0)
@@ -964,8 +964,6 @@ end
 -- # DUNGEON UNLOCKS #
 -- ###################
 
--- need to do a dungeon queue function
--- this should probably be retuned to not rely on qst
 function HalataliUnlock()
     if GetLevel() < 20 then
         Echo("You do not have the level 20 requirement.")
@@ -983,7 +981,6 @@ function HalataliUnlock()
         Movement(-399.64, 23.00, -351.08) -- It gets stuck otherwise
         Movement(-471.06, 23.01, -354.81)
         DoQuest("Hallo Halatali")
-        EquipRecommendedGear()
     else
         DoQuest("Hallo Halatali") -- This has the echo text inside
     end
@@ -1033,8 +1030,8 @@ function TheSunkenTempleOfQarnUnlock()
             Sleep(0.1)
         until IsQuestComplete(66300)
         
-        --DoQuest("Braving New Depths")
         EquipRecommendedGear()
+        --DoQuest("Braving New Depths")
     else
         DoQuest("Braving New Depths") -- This has the echo text inside
     end
@@ -1049,15 +1046,26 @@ function DzemaelDarkholdUnlock()
     end
     
     if not IsQuestDone("Shadows Uncast (Maelstrom)") then
-        if not ZoneCheck("Limsa") then
-            Teleporter("Limsa", "tp")
+        if not IsAetheryteAttuned("Camp Dragonhead") then
+            if not ZoneCheck("Fallgourd Float") then
+                Teleporter("Fallgourd Float", "tp")
+            end
+
+            Movement(-388.34, 3.04, 161.80) -- Move to zone border to enter Coerthas Central Highlands
+            Movement(224.32, 301.51, -142.16) -- Navmesh tends to break without this, probs won't matter since our stuck checker is a thing now
+            Movement(229.20, 312.91, -235.02) -- Move to Aetheryte in Coerthas Central Highlands
+            AttuneAetheryte()
+        end
+
+        if ZoneCheck("Limsa Lominsa Lower Decks") and not ZoneCheck("Limsa Lominsa Upper Decks") then
+            Teleporter("Aftcastle", "li")
+        elseif not ZoneCheck("Limsa Lominsa Lower Decks") and not ZoneCheck("Limsa Lominsa Upper Decks") then
+            Teleporter("Limsa Lominsa Lower Decks", "tp")
             Teleporter("Aftcastle", "li")
         end
-        
+
         DoQuest("Shadows Uncast (Maelstrom)")
-        DutyFinderQueue(1,9) -- Will need updating once function updated
-        DoQuest("Shadows Uncast (Maelstrom)")
-        EquipRecommendedGear()
+        Teleporter("Limsa Lominsa Lower Decks", "tp")
     else
         DoQuest("Shadows Uncast (Maelstrom)") -- This has the echo text inside
     end
@@ -1066,6 +1074,7 @@ end
 -- NEEDS doing
 -- Questionable does not support this yet, using alternative method
 -- Requires Chief Storm Sergeant
+-- Requires you to complete the dungeon for quest completion
 function TheAurumValeUnlock()
     if GetMaelstromGCRank() < 8 or GetLevel() < 47 then
         Echo("You do not have the Chief Storm Sergeant rank or the level 47 requirements.")
@@ -1077,11 +1086,8 @@ function TheAurumValeUnlock()
             Teleporter("Limsa", "tp")
             Teleporter("Aftcastle", "li")
         end
-        
-        DoQuest("Gilding the Bilious (Maelstrom)")
-        DutyFinderQueue(1,10) -- Will need updating once function updated
+
         DoQuest("Shadows Uncast (Maelstrom)")
-        EquipRecommendedGear()
     else
         DoQuest("Gilding the Bilious (Maelstrom)") -- This has the echo text inside
     end

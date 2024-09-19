@@ -44,6 +44,7 @@ GC_MIN_List = vac_lists.GC_MIN_List
 GC_BTN_List = vac_lists.GC_BTN_List
 GC_FSH_List = vac_lists.GC_FSH_List
 Fate_List = vac_lists.Fate_List
+Submersible_Part_List = vac_lists.Submersible_Part_List
 
 -- Usage: EnsureFolderExists("\\path\\to\\your\\folder")
 --
@@ -193,20 +194,15 @@ end
 -- Usage: ZoneTransitions()
 -- Zone transition checker, used if you need to path between two zones and waits until player is available
 function ZoneTransitions()
-    -- Check if player is in transition between zones
-    while not (GetCharacterCondition(45) or GetCharacterCondition(51)) do
+    -- Wait for a zone transition to complete
+    repeat
         Sleep(0.1)
-    end
+    until (GetCharacterCondition(45) or GetCharacterCondition(51))
 
-    -- Wait until player no longer in transition between zones
-    while GetCharacterCondition(45) or GetCharacterCondition(51) do
+    -- Once zone change has happened, wait until the conditions turn false
+    repeat
         Sleep(0.1)
-    end
-
-    -- Check if player is available
-    while not IsPlayerAvailable() or IsPlayerCasting() or GetCharacterCondition(26) or GetCharacterCondition(32) do
-        Sleep(0.1)
-    end
+    until not (GetCharacterCondition(45) and GetCharacterCondition(51)) and IsPlayerAvailable()
 end
 
 -- Usage: QuestNPC("SelectYesno"|"CutSceneSelectString", true, 0)
@@ -932,7 +928,8 @@ function Movement(x_position, y_position, z_position, range)
             until not GetCharacterCondition(45) and not GetCharacterCondition(51)
 
             -- Resume navmesh after conditions clear
-            NavToDestination()
+            --NavToDestination()
+            return
         end
 
         -- Get player's current position
@@ -2028,6 +2025,7 @@ end
 -- Usage: DoQuest("Hallo Halatali") or DoQuest(1433)
 -- Checks if you have completed the specified quest and starts if you have not
 function DoQuest(quest_do_name)
+    EquipRecommendedGear() -- Equip recommended gear before starting a quest
 
     -- If input is nil or an empty string
     if not quest_do_name or quest_do_name == "" then
@@ -2051,7 +2049,6 @@ function DoQuest(quest_do_name)
         for key, quest in pairs(Quest_List) do
             if string.lower(quest['Name']) == string.lower(quest_do_name) and (string.lower(quest['ClassJobUnlock']) == string.lower(GetPlayerJob(true)) or string.lower(quest['ClassJobUnlock'])) == string.lower("adventurer") then
                 quest_id = tonumber(quest['ID'])
-                Echo(quest_id)
                 quest_key = tonumber(key)
                 break
             end
@@ -2212,6 +2209,11 @@ function DoQuest(quest_do_name)
 
             -- Update the previous position for the next check
             previous_position = current_position
+            
+            -- Exit the function if ContentsFinder and Entrance exist so stuck checker loop ends
+            if IsAddonVisible("ContentsFinder") and DoesObjectExist("Entrance") then
+                return
+            end
         end
     end
 
@@ -2222,6 +2224,11 @@ function DoQuest(quest_do_name)
         -- Check if the player is available and not busy before running the stuck checker
         if IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32) then
             CheckIfStuck() -- Run the stuck checker
+        end
+        
+        -- Exit the function if ContentsFinder and Entrance exist so stuck checker loop ends
+        if IsAddonVisible("ContentsFinder") and DoesObjectExist("Entrance") then
+            return
         end
     end
 
@@ -2812,4 +2819,369 @@ function ExitGame()
     repeat
         Sleep(0.1)
     until not IsAddonVisible("SelectYesno")
+end
+
+-- Usage: GetSubmersibleParts()
+-- Will return the currently open submersible components from the "CompanyCraftSupply" Addon menu in abbreviation form such as SSSS
+-- Requires Addon "CompanyCraftSupply" to be visible
+function GetSubmersibleParts()
+    if IsAddonVisible("CompanyCraftSupply") then
+        -- Target totals to be used to match parts
+        local target_favor = tonumber(GetNodeText("CompanyCraftSupply", 5, 3)) or 0
+        local target_range = tonumber(GetNodeText("CompanyCraftSupply", 6, 3)) or 0
+        local target_speed = tonumber(GetNodeText("CompanyCraftSupply", 7, 3)) or 0
+        local target_retrieval = tonumber(GetNodeText("CompanyCraftSupply", 8, 3)) or 0
+        local target_surveillance = tonumber(GetNodeText("CompanyCraftSupply", 9, 3)) or 0
+
+        local num_parts = #Submersible_Part_List
+
+        for hull = 1, num_parts do
+            for stern = 1, num_parts do
+                for bow = 1, num_parts do
+                    for bridge = 1, num_parts do
+                        -- Check if the parts are of the correct type for each slot
+                        if Submersible_Part_List[hull].SlotName == "Hull" and
+                           Submersible_Part_List[stern].SlotName == "Stern" and
+                           Submersible_Part_List[bow].SlotName == "Bow" and
+                           Submersible_Part_List[bridge].SlotName == "Bridge" then
+                            
+                            local total_favor = Submersible_Part_List[hull].Favor + Submersible_Part_List[stern].Favor + Submersible_Part_List[bow].Favor + Submersible_Part_List[bridge].Favor
+                            local total_range = Submersible_Part_List[hull].Range + Submersible_Part_List[stern].Range + Submersible_Part_List[bow].Range + Submersible_Part_List[bridge].Range
+                            local total_speed = Submersible_Part_List[hull].Speed + Submersible_Part_List[stern].Speed + Submersible_Part_List[bow].Speed + Submersible_Part_List[bridge].Speed
+                            local total_retrieval = Submersible_Part_List[hull].Retrieval + Submersible_Part_List[stern].Retrieval + Submersible_Part_List[bow].Retrieval + Submersible_Part_List[bridge].Retrieval
+                            local total_surveillance = Submersible_Part_List[hull].Surveillance + Submersible_Part_List[stern].Surveillance + Submersible_Part_List[bow].Surveillance + Submersible_Part_List[bridge].Surveillance
+
+                            if total_favor == target_favor and
+                               total_range == target_range and
+                               total_speed == target_speed and
+                               total_retrieval == target_retrieval and
+                               total_surveillance == target_surveillance then
+                                
+                                local function get_abbreviation(part)
+                                    if part.PartName:find("Modified") then
+                                        return part.PartAbbreviation
+                                    else
+                                        return part.PartAbbreviation:sub(1,1)  -- Return first letter if not modified
+                                    end
+                                end
+
+                                local abbreviations = {
+                                    get_abbreviation(Submersible_Part_List[hull]),
+                                    get_abbreviation(Submersible_Part_List[stern]),
+                                    get_abbreviation(Submersible_Part_List[bow]),
+                                    get_abbreviation(Submersible_Part_List[bridge])
+                                }
+
+                                local abbreviation = table.concat(abbreviations)
+                                local modified_count = select(2, abbreviation:gsub("%+", ""))
+
+                                if modified_count == 4 then
+                                    abbreviation = abbreviation:gsub("%+", "") .. "++"
+                                end
+
+                                LogInfo("[VAC] (GetSubmersibleParts) Matching Parts Found: " .. abbreviation)
+                                LogInfo("[VAC] (GetSubmersibleParts) Hull: " .. Submersible_Part_List[hull].PartName)
+                                LogInfo("[VAC] (GetSubmersibleParts) Stern: " .. Submersible_Part_List[stern].PartName)
+                                LogInfo("[VAC] (GetSubmersibleParts) Bow: " .. Submersible_Part_List[bow].PartName)
+                                LogInfo("[VAC] (GetSubmersibleParts) Bridge: " .. Submersible_Part_List[bridge].PartName)
+                                LogInfo("[VAC] (GetSubmersibleParts) Total Favor: " .. total_favor)
+                                LogInfo("[VAC] (GetSubmersibleParts) Total Range: " .. total_range)
+                                LogInfo("[VAC] (GetSubmersibleParts) Total Speed: " .. total_speed)
+                                LogInfo("[VAC] (GetSubmersibleParts) Total Retrieval: " .. total_retrieval)
+                                LogInfo("[VAC] (GetSubmersibleParts) Total Surveillance: " .. total_surveillance)
+                                
+                                return abbreviation--[[{
+                                    abbreviation = abbreviation,
+                                    hull = Submersible_Part_List[hull],
+                                    stern = Submersible_Part_List[stern],
+                                    bow = Submersible_Part_List[bow],
+                                    bridge = Submersible_Part_List[bridge],
+                                    totals = {
+                                        favor = total_favor,
+                                        range = total_range,
+                                        speed = total_speed,
+                                        retrieval = total_retrieval,
+                                        surveillance = total_surveillance
+                                    }
+                                }--]]
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        LogInfo("[VAC] (GetSubmersibleParts) No matching combination found.")
+        return nil
+    else
+        LogInfo('[VAC] (GetSubmersibleParts) Addon "CompanyCraftSupply" not visible.')
+        return nil
+    end
+end
+
+-- Usage: GetSubmersibleRank() or GetSubmersibleRank(1)
+-- Will return the submersible rank from either the "CompanyCraftSupply" or "SelectString" Addon menus
+-- Works with both "SelectString" Addon menus that display all submersibles and individual submersibles
+-- If using "SelectString" for displaying all submersibles, then specifying a submersible number is required
+-- Options: 1-4 to select a submersible, defaults to 1 if empty
+function GetSubmersibleRank(sub_number)
+    if IsAddonVisible("CompanyCraftSupply") then
+        local sub_rank = tonumber(GetNodeText("CompanyCraftSupply", 40)) or 0
+        return sub_rank or 0
+    end
+    
+    if IsAddonVisible("SelectString") then
+        local node_text = tostring(GetNodeText("SelectString", 3)) or ""
+        local sub_rank_number = tonumber(node_text:match("%(Rank: (%d+)%)"))
+        
+        if sub_rank_number and sub_rank_number ~= "" then
+            return sub_rank_number or 0
+        else
+            -- Ensure sub_number is 1, 2, 3, or 4 and exit if not
+            local sub_number = tonumber(sub_number) or 1
+
+            if not sub_number or sub_number < 1 or sub_number > 4 then
+                LogInfo("[VAC] (SelectSubmersible) sub_number is not between 1 and 4")
+                return
+            end
+
+            local sub_rank_text = tostring(GetNodeText("SelectString", 2, sub_number, 3)) or ""
+            
+            -- "SelectString" multiple submersible menu
+            if node_text:match("Select a submersible%.$") and sub_rank_text:match("%(Rank:%s%d+%)") then
+                sub_rank_number = sub_rank_text:match("%(Rank:%s(%d+)%)")
+                return sub_rank_number or 0
+            end
+        end
+    end
+    
+    return 0 -- Default return if no conditions are met
+end
+
+-- Usage: GetSubmersibleName() or GetSubmersibleName(1)
+-- Will return the submersible name from either the "CompanyCraftSupply" or "SelectString" Addon menus
+-- Works with both "SelectString" Addon menus that display all submersibles and individual submersibles
+-- If using "SelectString" for displaying all submersibles, then specifying a submersible number is required
+-- Options: 1-4 to select a submersible, defaults to 1 if empty
+function GetSubmersibleName(sub_number)
+    -- Check if CompanyCraftSupply addon is visible and return its node text if so
+    if IsAddonVisible("CompanyCraftSupply") then
+        return GetNodeText("CompanyCraftSupply", 42) or ""
+    end
+    -- Return empty string if SelectString addon is not visible
+    if not IsAddonVisible("SelectString") then return "" end
+
+    -- Get text from SelectString addon
+    local node_text = GetNodeText("SelectString", 3) or ""
+
+    -- Helper function to extract and clean submersible name
+    local extract_name = function(text, remove_last_dot)
+        local name = text:match("^(.-)%s*%(Rank:") or text:match("^(.-)%s*%-") or text
+        name = name:match("^%s*(.-)%s*$"):gsub(remove_last_dot and "%.$" or "$", "")
+        return name
+    end
+
+    -- Check if it's a multiple submersible selection menu
+    local is_multiple_menu = node_text:match("Select a submersible%.$")
+    local sub_name
+
+    if is_multiple_menu then
+        -- Handle multiple menu case
+        sub_number = tonumber(sub_number) or 1
+        if sub_number < 1 or sub_number > 4 then return "" end
+        sub_name = GetNodeText("SelectString", 2, sub_number, 3)
+    else
+        -- Handle single menu case
+        for line in node_text:gmatch("[^\r\n]+") do
+            if not line:match("^Ceruleum tanks:") and not line:match("^Vessels deployed:") then
+                sub_name = line
+                break
+            end
+        end
+    end
+
+    -- Extract and return the submersible name, or empty string if not found
+    return sub_name and extract_name(sub_name, is_multiple_menu) or ""
+end
+
+-- Usage: GetSubmersibleExperience()
+-- Will return the currently open submersible experience from the "CompanyCraftSupply" Addon menu
+-- "SelectString" Addon menus do not contain this information so it can only be used in the "CompanyCraftSupply" Addon menu
+function GetSubmersibleExperience()
+    if IsAddonVisible("CompanyCraftSupply") then
+        local exp_text = GetNodeText("CompanyCraftSupply", 39)
+
+        if exp_text then
+            -- Extract the current experience value using pattern matching
+            local current_exp = exp_text:match("EXP:%s*(%d+)/")
+            
+            if current_exp then
+                LogInfo('[VAC] (GetSubmersibleExperience) Submersible "' .. GetSubmersibleName() .. '" has ' .. current_exp .. ' experience')
+                return tonumber(current_exp)
+            else
+                LogInfo("[VAC] (GetSubmersibleExperience) Failed to parse experience value from: " .. exp_text)
+            end
+        else
+            LogInfo('[VAC] (GetSubmersibleExperience) Failed to get experience text from "CompanyCraftSupply"')
+        end
+    else
+        LogInfo('[VAC] (GetSubmersibleExperience) "CompanyCraftSupply" addon is not visible')
+    end
+
+    return 0 -- Return 0 if we couldn't get or parse the experience value
+end
+
+-- Usage: SelectSubmersible(1)
+-- Will select the specified submersible and select the string to open it
+-- Requires Addon "SelectString" to be visible
+-- Options: 1-4 to select a submersible, defaults to 1 if empty
+function SelectSubmersible(sub_number)
+    -- Ensure sub_number is 1, 2, 3, or 4 and exit if not
+    local sub_number = tonumber(sub_number)
+
+    if not sub_number or sub_number < 1 or sub_number > 4 then
+        LogInfo("[VAC] (SelectSubmersible) sub_number is not between 1 and 4")
+        return
+    end
+
+    -- Adjust sub_number to be zero-indexed since the menu starts at 0
+    sub_number = sub_number - 1
+
+    if IsAddonVisible("SelectString") and GetNodeText("SelectString", 3):match("Select a submersible%.$") then
+        yield("/pcall SelectString true " .. sub_number)
+
+        -- Wait for the SelectString menu to show "Quit"
+        while IsAddonVisible("SelectString") do
+            local node_text_5 = GetNodeText("SelectString", 2, 5, 3)
+            local node_text_7 = GetNodeText("SelectString", 2, 7, 3)
+
+            if node_text_5 == "Quit" or node_text_7 == "Quit" then
+                break
+            end
+            Sleep(0.1)
+        end
+        LogInfo("[VAC] (SelectSubmersible) Opened submersible slot " .. sub_number)
+    else
+        LogInfo('[VAC] (SelectSubmersible) "SelectString" addon is not visible')
+    end
+end
+
+-- Usage: ChangeSubmersibleParts("SSSS")
+-- Will change the current submersible components by specified part abbreviation
+-- Case insensitive
+-- Requires Addon "CompanyCraftSupply" to be visible
+function ChangeSubmersibleParts(desired_parts)
+    if not IsAddonVisible("CompanyCraftSupply") then
+        LogInfo("[VAC] (ChangeSubmersibleParts) CompanyCraftSupply addon is not visible.")
+        return false
+    end
+
+    local current_parts = GetSubmersibleParts()
+
+    if not current_parts then
+        LogInfo("[VAC] (ChangeSubmersibleParts) Failed to get current submersible parts.")
+        return false
+    end
+
+    desired_parts = string.upper(desired_parts)
+
+    if current_parts == desired_parts then
+        LogInfo("[VAC] (ChangeSubmersibleParts) Submersible parts already match the desired configuration.")
+        return true
+    end
+
+    local part_slots = {
+        {menu_options = "2 1 0", name = "Hull", index = 1},
+        {menu_options = "2 1 1", name = "Stern", index = 2},
+        {menu_options = "2 1 2", name = "Bow", index = 3},
+        {menu_options = "2 1 3", name = "Bridge", index = 4}
+    }
+
+    for _, slot in ipairs(part_slots) do
+        local current_part = current_parts:sub(slot.index, slot.index)
+        local desired_part = desired_parts:sub(slot.index, slot.index)
+
+        if current_part ~= desired_part then
+            LogInfo(string.format("[VAC] (ChangeSubmersibleParts) Changing %s from %s to %s", slot.name, current_part, desired_part))
+
+            -- Amount of parts to try (Node capacity)
+            for attempt = 1, 35 do
+                -- Open the parts menu for the current slot
+                yield("/pcall CompanyCraftSupply true " .. slot.menu_options)
+
+                -- Wait for the menu to appear
+                local menu_appeared = false
+
+                for _ = 1, 10 do
+                    if IsAddonVisible("ContextIconMenu") then
+                        menu_appeared = true
+                        break
+                    end
+                    Sleep(0.2)
+                end
+
+                if not menu_appeared then
+                    LogInfo(string.format("[VAC] (ChangeSubmersibleParts) Failed to open menu for %s", slot.name))
+                    return false
+                end
+
+                -- Try changing the part
+                yield("/pcall ContextIconMenu true 0 " .. (attempt - 1))
+
+                -- Wait for the menu to disappear
+                local menu_disappeared = false
+
+                for _ = 1, 10 do
+                    if not IsAddonVisible("ContextIconMenu") then
+                        menu_disappeared = true
+                        break
+                    end
+                    Sleep(0.2)
+                end
+
+                if not menu_disappeared then
+                    LogInfo(string.format("[VAC] (ChangeSubmersibleParts) Menu didn't close for %s (Attempt %d)", slot.name, attempt))
+                    break
+                end
+
+                Sleep(0.2) -- Delay after menu closes
+
+                -- Check if the part has been changed correctly
+                local new_parts = GetSubmersibleParts()
+
+                if not new_parts then
+                    LogInfo("[VAC] (ChangeSubmersibleParts) Failed to get updated submersible parts.")
+                    return false
+                end
+
+                if new_parts:sub(slot.index, slot.index) == desired_part then
+                    LogInfo(string.format("[VAC] (ChangeSubmersibleParts) Successfully changed %s to %s", slot.name, desired_part))
+                    break
+                end
+
+                -- If this is not the last attempt, prepare for the next attempt
+                if attempt < 4 then
+                    Sleep(0.2) -- Delay before next attempt
+                else
+                    LogInfo(string.format("[VAC] (ChangeSubmersibleParts) Failed to change %s to %s after all attempts", slot.name, desired_part))
+                    return false
+                end
+            end
+        end
+
+        -- Check if all parts are correct after each change
+        current_parts = GetSubmersibleParts()
+        
+        if not current_parts then
+            LogInfo("[VAC] (ChangeSubmersibleParts) Failed to get updated submersible parts.")
+            return false
+        end
+        
+        if current_parts == desired_parts then
+            LogInfo("[VAC] (ChangeSubmersibleParts) Successfully changed submersible parts to: " .. desired_parts)
+            return true
+        end
+    end
+
+    LogInfo("[VAC] (ChangeSubmersibleParts) Failed to change submersible parts to: " .. desired_parts)
+    return false
 end
