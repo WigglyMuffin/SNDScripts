@@ -65,27 +65,23 @@ local party_invite = true
 
 -- Here you can add items you want included with every trade
 local always_include = {
-    {"Salvaged Ring", 99999},
-    {"Salvaged Bracelet", 99999},
-    {"Salvaged Earring", 99999},
-    {"Salvaged Necklace", 99999},
-    {"Extravagant Salvaged Ring", 99999},
-    {"Extravagant Salvaged Bracelet", 99999},
-    {"Extravagant Salvaged Earring", 99999},
-    {"Extravagant Salvaged Necklace", 99999}
+    { "Salvaged Ring", 99999 },
+    { "Salvaged Bracelet", 99999 },
+    { "Salvaged Earring", 99999 },
+    { "Salvaged Necklace", 99999 },
+    { "Extravagant Salvaged Ring", 99999 },
+    { "Extravagant Salvaged Bracelet", 99999 },
+    { "Extravagant Salvaged Earring", 99999 },
+    { "Extravagant Salvaged Necklace", 99999 }
 }
 
 -- in case something somehow goes wrong you can set the amount of characters in the list to skip, this goes from the top of the list
 -- a good way to know how many chars you actually need to skip is to read the processing echo in chat which lists how many chars it's finished already and which char it's on  ]]
 local skip_chars = 0 -- number of characters you'd like to skip
 
-
 -- Options: true / false
 -- If the below options is set to true then it will utilize the external vac_char_list and you need to make sure that is correctly configured
 local use_external_character_list = true
-
-
-
 
 -- This is where you put your character list if you choose to not use the external one
 -- If use_external_character_list is set to true then this list is completely skipped
@@ -102,9 +98,10 @@ local character_list_postmoogle = {
         ["Do Movement"] = false, -- will move to the character you're trading to, usually this is done by the delivery character
         ["Return Home"] = false, -- will just log out if set to false, otherwise will move to home server and to set location configured by ["Return Location"]
         ["Return Location"] = 0, -- 0 = do nothing, 1 = limsa, 2 = limsa bell, 3 = nearby bell, 4 = fc
-        ["Items"] = {  -- This is where you configure what items each character is going to be delivering, the format is {ITEMNAME, AMOUNT}
-            {"Copper", 50}, -- It is not case sensitive, however it needs to be the full name so it doesn't accidentally get the wrong item
-            {"Gold Ore", 10}
+        ["Items"] = {
+            -- This is where you configure what items each character is going to be delivering, the format is {ITEMNAME, AMOUNT}
+            --{ "Copper", 50 }, -- It is not case sensitive, however it needs to be the full name so it doesn't accidentally get the wrong item
+            --{ "Gold Ore", 10 }
         },
     },
     {
@@ -117,9 +114,10 @@ local character_list_postmoogle = {
         ["Do Movement"] = false, -- Will move to the character you're trading to, usually this is done by the delivery character
         ["Return Home"] = false, -- Will just log out if set to false, otherwise will move to home server and to set location configured by ["Return Location"]. This is always processed after it no longer has any trades left
         ["Return Location"] = 0, -- 0 = do nothing, 1 = limsa, 2 = limsa bell, 3 = nearby bell, 4 = fc
-        ["Items"] = {  -- This is where you configure what items each character is going to be delivering, the format is {ITEMNAME, AMOUNT}
-            --{"Copper", 50}, -- It is not case sensitive, however it needs to be the full name so it doesn't accidentally get the wrong item
-            --{"Gold Ore", 10}
+        ["Items"] = {
+            -- This is where you configure what items each character is going to be delivering, the format is {ITEMNAME, AMOUNT}
+            --{ "Copper", 50 }, -- It is not case sensitive, however it needs to be the full name so it doesn't accidentally get the wrong item
+            --{ "Gold Ore", 10 }
         },
     },
 }
@@ -128,7 +126,6 @@ local character_list_postmoogle = {
 #  DON'T TOUCH ANYTHING BELOW HERE  #
 # UNLESS YOU KNOW WHAT YOU'RE DOING #
 #####################################
-
 
 ###################
 # FUNCTION LOADER #
@@ -194,7 +191,6 @@ local function Main(character_list_postmoogle)
             local return_home = return_home_override or character_list_postmoogle[i]["Return Home"]
             local return_location = return_location_override or character_list_postmoogle[i]["Return Location"]
 
-
             -- Switch characters if required, looks up current character and compares
             if GetCharacterName(true) ~= alt_char_name then
                 -- checks if return_location options matches 1 which returns player to Limsa
@@ -208,8 +204,6 @@ local function Main(character_list_postmoogle)
                 Sleep(7.5)
                 LoginCheck()
             end
-
-
 
             Echo("Delivering items to " .. trading_with .. " on server " .. destination_server)
             LogInfo("[PostMoogle] Delivering items to " .. trading_with .. " on server " .. destination_server)
@@ -253,7 +247,6 @@ local function Main(character_list_postmoogle)
                 LogInfo("[PostMoogle] Teleporting to estate to find " .. trading_with)
                 EstateTeleport(trading_with, destination_house)
             end
-
 
             -- Handle different destination types
             -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
@@ -531,15 +524,14 @@ local function Main(character_list_postmoogle)
                     -- Nearby Retainer Bell Stuff
                     if return_location == 3 then
                         LogInfo("[PostMoogle] Attempting to go to nearest retainer bell")
-                        Movement(GetObjectRawXPos("Summoning Bell"), GetObjectRawYPos("Summoning Bell"), GetObjectRawZPos("Summoning Bell"))
+                        PathToObject("Summoning Bell")
                     end
 
                     -- FC Entrance stuff
                     if return_location == 4 then
                         LogInfo("[PostMoogle] Attempting to go to FC Entrance")
                         Teleporter("Estate Hall (Free Company)", "tp")
-                        -- This likely needs some logic on nearest "Entrance" for nearby estates
-                        PathToEstateEntrance()
+                        PathToObject("Entrance")
                     end
                 end
             end

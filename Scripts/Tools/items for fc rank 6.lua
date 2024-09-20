@@ -1,3 +1,8 @@
+-- Acceptable items include all gear with names that are not yellow in their help window. Items must be of Aetherial, Green, or Blue rarity.
+-- In addition, the item must be sellable to vendors, which is indicated by a "Sells for" value in its tooltip.
+-- For GC seals, there is no difference in reward between normal quality and high quality gear, although an additional confirmation prompt will appear if the player selects a piece of HQ equipment to trade.
+-- For Company Credits, HQ items yield double the amount when compared to NQ items, so it is beneficial to ensure the item you trade in is HQ.
+
 function ItemsForFcRank6()
     local ilvl = 640   -- Item level
     local is_hq = true -- Options: true = HQ, false = NQ

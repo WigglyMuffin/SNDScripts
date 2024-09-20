@@ -738,6 +738,10 @@ function Teleporter(location, tp_kind) -- Teleporter handler
     else
         Echo('Invalid option "' .. tp_kind .. '", valid options are li and tp')
     end
+    
+    repeat
+        Sleep(0.1)
+    until IsPlayerAvailable() and not IsPlayerCasting()
 end
 
 -- Usage: UseItemTeleport("Maelstrom")
@@ -954,7 +958,7 @@ function Movement(x_position, y_position, z_position, range)
             break
         end
 
-        -- Stuck check logic
+        -- Stuck check logic NEEDS /vnav rebuild adding if movement has not happened on first call
         if previous_squared_distance_to_target and previous_relative_position then
             local dx = xpos - previous_relative_position.x
             local dy = ypos - previous_relative_position.y
@@ -1659,7 +1663,7 @@ end
 -- I think this will break though since there will be multiple entrances around a housing area
 -- So maybe needs nearest logic
 function PathToEstateEntrance()
-    Movement(GetObjectRawXPos("Entrance"), GetObjectRawYPos("Entrance"), GetObjectRawZPos("Entrance"), 4)
+    Movement(GetObjectRawXPos("Entrance"), GetObjectRawYPos("Entrance"), GetObjectRawZPos("Entrance"), 3.5)
 end
 
 -- Function to navigate to the summoning bell in limsa lominsa lower decks
@@ -1954,12 +1958,12 @@ end
 
 -- Usage: GetPlayerJob()
 -- Returns the current player job abbreviation, or pass true if you want the full name
-function GetPlayerJob(boolean)
+function GetPlayerJob(player_job_full_name)
     -- Mapping for GetClassJobId()
     -- Find and return job ID
     local job_id = GetClassJobId()
     -- check if true has been passed
-    if boolean == true then
+    if player_job_full_name == true then
         -- returns the full name of the job
         return Job_List[job_id]["Name"] or "Unknown job"
     else

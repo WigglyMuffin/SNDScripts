@@ -58,16 +58,13 @@ to use any of the overrides you need to uncomment the line and set it to what yo
 -- local return_home_override = true                    -- Options: true = Returns home from destination, false = Does nothing and logs out
 -- local return_location_override = 0                   -- Options: 0 = do nothing, 1 = limsa, 2 = limsa bell, 3 = nearby bell, 4 = fc 
 
-
 -- Options: true = invites character you're trading with to party for trading, false = uses distance based proximity check for trading
 -- toggling this off is usually the faster but less safe method of trading
 local party_invite = true
 
-
 -- in case something somehow goes wrong you can set the amount of characters in the list to skip, this goes from the top of the list
 -- a good way to know how many chars you actually need to skip is to read the processing echo in chat which lists how many chars it's finished already and which char it's on  ]]
 local skip_chars = 0 -- number of characters you'd like to skip
-
 
 -- Options: true / false
 -- If the below options is set to true then it will utilize the external vac_char_list and you need to make sure that is correctly configured
@@ -321,13 +318,14 @@ local function ProcessAltCharacters(character_list_kupobox)
                 -- Nearby Retainer Bell Stuff
                 if return_location == 3 then
                     LogInfo("[KupoBox] Attempting to go to nearest retainer bell")
-                    Movement(GetObjectRawXPos("Summoning Bell"), GetObjectRawYPos("Summoning Bell"), GetObjectRawZPos("Summoning Bell"))
+                    PathToObject("Summoning Bell")
                 end
 
                 -- FC Entrance stuff
                 if return_location == 4 then
                     LogInfo("[KupoBox] Attempting to go to FC Entrance")
                     Teleporter("Estate Hall (Free Company)", "tp")
+                    PathToObject("Entrance")
                 end
             end
         end
