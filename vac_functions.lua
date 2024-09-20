@@ -370,62 +370,70 @@ end
 
 -- Usage: FindAndKillTarget("Heckler Imp", 20)
 --
--- Uses TargetNearestEnemy() to find and kill the provided target within the specified radius
-function FindAndKillTarget(target_name, radius)
-    local radius = radius or 50
+-- Uses TargetNearestEnemy() to find and kill the provided target within the specified target_radius
+function FindAndKillTarget(target_name, target_radius)
+    local target_radius = target_radius or 100
     local auto_attack_triggered = false
     local target_x_pos, target_y_pos, target_z_pos = FindNearestObject(target_name)
-
+    
     if target_x_pos == nil then
         return
     end
-
+    
     local distance_to_target = FindDistanceToPos(target_x_pos, target_y_pos, target_z_pos)
-
-    if distance_to_target > radius then
+    if distance_to_target > target_radius then
         return
     end
-
-    Movement(target_x_pos, target_y_pos, target_z_pos, 4)
-    TargetNearestEnemy(target_name, radius)
-
+    
+    -- Determine the attack range based on the current job
+    local current_job = GetPlayerJob()
+    local attack_range = 3.5
+    if current_job == "ARC" or current_job == "BRD" or current_job == "MCH" or current_job == "DNC" then
+        attack_range = 10
+    end
+    
+    Movement(target_x_pos, target_y_pos, target_z_pos, attack_range)
+    TargetNearestEnemy(target_name, target_radius)
     local dist_to_target = GetDistanceToTarget()
-
-    while GetTargetHP() > 0 and dist_to_target <= radius do
+    
+    while GetTargetHP() > 0 and dist_to_target <= target_radius do
         if GetCharacterCondition(4) then
             repeat
                 Dismount()
                 Sleep(0.1)
             until not GetCharacterCondition(4)
         end
-
+        
         yield("/rotation manual")
-
+        
         repeat
-            if (GetDistanceToTarget() <= 4) and PathIsRunning() then
+            if (GetDistanceToTarget() <= attack_range) and PathIsRunning() then
                 yield("/vnav stop")
             end
-            if not (GetDistanceToTarget() <= 4) and not PathIsRunning() then
+            
+            if not (GetDistanceToTarget() <= attack_range) and not PathIsRunning() then
                 if not auto_attack_triggered then
                     yield("/vnavmesh movetarget")
                     Sleep(0.1)
                 end
             end
-
-            if GetDistanceToTarget() <= 4 and not auto_attack_triggered then
+            
+            if GetDistanceToTarget() <= attack_range and not auto_attack_triggered then
                 DoAction("Auto-attack")
                 Sleep(0.1)
                 if IsTargetInCombat() and GetCharacterCondition(26) then
                     auto_attack_triggered = true
                 end
             end
-
+            
             Sleep(0.05)
         until GetTargetHP() <= 0
-
+        
         yield("/vnavmesh stop")
     end
+    
     Sleep(0.5)
+    
     if GetCharacterCondition(26) then
         yield("/rotation auto")
         repeat
@@ -849,8 +857,7 @@ function Movement(x_position, y_position, z_position, range)
         Sleep(0.1)
     until not (GetCharacterCondition(45) and GetCharacterCondition(51))
 
-    range = range or 2.5                 -- Default stopping range if not provided
-    local stop_buffer = 1.0              -- Increased buffer to ensure stopping before reaching the exact target
+    range = range or 3.5                 -- Default stopping range if not provided
     local max_retries = 10               -- Max number of retries to start moving
     local stuck_check_interval = 0.50    -- Interval in seconds to check if stuck
     local stuck_threshold_seconds = 4.0  -- Time before considering the player stuck
@@ -868,7 +875,7 @@ function Movement(x_position, y_position, z_position, range)
     -- Function to check if the current position is within the target range (using squared distance)
     local function IsWithinRange(xpos, ypos, zpos)
         -- Check if the squared distance is less than or equal to the squared range plus buffer
-        return GetSquaredDistanceToTarget(xpos, ypos, zpos) <= (range + stop_buffer) * (range + stop_buffer)
+        return GetSquaredDistanceToTarget(xpos, ypos, zpos) <= (range) * (range)
     end
 
     -- Initiate movement towards the destination using vnavmesh
@@ -3090,10 +3097,10 @@ function ChangeSubmersibleParts(desired_parts)
     end
 
     local part_slots = {
-        {menu_options = "2 1 0", name = "Hull", index = 1},
-        {menu_options = "2 1 1", name = "Stern", index = 2},
-        {menu_options = "2 1 2", name = "Bow", index = 3},
-        {menu_options = "2 1 3", name = "Bridge", index = 4}
+        { menu_options = "2 1 0", name = "Hull", index = 1 },
+        { menu_options = "2 1 1", name = "Stern", index = 2 },
+        { menu_options = "2 1 2", name = "Bow", index = 3 },
+        { menu_options = "2 1 3", name = "Bridge", index = 4 }
     }
 
     for _, slot in ipairs(part_slots) do

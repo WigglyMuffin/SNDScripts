@@ -267,7 +267,7 @@ local function Main(character_list_postmoogle)
                 if do_movement then
                     -- Path to main char
                     LogInfo("[PostMoogle] do_movement is set to true, moving towards " .. trading_with)
-                    PathToObject(trading_with, 2.5)
+                    PathToObject(trading_with, 3.5)
                 else
                     LogInfo("[PostMoogle] do_movement is set to false, not moving")
                 end
@@ -291,7 +291,7 @@ local function Main(character_list_postmoogle)
                 if do_movement then
                     -- Path to main char
                     LogInfo("[PostMoogle] do_movement is set to true, moving towards " .. trading_with)
-                    PathToObject(trading_with, 2.5)
+                    PathToObject(trading_with, 3.5)
                 else
                     LogInfo("[PostMoogle] do_movement is set to false, not moving")
                 end

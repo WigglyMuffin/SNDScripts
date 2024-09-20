@@ -240,7 +240,7 @@ local function ProcessAltCharacters(character_list_kupobox)
                 if do_movement then
                     -- Path to main char
                     LogInfo("[KupoBox] do_movement is set to true, moving towards " .. trading_with)
-                    PathToObject(trading_with, 2.5)
+                    PathToObject(trading_with, 3.5)
                 else
                     LogInfo("[KupoBox] do_movement is set to false, not moving")
                 end
@@ -271,7 +271,7 @@ local function ProcessAltCharacters(character_list_kupobox)
                 if do_movement then
                     -- Path to main char
                     LogInfo("[KupoBox] do_movement is set to true, moving towards " .. trading_with)
-                    PathToObject(trading_with, 2.5)
+                    PathToObject(trading_with, 3.5)
                 else
                     LogInfo("[KupoBox] do_movement is set to false, not moving")
                 end
