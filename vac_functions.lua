@@ -1688,28 +1688,51 @@ end
 
 -- Function to wait until a specified amount of gil is traded
 -- Usage: WaitForGilIncrease(1)
---
--- This function monitors the gil amount and waits until it increases by the
--- specified amount. It acts as a trigger before proceeding with further actions.
+-- This function monitors the gil amount and waits until it increases by the specified amount.
+-- It acts as a trigger before proceeding with further actions.
 function WaitForGilIncrease(gil_increase_amount)
     -- Store the current amount of gil before the trade
     local previous_gil = GetGil()
-
     -- Continuously check the gil amount until the specified increase is detected
     while true do
         Sleep(1.0) -- Pause execution for 1 second between checks
-
         -- Retrieve the current amount of gil
         local current_gil = GetGil()
-
+        local gil_difference = current_gil - previous_gil
         -- Check if the gil has increased by the specified amount
-        if current_gil > previous_gil and (current_gil - previous_gil) == gil_increase_amount then
-            Echo(gil_increase_amount .. " Gil successfully traded")
-            break -- Exit the loop when the desired increase in gil is detected
+        if gil_difference == gil_increase_amount then
+            LogInfo(string.format("%d Gil successfully received", gil_increase_amount))
+            return true
         end
+        if gil_difference > gil_increase_amount then
+            LogInfo(string.format("Gil difference (%d) exceeded expected amount (%d). Resetting...", gil_difference, gil_increase_amount))
+            previous_gil = current_gil
+        end
+    end
+end
 
-        -- Update the previous gil amount for the next check
-        previous_gil = current_gil
+-- Function to wait until a specified amount of gil is traded
+-- Usage: WaitForGilDecrease(1)
+-- This function monitors the gil amount and waits until it decreases by the specified amount.
+-- It acts as a trigger before proceeding with further actions.
+function WaitForGilDecrease(gil_decrease_amount)
+    -- Store the current amount of gil before the trade
+    local previous_gil = GetGil()
+    -- Continuously check the gil amount until the specified decrease is detected
+    while true do
+        Sleep(1.0) -- Pause execution for 1 second between checks
+        -- Retrieve the current amount of gil
+        local current_gil = GetGil()
+        local gil_difference = previous_gil - current_gil
+        -- Check if the gil has decreased by the specified amount
+        if gil_difference == gil_decrease_amount then
+            LogInfo(string.format("%d Gil successfully traded", gil_decrease_amount))
+            return true
+        end
+        if gil_difference > gil_decrease_amount then
+            LogInfo(string.format("Gil difference (%d) exceeded expected amount (%d). Resetting...", gil_difference, gil_decrease_amount))
+            previous_gil = current_gil
+        end
     end
 end
 
