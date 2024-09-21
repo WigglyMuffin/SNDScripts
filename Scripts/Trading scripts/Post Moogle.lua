@@ -9,7 +9,7 @@
                                                 |___/          
 ####################
 ##    Version     ##
-##     1.1.1      ##
+##     1.1.2      ##
 ####################
 
 -> 1.0.0: Initial release
@@ -18,11 +18,16 @@
    - Added prioritisation of high-quality items
    - Added toggle to allow mixing of high-quality and normal-quality items
    - Updated TradeItems function to respect new settings
-   
+
 -> 1.1.1:
    - Fixed issue with 1 gil trade not occurring after all items have been traded
    - Improved transition to final 1 gil trade
    - Added more detailed logging for trade process
+
+-> 1.1.2:
+   - Fixed item trading logic to work correctly alongside gil trading
+   - Improved inventory handling and trade setup
+   - Enhanced logging for better trade process visibility
 
 ####################################################
 ##                  Description                   ##
@@ -307,87 +312,34 @@ local function Main(character_list_postmoogle)
             -- trade section
 
             local function TradeItems()
-                local items_to_trade_inventory_amount = {}
                 local items_to_trade = {}
                 local gil_to_trade = 0
                 local initial_gil = GetGil()
 
                 local function RefreshInv()
-                    for _, item in ipairs(items_to_trade) do
-                        local item_id = item.id
+                    for _, item in ipairs(character_list_postmoogle[i]["Items"]) do
+                        local item_name = item[1]
+                        local item_id = FindItemID(item_name)
+                        local item_amount = item[2]
                         if item_id == 1 then  -- Gil
-                            gil_to_trade = item.amount
-                        else
-                            local item_count = GetItemCount(item_id, false) + GetItemCount(item_id, true)
-                            table.insert(items_to_trade_inventory_amount, {id = item_id, amount = item_count})
-                        end
-                        Sleep(0.0001)
-                    end
-                end
-
-                Echo("Getting Ready to trade")
-
-                local item_trades_succeeded = false
-
-                -- process character item list
-                for _, item in ipairs(character_list_postmoogle[i]["Items"]) do
-                    local item_name = item[1]
-                    local item_id = FindItemID(item_name)
-                    local item_amount = item[2]
-                    local item_inv_amount_normal = GetItemCount(item_id, false)
-                    local item_inv_amount_hq = GetItemCount(item_id, true)
-                    local item_inv_amount_total = item_inv_amount_normal + item_inv_amount_hq
-                    if item_inv_amount_total > 0 then
-                        if item_amount > item_inv_amount_total then
-                            table.insert(items_to_trade, {id = item_id, amount = item_inv_amount_total})
+                            gil_to_trade = item_amount
                         else
                             table.insert(items_to_trade, {id = item_id, amount = item_amount})
                         end
-                    end
-                    Sleep(0.0001)
-                end
-
-                -- process always include list
-                for _, item in ipairs(always_include) do
-                    local item_name = item[1]
-                    local item_id = FindItemID(item_name)
-                    local item_amount = item[2]
-                    local item_inv_amount_normal = GetItemCount(item_id, false)
-                    local item_inv_amount_hq = GetItemCount(item_id, true)
-                    local item_inv_amount_total = item_inv_amount_normal + item_inv_amount_hq
-                    -- Check if the item already exists in items_to_trade
-                    local found = false
-                    for _, existing_item in ipairs(items_to_trade) do
-                        if existing_item.id == item_id then
-                            -- If the item exists, update the amount
-                            existing_item.amount = existing_item.amount + item_amount
-                            found = true
-                            break
-                        end
                         Sleep(0.0001)
                     end
-
-                    -- If the item does not exist, add it to the list
-                    if not found then
-                        if item_inv_amount_total > 0 then
-                            if item_amount > item_inv_amount_total then
-                                table.insert(items_to_trade, {id = item_id, amount = item_inv_amount_total})
-                            else
-                                table.insert(items_to_trade, {id = item_id, amount = item_amount})
-                            end
-                        end
+                    
+                    -- Add always_include items
+                    for _, item in ipairs(always_include) do
+                        local item_name = item[1]
+                        local item_id = FindItemID(item_name)
+                        local item_amount = item[2]
+                        table.insert(items_to_trade, {id = item_id, amount = item_amount})
+                        Sleep(0.0001)
                     end
-
-                    Sleep(0.0001)
                 end
 
                 RefreshInv()
-
-                local item_amount_lookup = {}
-                for _, item in ipairs(items_to_trade) do
-                    item_amount_lookup[item.id] = item.amount
-                    Sleep(0.0001)
-                end
 
                 -- Do the actual trading
                 local all_trades_succeeded = false
@@ -408,9 +360,9 @@ local function Main(character_list_postmoogle)
                     end
 
                     -- Handle item trades
-                    for _, item in ipairs(items_to_trade_inventory_amount) do
-                        local item_id = tonumber(item.id)
-                        local item_amount = tonumber(item_amount_lookup[item_id])
+                    for _, item in ipairs(items_to_trade) do
+                        local item_id = item.id
+                        local item_amount = item.amount
                         local normal_amount = GetItemCount(item_id, false)
                         local hq_amount = GetItemCount(item_id, true)
                         
@@ -419,7 +371,7 @@ local function Main(character_list_postmoogle)
                         local nq_trade = 0
 
                         if prioritise_hq then
-                            -- prioritise HQ items
+                            -- Prioritise HQ items
                             if hq_amount > 0 then
                                 hq_trade = math.min(hq_amount, remaining_amount)
                                 remaining_amount = remaining_amount - hq_trade
@@ -428,7 +380,7 @@ local function Main(character_list_postmoogle)
                                 nq_trade = math.min(normal_amount, remaining_amount)
                             end
                         else
-                            -- prioritise NQ items
+                            -- Prioritise NQ items
                             if normal_amount > 0 then
                                 nq_trade = math.min(normal_amount, remaining_amount)
                                 remaining_amount = remaining_amount - nq_trade
@@ -440,9 +392,11 @@ local function Main(character_list_postmoogle)
 
                         if hq_trade > 0 then
                             DropboxSetItemQuantity(item_id, true, hq_trade)
+                            LogInfo("[PostMoogle] Setting up HQ trade for item " .. item_id .. ": " .. hq_trade)
                         end
                         if nq_trade > 0 then
                             DropboxSetItemQuantity(item_id, false, nq_trade)
+                            LogInfo("[PostMoogle] Setting up NQ trade for item " .. item_id .. ": " .. nq_trade)
                         end
                         
                         Sleep(0.0001)
@@ -471,17 +425,17 @@ local function Main(character_list_postmoogle)
                         end
                     end
 
-                    for s = #items_to_trade_inventory_amount, 1, -1 do
-                        local item = items_to_trade_inventory_amount[s]
+                    for i = #items_to_trade, 1, -1 do
+                        local item = items_to_trade[i]
                         local item_id = item.id
-                        local expected_amount = tonumber(item_amount_lookup[item_id])
+                        local expected_amount = item.amount
                         local current_count = GetItemCount(item_id, false) + GetItemCount(item_id, true)
 
                         if current_count >= expected_amount then
                             LogInfo("[PostMoogle] Trade for item " .. item_id .. " did not succeed, retrying...")
                             all_trades_succeeded = false
                         else
-                            table.remove(items_to_trade_inventory_amount, s)
+                            table.remove(items_to_trade, i)
                             LogInfo("[PostMoogle] Trade for item " .. item_id .. " succeeded")
                         end
                         Sleep(0.0001)
