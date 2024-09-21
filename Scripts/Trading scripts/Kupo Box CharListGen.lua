@@ -60,17 +60,17 @@ This script is ideal for players managing multiple characters or complex trading
 -- Set the characters you're generating a list with, the list generates in order
 -- If only one character is listed, it will be used as the main trading partner for all entries in trading_with_list
 local gen_char_list = {
-    "Mrow Mrow@Louisoix", -- Main trading partner
-    -- "Smol Meow@Lich",     -- Uncomment to add more trading partners
-    -- "Beeg Meow@Zodiark",  -- Uncomment to add more trading partners
+    "Mrow Mrow@Louisoix",    -- Main trading character
+    -- "Smol Meow@Lich",     -- Uncomment to add more main trading characters
+    -- "Beeg Meow@Zodiark"   -- Uncomment to add more main trading characters
 }
 
 -- Here you can define a list of trading partners.
 -- If gen_char_list has only one entry, this list determines the number of entries generated.
 local trading_with_list = {
-    "Mrow Mrow@Louisoix",   -- Corresponding trading partner for Character 1
-    "Smol Meow@Lich",       -- Corresponding trading partner for Character 2
-    "Beeg Meow@Zodiark"     -- Corresponding trading partner for Character 3
+    "Mrow Mrow@Louisoix",   -- Trading partner 1 for main trading character
+    "Smol Meow@Lich",       -- Trading partner 2 for main trading character
+    "Beeg Meow@Zodiark"     -- Trading partner 3 for main trading character
 }
 
 -- Here you set the default settings each character will have when generated

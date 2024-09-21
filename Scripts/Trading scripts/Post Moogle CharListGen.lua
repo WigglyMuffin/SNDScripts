@@ -57,15 +57,15 @@ This script is particularly useful for players managing complex item deliveries.
 
 -- Set the characters you're generating a list with, these are the partners to trade with
 local gen_char_list = {
-    "Mrow Mrow@Louisoix",   -- Corresponding trading partner for Character 1
-    "Smol Meow@Lich",       -- Corresponding trading partner for Character 2
-    "Beeg Meow@Zodiark"     -- Corresponding trading partner for Character 3
+    "Mrow Mrow@Louisoix",   -- Trading partner 1 for main trading character
+    "Smol Meow@Lich",       -- Trading partner 2 for main trading character
+    "Beeg Meow@Zodiark"     -- Trading partner 3 for main trading character
 }
 
 -- Here you can define the main trading character(s).
 -- If only one character is listed, it will be used as the main trading partner for all entries in gen_char_list
 local trading_with_list = {
-    "Mrow Mrow@Louisoix", -- Main trading character
+    "Mrow Mrow@Louisoix",    -- Main trading character
     -- "Smol Meow@Lich",     -- Uncomment to add more main trading characters
     -- "Beeg Meow@Zodiark"   -- Uncomment to add more main trading characters
 }
