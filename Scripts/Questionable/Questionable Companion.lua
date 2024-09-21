@@ -6,9 +6,10 @@
 
 ####################
 ##    Version     ##
-##     0.1.7      ##
+##     0.1.8      ##
 ####################
 
+-> 0.1.8: Fixed the script being broken due to an SND update
 -> 0.1.7: Unexpected combat should be fixed
 -> 0.1.6: Hopefully finally actually fixed the bug with z2. And added extra rsr calls once inside an instance to see if that helps with it not starting properly.
 -> 0.1.5: Changed to using the rsr ipc for hopefully more consistency, also redid how combat is handled in the overworld, hopefully this works better in practice. A bug where the script sometimes would crash going between zones should also be fixed
@@ -243,10 +244,10 @@ local function WaitforInstanceFinishAndStartQst()
     end
     Sleep(0)
     LogInfo("[QSTC] Setting rsr to off")
-    ChangeOperatingMode(0)
+    RSRChangeOperatingMode(0)
     Sleep(1)
     LogInfo("[QSTC] Setting rsr to auto")
-    ChangeOperatingMode(1)
+    RSRChangeOperatingMode(1)
     if bossmod_ai_outside_of_instances then
         LogInfo("[QSTC] Setting bmrai to on")
         yield("/bmrai on")
@@ -285,7 +286,7 @@ for _, char in ipairs(chars) do
     yield("/at e")
     yield("/qst start")
     -- rsr settings
-    ChangeOperatingMode(1)
+    RSRChangeOperatingMode(1)
     yield("/rotation Settings AutoOffBetweenArea False")
     yield("/rotation Settings AutoOffSwitchClass False")
     yield("/rotation Settings AutoOffWhenDutyCompleted True")
@@ -442,7 +443,7 @@ for _, char in ipairs(chars) do
                 yield("/bmrai on")
                 ZoneTransitions()
                 Sleep(2)
-                ChangeOperatingMode(1)
+                RSRChangeOperatingMode(1)
                 WaitforInstanceFinishAndStartQst()
             else
                 Echo(duty.." is not on the duty whitelist")
@@ -479,7 +480,7 @@ for _, char in ipairs(chars) do
                 end
                 ZoneTransitions() -- make sure to wait properly for the transition
                 Sleep(3)
-                ChangeOperatingMode(1)
+                RSRChangeOperatingMode(1)
                 LogInfo("[QSTC] Instance helper: Inside instance, setting bmrai to on")
                 yield("/bmrai on")
                 WaitforInstanceFinishAndStartQst()
