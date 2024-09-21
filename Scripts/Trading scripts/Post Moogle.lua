@@ -324,7 +324,9 @@ local function Main(character_list_postmoogle)
                         if item_id == 1 then  -- Gil
                             gil_to_trade = item_amount
                         else
-                            table.insert(items_to_trade, {id = item_id, amount = item_amount})
+                            if GetItemCount(item_id, true) >= item_amount then
+                                table.insert(items_to_trade, {id = item_id, amount = item_amount})
+                            end
                         end
                         Sleep(0.0001)
                     end
@@ -334,7 +336,9 @@ local function Main(character_list_postmoogle)
                         local item_name = item[1]
                         local item_id = FindItemID(item_name)
                         local item_amount = item[2]
-                        table.insert(items_to_trade, {id = item_id, amount = item_amount})
+                        if GetItemCount(item_id, true) >= item_amount then
+                            table.insert(items_to_trade, {id = item_id, amount = item_amount})
+                        end
                         Sleep(0.0001)
                     end
                 end
