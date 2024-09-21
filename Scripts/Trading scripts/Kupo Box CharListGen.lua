@@ -8,7 +8,7 @@
 
 ####################
 ##    Version     ##
-##     1.0.2      ##
+##     1.1.0      ##
 ####################
 
 -> 1.0.0: Initial release
@@ -30,6 +30,19 @@
      * Added set_destination_server_to_home_server option for automatic server assignment
    - Refined code structure for better readability and maintenance
    - Updated comments and variable names for clarity
+   
+-> 1.1.0: Comprehensive revision for correct list handling and enhanced flexibility
+   - Corrected the roles of gen_char_list and trading_with_list:
+     * gen_char_list now represents the "Trading With" entries
+     * trading_with_list now represents the "Name" entries
+   - Implemented flexible entry generation based on the larger of the two lists
+   - Added support for all possible list combinations:
+     * Single entry in gen_char_list with multiple entries in trading_with_list
+     * Multiple entries in gen_char_list with fewer entries in trading_with_list
+     * Equal number of entries in both lists
+   - Improved cyclic assignment logic to handle any list size discrepancy
+   - Maintained compatibility with existing server destination and movement options
+   - Further refined code structure and comments for improved clarity and maintainability
 
 ####################################################
 ##                  Description                   ##
@@ -134,19 +147,14 @@ local function generate_character_list_options()
     local num_chars = #gen_char_list
     local num_trading_partners = #trading_with_list
 
-    local main_trading_partner = gen_char_list[1]
-    local use_single_trading_partner = (num_chars == 1)
+    local entries_to_generate = math.max(num_chars, num_trading_partners)
 
-    for i = 1, math.max(num_chars, num_trading_partners) do
-        local char_name, trading_with_t
+    for i = 1, entries_to_generate do
+        local trading_with_index = ((i - 1) % num_chars) + 1
+        local name_index = ((i - 1) % num_trading_partners) + 1
 
-        if use_single_trading_partner then
-            char_name = main_trading_partner
-            trading_with_t = strip_after_at(trading_with_list[i] or "")
-        else
-            char_name = gen_char_list[i] or ""
-            trading_with_t = strip_after_at(trading_with_list[i] or "")
-        end
+        local char_name = trading_with_list[name_index]
+        local trading_with_t = strip_after_at(gen_char_list[trading_with_index])
 
         local server_to_use = destination_server
         

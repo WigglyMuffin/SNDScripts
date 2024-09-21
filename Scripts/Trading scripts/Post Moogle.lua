@@ -9,10 +9,15 @@
                                                 |___/          
 ####################
 ##    Version     ##
-##     1.0.0      ##
+##     1.1.0      ##
 ####################
 
 -> 1.0.0: Initial release
+
+-> 1.1.0: 
+   - Added prioritisation of high-quality items
+   - Added toggle to allow mixing of high-quality and normal-quality items
+   - Updated TradeItems function to respect new settings
 
 ####################################################
 ##                  Description                   ##
@@ -74,6 +79,9 @@ local always_include = {
     { "Extravagant Salvaged Earring", 99999 },
     { "Extravagant Salvaged Necklace", 99999 }
 }
+
+local prioritise_hq = true -- Options: true = prioritise HQ items, false = prioritise NQ items
+local allow_mixed_quality = true -- Options: true = allow mixing HQ and NQ, false = use only one quality type (prioritise_hq)
 
 -- in case something somehow goes wrong you can set the amount of characters in the list to skip, this goes from the top of the list
 -- a good way to know how many chars you actually need to skip is to read the processing echo in chat which lists how many chars it's finished already and which char it's on  ]]
@@ -300,7 +308,7 @@ local function Main(character_list_postmoogle)
                 local function RefreshInv()
                     for _, item in ipairs(items_to_trade) do
                         local item_id = item.id
-                        local item_count = GetItemCount(item_id, true)
+                        local item_count = GetItemCount(item_id, false) + GetItemCount(item_id, true)
                         table.insert(items_to_trade_inventory_amount, {id = item_id, amount = item_count})
                         Sleep(0.0001)
                     end
@@ -315,10 +323,12 @@ local function Main(character_list_postmoogle)
                     local item_name = item[1]
                     local item_id = FindItemID(item_name)
                     local item_amount = item[2]
-                    local item_inv_amount = GetItemCount(item_id, true)
-                    if item_inv_amount > 0 then
-                        if item_amount > item_inv_amount then
-                            table.insert(items_to_trade, {id = item_id, amount = item_inv_amount})
+                    local item_inv_amount_normal = GetItemCount(item_id, false)
+                    local item_inv_amount_hq = GetItemCount(item_id, true)
+                    local item_inv_amount_total = item_inv_amount_normal + item_inv_amount_hq
+                    if item_inv_amount_total > 0 then
+                        if item_amount > item_inv_amount_total then
+                            table.insert(items_to_trade, {id = item_id, amount = item_inv_amount_total})
                         else
                             table.insert(items_to_trade, {id = item_id, amount = item_amount})
                         end
@@ -331,7 +341,9 @@ local function Main(character_list_postmoogle)
                     local item_name = item[1]
                     local item_id = FindItemID(item_name)
                     local item_amount = item[2]
-                    local item_inv_amount = GetItemCount(item_id, true)
+                    local item_inv_amount_normal = GetItemCount(item_id, false)
+                    local item_inv_amount_hq = GetItemCount(item_id, true)
+                    local item_inv_amount_total = item_inv_amount_normal + item_inv_amount_hq
                     -- Check if the item already exists in items_to_trade
                     local found = false
                     for _, existing_item in ipairs(items_to_trade) do
@@ -346,9 +358,9 @@ local function Main(character_list_postmoogle)
 
                     -- If the item does not exist, add it to the list
                     if not found then
-                        if item_inv_amount > 0 then
-                            if item_amount > item_inv_amount then
-                                table.insert(items_to_trade, {id = item_id, amount = item_inv_amount})
+                        if item_inv_amount_total > 0 then
+                            if item_amount > item_inv_amount_total then
+                                table.insert(items_to_trade, {id = item_id, amount = item_inv_amount_total})
                             else
                                 table.insert(items_to_trade, {id = item_id, amount = item_amount})
                             end
@@ -371,7 +383,7 @@ local function Main(character_list_postmoogle)
                 
                 while not item_trades_succeeded do
                     DropboxClearAll()
-                    Sleep(0.1) -- this has to be here otherwise the script will break
+                    Sleep(0.1)
                     for _, item in ipairs(items_to_trade_inventory_amount) do
                         local item_id = tonumber(item.id)
                         local item_amount = tonumber(item_amount_lookup[item_id])
@@ -379,7 +391,40 @@ local function Main(character_list_postmoogle)
                             item_amount = item_amount - gil_cut
                             gil_has_been_cut = true
                         end
-                        DropboxSetItemQuantity(item_id, false, item_amount)
+                        local normal_amount = GetItemCount(item_id, false)
+                        local hq_amount = GetItemCount(item_id, true)
+                        
+                        local remaining_amount = item_amount
+                        local hq_trade = 0
+                        local nq_trade = 0
+
+                        if prioritise_hq then
+                            -- Prioritise HQ items
+                            if hq_amount > 0 then
+                                hq_trade = math.min(hq_amount, remaining_amount)
+                                remaining_amount = remaining_amount - hq_trade
+                            end
+                            if allow_mixed_quality and remaining_amount > 0 and normal_amount > 0 then
+                                nq_trade = math.min(normal_amount, remaining_amount)
+                            end
+                        else
+                            -- Prioritise NQ items
+                            if normal_amount > 0 then
+                                nq_trade = math.min(normal_amount, remaining_amount)
+                                remaining_amount = remaining_amount - nq_trade
+                            end
+                            if allow_mixed_quality and remaining_amount > 0 and hq_amount > 0 then
+                                hq_trade = math.min(hq_amount, remaining_amount)
+                            end
+                        end
+
+                        if hq_trade > 0 then
+                            DropboxSetItemQuantity(item_id, true, hq_trade)
+                        end
+                        if nq_trade > 0 then
+                            DropboxSetItemQuantity(item_id, false, nq_trade)
+                        end
+                        
                         Sleep(0.0001)
                     end
 
@@ -398,7 +443,7 @@ local function Main(character_list_postmoogle)
                         local item_id = item.id
                         local expected_amount = item.amount
                         -- Get the current count of the item in the inventory
-                        local current_count = GetItemCount(item_id, true)
+                        local current_count = GetItemCount(item_id, false) + GetItemCount(item_id, true)
 
                         -- Check if the current item amount is less than the expected amount
                         if current_count < expected_amount or current_count == 0 then

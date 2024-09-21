@@ -8,7 +8,7 @@
 
 ####################
 ##    Version     ##
-##     1.0.1      ##
+##     1.1.0      ##
 ####################
 
 -> 1.0.0: Initial release
@@ -27,6 +27,25 @@
    - Enhanced server destination logic:
      * Added set_destination_server_to_home_server option for automatic server assignment
    - Improved comments and variable names for better readability and maintenance
+   
+-> 1.1.0: Major update to improve flexibility and usability
+   - Reworked logic to handle various trading scenarios:
+     * Single delivery character trading with multiple partners
+     * Multiple delivery characters trading with multiple partners
+   - Improved handling of gen_char_list and trading_with_list:
+     * gen_char_list now represents the delivery characters
+     * trading_with_list now represents the characters to trade with
+   - Enhanced flexibility in list handling:
+     * Supports cases where gen_char_list has more entries than trading_with_list
+     * Handles scenarios where trading_with_list has more entries than gen_char_list
+   - Implemented flexible entry generation based on the larger of the two lists
+   - Improved cyclic assignment logic to handle any list size discrepancy
+   - Maintained item configuration support with always_include list
+   - Enhanced server destination logic:
+     * Kept set_destination_server_to_home_server option for automatic server assignment
+   - Refined code structure for better readability and maintenance
+   - Updated comments and variable names for clarity
+   - Ensured compatibility with the main Post Moogle script
 
 ####################################################
 ##                  Description                   ##
@@ -146,19 +165,14 @@ local function generate_character_list_options()
     local num_chars = #gen_char_list
     local num_trading_partners = #trading_with_list
 
-    local main_trading_partner = trading_with_list[1]
-    local use_single_trading_partner = (num_trading_partners == 1)
+    local entries_to_generate = math.max(num_chars, num_trading_partners)
 
-    for i = 1, math.max(num_chars, num_trading_partners) do
-        local char_name, trading_with_t
+    for i = 1, entries_to_generate do
+        local trading_with_index = ((i - 1) % num_chars) + 1
+        local name_index = ((i - 1) % num_trading_partners) + 1
 
-        if use_single_trading_partner then
-            char_name = gen_char_list[i] or ""
-            trading_with_t = strip_after_at(main_trading_partner)
-        else
-            char_name = gen_char_list[i] or ""
-            trading_with_t = strip_after_at(trading_with_list[i] or "")
-        end
+        local char_name = trading_with_list[name_index]
+        local trading_with_t = strip_after_at(gen_char_list[trading_with_index])
 
         local server_to_use = destination_server
         
