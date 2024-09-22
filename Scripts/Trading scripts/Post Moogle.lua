@@ -9,7 +9,7 @@
                                                 |___/          
 ####################
 ##    Version     ##
-##     1.1.2      ##
+##     1.1.3      ##
 ####################
 
 -> 1.0.0: Initial release
@@ -28,6 +28,16 @@
    - Fixed item trading logic to work correctly alongside gil trading
    - Improved inventory handling and trade setup
    - Enhanced logging for better trade process visibility
+
+-> 1.1.3:
+   - Implemented inventory check for always_include items
+   - Fixed retry for failed trades
+   - Improved gil trading logic for partial trades
+   - Enhanced logging for detailed trade information
+   - Added final verification step before 1 gil trade
+   - Implemented separate handling for HQ and NQ items
+   - Added return values to TradeItems function
+   - Improved error handling for incomplete trades
 
 ####################################################
 ##                  Description                   ##
@@ -91,7 +101,7 @@ local always_include = {
 }
 
 local prioritise_hq = true -- Options: true = prioritise HQ items, false = prioritise NQ items
-local allow_mixed_quality = true -- Options: true = allow mixing HQ and NQ, false = use only one quality type (prioritise_hq)
+local allow_mixed_quality = true -- Options: true = allow mixing HQ and NQ, false = use only one quality type (prioritise_hq value)
 
 -- in case something somehow goes wrong you can set the amount of characters in the list to skip, this goes from the top of the list
 -- a good way to know how many chars you actually need to skip is to read the processing echo in chat which lists how many chars it's finished already and which char it's on  ]]
@@ -307,16 +317,17 @@ local function Main(character_list_postmoogle)
                     LogInfo("[PostMoogle] do_movement is set to false, not moving")
                 end
             end
-            Sleep(1)
+            Sleep(1.0)
 
             -- trade section
-
             local function TradeItems()
                 local items_to_trade = {}
                 local gil_to_trade = 0
+                local gil_traded = 0
                 local initial_gil = GetGil()
 
                 local function RefreshInv()
+                    items_to_trade = {}  -- Reset the list
                     for _, item in ipairs(character_list_postmoogle[i]["Items"]) do
                         local item_name = item[1]
                         local item_id = FindItemID(item_name)
@@ -324,22 +335,43 @@ local function Main(character_list_postmoogle)
                         if item_id == 1 then  -- Gil
                             gil_to_trade = item_amount
                         else
-                            if GetItemCount(item_id, true) >= item_amount then
-                                table.insert(items_to_trade, {id = item_id, amount = item_amount})
+                            local current_count = GetItemCount(item_id, false) + GetItemCount(item_id, true)
+                            if current_count > 0 then
+                                table.insert(items_to_trade, {id = item_id, amount = math.min(item_amount, current_count), initial_count = current_count})
                             end
                         end
                         Sleep(0.0001)
                     end
                     
-                    -- Add always_include items
+                    -- Add always_include items, but only if they exist in the inventory
                     for _, item in ipairs(always_include) do
                         local item_name = item[1]
                         local item_id = FindItemID(item_name)
                         local item_amount = item[2]
-                        if GetItemCount(item_id, true) >= item_amount then
-                            table.insert(items_to_trade, {id = item_id, amount = item_amount})
+                        local current_count = GetItemCount(item_id, false) + GetItemCount(item_id, true)
+                        if current_count > 0 then
+                            local found = false
+                            for _, existing_item in ipairs(items_to_trade) do
+                                if existing_item.id == item_id then
+                                    existing_item.amount = math.min(existing_item.amount + item_amount, current_count)
+                                    found = true
+                                    break
+                                end
+                            end
+                            if not found then
+                                table.insert(items_to_trade, {id = item_id, amount = math.min(item_amount, current_count), initial_count = current_count})
+                            end
                         end
                         Sleep(0.0001)
+                    end
+
+                    -- Log the items that will be traded
+                    LogInfo("[PostMoogle] Items to be traded:")
+                    for _, item in ipairs(items_to_trade) do
+                        LogInfo("[PostMoogle] Item ID: " .. item.id .. ", Amount: " .. item.amount .. ", Initial Count: " .. item.initial_count)
+                    end
+                    if gil_to_trade > 0 then
+                        LogInfo("[PostMoogle] Gil to be traded: " .. gil_to_trade)
                     end
                 end
 
@@ -347,19 +379,21 @@ local function Main(character_list_postmoogle)
 
                 -- Do the actual trading
                 local all_trades_succeeded = false
-                local gil_traded = false
+                local max_retries = 10
+                local retry_count = 0
                 
-                while not all_trades_succeeded do
+                while not all_trades_succeeded and retry_count < max_retries do
                     DropboxClearAll()
                     Sleep(0.1)
 
-                    -- Handle gil trade first, but only if it hasn't been traded yet
-                    if gil_to_trade > 0 and not gil_traded then
-                        local gil_inv_amount = GetGil()
-                        local gil_to_trade_adjusted = math.min(gil_to_trade, gil_inv_amount - gil_cut)
-                        if gil_to_trade_adjusted > 0 then
-                            DropboxSetItemQuantity(1, false, gil_to_trade_adjusted)
-                            LogInfo("[PostMoogle] Setting up gil trade of " .. gil_to_trade_adjusted)
+                    -- Handle gil trade
+                    if gil_to_trade > gil_traded then
+                        local current_gil = GetGil()
+                        local gil_remaining = gil_to_trade - gil_traded
+                        local gil_to_trade_now = math.min(gil_remaining, current_gil - gil_cut)
+                        if gil_to_trade_now > 0 then
+                            DropboxSetItemQuantity(1, false, gil_to_trade_now)
+                            LogInfo("[PostMoogle] Setting up gil trade of " .. gil_to_trade_now)
                         end
                     end
 
@@ -367,40 +401,45 @@ local function Main(character_list_postmoogle)
                     for _, item in ipairs(items_to_trade) do
                         local item_id = item.id
                         local item_amount = item.amount
-                        local normal_amount = GetItemCount(item_id, false)
-                        local hq_amount = GetItemCount(item_id, true)
+                        local current_count = GetItemCount(item_id, false) + GetItemCount(item_id, true)
+                        local traded_so_far = item.initial_count - current_count
+                        local remaining_amount = item_amount - traded_so_far
                         
-                        local remaining_amount = item_amount
-                        local hq_trade = 0
-                        local nq_trade = 0
+                        if remaining_amount > 0 then
+                            local normal_amount = GetItemCount(item_id, false)
+                            local hq_amount = GetItemCount(item_id, true)
+                            
+                            local hq_trade = 0
+                            local nq_trade = 0
 
-                        if prioritise_hq then
-                            -- Prioritise HQ items
-                            if hq_amount > 0 then
-                                hq_trade = math.min(hq_amount, remaining_amount)
-                                remaining_amount = remaining_amount - hq_trade
+                            if prioritise_hq then
+                                -- Prioritise HQ items
+                                if hq_amount > 0 then
+                                    hq_trade = math.min(hq_amount, remaining_amount)
+                                    remaining_amount = remaining_amount - hq_trade
+                                end
+                                if allow_mixed_quality and remaining_amount > 0 and normal_amount > 0 then
+                                    nq_trade = math.min(normal_amount, remaining_amount)
+                                end
+                            else
+                                -- Prioritise NQ items
+                                if normal_amount > 0 then
+                                    nq_trade = math.min(normal_amount, remaining_amount)
+                                    remaining_amount = remaining_amount - nq_trade
+                                end
+                                if allow_mixed_quality and remaining_amount > 0 and hq_amount > 0 then
+                                    hq_trade = math.min(hq_amount, remaining_amount)
+                                end
                             end
-                            if allow_mixed_quality and remaining_amount > 0 and normal_amount > 0 then
-                                nq_trade = math.min(normal_amount, remaining_amount)
-                            end
-                        else
-                            -- Prioritise NQ items
-                            if normal_amount > 0 then
-                                nq_trade = math.min(normal_amount, remaining_amount)
-                                remaining_amount = remaining_amount - nq_trade
-                            end
-                            if allow_mixed_quality and remaining_amount > 0 and hq_amount > 0 then
-                                hq_trade = math.min(hq_amount, remaining_amount)
-                            end
-                        end
 
-                        if hq_trade > 0 then
-                            DropboxSetItemQuantity(item_id, true, hq_trade)
-                            LogInfo("[PostMoogle] Setting up HQ trade for item " .. item_id .. ": " .. hq_trade)
-                        end
-                        if nq_trade > 0 then
-                            DropboxSetItemQuantity(item_id, false, nq_trade)
-                            LogInfo("[PostMoogle] Setting up NQ trade for item " .. item_id .. ": " .. nq_trade)
+                            if hq_trade > 0 then
+                                DropboxSetItemQuantity(item_id, true, hq_trade)
+                                LogInfo("[PostMoogle] Setting up HQ trade for item " .. item_id .. ": " .. hq_trade)
+                            end
+                            if nq_trade > 0 then
+                                DropboxSetItemQuantity(item_id, false, nq_trade)
+                                LogInfo("[PostMoogle] Setting up NQ trade for item " .. item_id .. ": " .. nq_trade)
+                            end
                         end
                         
                         Sleep(0.0001)
@@ -419,40 +458,74 @@ local function Main(character_list_postmoogle)
                     all_trades_succeeded = true
                     local new_gil_amount = GetGil()
 
-                    if gil_to_trade > 0 and not gil_traded then
-                        if new_gil_amount > initial_gil - gil_to_trade then
-                            LogInfo("[PostMoogle] Gil trade did not succeed, retrying...")
-                            all_trades_succeeded = false
+                    if gil_to_trade > gil_traded then
+                        local gil_traded_now = initial_gil - new_gil_amount - gil_traded
+                        if gil_traded_now > 0 then
+                            gil_traded = gil_traded + gil_traded_now
+                            LogInfo("[PostMoogle] Gil trade of " .. gil_traded_now .. " succeeded. Total gil traded: " .. gil_traded)
                         else
-                            gil_traded = true
-                            LogInfo("[PostMoogle] Gil trade of " .. (initial_gil - new_gil_amount) .. " succeeded")
+                            LogInfo("[PostMoogle] Gil trade did not succeed")
+                            all_trades_succeeded = false
                         end
                     end
 
-                    for i = #items_to_trade, 1, -1 do
-                        local item = items_to_trade[i]
+                    for _, item in ipairs(items_to_trade) do
                         local item_id = item.id
                         local expected_amount = item.amount
                         local current_count = GetItemCount(item_id, false) + GetItemCount(item_id, true)
+                        local traded_amount = item.initial_count - current_count
 
-                        if current_count >= expected_amount then
-                            LogInfo("[PostMoogle] Trade for item " .. item_id .. " did not succeed, retrying...")
+                        if traded_amount < expected_amount then
+                            LogInfo("[PostMoogle] Trade for item " .. item_id .. " partially succeeded. Traded: " .. traded_amount .. "/" .. expected_amount)
                             all_trades_succeeded = false
                         else
-                            table.remove(items_to_trade, i)
-                            LogInfo("[PostMoogle] Trade for item " .. item_id .. " succeeded")
+                            LogInfo("[PostMoogle] Trade for item " .. item_id .. " fully succeeded")
                         end
                         Sleep(0.0001)
+                    end
+
+                    if not all_trades_succeeded then
+                        retry_count = retry_count + 1
+                        LogInfo("[PostMoogle] Trade attempt " .. retry_count .. " of " .. max_retries .. " failed. Retrying...")
+                        Sleep(1)  -- Wait a bit before retrying
                     end
                 end
                 
                 DropboxClearAll()
                 
+                -- Final check to ensure all items were traded
+                local all_items_traded = true
+                for _, item in ipairs(items_to_trade) do
+                    local current_count = GetItemCount(item.id, false) + GetItemCount(item.id, true)
+                    local traded_amount = item.initial_count - current_count
+                    if traded_amount < item.amount then
+                        all_items_traded = false
+                        LogInfo("[PostMoogle] Item " .. item.id .. " was not fully traded. Traded: " .. traded_amount .. "/" .. item.amount)
+                    end
+                end
+
+                if gil_traded < gil_to_trade then
+                    all_items_traded = false
+                    LogInfo("[PostMoogle] Gil was not fully traded. Traded: " .. gil_traded .. "/" .. gil_to_trade)
+                end
+
+                if not all_items_traded then
+                    LogInfo("[PostMoogle] Not all items or gil were successfully traded. Skipping final 1 gil trade.")
+                    return false
+                end
+
+                LogInfo("[PostMoogle] All items and gil successfully traded. Proceeding to final 1 gil trade.")
+
                 -- Perform the final 1 gil trade
                 local gil_trade_succeeded = false
-                while not gil_trade_succeeded do
+                local gil_retry_count = 0
+                while not gil_trade_succeeded and gil_retry_count < max_retries do
+                    DropboxClearAll()  -- Clear any previous trade setup
+                    Sleep(0.1)
+
                     local gil_inv_amount = GetGil()
                     DropboxSetItemQuantity(1, false, 1)
+                    LogInfo("[PostMoogle] Setting up final 1 gil trade")
 
                     Sleep(0.1)
                     DropboxStart()
@@ -470,13 +543,20 @@ local function Main(character_list_postmoogle)
                         LogInfo("[PostMoogle] Successfully traded final 1 gil.")
                     else
                         LogInfo("[PostMoogle] Final gil trade did not succeed, retrying...")
-                        DropboxSetItemQuantity(1, false, 0)
+                        gil_retry_count = gil_retry_count + 1
                     end
 
                     Sleep(0.1)
                 end
-                DropboxSetItemQuantity(1, false, 0)
+                
+                if not gil_trade_succeeded then
+                    LogInfo("[PostMoogle] Failed to trade final 1 gil after " .. max_retries .. " attempts.")
+                    return false
+                end
+                
+                DropboxClearAll()
                 ClearFocusTarget()
+                return true
             end
 
             local ready_to_trade = false
