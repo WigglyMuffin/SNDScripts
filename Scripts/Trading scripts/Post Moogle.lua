@@ -9,7 +9,7 @@
                                                 |___/          
 ####################
 ##    Version     ##
-##     1.1.3      ##
+##     1.1.4      ##
 ####################
 
 -> 1.0.0: Initial release
@@ -38,6 +38,9 @@
    - Implemented separate handling for HQ and NQ items
    - Added return values to TradeItems function
    - Improved error handling for incomplete trades
+
+-> 1.1.4:
+   - Fixed the script failing to return home if you were the final character in the list
 
 ####################################################
 ##                  Description                   ##
@@ -229,7 +232,6 @@ local function Main(character_list_postmoogle)
                 end
 
                 RelogCharacter(alt_char_name)
-                Sleep(7.5)
                 LoginCheck()
             end
 
@@ -608,11 +610,14 @@ local function Main(character_list_postmoogle)
             -- Character handling to go home if the next in list is not receiving items from this character
             -- [2] return_home options: 0 = no, 1 = yes
             -- [3] return_location options: 0 = do nothing, 1 = limsa, 2 = limsa bell, 3 = nearby bell, 4 = fc
-            local i_temp = i + 1 -- adds +1 to the index so i can check which character is next and only run return routine if the character is different
-            if character_list_postmoogle[i_temp]["Name"] == nil then
-                i_temp = i_temp - 1
+            local i_temp = i + 1 -- adds + 1 to the index so i can check which character is next and only run return routine if the character is different
+            -- Checks if there's another char in the list
+            local next_char_in_list = "Place Holder" -- Makes sure that if the below if check fails it will have something to fallback on
+            if character_list_postmoogle[i_temp] and character_list_postmoogle[i_temp]["Name"] then
+                next_char_in_list = character_list_postmoogle[i_temp]["Name"]
             end
-            if alt_char_name ~= character_list_postmoogle[i_temp]["Name"] then
+            -- Returns home if the next char is either nil(list done) or another name 
+            if alt_char_name ~= next_char_in_list then
                 Echo("delivery job done")
                 if return_home then
                     Echo(alt_char_name .. " returning home to")
