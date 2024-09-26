@@ -1917,7 +1917,7 @@ end
 function RelogCharacter(relog_char_name)
     repeat
         Sleep(0.1)
-    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
+    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) or IsAddonVisible("Title")
 
     yield("/ays relog " .. relog_char_name)
 end
