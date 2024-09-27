@@ -1450,6 +1450,18 @@ function GcProvisioningDeliver()
     end
 end
 
+-- Usage: GCDeliverooExpertDelivery()
+--
+-- Will go to the gc and activate deliveroo, automatically doing your expert deliveries
+function GCDeliverooExpertDelivery()
+    Teleporter("gc", "li")
+    yield("/deliveroo enable")
+    Sleep(3)
+    repeat
+        Sleep(0.1)
+    until not DeliverooIsTurnInRunning() and IsPlayerAvailable()
+end
+
 -- Usage: FindWorldByID(11) // FindWorldByID(GetHomeWorld())
 --
 -- Looks through the World_ID_List for the world name with X id and returns the name
