@@ -3374,3 +3374,91 @@ function RegisterNewSubmersible()
         Sleep(0.001)
     end
 end
+
+-- Usage: BuyCeruleum(999)
+-- Will buy X amount of ceruleum from the Mammet Voyager inside the workshop
+function BuyCeruleum(amount)
+    if not amount then -- Check if anything was passed
+        LogInfo("[VAC] (BuyCeruleum) Ceruleum amount missing")
+        return
+    end
+
+    if not type(amount) == "number" then -- Chjeck if the input is a number
+        LogInfo("[VAC] (BuyCeruleum) BuyCeruleum input not a number")
+        return
+    end
+
+    if not IsPlayerAvailable() then
+        LogInfo("[VAC] (BuyCeruleum) Player isn't available, cancelling ceruleum buy attempt")
+        Echo("Player isn't available, cancelling ceruleum buy attempt")
+        return
+    end
+
+    LogInfo("[VAC] (BuyCeruleum) Targeting the mammet")
+    Target("Mammet Voyager #004A") -- Target the mammet we're buying ceruleum from
+
+    yield("/lockon")
+    Sleep(0.2)
+
+    LogInfo("[VAC] (BuyCeruleum) Moving towards the mammet")
+    yield("/automove") -- Move to the mammet, i don't want to rely on Movement() here
+    Sleep(0.3)
+
+    repeat
+        Sleep(0.1)
+    until not IsMoving() -- Wait until we're no longer moving
+    LogInfo("[VAC] (BuyCeruleum) Attempting to talk to the mammet")
+    Interact() -- Talk to the mammet
+
+    repeat
+        Sleep(0.1)
+    until IsAddonReady("SelectIconString") -- Wait for the talk window to open
+    yield("/callback SelectIconString true 0") -- Open the company credit exchange
+
+    repeat
+        Sleep(0.1)
+    until IsAddonReady("FreeCompanyCreditShop") -- Waits for the company credit exchange to open
+
+    local ceruleum_price = 100
+    local current_fc_credits_str = GetNodeText("FreeCompanyCreditShop", 40)
+    local current_fc_credits = tonumber(current_fc_credits_str:gsub(",", ""):match("%d+")) -- Remove commas from the string and convert it to a number
+
+    if not current_fc_credits then
+        LogInfo("[VAC] (BuyCeruleum) Failed to find current fc credit amount")
+        yield("/callback FreeCompanyCreditShop true -1")
+        return
+    end
+
+    local max_affordable_amount = math.floor(current_fc_credits / ceruleum_price)
+
+    amount = math.min(amount, max_affordable_amount)
+
+    if amount <= 0 then
+        LogInfo("[VAC] (BuyCeruleum) Not enough credits to buy ceruleum")
+        yield("/callback FreeCompanyCreditShop true -1")
+        return
+    end
+
+    while amount > 0 do
+        -- Limit the amount per buy to 999
+        local buy_amount = math.min(amount, 999)
+
+        LogInfo("[VAC] (BuyCeruleum) Buying " .. buy_amount .. " ceruleum")
+        yield("/callback FreeCompanyCreditShop true 0 0 " .. buy_amount) -- Buy X amount of ceruleum
+        repeat
+            Sleep(0.01)
+        until IsAddonReady("SelectYesno") -- Wait for confirm window
+
+        yield("/callback SelectYesno true 0") -- Confirm
+        repeat
+            Sleep(0.01)
+        until not IsAddonVisible("SelectYesno")
+
+        amount = amount - buy_amount
+    end
+    LogInfo("[VAC] (BuyCeruleum) Finished buying ceruleum")
+    yield("/callback FreeCompanyCreditShop true -1") -- Exit shop menu
+    repeat
+        Sleep(0.1)
+    until IsPlayerAvailable() and not IsAddonVisible("FreeCompanyCreditShop")
+end
