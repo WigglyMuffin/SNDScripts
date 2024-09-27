@@ -1338,7 +1338,7 @@ end
 function CloseGcSupplyWindow()
     attempt_counter = 0
     ::tryagain::
-    if IsAddonVisible("GrandCompanySupplyList") then
+    if IsAddonReady("GrandCompanySupplyList") then
         yield("/callback GrandCompanySupplyList true -1")
 
         repeat
@@ -1415,7 +1415,9 @@ function GcProvisioningDeliver()
                 local max_attempts = 10
 
                 repeat
-                    yield("/callback SelectYesno true 0")
+                    if IsAddonReady("SelectYesno") then
+                        yield("/callback SelectYesno true 0")
+                    end
                     Sleep(0.05)
 
                     if IsAddonVisible("SelectYesno") then
@@ -1786,17 +1788,23 @@ function PartyInviteMenu(party_invite_menu_first, party_invite_menu_full)
         -- Probably needs the node scanner here to match the name, otherwise it will invite whoever was previously searched, will probably mess up for multiple matches too
 
         repeat
-            yield('/callback SocialList true 1 0 "' .. party_invite_menu_full .. '"')
+            if IsAddonReady("SocialList") then
+                yield('/callback SocialList true 1 0 "' .. party_invite_menu_full .. '"')
+            end
             Sleep(0.5)
         until IsAddonReady("ContextMenu")
 
         repeat
-            yield("/callback ContextMenu true 0 3 0")
+            if IsAddonReady("ContextMenu") then
+                yield("/callback ContextMenu true 0 3 0")
+            end
             Sleep(0.1)
         until not IsAddonReady("ContextMenu")
 
         repeat
-            yield("/callback Social true -1")
+            if IsAddonReady("Social") then
+                yield("/callback Social true -1")
+            end
             Sleep(0.1)
         until not IsAddonReady("Social")
 
@@ -1828,7 +1836,9 @@ function PartyDisband()
             Sleep(0.1)
         until IsAddonReady("SelectYesno")
         repeat
-            yield("/callback SelectYesno true 0")
+            if IsAddonReady("SelectYesno") then
+                yield("/callback SelectYesno true 0")
+            end
             Sleep(0.1)
         until not IsAddonVisible("SelectYesno")
     end
@@ -1882,7 +1892,9 @@ function PartyLeave()
         Sleep(0.1)
 
         repeat
-            yield("/callback SelectYesno true 0")
+            if IsAddonReady("SelectYesno") then
+                yield("/callback SelectYesno true 0")
+            end
             Sleep(0.1)
         until not IsAddonVisible("SelectYesno")
 
@@ -1938,7 +1950,9 @@ function EquipRecommendedGear()
     until IsAddonReady("Character")
 
     repeat
-        yield("/callback Character true 12")
+        if IsAddonReady("Character") then
+            yield("/callback Character true 12")
+        end
         Sleep(0.1)
     until IsAddonReady("RecommendEquip")
 
@@ -1948,9 +1962,11 @@ function EquipRecommendedGear()
     until not IsAddonReady("Character")
 
     repeat
-        yield("/callback RecommendEquip true 0")
+        if IsAddonReady("RecommendEquip") then
+            yield("/callback RecommendEquip true 0")
+        end
         Sleep(0.1)
-    until not IsAddonReady("RecommendEquip")
+    until not IsAddonVisible("RecommendEquip")
 end
 
 -- Usage: WaitUntilObjectExists("First Last") or WaitUntilObjectExists("Aetheryte")
@@ -2317,19 +2333,25 @@ function DutyFinderQueue(duty_finder_tab_number, duty_finder_number)
 
     -- Pick the duty tab
     repeat
-        yield("/callback ContentsFinder true 1 " .. duty_finder_tab_number)
+        if IsAddonReady("ContentsFinder") then
+            yield("/callback ContentsFinder true 1 " .. duty_finder_tab_number)
+        end
         Sleep(0.1)
     until IsAddonReady("JournalDetail")
 
     -- Clear the duty selection
     repeat
-        yield("/callback ContentsFinder true 12 1")
+        if IsAddonReady("ContentsFinder") then
+            yield("/callback ContentsFinder true 12 1")
+        end
         Sleep(0.1)
     until IsAddonReady("ContentsFinder")
 
     -- Pick the duty
     repeat
-        yield("/callback ContentsFinder true 3 " .. duty_finder_number)
+        if IsAddonReady("ContentsFinder") then
+            yield("/callback ContentsFinder true 3 " .. duty_finder_number)
+        end
         Sleep(0.1)
     until IsAddonReady("ContentsFinder")
 
@@ -2339,13 +2361,17 @@ function DutyFinderQueue(duty_finder_tab_number, duty_finder_number)
 
     -- Queue the duty
     repeat
-        yield("/callback ContentsFinder true 12 0")
+        if IsAddonReady("ContentsFinder") then
+            yield("/callback ContentsFinder true 12 0")
+        end
         Sleep(0.1)
     until IsAddonReady("ContentsFinderConfirm")
 
     -- Accept the duty
     repeat
-        yield("/callback ContentsFinderConfirm true 8")
+        if IsAddonReady("ContentsFinderConfirm") then
+            yield("/callback ContentsFinderConfirm true 8")
+        end
         Sleep(0.1)
     until not IsAddonVisible("ContentsFinderConfirm")
 
@@ -2436,21 +2462,27 @@ function DutyFinderSettings(...)
 
     -- Open duty finder settings
     repeat
-        yield("/callback ContentsFinder true 15")
+        if IsAddonReady("ContentsFinder") then
+            yield("/callback ContentsFinder true 15")
+        end
         Sleep(0.1)
     until IsAddonReady("ContentsFinderSetting")
 
     -- Loop through each setting and apply it
     for _, setting_number in ipairs(duty_finder_settings) do
         repeat
-            yield("/callback ContentsFinderSetting true 1 " .. setting_number .. " 1")
+            if IsAddonReady("ContentsFinderSetting") then
+                yield("/callback ContentsFinderSetting true 1 " .. setting_number .. " 1")
+            end
             Sleep(0.1)
         until IsAddonReady("ContentsFinderSetting")
     end
 
     -- Close duty finder settings
     repeat
-        yield("/callback ContentsFinderSetting true 0")
+        if IsAddonReady("ContentsFinderSetting") then
+            yield("/callback ContentsFinderSetting true 0")
+        end
         Sleep(0.1)
     until not IsAddonVisible("ContentsFinderSetting")
 end
@@ -2467,21 +2499,27 @@ function DutyFinderSettingsClear()
 
     -- Open duty finder settings
     repeat
-        yield("/callback ContentsFinder true 15")
+        if IsAddonReady("ContentsFinder") then
+            yield("/callback ContentsFinder true 15")
+        end
         Sleep(0.1)
     until IsAddonReady("ContentsFinderSetting")
 
     -- Iterate through all settings (0-8) and clear them
     for setting_number = 0, 8 do
         repeat
-            yield("/callback ContentsFinderSetting true 1 " .. setting_number .. " 0")
+            if IsAddonReady("ContentsFinderSetting") then
+                yield("/callback ContentsFinderSetting true 1 " .. setting_number .. " 0")
+            end
             Sleep(0.1)
         until IsAddonReady("ContentsFinderSetting")
     end
 
     -- Close duty finder settings
     repeat
-        yield("/callback ContentsFinderSetting true 0")
+        if IsAddonReady("ContentsFinderSetting") then
+            yield("/callback ContentsFinderSetting true 0")
+        end
         Sleep(0.1)
     until not IsAddonVisible("ContentsFinderSetting")
 end
@@ -3142,7 +3180,9 @@ function ChangeSubmersibleParts(desired_parts)
             -- Amount of parts to try (Node capacity)
             for attempt = 1, 35 do
                 -- Open the parts menu for the current slot
-                yield("/callback CompanyCraftSupply true " .. slot.menu_options)
+                if IsAddonReady("CompanyCraftSupply") then
+                    yield("/callback CompanyCraftSupply true " .. slot.menu_options)
+                end
 
                 -- Wait for the menu to appear
                 local menu_appeared = false
@@ -3161,7 +3201,9 @@ function ChangeSubmersibleParts(desired_parts)
                 end
 
                 -- Try changing the part
-                yield("/callback ContextIconMenu true 0 " .. (attempt - 1))
+                if IsAddonReady("ContextIconMenu") then
+                    yield("/callback ContextIconMenu true 0 " .. (attempt - 1))
+                end
 
                 -- Wait for the menu to disappear
                 local menu_disappeared = false
