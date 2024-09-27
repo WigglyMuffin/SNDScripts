@@ -3263,3 +3263,114 @@ function ChangeSubmersibleParts(desired_parts)
     LogInfo("[VAC] (ChangeSubmersibleParts) Failed to change submersible parts to: " .. desired_parts)
     return false
 end
+
+-- Usage: RegisterNewSubmersible()
+-- Will attempt to register any available submarines
+-- Requires Addon "SelectString" to be visible
+function RegisterNewSubmersible()
+    if not IsAddonReady("SelectString") and not GetNodeText("SelectString", 3):match("Select a submersible%.$") then
+        LogInfo("[VAC] (RegisterNewSubmersible) Not in the right SelectString menu")
+        return
+    end
+    for i = 1, 4 do
+        local node_text = GetNodeText("SelectString", 2, i, 3)
+
+        if node_text:match("Outfit and register a submersible%.") then
+            LogInfo("[VAC] (RegisterNewSubmersible) Submarine " .. i .. " possible to register, checking if we have the required parts")
+
+            local required_items = { -- List of all items needed for creating a submersible
+                { id = 21794, name = "Shark-class Pressure Hull"},
+                { id = 21795, name = "Shark-class Stern"},
+                { id = 21792, name = "Shark-class Bow"},
+                { id = 21793, name = "Shark-class Bridge"},
+                { id = 22317, name = "Dive Credit"}
+            }
+
+            -- Check how many dive credits we need for the submersible
+            local needed_dive_credits = 99 -- placeholder until it gets set below
+            if i == 1 then
+                needed_dive_credits = 1
+            elseif i == 2 then
+                needed_dive_credits = 3
+            elseif i == 3 then
+                needed_dive_credits = 5
+            elseif i == 4 then
+                needed_dive_credits = 7
+            end
+
+            -- Variable that will be set to false if we're missing any item
+            local enough_items = true
+
+            for _, item in ipairs(required_items) do
+                LogInfo("[VAC] (RegisterNewSubmersible) Checking if we have enough of " .. item.name)
+
+                if item.name == "Dive Credit" then -- special handling for dive credits
+                    local current_dive_credits = GetItemCount(item.id)
+                    LogInfo("[VAC] (RegisterNewSubmersible) Found " .. current_dive_credits .. " " .. item.name .. ". We need " .. needed_dive_credits)
+
+                    if current_dive_credits >= needed_dive_credits then
+                        LogInfo("[VAC] (RegisterNewSubmersible) We have enough Dive Credits")
+                    else
+                        LogInfo("[VAC] (RegisterNewSubmersible) Not enough Dive Credits")
+                        Echo("Missing " .. needed_dive_credits .. " Dive Credits")
+                        enough_items = false
+                    end
+
+                else
+                    local item_count = GetItemCount(item.id)
+                    LogInfo("[VAC] (RegisterNewSubmersible) Found " .. item_count .. " " .. item.name)
+
+                    if item_count >= 1 then
+                        LogInfo("[VAC] (RegisterNewSubmersible) Found " .. item.name)
+                    else
+                        LogInfo("[VAC] (RegisterNewSubmersible) Missing " .. item.name)
+                        enough_items = false
+                    end
+                end
+                Sleep(0.001)
+            end
+            if enough_items then
+                LogInfo("[VAC] (RegisterNewSubmersible) Can register submersible number " .. i)
+                LogInfo("[VAC] (RegisterNewSubmersible) Attempting to register submersible number " .. i)
+
+                yield("/callback SelectString true " .. (i - 1)) -- Open the "CompanyCraftSupply" addon so we can register the submarine
+
+                repeat
+                    Sleep(0.1)
+                until IsAddonReady("CompanyCraftSupply") -- Wait for the "CompanyCraftSupply" addon to be ready
+
+                ChangeSubmersibleParts("SSSS") -- Put on the parts
+
+                yield("/callback CompanyCraftSupply true 0") -- Click Register
+
+                repeat
+                    Sleep(0.1)
+                until IsAddonReady("SelectYesno") -- Wait for the confirm menu to load
+
+                yield("/callback SelectYesno true 0") -- Confirm submersible registration
+
+                repeat
+                    Sleep(0.1)
+                until IsAddonReady("SelectString") -- Wait for the submersible selection menu to load properly
+
+                for x = 1, 10 do -- Find Quit so we can go back to the submersible selection menu
+                    local quit_text = GetNodeText("SelectString", 2, x, 3)
+                    if quit_text == "Quit" then
+                        yield("/callback SelectString true " .. (x - 1))
+                        Sleep(0.5)
+                        repeat
+                            Sleep(0.1)
+                        until IsAddonReady("SelectString")
+                        break
+                    end
+                    Sleep(0.001)
+                end
+            else
+                Echo("Missing items for submersible " .. i .. ". Skipping.")
+            end
+        else
+            LogInfo("[VAC] (RegisterNewSubmersible) Submarine " .. i .. " unavailable")
+        end
+        Sleep(0.001)
+    end
+end
