@@ -2666,18 +2666,31 @@ end
 
 -- Usage: FindItemID("Copper")
 --
--- Searches the item list for an item and returns it's id, not case sensitive but you need the full item name
+-- Searches the item list for an item and returns its id, not case sensitive but you need the full item name
 function FindItemID(item_to_find)
-    local searchTerm = string.lower(item_to_find)
+    local search_term = string.lower(item_to_find)
 
     for key, item in pairs(Item_List) do
-        local itemName = string.lower(item['Name'])
+        local item_name = string.lower(item['Name'])
 
-        if itemName == searchTerm then
+        if item_name == search_term then
             return key
         end
     end
     return nil
+end
+
+-- Usage: FindItemName(1)
+-- Searches the item list for an item and returns its name, inverse of FindItemID()
+function FindItemName(item_id)
+    -- Check if the item ID exists in the Item_List
+    if Item_List[item_id] then
+        -- Return the item name if the item ID is valid
+        return Item_List[item_id]['Name']
+    else
+        -- Return nil if the item ID does not exist
+        return nil
+    end
 end
 
 -- Usage: IsAetheryteAttuned("Limsa Lominsa")
