@@ -1339,8 +1339,8 @@ end
 function CloseGcSupplyWindow()
     attempt_counter = 0
     ::tryagain::
-    if IsAddonVisible("GrandCompanySupplyList") then
-        yield("/pcall GrandCompanySupplyList true -1")
+    if IsAddonReady("GrandCompanySupplyList") then
+        yield("/callback GrandCompanySupplyList true -1")
 
         repeat
             Sleep(0.1)
@@ -1416,7 +1416,9 @@ function GcProvisioningDeliver()
                 local max_attempts = 10
 
                 repeat
-                    yield("/pcall SelectYesno true 0")
+                    if IsAddonReady("SelectYesno") then
+                        yield("/callback SelectYesno true 0")
+                    end
                     Sleep(0.05)
 
                     if IsAddonVisible("SelectYesno") then
@@ -1447,6 +1449,18 @@ function GcProvisioningDeliver()
     if HasPlugin("YesAlready") then
         RestoreYesAlready()
     end
+end
+
+-- Usage: GCDeliverooExpertDelivery()
+--
+-- Will go to the gc and activate deliveroo, automatically doing your expert deliveries
+function GCDeliverooExpertDelivery()
+    Teleporter("gc", "li")
+    yield("/deliveroo enable")
+    Sleep(3)
+    repeat
+        Sleep(0.1)
+    until not DeliverooIsTurnInRunning() and IsPlayerAvailable()
 end
 
 -- Usage: FindWorldByID(11) // FindWorldByID(GetHomeWorld())
@@ -1787,17 +1801,23 @@ function PartyInviteMenu(party_invite_menu_first, party_invite_menu_full)
         -- Probably needs the node scanner here to match the name, otherwise it will invite whoever was previously searched, will probably mess up for multiple matches too
 
         repeat
-            yield('/pcall SocialList true 1 0 "' .. party_invite_menu_full .. '"')
+            if IsAddonReady("SocialList") then
+                yield('/callback SocialList true 1 0 "' .. party_invite_menu_full .. '"')
+            end
             Sleep(0.5)
         until IsAddonVisible("ContextMenu")
 
         repeat
-            yield("/pcall ContextMenu true 0 3 0")
+            if IsAddonReady("ContextMenu") then
+                yield("/callback ContextMenu true 0 3 0")
+            end
             Sleep(0.1)
         until not IsAddonVisible("ContextMenu")
 
         repeat
-            yield("/pcall Social true -1")
+            if IsAddonReady("Social") then
+                yield("/callback Social true -1")
+            end
             Sleep(0.1)
         until not IsAddonVisible("Social")
 
@@ -1827,7 +1847,12 @@ function PartyDisband()
         yield("/partycmd disband")
 
         repeat
-            yield("/pcall SelectYesno true 0")
+            Sleep(0.1)
+        until IsAddonReady("SelectYesno")
+        repeat
+            if IsAddonReady("SelectYesno") then
+                yield("/callback SelectYesno true 0")
+            end
             Sleep(0.1)
         until not IsAddonVisible("SelectYesno")
     end
@@ -1881,7 +1906,9 @@ function PartyLeave()
         Sleep(0.1)
 
         repeat
-            yield("/pcall SelectYesno true 0")
+            if IsAddonReady("SelectYesno") then
+                yield("/callback SelectYesno true 0")
+            end
             Sleep(0.1)
         until not IsAddonVisible("SelectYesno")
 
@@ -1936,7 +1963,9 @@ function EquipRecommendedGear()
     until IsAddonVisible("Character")
 
     repeat
-        yield("/pcall Character true 12")
+        if IsAddonReady("Character") then
+            yield("/callback Character true 12")
+        end
         Sleep(0.1)
     until IsAddonVisible("RecommendEquip")
 
@@ -1946,7 +1975,9 @@ function EquipRecommendedGear()
     until not IsAddonVisible("Character")
 
     repeat
-        yield("/pcall RecommendEquip true 0")
+        if IsAddonReady("RecommendEquip") then
+            yield("/callback RecommendEquip true 0")
+        end
         Sleep(0.1)
     until not IsAddonVisible("RecommendEquip")
 end
@@ -2315,19 +2346,25 @@ function DutyFinderQueue(duty_finder_tab_number, duty_finder_number)
 
     -- Pick the duty tab
     repeat
-        yield("/pcall ContentsFinder true 1 " .. duty_finder_tab_number)
+        if IsAddonReady("ContentsFinder") then
+            yield("/callback ContentsFinder true 1 " .. duty_finder_tab_number)
+        end
         Sleep(0.1)
     until IsAddonVisible("JournalDetail")
 
     -- Clear the duty selection
     repeat
-        yield("/pcall ContentsFinder true 12 1")
+        if IsAddonReady("ContentsFinder") then
+            yield("/callback ContentsFinder true 12 1")
+        end
         Sleep(0.1)
     until IsAddonVisible("ContentsFinder")
 
     -- Pick the duty
     repeat
-        yield("/pcall ContentsFinder true 3 " .. duty_finder_number)
+        if IsAddonReady("ContentsFinder") then
+            yield("/callback ContentsFinder true 3 " .. duty_finder_number)
+        end
         Sleep(0.1)
     until IsAddonVisible("ContentsFinder")
 
@@ -2337,13 +2374,17 @@ function DutyFinderQueue(duty_finder_tab_number, duty_finder_number)
 
     -- Queue the duty
     repeat
-        yield("/pcall ContentsFinder true 12 0")
+        if IsAddonReady("ContentsFinder") then
+            yield("/callback ContentsFinder true 12 0")
+        end
         Sleep(0.1)
     until IsAddonVisible("ContentsFinderConfirm")
 
     -- Accept the duty
     repeat
-        yield("/pcall ContentsFinderConfirm true 8")
+        if IsAddonReady("ContentsFinderConfirm") then
+            yield("/callback ContentsFinderConfirm true 8")
+        end
         Sleep(0.1)
     until not IsAddonVisible("ContentsFinderConfirm")
 
@@ -2434,21 +2475,27 @@ function DutyFinderSettings(...)
 
     -- Open duty finder settings
     repeat
-        yield("/pcall ContentsFinder true 15")
+        if IsAddonReady("ContentsFinder") then
+            yield("/callback ContentsFinder true 15")
+        end
         Sleep(0.1)
     until IsAddonVisible("ContentsFinderSetting")
 
     -- Loop through each setting and apply it
     for _, setting_number in ipairs(duty_finder_settings) do
         repeat
-            yield("/pcall ContentsFinderSetting true 1 " .. setting_number .. " 1")
+            if IsAddonReady("ContentsFinderSetting") then
+                yield("/callback ContentsFinderSetting true 1 " .. setting_number .. " 1")
+            end
             Sleep(0.1)
         until IsAddonVisible("ContentsFinderSetting")
     end
 
     -- Close duty finder settings
     repeat
-        yield("/pcall ContentsFinderSetting true 0")
+        if IsAddonReady("ContentsFinderSetting") then
+            yield("/callback ContentsFinderSetting true 0")
+        end
         Sleep(0.1)
     until not IsAddonVisible("ContentsFinderSetting")
 end
@@ -2465,21 +2512,27 @@ function DutyFinderSettingsClear()
 
     -- Open duty finder settings
     repeat
-        yield("/pcall ContentsFinder true 15")
+        if IsAddonReady("ContentsFinder") then
+            yield("/callback ContentsFinder true 15")
+        end
         Sleep(0.1)
     until IsAddonVisible("ContentsFinderSetting")
 
     -- Iterate through all settings (0-8) and clear them
     for setting_number = 0, 8 do
         repeat
-            yield("/pcall ContentsFinderSetting true 1 " .. setting_number .. " 0")
+            if IsAddonReady("ContentsFinderSetting") then
+                yield("/callback ContentsFinderSetting true 1 " .. setting_number .. " 0")
+            end
             Sleep(0.1)
         until IsAddonVisible("ContentsFinderSetting")
     end
 
     -- Close duty finder settings
     repeat
-        yield("/pcall ContentsFinderSetting true 0")
+        if IsAddonReady("ContentsFinderSetting") then
+            yield("/callback ContentsFinderSetting true 0")
+        end
         Sleep(0.1)
     until not IsAddonVisible("ContentsFinderSetting")
 end
@@ -3153,7 +3206,9 @@ function ChangeSubmersibleParts(desired_parts)
             -- Amount of parts to try (Node capacity)
             for attempt = 1, 35 do
                 -- Open the parts menu for the current slot
-                yield("/pcall CompanyCraftSupply true " .. slot.menu_options)
+                if IsAddonReady("CompanyCraftSupply") then
+                    yield("/callback CompanyCraftSupply true " .. slot.menu_options)
+                end
 
                 -- Wait for the menu to appear
                 local menu_appeared = false
@@ -3172,7 +3227,9 @@ function ChangeSubmersibleParts(desired_parts)
                 end
 
                 -- Try changing the part
-                yield("/pcall ContextIconMenu true 0 " .. (attempt - 1))
+                if IsAddonReady("ContextIconMenu") then
+                    yield("/callback ContextIconMenu true 0 " .. (attempt - 1))
+                end
 
                 -- Wait for the menu to disappear
                 local menu_disappeared = false
@@ -3231,4 +3288,203 @@ function ChangeSubmersibleParts(desired_parts)
 
     LogInfo("[VAC] (ChangeSubmersibleParts) Failed to change submersible parts to: " .. desired_parts)
     return false
+end
+
+-- Usage: RegisterNewSubmersible()
+-- Will attempt to register any available submarines
+-- Requires Addon "SelectString" to be visible
+function RegisterNewSubmersible()
+    if not IsAddonReady("SelectString") and not GetNodeText("SelectString", 3):match("Select a submersible%.$") then
+        LogInfo("[VAC] (RegisterNewSubmersible) Not in the right SelectString menu")
+        return
+    end
+    for i = 1, 4 do
+        local node_text = GetNodeText("SelectString", 2, i, 3)
+
+        if node_text:match("Outfit and register a submersible%.") then
+            LogInfo("[VAC] (RegisterNewSubmersible) Submarine " .. i .. " possible to register, checking if we have the required parts")
+
+            local required_items = { -- List of all items needed for creating a submersible
+                { id = 21794, name = "Shark-class Pressure Hull"},
+                { id = 21795, name = "Shark-class Stern"},
+                { id = 21792, name = "Shark-class Bow"},
+                { id = 21793, name = "Shark-class Bridge"},
+                { id = 22317, name = "Dive Credit"}
+            }
+
+            -- Check how many dive credits we need for the submersible
+            local needed_dive_credits = 99 -- placeholder until it gets set below
+            if i == 1 then
+                needed_dive_credits = 1
+            elseif i == 2 then
+                needed_dive_credits = 3
+            elseif i == 3 then
+                needed_dive_credits = 5
+            elseif i == 4 then
+                needed_dive_credits = 7
+            end
+
+            -- Variable that will be set to false if we're missing any item
+            local enough_items = true
+
+            for _, item in ipairs(required_items) do
+                LogInfo("[VAC] (RegisterNewSubmersible) Checking if we have enough of " .. item.name)
+
+                if item.name == "Dive Credit" then -- special handling for dive credits
+                    local current_dive_credits = GetItemCount(item.id)
+                    LogInfo("[VAC] (RegisterNewSubmersible) Found " .. current_dive_credits .. " " .. item.name .. ". We need " .. needed_dive_credits)
+
+                    if current_dive_credits >= needed_dive_credits then
+                        LogInfo("[VAC] (RegisterNewSubmersible) We have enough Dive Credits")
+                    else
+                        LogInfo("[VAC] (RegisterNewSubmersible) Not enough Dive Credits")
+                        Echo("Missing " .. needed_dive_credits .. " Dive Credits")
+                        enough_items = false
+                    end
+
+                else
+                    local item_count = GetItemCount(item.id)
+                    LogInfo("[VAC] (RegisterNewSubmersible) Found " .. item_count .. " " .. item.name)
+
+                    if item_count >= 1 then
+                        LogInfo("[VAC] (RegisterNewSubmersible) Found " .. item.name)
+                    else
+                        LogInfo("[VAC] (RegisterNewSubmersible) Missing " .. item.name)
+                        enough_items = false
+                    end
+                end
+                Sleep(0.001)
+            end
+            if enough_items then
+                LogInfo("[VAC] (RegisterNewSubmersible) Can register submersible number " .. i)
+                LogInfo("[VAC] (RegisterNewSubmersible) Attempting to register submersible number " .. i)
+
+                yield("/callback SelectString true " .. (i - 1)) -- Open the "CompanyCraftSupply" addon so we can register the submarine
+
+                repeat
+                    Sleep(0.1)
+                until IsAddonReady("CompanyCraftSupply") -- Wait for the "CompanyCraftSupply" addon to be ready
+
+                ChangeSubmersibleParts("SSSS") -- Put on the parts
+
+                yield("/callback CompanyCraftSupply true 0") -- Click Register
+
+                repeat
+                    Sleep(0.1)
+                until IsAddonReady("SelectYesno") -- Wait for the confirm menu to load
+
+                yield("/callback SelectYesno true 0") -- Confirm submersible registration
+
+                repeat
+                    Sleep(0.1)
+                until IsAddonReady("SelectString") -- Wait for the submersible selection menu to load properly
+
+                for x = 1, 10 do -- Find Quit so we can go back to the submersible selection menu
+                    local quit_text = GetNodeText("SelectString", 2, x, 3)
+                    if quit_text == "Quit" then
+                        yield("/callback SelectString true " .. (x - 1))
+                        Sleep(0.5)
+                        repeat
+                            Sleep(0.1)
+                        until IsAddonReady("SelectString")
+                        break
+                    end
+                    Sleep(0.001)
+                end
+            else
+                Echo("Missing items for submersible " .. i .. ". Skipping.")
+            end
+        else
+            LogInfo("[VAC] (RegisterNewSubmersible) Submarine " .. i .. " unavailable")
+        end
+        Sleep(0.001)
+    end
+end
+
+-- Usage: BuyCeruleum(999)
+-- Will buy X amount of ceruleum from the Mammet Voyager inside the workshop
+function BuyCeruleum(amount)
+    if not amount then -- Check if anything was passed
+        LogInfo("[VAC] (BuyCeruleum) Ceruleum amount missing")
+        return
+    end
+
+    if not type(amount) == "number" then -- Chjeck if the input is a number
+        LogInfo("[VAC] (BuyCeruleum) BuyCeruleum input not a number")
+        return
+    end
+
+    if not IsPlayerAvailable() then
+        LogInfo("[VAC] (BuyCeruleum) Player isn't available, cancelling ceruleum buy attempt")
+        Echo("Player isn't available, cancelling ceruleum buy attempt")
+        return
+    end
+
+    LogInfo("[VAC] (BuyCeruleum) Targeting the mammet")
+    Target("Mammet Voyager #004A") -- Target the mammet we're buying ceruleum from
+
+    yield("/lockon")
+    Sleep(0.2)
+
+    LogInfo("[VAC] (BuyCeruleum) Moving towards the mammet")
+    yield("/automove") -- Move to the mammet, i don't want to rely on Movement() here
+    Sleep(0.3)
+
+    repeat
+        Sleep(0.1)
+    until not IsMoving() -- Wait until we're no longer moving
+    LogInfo("[VAC] (BuyCeruleum) Attempting to talk to the mammet")
+    Interact() -- Talk to the mammet
+
+    repeat
+        Sleep(0.1)
+    until IsAddonReady("SelectIconString") -- Wait for the talk window to open
+    yield("/callback SelectIconString true 0") -- Open the company credit exchange
+
+    repeat
+        Sleep(0.1)
+    until IsAddonReady("FreeCompanyCreditShop") -- Waits for the company credit exchange to open
+
+    local ceruleum_price = 100
+    local current_fc_credits_str = GetNodeText("FreeCompanyCreditShop", 40)
+    local current_fc_credits = tonumber(current_fc_credits_str:gsub(",", ""):match("%d+")) -- Remove commas from the string and convert it to a number
+
+    if not current_fc_credits then
+        LogInfo("[VAC] (BuyCeruleum) Failed to find current fc credit amount")
+        yield("/callback FreeCompanyCreditShop true -1")
+        return
+    end
+
+    local max_affordable_amount = math.floor(current_fc_credits / ceruleum_price)
+
+    amount = math.min(amount, max_affordable_amount)
+
+    if amount <= 0 then
+        LogInfo("[VAC] (BuyCeruleum) Not enough credits to buy ceruleum")
+        yield("/callback FreeCompanyCreditShop true -1")
+        return
+    end
+
+    while amount > 0 do
+        -- Limit the amount per buy to 999
+        local buy_amount = math.min(amount, 999)
+
+        LogInfo("[VAC] (BuyCeruleum) Buying " .. buy_amount .. " ceruleum")
+        yield("/callback FreeCompanyCreditShop true 0 0 " .. buy_amount) -- Buy X amount of ceruleum
+        repeat
+            Sleep(0.01)
+        until IsAddonReady("SelectYesno") -- Wait for confirm window
+
+        yield("/callback SelectYesno true 0") -- Confirm
+        repeat
+            Sleep(0.01)
+        until not IsAddonVisible("SelectYesno")
+
+        amount = amount - buy_amount
+    end
+    LogInfo("[VAC] (BuyCeruleum) Finished buying ceruleum")
+    yield("/callback FreeCompanyCreditShop true -1") -- Exit shop menu
+    repeat
+        Sleep(0.1)
+    until IsPlayerAvailable() and not IsAddonVisible("FreeCompanyCreditShop")
 end
