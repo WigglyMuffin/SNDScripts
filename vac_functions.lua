@@ -133,9 +133,10 @@ function AttuneAetheryte()
     if (GetCharacterCondition(31) or GetCharacterCondition(32)) and IsAddonVisible("SelectString") then
         repeat
             Sleep(0.1)
-        until IsAddonReady("SelectString")
+        until IsAddonVisible("SelectString")
 
-        yield("/callback SelectString true 3")
+        Sleep(0.5)
+        yield("/pcall SelectString true 3")
 
         -- Wait until the menu is no longer visible
         repeat
@@ -215,13 +216,13 @@ function QuestNPC(DialogueType, DialogueConfirm, DialogueOption)
     if DialogueConfirm then
         repeat
             Sleep(0.1)
-        until IsAddonReady(DialogueType)
+        until IsAddonVisible(DialogueType)
         if DialogueOption == nil then
             repeat
                 Sleep(0.1)
-            until IsAddonReady(DialogueType)
+            until IsAddonVisible(DialogueType)
 
-            yield("/callback " .. DialogueType .. " true 0")
+            yield("/pcall " .. DialogueType .. " true 0")
 
             repeat
                 Sleep(0.1)
@@ -229,9 +230,9 @@ function QuestNPC(DialogueType, DialogueConfirm, DialogueOption)
         else
             repeat
                 Sleep(0.1)
-            until IsAddonReady(DialogueType)
+            until IsAddonVisible(DialogueType)
 
-            yield("/callback " .. DialogueType .. " true " .. DialogueOption)
+            yield("/pcall " .. DialogueType .. " true " .. DialogueOption)
 
             repeat
                 Sleep(0.1)
@@ -257,10 +258,10 @@ function QuestNPCSingle(dialogue_type, dialogue_confirm, dialogue_option)
         until IsAddonReady(dialogue_type)
         Sleep(0.5)
         if dialogue_option == nil then
-            yield("/callback " .. dialogue_type .. " true 0")
+            yield("/pcall " .. dialogue_type .. " true 0")
             Sleep(0.5)
         else
-            yield("/callback " .. dialogue_type .. " true " .. dialogue_option)
+            yield("/pcall " .. dialogue_type .. " true " .. dialogue_option)
             Sleep(0.5)
         end
     end
@@ -563,15 +564,15 @@ function OpenHuntLog(class, rank, show)
     local gc_id = GetPlayerGC()
 
     if class == 9 then
-        yield("/callback MonsterNote false 3 9 " .. tostring(gc_id))
+        yield("/pcall MonsterNote false 3 9 " .. tostring(gc_id))
     else
-        yield("/callback MonsterNote false 0 " .. tostring(class))
+        yield("/pcall MonsterNote false 0 " .. tostring(class))
     end
 
     Sleep(0.3)
-    yield("/callback MonsterNote false 1 " .. rank)
+    yield("/pcall MonsterNote false 1 " .. rank)
     Sleep(0.3)
-    yield("/callback MonsterNote false 2 " .. show)
+    yield("/pcall MonsterNote false 2 " .. show)
 end
 
 -- Usage: CloseHuntLog()
@@ -842,9 +843,9 @@ function LogOut()
 
     repeat
         Sleep(0.1)
-    until IsAddonReady("SelectYesno")
+    until IsAddonVisible("SelectYesno")
 
-    yield("/callback SelectYesno true 4")
+    yield("/pcall SelectYesno true 4")
 
     repeat
         Sleep(0.1)
@@ -1019,7 +1020,7 @@ function OpenTimers()
     repeat
         local current_time = os.time()
         if current_time - last_trigger_time >= retry_interval then -- Activate once every x seconds
-            yield("/callback ContentsInfo True 12 1")
+            yield("/pcall ContentsInfo True 12 1")
             last_trigger_time = current_time                       -- Store the last trigger time
         end
         Sleep(0.1)
@@ -1063,15 +1064,15 @@ function BuyFromStore(number_in_list, amount)
     end
 
     if IsAddonReady("Shop") and number_in_list and amount then
-        yield("/callback Shop True 0 " .. number_in_list .. " " .. amount)
+        yield("/pcall Shop True 0 " .. number_in_list .. " " .. amount)
         repeat
             Sleep(0.1)
         until IsAddonReady("SelectYesno")
 
-        yield("/callback SelectYesno true 0")
+        yield("/pcall SelectYesno true 0")
         Sleep(0.5)
-        if IsAddonReady("SelectYesno") then
-            yield("/callback SelectYesno true 0")
+        if IsAddonVisible("SelectYesno") then
+            yield("/pcall SelectYesno true 0")
         end
 
         repeat
@@ -1103,16 +1104,16 @@ function BuyFromStoreSingle(number_in_list)
     end
 
     if IsAddonReady("Shop") and number_in_list then
-        yield("/callback Shop True 0 " .. number_in_list .. " 1")
+        yield("/pcall Shop True 0 " .. number_in_list .. " 1")
         repeat
             Sleep(0.1)
         until IsAddonReady("SelectYesno")
         
-        yield("/callback SelectYesno true 0")
+        yield("/pcall SelectYesno true 0")
         Sleep(0.5)
         
-        if IsAddonReady("SelectYesno") then
-            yield("/callback SelectYesno true 0")
+        if IsAddonVisible("SelectYesno") then
+            yield("/pcall SelectYesno true 0")
         end
         repeat
             Sleep(0.1)
@@ -1125,13 +1126,13 @@ end
 -- Usage: CloseStore()
 -- Function used to close store windows
 function CloseStore()
-    if IsAddonReady("Shop") then
-        yield("/callback Shop True -1")
+    if IsAddonVisible("Shop") then
+        yield("/pcall Shop True -1")
     end
 
     repeat
         Sleep(0.1)
-    until not IsAddonReady("Shop")
+    until not IsAddonVisible("Shop")
 
     repeat
         Sleep(0.1)
@@ -1183,13 +1184,13 @@ function DoGcRankUp()
             Sleep(0.1)
         until IsAddonReady("SelectString")
 
-        yield("/callback SelectString true 1")
+        yield("/pcall SelectString true 1")
 
         repeat
             Sleep(0.1)
         until IsAddonReady("GrandCompanyRankUp")
 
-        yield("/callback GrandCompanyRankUp true 0")
+        yield("/pcall GrandCompanyRankUp true 0")
     end
 
     OpenAndAttemptRankup()
@@ -1294,7 +1295,7 @@ function OpenGcSupplyWindow(tab)
         if (tab <= 0 or tab >= 3) then
             Echo("Invalid tab number")
         else
-            yield("/callback GrandCompanySupplyList true 0 " .. tab)
+            yield("/pcall GrandCompanySupplyList true 0 " .. tab)
         end
     elseif not IsAddonVisible("GrandCompanySupplyList") then
         -- Mapping for GetPlayerGC()
@@ -1322,13 +1323,13 @@ function OpenGcSupplyWindow(tab)
             Sleep(0.1)
         until IsAddonReady("SelectString")
 
-        yield("/callback SelectString true 0")
+        yield("/pcall SelectString true 0")
 
         repeat
             Sleep(0.1)
         until IsAddonReady("GrandCompanySupplyList")
 
-        yield("/callback GrandCompanySupplyList true 0 " .. tab)
+        yield("/pcall GrandCompanySupplyList true 0 " .. tab)
     end
 end
 
@@ -1345,10 +1346,10 @@ function CloseGcSupplyWindow()
             Sleep(0.1)
         until IsAddonReady("SelectString")
 
-        yield("/callback SelectString true -1")
+        yield("/pcall SelectString true -1")
     end
     if IsAddonReady("SelectString") then
-        yield("/callback SelectString true -1")
+        yield("/pcall SelectString true -1")
     end
     repeat
         attempt_counter = attempt_counter + 1
@@ -1386,7 +1387,7 @@ function GcProvisioningDeliver()
         end
 
         local row_to_call = i - 2
-        yield("/callback GrandCompanySupplyList true 1 " .. row_to_call)
+        yield("/pcall GrandCompanySupplyList true 1 " .. row_to_call)
         local err_counter_request = 0
         local err_counter_supply = 0
 
@@ -1399,7 +1400,7 @@ function GcProvisioningDeliver()
             LogInfo("[VAC] Something might have gone wrong")
             err_counter_request = 0
         else
-            yield("/callback GrandCompanySupplyReward true 0")
+            yield("/pcall GrandCompanySupplyReward true 0")
         end
 
         Sleep(0.2)
@@ -1795,7 +1796,7 @@ function PartyInviteMenu(party_invite_menu_first, party_invite_menu_full)
         repeat
             yield('/search first "' .. party_invite_menu_first .. '" en jp de fr')
             Sleep(0.5)
-        until IsAddonReady("SocialList")
+        until IsAddonVisible("SocialList")
 
         -- Probably needs the node scanner here to match the name, otherwise it will invite whoever was previously searched, will probably mess up for multiple matches too
 
@@ -1804,21 +1805,21 @@ function PartyInviteMenu(party_invite_menu_first, party_invite_menu_full)
                 yield('/callback SocialList true 1 0 "' .. party_invite_menu_full .. '"')
             end
             Sleep(0.5)
-        until IsAddonReady("ContextMenu")
+        until IsAddonVisible("ContextMenu")
 
         repeat
             if IsAddonReady("ContextMenu") then
                 yield("/callback ContextMenu true 0 3 0")
             end
             Sleep(0.1)
-        until not IsAddonReady("ContextMenu")
+        until not IsAddonVisible("ContextMenu")
 
         repeat
             if IsAddonReady("Social") then
                 yield("/callback Social true -1")
             end
             Sleep(0.1)
-        until not IsAddonReady("Social")
+        until not IsAddonVisible("Social")
 
         -- Wait for the target player to accept the invite or the timeout to expire
         while not IsInParty() do
@@ -1844,6 +1845,7 @@ function PartyDisband()
         until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
 
         yield("/partycmd disband")
+
         repeat
             Sleep(0.1)
         until IsAddonReady("SelectYesno")
@@ -1869,12 +1871,12 @@ function PartyAccept()
         -- Wait until the "SelectYesno" addon is visible
         repeat
             Sleep(0.1)
-        until IsAddonReady("SelectYesno")
+        until IsAddonVisible("SelectYesno")
 
         Sleep(0.1)
 
         -- Accept the party invite
-        yield("/callback SelectYesno true 0")
+        yield("/pcall SelectYesno true 0")
 
         -- Wait until the player is in a party
         repeat
@@ -1899,7 +1901,7 @@ function PartyLeave()
 
         repeat
             Sleep(0.1)
-        until IsAddonReady("SelectYesno")
+        until IsAddonVisible("SelectYesno")
 
         Sleep(0.1)
 
@@ -1928,10 +1930,9 @@ function EstateTeleport(estate_char_name, estate_type)
     yield("/estatelist " .. estate_char_name)
 
     repeat
+        yield("/pcall TeleportHousingFriend true " .. estate_type)
         Sleep(0.1)
-    until IsAddonReady("TeleportHousingFriend")
-
-    yield("/callback TeleportHousingFriend true " .. estate_type)
+    until not IsAddonVisible("TeleportHousingFriend")
 
     ZoneTransitions()
 end
@@ -1959,19 +1960,19 @@ function EquipRecommendedGear()
     repeat
         yield("/character")
         Sleep(0.1)
-    until IsAddonReady("Character")
+    until IsAddonVisible("Character")
 
     repeat
         if IsAddonReady("Character") then
             yield("/callback Character true 12")
         end
         Sleep(0.1)
-    until IsAddonReady("RecommendEquip")
+    until IsAddonVisible("RecommendEquip")
 
     repeat
         yield("/character")
         Sleep(0.1)
-    until not IsAddonReady("Character")
+    until not IsAddonVisible("Character")
 
     repeat
         if IsAddonReady("RecommendEquip") then
@@ -2341,7 +2342,7 @@ function DutyFinderQueue(duty_finder_tab_number, duty_finder_number)
     repeat
         yield("/dutyfinder")
         Sleep(0.1)
-    until IsAddonReady("ContentsFinder")
+    until IsAddonVisible("ContentsFinder")
 
     -- Pick the duty tab
     repeat
@@ -2349,7 +2350,7 @@ function DutyFinderQueue(duty_finder_tab_number, duty_finder_number)
             yield("/callback ContentsFinder true 1 " .. duty_finder_tab_number)
         end
         Sleep(0.1)
-    until IsAddonReady("JournalDetail")
+    until IsAddonVisible("JournalDetail")
 
     -- Clear the duty selection
     repeat
@@ -2357,7 +2358,7 @@ function DutyFinderQueue(duty_finder_tab_number, duty_finder_number)
             yield("/callback ContentsFinder true 12 1")
         end
         Sleep(0.1)
-    until IsAddonReady("ContentsFinder")
+    until IsAddonVisible("ContentsFinder")
 
     -- Pick the duty
     repeat
@@ -2365,7 +2366,7 @@ function DutyFinderQueue(duty_finder_tab_number, duty_finder_number)
             yield("/callback ContentsFinder true 3 " .. duty_finder_number)
         end
         Sleep(0.1)
-    until IsAddonReady("ContentsFinder")
+    until IsAddonVisible("ContentsFinder")
 
     -- Take note of current ZoneID to know when duty is over later
     Sleep(0.1)
@@ -2377,7 +2378,7 @@ function DutyFinderQueue(duty_finder_tab_number, duty_finder_number)
             yield("/callback ContentsFinder true 12 0")
         end
         Sleep(0.1)
-    until IsAddonReady("ContentsFinderConfirm")
+    until IsAddonVisible("ContentsFinderConfirm")
 
     -- Accept the duty
     repeat
@@ -2469,8 +2470,8 @@ function DutyFinderSettings(...)
     -- Open duty finder
     repeat
         yield("/dutyfinder")
-        Sleep(0.5)
-    until IsAddonReady("ContentsFinder")
+        Sleep(0.1)
+    until IsAddonVisible("ContentsFinder")
 
     -- Open duty finder settings
     repeat
@@ -2478,7 +2479,7 @@ function DutyFinderSettings(...)
             yield("/callback ContentsFinder true 15")
         end
         Sleep(0.1)
-    until IsAddonReady("ContentsFinderSetting")
+    until IsAddonVisible("ContentsFinderSetting")
 
     -- Loop through each setting and apply it
     for _, setting_number in ipairs(duty_finder_settings) do
@@ -2487,7 +2488,7 @@ function DutyFinderSettings(...)
                 yield("/callback ContentsFinderSetting true 1 " .. setting_number .. " 1")
             end
             Sleep(0.1)
-        until IsAddonReady("ContentsFinderSetting")
+        until IsAddonVisible("ContentsFinderSetting")
     end
 
     -- Close duty finder settings
@@ -2507,7 +2508,7 @@ function DutyFinderSettingsClear()
     repeat
         yield("/dutyfinder")
         Sleep(0.1)
-    until IsAddonReady("ContentsFinder")
+    until IsAddonVisible("ContentsFinder")
 
     -- Open duty finder settings
     repeat
@@ -2515,7 +2516,7 @@ function DutyFinderSettingsClear()
             yield("/callback ContentsFinder true 15")
         end
         Sleep(0.1)
-    until IsAddonReady("ContentsFinderSetting")
+    until IsAddonVisible("ContentsFinderSetting")
 
     -- Iterate through all settings (0-8) and clear them
     for setting_number = 0, 8 do
@@ -2524,7 +2525,7 @@ function DutyFinderSettingsClear()
                 yield("/callback ContentsFinderSetting true 1 " .. setting_number .. " 0")
             end
             Sleep(0.1)
-        until IsAddonReady("ContentsFinderSetting")
+        until IsAddonVisible("ContentsFinderSetting")
     end
 
     -- Close duty finder settings
@@ -2718,18 +2719,31 @@ end
 
 -- Usage: FindItemID("Copper")
 --
--- Searches the item list for an item and returns it's id, not case sensitive but you need the full item name
+-- Searches the item list for an item and returns its id, not case sensitive but you need the full item name
 function FindItemID(item_to_find)
-    local searchTerm = string.lower(item_to_find)
+    local search_term = string.lower(item_to_find)
 
     for key, item in pairs(Item_List) do
-        local itemName = string.lower(item['Name'])
+        local item_name = string.lower(item['Name'])
 
-        if itemName == searchTerm then
+        if item_name == search_term then
             return key
         end
     end
     return nil
+end
+
+-- Usage: FindItemName(1)
+-- Searches the item list for an item and returns its name, inverse of FindItemID()
+function FindItemName(item_id)
+    -- Check if the item ID exists in the Item_List
+    if Item_List[item_id] then
+        -- Return the item name if the item ID is valid
+        return Item_List[item_id]['Name']
+    else
+        -- Return nil if the item ID does not exist
+        return nil
+    end
 end
 
 -- Usage: IsAetheryteAttuned("Limsa Lominsa")
@@ -2748,7 +2762,7 @@ function IsAetheryteAttuned(aetheryte_attuned_name)
 
     -- Find the Aetheryte ID by name
     local aetheryte_id = FindAetheryteIDByName(aetheryte_attuned_name)
-
+    
     -- If Aetheryte ID is not found
     if not aetheryte_id then
         LogInfo("[VAC] IsAetheryteAttuned: Aetheryte '" .. aetheryte_attuned_name .. "' not found.")
@@ -2798,9 +2812,9 @@ function ReturnTeleport()
     
     repeat
         Sleep(0.1)
-    until IsAddonReady("SelectYesno")
+    until IsAddonVisible("SelectYesno")
 
-    yield("/callback SelectYesno true 0")
+    yield("/pcall SelectYesno true 0")
 
     repeat
         Sleep(0.1)
@@ -2853,10 +2867,10 @@ function AttuneAethernetShard()
     if (GetCharacterCondition(31) or GetCharacterCondition(32)) and IsAddonVisible("TelepotTown") then
         repeat
             Sleep(0.1)
-        until IsAddonReady("TelepotTown")
+        until IsAddonVisible("TelepotTown")
 
         Sleep(0.5)
-        yield("/callback TelepotTown true 1")
+        yield("/pcall TelepotTown true 1")
 
         -- Wait until the menu is no longer visible
         repeat
@@ -2898,9 +2912,9 @@ function ExitGame()
 
     repeat
         Sleep(0.1)
-    until IsAddonReady("SelectYesno")
+    until IsAddonVisible("SelectYesno")
 
-    yield("/callback SelectYesno true 0")
+    yield("/pcall SelectYesno true 0")
 
     repeat
         Sleep(0.1)
@@ -3132,11 +3146,11 @@ function SelectSubmersible(sub_number)
     -- Adjust sub_number to be zero-indexed since the menu starts at 0
     sub_number = sub_number - 1
 
-    if IsAddonReady("SelectString") and GetNodeText("SelectString", 3):match("Select a submersible%.$") then
-        yield("/callback SelectString true " .. sub_number)
+    if IsAddonVisible("SelectString") and GetNodeText("SelectString", 3):match("Select a submersible%.$") then
+        yield("/pcall SelectString true " .. sub_number)
 
         -- Wait for the SelectString menu to show "Quit"
-        while IsAddonReady("SelectString") do
+        while IsAddonVisible("SelectString") do
             local node_text_5 = GetNodeText("SelectString", 2, 5, 3)
             local node_text_7 = GetNodeText("SelectString", 2, 7, 3)
 
@@ -3156,8 +3170,8 @@ end
 -- Case insensitive
 -- Requires Addon "CompanyCraftSupply" to be visible
 function ChangeSubmersibleParts(desired_parts)
-    if not IsAddonReady("CompanyCraftSupply") then
-        LogInfo("[VAC] (ChangeSubmersibleParts) CompanyCraftSupply addon is not ready.")
+    if not IsAddonVisible("CompanyCraftSupply") then
+        LogInfo("[VAC] (ChangeSubmersibleParts) CompanyCraftSupply addon is not visible.")
         return false
     end
 
@@ -3200,7 +3214,7 @@ function ChangeSubmersibleParts(desired_parts)
                 local menu_appeared = false
 
                 for _ = 1, 10 do
-                    if IsAddonReady("ContextIconMenu") then
+                    if IsAddonVisible("ContextIconMenu") then
                         menu_appeared = true
                         break
                     end
