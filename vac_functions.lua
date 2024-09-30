@@ -1453,9 +1453,8 @@ end
 
 -- Usage: GCDeliverooExpertDelivery()
 --
--- Will go to the gc and activate deliveroo, automatically doing your expert deliveries
+-- Will activate deliveroo and wait for it to finish
 function GCDeliverooExpertDelivery()
-    Teleporter("gc", "li")
     yield("/deliveroo enable")
     Sleep(3)
     repeat
