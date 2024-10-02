@@ -1639,44 +1639,165 @@ end
 -- Finds specified object and paths to it
 -- Optionally can include a range value to stop once distance between character and target has been reached
 function PathToObject(path_object_name, range)
-    -- Check whether path_object_name isn't nil
+    -- Check whether path_object_name isn't nil or empty
     if not path_object_name or path_object_name == "" then
-        LogInfo("[VAC] PathToObject name is empty.")
+        LogInfo("[VAC] (PathToObject) PathToObject name is empty.")
         Echo("PathToObject name is empty.")
-        return
+        return false
     end
 
     path_object_name = string.lower(path_object_name)
-
     if not DoesObjectExist(path_object_name) then
-        LogInfo("[VAC] Object '" .. path_object_name .. "' does not exist.")
+        LogInfo("[VAC] (PathToObject) Object '" .. path_object_name .. "' does not exist.")
         Echo("Object '" .. path_object_name .. "' does not exist.")
-        return
+        return false
     end
 
-    -- Get the object pos
-    local x_pos = GetObjectRawXPos(path_object_name)
-    local y_pos = GetObjectRawYPos(path_object_name)
-    local z_pos = GetObjectRawZPos(path_object_name)
+    -- Get the object position
+    local objectX = GetObjectRawXPos(path_object_name)
+    local objectY = GetObjectRawYPos(path_object_name)
+    local objectZ = GetObjectRawZPos(path_object_name)
 
-    -- Pass x y z pos to Movement, range optional
-    if range then
-        Movement(x_pos, y_pos, z_pos, range)
+    -- Get player's current position
+    local playerX = GetPlayerRawXPos()
+    local playerY = GetPlayerRawYPos()
+    local playerZ = GetPlayerRawZPos()
+
+    LogInfo(string.format("[VAC] (PathToObject) Player position: X=%.2f, Y=%.2f, Z=%.2f", playerX, playerY, playerZ))
+    LogInfo(string.format("[VAC] (PathToObject) Object position: X=%.2f, Y=%.2f, Z=%.2f", objectX, objectY, objectZ))
+
+    -- Try different extents for finding a valid navmesh point
+    local extents = {1, 2, 5, 10, 20}
+    local nearestX, nearestY, nearestZ
+
+    for _, extent in ipairs(extents) do
+        nearestX = QueryMeshNearestPointX(objectX, objectY, objectZ, extent, extent)
+        nearestY = QueryMeshNearestPointY(objectX, objectY, objectZ, extent, extent)
+        nearestZ = QueryMeshNearestPointZ(objectX, objectY, objectZ, extent, extent)
+        
+        if nearestX and nearestY and nearestZ then
+            LogInfo(string.format("[VAC] (PathToObject) Found valid navmesh point with extent %.2f", extent))
+            LogInfo(string.format("[VAC] (PathToObject) Nearest point: X=%.2f, Y=%.2f, Z=%.2f", nearestX, nearestY, nearestZ))
+            break
+        end
+    end
+
+    if not (nearestX and nearestY and nearestZ) then
+        LogInfo("[VAC] (PathToObject) Couldn't find a valid navmesh point near the object with any extent.")
+        Echo("Unable to find a path to the object.")
+        return false
+    end
+
+    -- Find a valid floor point for the player to stand on
+    local floorX = QueryMeshPointOnFloorX(nearestX, nearestY, nearestZ, true, 2)
+    local floorY = QueryMeshPointOnFloorY(nearestX, nearestY, nearestZ, true, 2)
+    local floorZ = QueryMeshPointOnFloorZ(nearestX, nearestY, nearestZ, true, 2)
+    
+    if not (floorX and floorY and floorZ) then
+        LogInfo("[VAC] (PathToObject) Couldn't find a valid floor point near the object.")
+        Echo("Unable to find a safe position near the object.")
+        return false
+    end
+
+    LogInfo(string.format("[VAC] (PathToObject) Valid floor point: X=%.2f, Y=%.2f, Z=%.2f", floorX, floorY, floorZ))
+    
+    -- Calculate distance to check if we're already close enough
+    local distance = math.sqrt((playerX - floorX) ^ 2 + (playerY - floorY) ^ 2 + (playerZ - floorZ) ^ 2)
+    LogInfo(string.format("[VAC] (PathToObject) Distance to floor point: %.2f", distance))
+    
+    if distance > (range or 3) then  -- Use specified range or default to 3
+        LogInfo("[VAC] (PathToObject) Moving to floor point.")
+        Movement(floorX, floorY, floorZ, range or 3.5)
+        
+        -- Wait until the pathing is complete
+        repeat
+            Sleep(0.1)
+        until not PathIsRunning()
+        
+        return true
     else
-        Movement(x_pos, y_pos, z_pos)
+        LogInfo("[VAC] (PathToObject) Already close to the object.")
+        return true
     end
-
-    -- Wait until the pathing is complete
-    repeat
-        Sleep(0.1)
-    until not PathIsRunning()
 end
 
+-- Usage: PathToEstateEntrance()
 -- Finds where your estate entrance is and paths to it
--- I think this will break though since there will be multiple entrances around a housing area
--- So maybe needs nearest logic
+-- Assumes you are outside your plot/recently used estate teleport
 function PathToEstateEntrance()
-    Movement(GetObjectRawXPos("Entrance"), GetObjectRawYPos("Entrance"), GetObjectRawZPos("Entrance"), 3.5)
+    local entranceX = GetObjectRawXPos("Entrance")
+    local entranceY = GetObjectRawYPos("Entrance")
+    local entranceZ = GetObjectRawZPos("Entrance")
+    
+    -- Check if we got valid entrance coordinates
+    if not entranceX or not entranceY or not entranceZ then
+        LogInfo("[VAC] (PathToEstateEntrance) Failed to get valid entrance coordinates.")
+        LogInfo(string.format("[VAC] (PathToEstateEntrance) Entrance coordinates: X=%s, Y=%s, Z=%s", 
+            tostring(entranceX), tostring(entranceY), tostring(entranceZ)))
+        return false
+    end
+
+    -- Get player's current position
+    local playerX = GetPlayerRawXPos()
+    local playerY = GetPlayerRawYPos()
+    local playerZ = GetPlayerRawZPos()
+    
+    LogInfo(string.format("[VAC] (PathToEstateEntrance) Player position: X=%.2f, Y=%.2f, Z=%.2f", playerX, playerY, playerZ))
+    LogInfo(string.format("[VAC] (PathToEstateEntrance) Entrance position: X=%.2f, Y=%.2f, Z=%.2f", entranceX, entranceY, entranceZ))
+
+    -- Try different extents for finding a valid navmesh point
+    local extents = {1, 2, 5, 10, 20}
+    local nearestX, nearestY, nearestZ
+
+    for _, extent in ipairs(extents) do
+        nearestX = QueryMeshNearestPointX(entranceX, entranceY, entranceZ, extent, extent)
+        nearestY = QueryMeshNearestPointY(entranceX, entranceY, entranceZ, extent, extent)
+        nearestZ = QueryMeshNearestPointZ(entranceX, entranceY, entranceZ, extent, extent)
+        
+        if nearestX and nearestY and nearestZ then
+            LogInfo(string.format("[VAC] (PathToEstateEntrance) Found valid navmesh point with extent %.2f", extent))
+            LogInfo(string.format("[VAC] (PathToEstateEntrance) Nearest point: X=%.2f, Y=%.2f, Z=%.2f", nearestX, nearestY, nearestZ))
+            break
+        end
+    end
+
+    if not (nearestX and nearestY and nearestZ) then
+        LogInfo("[VAC] (PathToEstateEntrance) Couldn't find a valid navmesh point near the entrance with any extent.")
+        return false
+    end
+
+    -- Find a valid floor point for the player to path to
+    local floorX = QueryMeshPointOnFloorX(nearestX, nearestY, nearestZ, true, 2)
+    local floorY = QueryMeshPointOnFloorY(nearestX, nearestY, nearestZ, true, 2)
+    local floorZ = QueryMeshPointOnFloorZ(nearestX, nearestY, nearestZ, true, 2)
+    
+    if floorX and floorY and floorZ then
+        LogInfo(string.format("[VAC] (PathToEstateEntrance) Valid floor point: X=%.2f, Y=%.2f, Z=%.2f", floorX, floorY, floorZ))
+        
+        -- Calculate distance to check if we're already close enough
+        local distance = math.sqrt((playerX - floorX) ^ 2 + (playerY - floorY) ^ 2 + (playerZ - floorZ) ^ 2)
+        LogInfo(string.format("[VAC] (PathToEstateEntrance) Distance to floor point: %.2f", distance))
+        
+        if distance > 3 then  -- Only move if we're more than 3 units away
+            LogInfo("[VAC] (PathToEstateEntrance) Moving to floor point.")
+            Movement(floorX, floorY, floorZ, 3.5)
+            
+    
+            -- Wait until the pathing is complete
+            repeat
+                Sleep(0.1)
+            until not PathIsRunning()
+            
+            LogInfo("[VAC] (PathToEstateEntrance) Movement to estate entrance complete.")
+            return true
+        else
+            LogInfo("[VAC] (PathToEstateEntrance) Already close to the estate entrance.")
+            return true
+        end
+    else
+        LogInfo("[VAC] (PathToEstateEntrance) Couldn't find a valid floor point near the entrance.")
+        return false
+    end
 end
 
 -- Function to navigate to the summoning bell in limsa lominsa lower decks
@@ -1685,18 +1806,63 @@ end
 -- Will move the character to the summoning bell if already in limsa lominsa lower decks,
 -- Otherwise teleports to limsa lominsa and then moves to the summoning bell
 function PathToLimsaBell()
-    -- Check if the current zone is limsa lominsa lower decks
-    if ZoneCheck("Limsa Lominsa Lower Decks") then
-        -- Move directly to the summoning bell using its coordinates
-        Movement(GetObjectRawXPos("Summoning Bell"), GetObjectRawYPos("Summoning Bell"),
-            GetObjectRawZPos("Summoning Bell"))
-    else
-        -- Teleport to limsa lominsa if not already in lower decks
+    if not ZoneCheck("Limsa Lominsa Lower Decks") then
+        LogInfo("[VAC] (PathToLimsaBell) Not in Limsa Lominsa Lower Decks.")
         Teleporter("Limsa Lominsa", "tp")
-        -- After teleporting, move to the summoning bell using its coordinates
-        Movement(GetObjectRawXPos("Summoning Bell"), GetObjectRawYPos("Summoning Bell"),
-            GetObjectRawZPos("Summoning Bell"))
     end
+
+    local bellX = GetObjectRawXPos("Summoning Bell")
+    local bellY = GetObjectRawYPos("Summoning Bell")
+    local bellZ = GetObjectRawZPos("Summoning Bell")
+
+    if not bellX or not bellY or not bellZ then
+        LogInfo("[VAC] (PathToLimsaBell) Failed to get Summoning Bell coordinates.")
+        return false
+    end
+
+    LogInfo(string.format("[VAC] (PathToLimsaBell) Summoning Bell position: X=%.2f, Y=%.2f, Z=%.2f", bellX, bellY, bellZ))
+
+    -- Try different extents for finding a valid navmesh point
+    local extents = {1, 2, 5, 10, 20}
+    local nearestX, nearestY, nearestZ
+
+    for _, extent in ipairs(extents) do
+        nearestX = QueryMeshNearestPointX(bellX, bellY, bellZ, extent, extent)
+        nearestY = QueryMeshNearestPointY(bellX, bellY, bellZ, extent, extent)
+        nearestZ = QueryMeshNearestPointZ(bellX, bellY, bellZ, extent, extent)
+        
+        if nearestX and nearestY and nearestZ then
+            LogInfo(string.format("[VAC] (PathToLimsaBell) Found valid navmesh point with extent %.2f", extent))
+            LogInfo(string.format("[VAC] (PathToLimsaBell) Nearest point: X=%.2f, Y=%.2f, Z=%.2f", nearestX, nearestY, nearestZ))
+            break
+        end
+    end
+
+    if not (nearestX and nearestY and nearestZ) then
+        LogInfo("[VAC] (PathToLimsaBell) Couldn't find a valid navmesh point near the Summoning Bell with any extent.")
+        return false
+    end
+
+    -- Find a valid floor point for the player to stand on
+    local floorX = QueryMeshPointOnFloorX(nearestX, nearestY, nearestZ, true, 2)
+    local floorY = QueryMeshPointOnFloorY(nearestX, nearestY, nearestZ, true, 2)
+    local floorZ = QueryMeshPointOnFloorZ(nearestX, nearestY, nearestZ, true, 2)
+
+    if not (floorX and floorY and floorZ) then
+        LogInfo("[VAC] (PathToLimsaBell) Couldn't find a valid floor point near the Summoning Bell.")
+        return false
+    end
+
+    LogInfo(string.format("[VAC] (PathToLimsaBell) Moving to Summoning Bell: X=%.2f, Y=%.2f, Z=%.2f", floorX, floorY, floorZ))
+    Movement(floorX, floorY, floorZ, 3)
+
+    -- Wait until the pathing is complete
+    repeat
+        Sleep(0.1)
+    until not PathIsRunning()
+
+    LogInfo("[VAC] (PathToLimsaBell) Reached the Summoning Bell.")
+    return true
 end
 
 -- Function to wait until a specified amount of gil is traded
