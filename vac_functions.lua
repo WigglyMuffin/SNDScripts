@@ -45,6 +45,8 @@ GC_BTN_List = vac_lists.GC_BTN_List
 GC_FSH_List = vac_lists.GC_FSH_List
 Fate_List = vac_lists.Fate_List
 Submersible_Part_List = vac_lists.Submersible_Part_List
+Submersible_Rank_List = vac_lists.Submersible_Rank_List
+Submersible_Zone_List = vac_lists.Submersible_Zone_List
 
 -- Usage: EnsureFolderExists("\\path\\to\\your\\folder")
 --
