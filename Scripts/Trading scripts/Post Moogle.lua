@@ -9,7 +9,7 @@
                                                 |___/          
 ####################
 ##    Version     ##
-##     1.1.4      ##
+##     1.1.5      ##
 ####################
 
 -> 1.0.0: Initial release
@@ -41,6 +41,9 @@
 
 -> 1.1.4:
    - Fixed the script failing to return home if you were the final character in the list
+
+-> 1.1.5:
+   - Should fix prioritisation of hq items
 
 ####################################################
 ##                  Description                   ##
@@ -406,11 +409,11 @@ local function Main(character_list_postmoogle)
                         local current_count = GetItemCount(item_id, false) + GetItemCount(item_id, true)
                         local traded_so_far = item.initial_count - current_count
                         local remaining_amount = item_amount - traded_so_far
-                        
+
                         if remaining_amount > 0 then
                             local normal_amount = GetItemCount(item_id, false)
-                            local hq_amount = GetItemCount(item_id, true)
-                            
+                            local hq_amount = GetItemCount(item_id, true) - GetItemCount(item_id, false)
+
                             local hq_trade = 0
                             local nq_trade = 0
 
