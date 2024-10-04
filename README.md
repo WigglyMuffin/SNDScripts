@@ -27,3 +27,18 @@ The above files need to be places in your Something Need Doing config directory,
 
 
 Required plugins: AutoRetainer, Teleporter, Lifestream, TextAdvance, Something Need Doing (Expanded Edition), Pandora's Box, vnavmesh
+
+# Project License
+
+This project is licensed under the [GNU GPL v3](https://www.gnu.org/licenses/gpl-3.0.en.html).
+
+## Third-Party Libraries
+
+This project includes the following third-party libraries:
+
+- JSON Library for Lua
+  - Source: https://github.com/craigmj/json4lua
+  - License: MIT License
+  - The full license text is included with the library code.
+
+The inclusion of MIT-licensed code in this GPL-licensed project does not affect the overall licensing of the project, which remains under the GNU GPL v3.
