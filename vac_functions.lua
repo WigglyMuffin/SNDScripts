@@ -4356,3 +4356,30 @@ function CreateJSONLibrary()
 
     return json
 end
+
+-- Usage: ManageCollection("Auto Retainer", true)
+-- Enables or disables a collection
+-- Options: true = enables the collection, false = disables the collection
+function ManageCollection(collection_name, enable)
+    if type(collection_name) ~= "string" or collection_name == "" then
+        LogError("[VAC] (ManageCollection) Invalid collection name provided")
+        return false
+    end
+
+    local action = enable and "enable" or "disable"
+
+    LogInfo("[VAC] (ManageCollection) Attempting to " .. action .. " profile: " .. collection_name)
+
+    yield("/xl" .. action .. "profile " .. collection_name)
+    Sleep(0.1)
+
+    local success = true
+
+    if success then
+        LogInfo("[VAC] (ManageCollection) Successfully " .. action .. "d profile: " .. collection_name)
+        return true
+    else
+        LogError("[VAC] (ManageCollection) Failed to " .. action .. " profile: " .. collection_name)
+        return false
+    end
+end
