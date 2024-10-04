@@ -58,14 +58,15 @@ function EnsureFolderExists(folder_path)
 
     -- If the file couldn't be opened, the folder doesn't exist
     if not file then
-        -- Folder doesn't exist, create it
-        os.execute("mkdir -p " .. folder_path)
+        -- Folder doesn't exist, create it silently
+        io.popen('mkdir "' .. folder_path .. '"'):close()
     else
         -- Folder exists, close and remove the temporary file
         file:close()
         os.remove(temp_file_path)
     end
 end
+
 
 -- InteractAndWait()
 --
