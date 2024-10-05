@@ -309,7 +309,6 @@ for _, char in ipairs(chars) do
     end
     LogInfo("[QSTC] All settings set, going into main loop")
     local hp_treshold_switch = false
-    local guh = 1
     while not finished do
 
         -- Disables bmr while vnav is moving so it doesn't break movement, but only if in combat
@@ -318,7 +317,7 @@ for _, char in ipairs(chars) do
         end
 
         -- Unexpected combat handler
-        if GetCharacterCondition(26) and not GetCharacterCondition(34) and not PathIsRunning() and guh == 3 then
+        if GetCharacterCondition(26) and not GetCharacterCondition(34) and not PathIsRunning() then
             LogInfo("[QSTC] Unexpected combat handler active")
             if not QuestionableIsRunning() then
                 LogInfo("[QSTC] Unexpected combat handler: Turning bmrai on")
@@ -447,7 +446,7 @@ for _, char in ipairs(chars) do
         end
 
         -- Duty helper
-        if IsAddonReady("ContentsFinder") and DoesObjectExist("Entrance") and guh == 3 then
+        if IsAddonReady("ContentsFinder") and DoesObjectExist("Entrance") then
             LogInfo("[QSTC] Duty helper active, attempting to pull the duty name from JournalDetail")
             repeat
                 Sleep(1)
@@ -477,7 +476,7 @@ for _, char in ipairs(chars) do
         end
 
         -- Instance helper
-        if IsAddonReady("SelectYesno") or IsAddonReady("DifficultySelectYesNo") and guh == 3 then
+        if IsAddonReady("SelectYesno") or IsAddonReady("DifficultySelectYesNo") then
             LogInfo("[QSTC] Instance helper active")
             Sleep(3)
             local text1 = GetNodeText("SelectYesno", 15)
