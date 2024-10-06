@@ -840,16 +840,31 @@ function Mount(mount_name)
 end
 
 -- Usage: LogOut()
--- Logs the player out of the game
+-- Logs the player out of the game, checks if player is in sanctuary
 function LogOut()
     yield("/logout")
 
+    local select_option
+    -- If the player is not in a sanctuary, they need to wait 20 seconds
+    if not InSanctuary() then
+        select_option = 4
+        -- Start the 20 second countdown
+        for i = 1, 200 do
+            Sleep(0.1)
+        end
+    else
+        select_option = 0 -- Immediate logout in sanctuary
+    end
+
+    -- Wait for "SelectYesno" to become visible
     repeat
         Sleep(0.1)
     until IsAddonVisible("SelectYesno")
 
-    yield("/pcall SelectYesno true 4")
+    -- Confirm the logout selection
+    yield("/pcall SelectYesno true " .. select_option)
 
+    -- Wait until "SelectYesno" is no longer visible
     repeat
         Sleep(0.1)
     until not IsAddonVisible("SelectYesno")
@@ -2106,15 +2121,27 @@ end
 
 -- Usage: RelogCharacter("First Last@Server")
 -- Relogs specified character, should be followed with a LoginCheck()
+-- Will check if player is in a santuary
 -- Requires @Server else it will not work
 -- Requires Auto Retainer plugin
 function RelogCharacter(relog_char_name)
+    -- Wait until the player is available, not casting, and conditions are met
     repeat
         Sleep(0.1)
-    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) or IsAddonVisible("Title")
+    until (IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)) or IsAddonVisible("Title")
 
+    -- If the player is not in a sanctuary, wait 20 seconds before relogging
+    if not InSanctuary() then
+        -- Start the 20 second countdown
+        for i = 1, 200 do
+            Sleep(0.1)
+        end
+    end
+
+    -- Proceed with the relog command after the wait or immediately if in sanctuary
     yield("/ays relog " .. relog_char_name)
 end
+
 
 -- Usage: EquipRecommendedGear()
 -- Equips recommended gear if any available

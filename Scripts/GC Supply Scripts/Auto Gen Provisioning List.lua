@@ -123,8 +123,8 @@ function GetAndSaveProvisioningToTable()
         else
             LogInfo("[APL] Logging into: " .. char)
 
-            if not (ZoneCheck("Limsa Lominsa Lower Deck") or ZoneCheck("Limsa Lominsa Upper Deck")) then
-                Teleporter("Limsa", "tp")
+            if not InSanctuary() then
+                Teleporter("Limsa Lominsa Lower Decks", "tp")
             end
 
             RelogCharacter(char)
