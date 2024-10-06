@@ -6,9 +6,10 @@
 
 ####################
 ##    Version     ##
-##     0.1.8      ##
+##     0.1.9      ##
 ####################
 
+-> 0.1.9: Added an option to force bossmod ai on if it detects the character is under X health, very basic implementation and will probably be improved in the future
 -> 0.1.8: Fixed the script being broken due to an SND update
 -> 0.1.7: Unexpected combat should be fixed
 -> 0.1.6: Hopefully finally actually fixed the bug with z2. And added extra rsr calls once inside an instance to see if that helps with it not starting properly.
@@ -60,6 +61,9 @@ local quest_name_to_stop_at = ""
 
 -- Toggle if you want bossmod ai to be enabled all the time or only when it's required
 local bossmod_ai_outside_of_instances = true
+
+-- This setting will force enable bossmod if it finds your character below x% health, set to 0 if you want it disabled
+local enable_bossmod_ai_hp_treshold = 50
 
 -- Here you provide it a character list to go through, this used alongside the above option will let you get a lot of different character to X quest
 local chars = {
@@ -250,10 +254,10 @@ local function WaitforInstanceFinishAndStartQst()
     RSRChangeOperatingMode(1)
     if bossmod_ai_outside_of_instances then
         LogInfo("[QSTC] Setting bmrai to on")
-        yield("/bmrai on")
+        yield("/vbmai on")
     else
         LogInfo("[QSTC] Setting bmrai to off")
-        yield("/bmrai off")
+        yield("/vbmai off")
     end
     LogInfo("[QSTC] Wait for instance finish no longer active")
 end
@@ -299,16 +303,17 @@ for _, char in ipairs(chars) do
     yield("/rotation Settings AoEType Full")
     yield("/rotation Settings HostileType AllTargetsWhenSoloInDuty")
     if bossmod_ai_outside_of_instances then
-        yield("/bmrai on")
+        yield("/vbmai on")
     else
-        yield("/bmrai off")
+        yield("/vbmai off")
     end
     LogInfo("[QSTC] All settings set, going into main loop")
+    local hp_treshold_switch = false
     while not finished do
 
         -- Disables bmr while vnav is moving so it doesn't break movement, but only if in combat
         if PathIsRunning() and not GetCharacterCondition(34) and GetCharacterCondition(26) then
-            yield("/bmrai off")
+            yield("/vbmai off")
         end
 
         -- Unexpected combat handler
@@ -316,15 +321,15 @@ for _, char in ipairs(chars) do
             LogInfo("[QSTC] Unexpected combat handler active")
             if not QuestionableIsRunning() then
                 LogInfo("[QSTC] Unexpected combat handler: Turning bmrai on")
-                yield("/bmrai on")
+                yield("/vbmai on")
                 repeat
                     Sleep(1)
                 until not GetCharacterCondition(26)
                 LogInfo("[QSTC] Unexpected combat handler: Setting bmr back to configured setting")
                 if bossmod_ai_outside_of_instances then
-                    yield("/bmrai on")
+                    yield("/vbmai on")
                 else
-                    yield("/bmrai off")
+                    yield("/vbmai off")
                 end
                 Sleep(0.5)
                 LogInfo("[QSTC] Unexpected combat handler: Reloading questionable")
@@ -334,6 +339,20 @@ for _, char in ipairs(chars) do
                 yield("/qst start")
             end
             LogInfo("[QSTC] Unexpected combat handler no longer active")
+        end
+
+        -- Force enable bossmod under x% health 
+        local current_hp_percentage = (GetHP() / GetMaxHP()) * 100
+        if current_hp_percentage < enable_bossmod_ai_hp_treshold and not hp_treshold_switch and enable_bossmod_ai_hp_treshold ~= 0 and not GetCharacterCondition(34) then
+            yield("/vbmai on")
+            hp_treshold_switch = true
+        elseif current_hp_percentage > enable_bossmod_ai_hp_treshold and hp_treshold_switch and enable_bossmod_ai_hp_treshold ~= 0 and not GetCharacterCondition(34) and not GetCharacterCondition(26) then
+            hp_treshold_switch = false
+            if bossmod_ai_outside_of_instances then
+                yield("/vbmai on")
+            else
+                yield("/vbmai off")
+            end
         end
 
         -- Qst reloader
@@ -440,7 +459,7 @@ for _, char in ipairs(chars) do
                 LogInfo("[QSTC] Duty helper: "..duty.." is on the whitelist, queueing it with supports")
                 AutoDutyRun(duty)
                 LogInfo("[QSTC] Duty helper: Waiting 30 seconds to make sure we're properly in the duty")
-                yield("/bmrai on")
+                yield("/vbmai on")
                 ZoneTransitions()
                 Sleep(2)
                 RSRChangeOperatingMode(1)
@@ -482,7 +501,7 @@ for _, char in ipairs(chars) do
                 Sleep(3)
                 RSRChangeOperatingMode(1)
                 LogInfo("[QSTC] Instance helper: Inside instance, setting bmrai to on")
-                yield("/bmrai on")
+                yield("/vbmai on")
                 WaitforInstanceFinishAndStartQst()
                 LogInfo("[QSTC] Instance helper no longer active")
             end
