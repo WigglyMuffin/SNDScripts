@@ -170,21 +170,21 @@ function GetAndSaveProvisioningToTable()
             local ItemAmount = GetNodeText("ContentsInfoDetail", i, 2)
 
             if ListName == "GC_MIN_List" then
-                if min_enabled and ((min_level < level_cap) or not skip_level_capped_jobs) then
+                if min_enabled and (min_level < level_cap or (min_level >= level_cap and not skip_level_capped_jobs)) then
                     provisioning_list[char_name]["MIN"] = {}
                     provisioning_list[char_name]["MIN"]["Item"] = ItemName
                     provisioning_list[char_name]["MIN"]["ID"] = ItemID
                     provisioning_list[char_name]["MIN"]["QTY"] = ItemAmount
                 end
             elseif ListName == "GC_BTN_List" then
-                if btn_enabled and ((btn_level < level_cap) or not skip_level_capped_jobs) then
+                if btn_enabled and (btn_level < level_cap or (btn_level >= level_cap and not skip_level_capped_jobs)) then
                     provisioning_list[char_name]["BTN"] = {}
                     provisioning_list[char_name]["BTN"]["Item"] = ItemName
                     provisioning_list[char_name]["BTN"]["ID"] = ItemID
                     provisioning_list[char_name]["BTN"]["QTY"] = ItemAmount
                 end
             elseif ListName == "GC_FSH_List" then
-                if fsh_enabled and ((fsh_level < level_cap) or not skip_level_capped_jobs) then
+                if fsh_enabled and (fsh_level < level_cap or (fsh_level >= level_cap and not skip_level_capped_jobs)) then
                     provisioning_list[char_name]["FSH"] = {}
                     provisioning_list[char_name]["FSH"]["Item"] = ItemName
                     provisioning_list[char_name]["FSH"]["ID"] = ItemID
