@@ -116,7 +116,7 @@ function Interact()
     
     repeat
         Sleep(0.1)
-    until not IsPlayerCasting() and not GetCharacterCondition(31)
+    until not IsPlayerCasting()
 end
 
 -- Usage: AttuneAetheryte()
@@ -1160,11 +1160,16 @@ end
 -- Usage: Target("Storm Quartermaster")
 -- TODO: target checking for consistency and speed
 function Target(target)
-    local target_command = "/target \"" .. target .. "\""
-    repeat
-        yield(target_command)
-        Sleep(0.1)
-    until string.lower(GetTargetName()) == string.lower(target)
+    if DoesObjectExist(target) then
+        local target_command = "/target \"" .. target .. "\""
+        repeat
+            yield(target_command)
+            Sleep(0.1)
+        until string.lower(GetTargetName()) == string.lower(target)
+        return true
+    else
+        return false
+    end
 end
 
 -- Usage: DoGcRankUp()
@@ -4410,4 +4415,149 @@ function ManageCollection(collection_name, enable)
         LogError("[VAC] (ManageCollection) Failed to " .. action .. " profile: " .. collection_name)
         return false
     end
+end
+
+-- Usage: OpenLetterMenu()
+-- Opens the letter menu if player is within distance of Delivery Moogle or Regal/Moogle Letter Box
+function OpenLetterMenu()
+    if not IsAddonVisible("LetterList") then
+        -- List of possible targets
+        local targets = { "Delivery Moogle", "Regal Letter Box", "Moogle Letter Box" }
+
+        -- Try to target each one in sequence
+        for _, target_name in ipairs(targets) do
+            if Target(target_name) then
+                break  -- Exit the loop once a target is found
+            else
+                return  -- Exit if no target is found
+            end
+        end
+
+        Interact()
+
+        repeat
+            Sleep(0.1)
+        until IsAddonReady("Talk")
+        
+        repeat
+            yield("/callback Talk true 0")
+            Sleep(0.1)
+        until not IsAddonVisible("Talk")
+
+        repeat
+            Sleep(0.1)
+        until IsAddonReady("LetterList")
+
+        -- Handle the "SelectOk" window with a check to prevent getting stuck
+        local max_attempts = 10
+        local attempts = 0
+
+        repeat
+            if IsAddonReady("SelectOk") and string.match(GetNodeText("SelectOk", 3), "You cannot carry any more campaign") then
+                yield("/callback SelectOk true 0")
+                break
+            end
+            attempts = attempts + 1
+
+            if attempts >= max_attempts then
+                break
+            end
+
+            Sleep(0.1)
+        until IsAddonVisible("SelectOk") and IsAddonVisible("LetterList")
+
+        repeat
+            Sleep(0.1)
+        until IsAddonReady("LetterList") and string.match(GetNodeText("LetterList", 14, 13, 2), "Purchases & Rewards")
+    end
+end
+
+-- Usage: SelectLetter()
+-- Selects the top letter in the "LetterList" addon menu
+function SelectLetter()
+    -- Check if "LetterList" addon is ready
+    repeat
+        Sleep(0.1)
+    until IsAddonReady("LetterList")
+
+    -- Selects the first letter in the letter list
+    repeat
+        yield("/callback LetterList true 0 0")
+        Sleep(0.1)
+    until IsAddonVisible("LetterViewer")
+
+    -- If "LetterList" breaks, timeout to recover opening remaining letters
+    local max_attempts = 10
+    local attempts = 0
+
+    repeat
+        yield("/callback LetterList true 0 0")
+        Sleep(0.1)
+        attempts = attempts + 1
+
+        if attempts >= max_attempts then
+            yield("/callback LetterList true -1")
+            OpenLetterMenu()
+        end
+
+        Sleep(0.1)
+    until IsAddonVisible("LetterViewer")
+end
+
+-- Usage: TakeLetterContents()
+-- Takes the letter contents in the "LetterViewer" addon menu
+function TakeLetterContents()
+    -- Check if "LetterViewer" addon is ready
+    repeat
+        Sleep(0.1)
+    until IsAddonReady("LetterViewer")
+
+    -- If letter contains "Enclosed" then take items
+    -- This also needs visibility check if it gets added here
+    if string.match(GetNodeText("LetterViewer", 28), "Enclosed") and IsNodeVisible("LetterViewer", 1, 2, 5) then
+        yield("/callback LetterViewer true 1")
+    end
+end
+
+-- Usage: DeleteLetter()
+-- Deletes the open letter in thet "LetterViewer" addon menu
+function DeleteLetter()
+    -- Check if "LetterViewer" addon is ready
+    repeat
+        Sleep(0.1)
+    until IsAddonReady("LetterViewer")
+
+    -- Track whether letter has been deleted
+    local deleted_letter = false
+
+    -- Check whether letter has text and node visibility, then delete the letter
+    repeat
+        if IsAddonReady("LetterViewer") and string.match(GetNodeText("LetterViewer", 28), ".+") then
+            repeat
+                yield("/callback LetterViewer true 2")
+                Sleep(0.1)
+            until IsAddonReady("SelectYesno") and string.match(GetNodeText("SelectYesno", 15), "Delete this letter?")
+            yield("/callback SelectYesno true 0")
+        end
+        Sleep(0.1)
+    until not IsAddonVisible("LetterViewer") and IsAddonVisible("LetterList")
+end
+
+-- Usage: RequestLetter()
+-- Requests any additional letters in the "LetterList" addon menu
+function RequestLetter()
+    -- Check if "LetterList" addon is ready
+    repeat
+        Sleep(0.1)
+    until IsAddonReady("LetterList")
+
+    repeat
+        yield("/callback LetterList true 3")
+        Sleep(0.1)
+    until IsAddonReady("SelectYesno") and string.match(GetNodeText("SelectYesno", 15), "Send a request to have recently acquired special")
+
+    repeat
+        yield("/callback SelectYesno true 0")
+        Sleep(0.1)
+    until not IsAddonVisible("SelectYesno") and IsAddonVisible("LetterList")
 end
