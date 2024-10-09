@@ -7,10 +7,14 @@
                            |_|    
 ####################
 ##    Version     ##
-##     1.0.0      ##
+##     1.0.1      ##
 ####################
 
 -> 1.0.0: Initial release
+
+-> 1.0.1: 
+   - Fixed disabling Text Advance
+   - Potentially fixed exiting out of the "LetterList" addon if stuck
 
 ####################################################
 ##                  Description                   ##
@@ -44,7 +48,7 @@ if HasPlugin("YesAlready") then
 end
 
 if HasPlugin("TextAdvance") then
-    yield("/at o")
+    yield("/at n")
 end
 
 function Target(target)
@@ -170,7 +174,9 @@ local function SelectLetter()
         attempts = attempts + 1
 
         if attempts >= max_attempts then
-            yield("/callback LetterList true -1")
+            repeat
+                yield("/callback LetterList true -1")
+            until not IsAddonVisible("LetterList")
             OpenLetterMenu()
         end
 
