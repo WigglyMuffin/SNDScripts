@@ -4496,7 +4496,9 @@ function SelectLetter()
         attempts = attempts + 1
 
         if attempts >= max_attempts then
-            yield("/callback LetterList true -1")
+            repeat
+                yield("/callback LetterList true -1")
+            until not IsAddonVisible("LetterList")
             OpenLetterMenu()
         end
 
