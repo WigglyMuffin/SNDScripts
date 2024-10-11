@@ -1420,7 +1420,6 @@ function BuyFCAction(action_name)
     Interact()
     repeat
         Sleep(0.1)
-        Echo("waiting")
     until IsAddonReady("SelectString")
     yield("/callback SelectString true 0")
     repeat
