@@ -1307,6 +1307,150 @@ function CanGCRankUp()
     end
 end
 
+-- Attempts to use an fc buff with the name you provide
+function UseFCAction(action_name)
+    local action_name = string.lower(tostring(action_name))
+    yield("/freecompanycmd")
+    repeat
+        Sleep(0.1)
+    until IsAddonReady("FreeCompany")
+    yield("/callback FreeCompany true 0 4")
+    Sleep(0.2)
+    yield("/callback FreeCompanyAction true 1 0")
+    Sleep(0.2)
+
+    -- Check if the requested buff is already active
+    for i = 1, 15 do
+        local node_text = GetNodeText("FreeCompanyAction", 13, i, 4)
+        node_text = string.lower(node_text)
+        if node_text == action_name then
+            yield("/callback FreeCompany true -1")
+            return true, "Action already active" -- send back a true because the buff is already active, so no action is needed
+        end
+        Sleep(0.0001)
+    end
+
+    -- Find the requested buff and use it if it is found
+    for i = 1, 30 do
+        local node_text = GetNodeText("FreeCompanyAction", 5, i, 3)
+        node_text = string.lower(node_text)
+        if node_text == action_name then
+            yield("/callback FreeCompanyAction true 1 0")
+            Sleep(0.2)
+            yield("/callback ContextMenu true 0 0 0")
+            repeat
+                Sleep(0.1)
+            until IsAddonReady("SelectYesno")
+            yield("/callback SelectYesno true 0")
+            Sleep(1)
+            yield("/callback FreeCompany true -1")
+            return true, "Action successfully activated"
+        end
+        Sleep(0.0001)
+    end
+
+    return false, "Failed to find action"
+end
+
+-- Attempts to buy an fc buff with the name you provide, assumes you are in front of the OIC Quartermaster
+function BuyFCAction(action_name)
+    action_name = tostring(action_name) or false
+    if not action_name then
+        Echo("No action name to buy provided")
+        return false, "No action name provided"
+    end
+
+    local actions = {
+        { name = "The Heat of Battle",     index = 0,  rank = 5, credit_cost = 3150 },
+        { name = "Earth and Water",        index = 1,  rank = 5, credit_cost = 3150 },
+        { name = "Helping Hand",           index = 2,  rank = 5, credit_cost = 3150 },
+        { name = "A Man's Best Friend",    index = 3,  rank = 5, credit_cost = 2520 },
+        { name = "Mark Up",                index = 4,  rank = 5, credit_cost = 2520 },
+        { name = "Seal Sweetener",         index = 5,  rank = 5, credit_cost = 2520 },
+        { name = "Jackpot",                index = 6,  rank = 5, credit_cost = 2520 },
+        { name = "Brave New World",        index = 7,  rank = 5, credit_cost = 1575 },
+        { name = "Live Off the Land",      index = 8,  rank = 5, credit_cost = 2520 },
+        { name = "What You See",           index = 9,  rank = 5, credit_cost = 2520 },
+        { name = "Eat from the Hand",      index = 10, rank = 5, credit_cost = 2520 },
+        { name = "In Control",             index = 11, rank = 5, credit_cost = 2520 },
+        { name = "That Which Binds Us",    index = 12, rank = 5, credit_cost = 3150 },
+        { name = "Meat and Mead",          index = 13, rank = 5, credit_cost = 2520 },
+        { name = "Proper Care",            index = 14, rank = 5, credit_cost = 3150 },
+        { name = "Fleet-footed",           index = 15, rank = 5, credit_cost = 2520 },
+        { name = "Reduced Rates",          index = 16, rank = 5, credit_cost = 3150 },
+        { name = "The Heat of Battle II",  index = 17, rank = 8, credit_cost = 6300 },
+        { name = "Earth and Water II",     index = 18, rank = 8, credit_cost = 6300 },
+        { name = "Helping Hand II",        index = 19, rank = 8, credit_cost = 6300 },
+        { name = "A Man's Best Friend II", index = 20, rank = 8, credit_cost = 6300 },
+        { name = "Mark Up II",             index = 21, rank = 8, credit_cost = 6300 },
+        { name = "Seal Sweetener II",      index = 22, rank = 8, credit_cost = 6300 },
+        { name = "Jackpot II",             index = 23, rank = 8, credit_cost = 6300 },
+        { name = "Brave New World II",     index = 24, rank = 8, credit_cost = 3150 },
+        { name = "Live Off the Land II",   index = 25, rank = 8, credit_cost = 6300 },
+        { name = "What You See II",        index = 26, rank = 8, credit_cost = 6300 },
+        { name = "Eat from the Hand II",   index = 27, rank = 8, credit_cost = 6300 },
+        { name = "In Control II",          index = 28, rank = 8, credit_cost = 6300 },
+        { name = "That Which Binds Us II", index = 29, rank = 8, credit_cost = 6300 },
+        { name = "Meat and Mead II",       index = 30, rank = 8, credit_cost = 6300 },
+        { name = "Proper Care II",         index = 31, rank = 8, credit_cost = 6300 },
+        { name = "Fleet-footed II",        index = 32, rank = 8, credit_cost = 5040 },
+        { name = "Reduced Rates II",       index = 33, rank = 8, credit_cost = 6300 },
+    }
+
+    local function find_action(search_name)
+        for i, action in ipairs(actions) do
+            if string.lower(action.name) == string.lower(search_name) then
+                return action
+            end
+        end
+        return nil
+    end
+
+    local found_target = Target("OIC Quartermaster") -- Target the quartermaster
+    if not found_target then
+        Echo("OIC Quartermaster not found, aborting attempt to buy FC action")
+        return false, "Quartermaster not found"
+    end
+    Interact()
+    repeat
+        Sleep(0.1)
+    until IsAddonReady("SelectString")
+    yield("/callback SelectString true 0")
+    repeat
+        Sleep(0.1)
+    until IsAddonReady("FreeCompanyExchange")
+    local action_info = find_action(action_name)
+    local current_credit_amount = tonumber((GetNodeText("FreeCompanyExchange", 40):gsub(",", "")))
+    local current_fc_rank = tonumber(GetNodeText("FreeCompanyExchange", 42))
+    if not action_info then
+        Echo("Action ".. action_name .." not found, aborting buy process")
+        yield("/callback FreeCompanyExchange true -1")
+        return false, "Action not found"
+    end
+    if current_credit_amount > action_info.credit_cost then
+        if action_info.rank >= current_fc_rank then
+            yield("/callback FreeCompanyExchange true 2 " .. action_info.index)
+            repeat
+                Sleep(0.1)
+            until IsAddonReady("SelectYesno")
+            yield("/callback SelectYesno true 0")
+            repeat
+                Sleep(0.1)
+            until not IsAddonVisible("SelectYesno")
+            yield("/callback FreeCompanyExchange true -1")
+            return true
+        else
+            return false, "Missing rank requirement"
+        end
+    else
+        yield("/callback FreeCompanyExchange true -1")
+        repeat
+            Sleep(0.1)
+        until not IsAddonVisible("FreeCompanyExchange")
+        return false, "Missing credits"
+    end
+end
+
 -- Usage: OpenGcSupplyWindow(1)
 -- Supply tab is 0 // Provisioning tab is 1 // Expert Delivery is 2
 -- Anything above or below those numbers will not work
@@ -1530,9 +1674,6 @@ function FindDutyID(duty_name)
 
     return nil
 end
-
-
-
 
 -- Usage: FindZoneID("Limsa Lominsa Lower Decks")
 --
@@ -4438,7 +4579,7 @@ function OpenLetterMenu()
         repeat
             Sleep(0.1)
         until IsAddonReady("Talk")
-        
+
         repeat
             yield("/callback Talk true 0")
             Sleep(0.1)
