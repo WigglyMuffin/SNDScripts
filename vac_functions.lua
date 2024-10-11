@@ -1839,7 +1839,7 @@ function PathToObject(path_object_name, range)
     LogInfo(string.format("[VAC] (PathToObject) Object position: X=%.2f, Y=%.2f, Z=%.2f", objectX, objectY, objectZ))
 
     -- Try different extents for finding a valid navmesh point
-    local extents = {0, 1, 2, 5, 10, 20}
+    local extents = {0, 1, 2, 5, 10, 15, 20}
     local nearestX, nearestY, nearestZ
 
     for _, extent in ipairs(extents) do
@@ -1918,7 +1918,7 @@ function PathToEstateEntrance()
     LogInfo(string.format("[VAC] (PathToEstateEntrance) Entrance position: X=%.2f, Y=%.2f, Z=%.2f", entranceX, entranceY, entranceZ))
 
     -- Try different extents for finding a valid navmesh point
-    local extents = {1, 2, 5, 10, 20}
+    local extents = {0, 1, 2, 5, 10, 15, 20}
     local nearestX, nearestY, nearestZ
 
     for _, extent in ipairs(extents) do
@@ -1994,7 +1994,7 @@ function PathToLimsaBell()
     LogInfo(string.format("[VAC] (PathToLimsaBell) Summoning Bell position: X=%.2f, Y=%.2f, Z=%.2f", bellX, bellY, bellZ))
 
     -- Try different extents for finding a valid navmesh point
-    local extents = {1, 2, 5, 10, 20}
+    local extents = {0, 1, 2, 5, 10, 15, 20}
     local nearestX, nearestY, nearestZ
 
     for _, extent in ipairs(extents) do
