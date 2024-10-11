@@ -1342,7 +1342,7 @@ function UseFCAction(action_name)
                 Sleep(0.1)
             until IsAddonReady("SelectYesno")
             yield("/callback SelectYesno true 0")
-            Sleep(1)
+            Sleep(1.0)
             yield("/callback FreeCompany true -1")
             return true, "Action successfully activated"
         end
