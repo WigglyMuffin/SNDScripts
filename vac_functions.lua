@@ -3772,11 +3772,11 @@ function BuyCeruleum(amount)
     Target("Mammet Voyager #004A") -- Target the mammet we're buying ceruleum from
 
     yield("/lockon")
-    Sleep(0.2)
+    Sleep(1)
 
     LogInfo("[VAC] (BuyCeruleum) Moving towards the mammet")
     yield("/automove") -- Move to the mammet, i don't want to rely on Movement() here
-    Sleep(0.3)
+    Sleep(1)
 
     repeat
         Sleep(0.1)
