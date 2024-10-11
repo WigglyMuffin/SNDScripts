@@ -20,7 +20,7 @@
 ##                  Description                   ##
 ####################################################
 
-https://github.com/Vaziayu/SNDScripts
+https://github.com/WigglyMuffin/SNDScripts
 
 This script automatically opens all of your characters mail
 It will also request additional mail if the setting is enabled
