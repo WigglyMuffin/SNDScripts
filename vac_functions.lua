@@ -1426,6 +1426,7 @@ function BuyFCAction(action_name)
     repeat
         Sleep(0.1)
     until IsAddonReady("FreeCompanyExchange")
+    Sleep(1)
     local action_info = find_action(action_name)
     local current_credit_amount = tonumber((GetNodeText("FreeCompanyExchange", 40):gsub(",", "")))
     local current_fc_rank = tonumber(GetNodeText("FreeCompanyExchange", 42))
@@ -4711,4 +4712,19 @@ function RequestLetter()
         yield("/callback SelectYesno true 0")
         Sleep(0.1)
     until not IsAddonVisible("SelectYesno") and IsAddonVisible("LetterList")
+end
+
+-- Usage: GetFCGCID()
+-- Returns the Grand Company id for your FC
+function GetFCGCID()
+    local gc_name = GetFCGrandCompany()
+    if gc_name == "Maelstrom" then
+        return 1
+    elseif gc_name == "Twin Adders" then
+        return 2
+    elseif gc_name == "Immortal Flames" then
+        return 3
+    else
+        return false -- if it fails to find a gc with that name
+    end
 end
