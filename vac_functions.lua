@@ -1309,14 +1309,15 @@ end
 
 -- Attempts to use an fc buff with the name you provide
 function UseFCAction(action_name)
+    repeat
+        Sleep(0.1)
+    until IsPlayerAvailable()
     local action_name = string.lower(tostring(action_name))
     yield("/freecompanycmd")
     repeat
         Sleep(0.1)
     until IsAddonReady("FreeCompany")
     yield("/callback FreeCompany true 0 4")
-    Sleep(0.2)
-    yield("/callback FreeCompanyAction true 1 0")
     Sleep(0.2)
 
     -- Check if the requested buff is already active
@@ -1348,13 +1349,18 @@ function UseFCAction(action_name)
         end
         Sleep(0.0001)
     end
-
+    if IsAddonReady("FreeCompany") then
+        yield("/callback FreeCompany true -1")
+    end
     return false, "Failed to find action"
 end
 
 -- Attempts to buy an fc buff with the name you provide, assumes you are in front of the OIC Quartermaster
 function BuyFCAction(action_name)
-    action_name = tostring(action_name) or false
+    repeat
+        Sleep(0.1)
+    until IsPlayerAvailable()
+    action_name = tostring(action_name)
     if not action_name then
         Echo("No action name to buy provided")
         return false, "No action name provided"
@@ -1403,7 +1409,7 @@ function BuyFCAction(action_name)
                 return action
             end
         end
-        return nil
+        return false
     end
 
     local found_target = Target("OIC Quartermaster") -- Target the quartermaster
@@ -1414,6 +1420,7 @@ function BuyFCAction(action_name)
     Interact()
     repeat
         Sleep(0.1)
+        Echo("waiting")
     until IsAddonReady("SelectString")
     yield("/callback SelectString true 0")
     repeat
@@ -1428,7 +1435,7 @@ function BuyFCAction(action_name)
         return false, "Action not found"
     end
     if current_credit_amount > action_info.credit_cost then
-        if action_info.rank >= current_fc_rank then
+        if action_info.rank and current_fc_rank and current_fc_rank >= action_info.rank then
             yield("/callback FreeCompanyExchange true 2 " .. action_info.index)
             repeat
                 Sleep(0.1)
@@ -1440,6 +1447,7 @@ function BuyFCAction(action_name)
             yield("/callback FreeCompanyExchange true -1")
             return true
         else
+            yield("/callback FreeCompanyExchange true -1")
             return false, "Missing rank requirement"
         end
     else
@@ -1831,7 +1839,7 @@ function PathToObject(path_object_name, range)
     LogInfo(string.format("[VAC] (PathToObject) Object position: X=%.2f, Y=%.2f, Z=%.2f", objectX, objectY, objectZ))
 
     -- Try different extents for finding a valid navmesh point
-    local extents = {1, 2, 5, 10, 20}
+    local extents = {0, 1, 2, 5, 10, 20}
     local nearestX, nearestY, nearestZ
 
     for _, extent in ipairs(extents) do
