@@ -1793,8 +1793,8 @@ local function PostARTasks()
         repeat
             Sleep(0.5)
         until HasPlugin("AutoRetainer") and type(ARGetInventoryFreeSlotCount()) == "number"
+        yield("/ays")
     end
-    yield("/ays")
 
     -- Handle any subs we might have modified
     if ARSubsWaitingToBeProcessed() then
