@@ -1846,7 +1846,7 @@ function PathToObject(path_object_name, range)
         nearestX = QueryMeshNearestPointX(objectX, objectY, objectZ, extent, extent)
         nearestY = QueryMeshNearestPointY(objectX, objectY, objectZ, extent, extent)
         nearestZ = QueryMeshNearestPointZ(objectX, objectY, objectZ, extent, extent)
-        
+
         if nearestX and nearestY and nearestZ then
             LogInfo(string.format("[VAC] (PathToObject) Found valid navmesh point with extent %.2f", extent))
             LogInfo(string.format("[VAC] (PathToObject) Nearest point: X=%.2f, Y=%.2f, Z=%.2f", nearestX, nearestY, nearestZ))
@@ -1864,7 +1864,7 @@ function PathToObject(path_object_name, range)
     local floorX = QueryMeshPointOnFloorX(nearestX, nearestY, nearestZ, true, 2)
     local floorY = QueryMeshPointOnFloorY(nearestX, nearestY, nearestZ, true, 2)
     local floorZ = QueryMeshPointOnFloorZ(nearestX, nearestY, nearestZ, true, 2)
-    
+
     if not (floorX and floorY and floorZ) then
         LogInfo("[VAC] (PathToObject) Couldn't find a valid floor point near the object.")
         Echo("Unable to find a safe position near the object.")
@@ -1872,20 +1872,20 @@ function PathToObject(path_object_name, range)
     end
 
     LogInfo(string.format("[VAC] (PathToObject) Valid floor point: X=%.2f, Y=%.2f, Z=%.2f", floorX, floorY, floorZ))
-    
+
     -- Calculate distance to check if we're already close enough
     local distance = math.sqrt((playerX - floorX) ^ 2 + (playerY - floorY) ^ 2 + (playerZ - floorZ) ^ 2)
     LogInfo(string.format("[VAC] (PathToObject) Distance to floor point: %.2f", distance))
-    
+
     if distance > (range or 3) then  -- Use specified range or default to 3
         LogInfo("[VAC] (PathToObject) Moving to floor point.")
         Movement(floorX, floorY, floorZ, range or 3.5)
-        
+
         -- Wait until the pathing is complete
         repeat
             Sleep(0.1)
         until not PathIsRunning()
-        
+
         return true
     else
         LogInfo("[VAC] (PathToObject) Already close to the object.")
@@ -2001,7 +2001,7 @@ function PathToLimsaBell()
         nearestX = QueryMeshNearestPointX(bellX, bellY, bellZ, extent, extent)
         nearestY = QueryMeshNearestPointY(bellX, bellY, bellZ, extent, extent)
         nearestZ = QueryMeshNearestPointZ(bellX, bellY, bellZ, extent, extent)
-        
+
         if nearestX and nearestY and nearestZ then
             LogInfo(string.format("[VAC] (PathToLimsaBell) Found valid navmesh point with extent %.2f", extent))
             LogInfo(string.format("[VAC] (PathToLimsaBell) Nearest point: X=%.2f, Y=%.2f, Z=%.2f", nearestX, nearestY, nearestZ))
