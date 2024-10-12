@@ -1645,6 +1645,8 @@ function GCDeliverooExpertDelivery()
     Sleep(0.5)
     yield("/lockon")
     Sleep(0.2)
+    ClearTarget()
+    Sleep(0.2)
     yield("/deliveroo enable")
     Sleep(3)
     repeat
