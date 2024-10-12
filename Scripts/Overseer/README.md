@@ -133,7 +133,7 @@ local point_plans = {
 
 Note: You cannot directly copy-paste these configurations. You'll need to manually copy each section to meet the required format.
 
-## Submersible Behavior
+## Submersible Behaviour
 
 For levelling, all submersibles will follow the `unlock_plan` defined in the configuration, with the following vessel behaviour:
 - The first submersible will use "Unlock + Spam one destination" until all four submersibles are unlocked, then switch to "Unlock + Pick max amount of destinations".
