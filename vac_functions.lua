@@ -1417,6 +1417,8 @@ function BuyFCAction(action_name)
         Echo("OIC Quartermaster not found, aborting attempt to buy FC action")
         return false, "Quartermaster not found"
     end
+    yield("/lockon")
+    Sleep(0.2)
     Interact()
     repeat
         Sleep(0.1)
@@ -1630,6 +1632,17 @@ end
 --
 -- Will activate deliveroo and wait for it to finish
 function GCDeliverooExpertDelivery()
+    local gc_id = GetPlayerGC()
+    if gc_id == 1 then -- checks if gc is maelstrom and checks if the quests are done
+        Target("Storm Personnel Officer")
+    elseif gc_id == 2 then -- checks if gc is twin adder and checks if the quests are done
+        Target("Serpent Personnel Officer")
+    elseif gc_id == 3 then -- checks if gc is immortal flames and checks if the quests are done
+        Target("Flame Personnel Officer")
+    end
+    Sleep(0.5)
+    yield("/lockon")
+    Sleep(0.5)
     yield("/deliveroo enable")
     Sleep(3)
     repeat
