@@ -733,7 +733,7 @@ local function UpdateFromAutoRetainerConfig()
                     if sub_number == 1 and optimal_plan_type == 3 and num_sub_slots < 4 then
                         return 1
                     else
-                        return 0
+                        return 2
                     end
                 end
 
@@ -1224,7 +1224,11 @@ local function RegisterSubmersible()
         return
     end
 
-    PathToObject("Voyage Control Panel") -- Move to the Voyage Control Panel
+    PathToObject("Voyage Control Panel", 2) -- Move to the Voyage Control Panel
+    Target("Voyage Control Panel")
+    Sleep(0.5)
+    yield("/lockon")
+    Sleep(0.5)
     yield("/interact")
     repeat
         Sleep(0.1)
@@ -1681,7 +1685,11 @@ local function PostARTasks()
     for _, submersible in ipairs(char_data.submersibles) do
         if submersible.build ~= submersible.optimal_build and submersible.name ~= "" then
             if not in_submersible_menu then
-                PathToObject("Voyage Control Panel")
+                PathToObject("Voyage Control Panel", 2) -- Move to the Voyage Control Panel
+                Target("Voyage Control Panel")
+                Sleep(0.5)
+                yield("/lockon")
+                Sleep(1)
                 yield("/interact")
                 repeat
                     Sleep(0.1)
