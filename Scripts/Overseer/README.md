@@ -2,6 +2,8 @@
 
 Overseer is a script designed to improve your Auto Retainer experience. It provides automated backup, intelligent management, and optimisation features for Auto Retainer, ensuring data integrity and enhancing overall efficiency.
 
+There will potentially be bugs and weird things happening, please report any issues you encounter, this should be considered a script in the testing period.
+
 ## Planned Features
 
 - **Character & Retainer Management**: Streamline data handling for all your characters and retainers.
