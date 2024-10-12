@@ -7,9 +7,10 @@
                   
 ####################
 ##    Version     ##
-##     1.0.0      ##
+##     1.0.1      ##
 ####################
 
+-> 1.0.1: Improved the backup functionality and adjusted a few things for consistency
 -> 1.0.0: Initial release
 
 ####################################################
@@ -169,11 +170,34 @@ local function CreateConfigBackup()
     local file_name = "DefaultConfig"
     local max_backups = 50
     local timestamp = os.time()
+    local backup_interval = 3600 -- Every hour
+    local last_backup_file = backup_folder .. "last_backup_timestamp.txt"
 
-    -- create the backup file name with timestamp
+    -- Read the last backup timestamp
+    local last_backup_timestamp = 0
+    local last_backup_handle = io.open(last_backup_file, "r")
+    if last_backup_handle then
+        last_backup_timestamp = tonumber(last_backup_handle:read("*all")) or 0
+        last_backup_handle:close()
+    end
+
+    -- Check if it's been at least 1 hour since the last backup
+    if (timestamp - last_backup_timestamp) < backup_interval then
+        -- Less than an hour since the last backup, do nothing
+        return
+    end
+
+    -- Update the last backup timestamp
+    local last_backup_handle = io.open(last_backup_file, "w")
+    if last_backup_handle then
+        last_backup_handle:write(tostring(timestamp))
+        last_backup_handle:close()
+    end
+
+    -- Create the backup file name with timestamp
     local backup_file = string.format("%s%s_backup_%d.json", backup_folder, file_name, timestamp)
 
-    -- read the original file to back up
+    -- Read the original file to back up
     local source = io.open(auto_retainer_config_path, "rb")
     if not source then
         return
@@ -181,7 +205,7 @@ local function CreateConfigBackup()
     local content = source:read("*all")
     source:close()
 
-    -- write the backup file
+    -- Write the backup file
     local dest = io.open(backup_file, "wb")
     if not dest then
         return
@@ -189,7 +213,7 @@ local function CreateConfigBackup()
     dest:write(content)
     dest:close()
 
-    -- log the new backup
+    -- Log the new backup
     local log_file_path = backup_folder .. "backup_log.txt"
     local log_file = io.open(log_file_path, "a")
     if log_file then
@@ -197,7 +221,7 @@ local function CreateConfigBackup()
         log_file:close()
     end
 
-    -- read the existing backups from the log file
+    -- Read the existing backups from the log file
     local backups = {}
     local log_file_read = io.open(log_file_path, "r")
     if log_file_read then
@@ -207,20 +231,20 @@ local function CreateConfigBackup()
         log_file_read:close()
     end
 
-    -- check if we exceed the maximum number of backups
+    -- Check if we exceed the maximum number of backups
     if #backups > max_backups then
-        -- sort backups by unix timestamp
+        -- Sort backups by unix timestamp
         table.sort(backups, function(a, b)
             return tonumber(a:match("_(%d+)%.json$")) < tonumber(b:match("_(%d+)%.json$"))
         end)
 
-        -- delete the oldest backups until we're under the backup limit
+        -- Delete the oldest backups until we're under the backup limit
         while #backups > max_backups do
-            os.remove(backups[1]) -- delete the oldest backup file
-            table.remove(backups, 1) -- remove from the list
+            os.remove(backups[1]) -- Delete the oldest backup file
+            table.remove(backups, 1) -- Remove from the list
         end
 
-        -- rewrite the log file without the deleted backups
+        -- Rewrite the log file without the deleted backups
         local log_file_write = io.open(log_file_path, "w")
         for _, backup in ipairs(backups) do
             log_file_write:write(backup .. "\n")
