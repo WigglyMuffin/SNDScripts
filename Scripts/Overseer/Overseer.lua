@@ -149,14 +149,11 @@ ar_character_data_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfi
 ##################################################]]
 
 -- Load necessary libraries and set up paths
-snd_config_folder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
-vac_config_folder = snd_config_folder .. "\\VAC\\"
 load_functions_file_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
 
 
 LoadFunctions = loadfile(load_functions_file_location)()
 LoadFileCheck()
-EnsureFolderExists(vac_config_folder)
 EnsureFolderExists(backup_folder)
 EnsureFolderExists(ar_character_data_location)
 
@@ -180,8 +177,7 @@ if HasPlugin("BossMod") or HasPlugin("BossModReborn") then
 end
 
 LogInfo("[Overseer] ##############################")
-LogInfo("[Overseer] Starting script...")
-LogInfo("[Overseer] snd_config_folder: " .. snd_config_folder)
+LogInfo("[Overseer] Starting overseer...")
 LogInfo("[Overseer] ##############################")
 
 -- Helper function to create config backups of DefaultConfig.json
@@ -1151,7 +1147,7 @@ end
 -- Load specific character data and return it
 local function LoadOverseerCharacterData(character)
     LogInfo("[Overseer] Attempting to load data for " .. character)
-    local overseer_data_file = snd_config_folder .. "ar_character_data.lua"
+    local overseer_data_file = ar_character_data_location .. "ar_character_data.lua"
 
     -- Safely load the data using pcall to catch errors from dofile
     local success, overseer_data = pcall(dofile, overseer_data_file)
