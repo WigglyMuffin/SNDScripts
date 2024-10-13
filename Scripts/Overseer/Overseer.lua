@@ -7,9 +7,10 @@
                   
 ####################
 ##    Version     ##
-##     1.0.1      ##
+##     1.0.2      ##
 ####################
 
+-> 1.0.2: Made it easier to swap paths for people who use multipe accounts with different XIVLauncher directories, but not different windows users. Also moved default backups and character data to the AutoRetainer directory itself.
 -> 1.0.1: Improved the backup functionality and adjusted a few things for consistency
 -> 1.0.0: Initial release
 
@@ -125,6 +126,24 @@ local point_plans = {
     -- },
 }
 
+--[[
+You might want to edit these if you are running multiple accounts on the same windows user with different XIVLauncher config paths.
+
+For example if you want to swap auto_retainer_config_path you'd point it directly like so
+auto_retainer_config_path = "C:\\ff14\\XIVLauncher\\pluginConfigs\\AutoRetainer\\DefaultConfig.json"
+
+]]
+
+-- Point this to DefaultConfig.json inside this accounts AutoRetainer config folder
+auto_retainer_config_path = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\AutoRetainer\\DefaultConfig.json"
+
+-- Point this to wherever you want to store backups for this account, usually i keep this to the same folder as AR
+backup_folder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\AutoRetainer\\Overseer\\AR Config Backups\\"
+
+-- Point this to wherever you want to store the data Overseer references for this account, by default it's in the AutoRetainer config directory
+ar_character_data_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\AutoRetainer\\Overseer\\"
+
+
 --[[################################################
 ##                  Script Start                  ##
 ##################################################]]
@@ -133,13 +152,13 @@ local point_plans = {
 snd_config_folder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
 vac_config_folder = snd_config_folder .. "\\VAC\\"
 load_functions_file_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
-auto_retainer_config_path = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\AutoRetainer\\DefaultConfig.json"
-backup_folder = vac_config_folder .. "\\Overseer\\AR Config Backups\\"
+
 
 LoadFunctions = loadfile(load_functions_file_location)()
 LoadFileCheck()
 EnsureFolderExists(vac_config_folder)
 EnsureFolderExists(backup_folder)
+EnsureFolderExists(ar_character_data_location)
 
 -- Load JSON library from vac_functions
 local json = CreateJSONLibrary()
@@ -906,7 +925,7 @@ end
 -- Function to save character data and global plans to a Lua file
 local function SaveCharacterDataToFile(character_data, global_data)
     local file_name = "ar_character_data.lua"
-    local file_path = snd_config_folder .. file_name
+    local file_path = ar_character_data_location .. file_name
     local file, err = io.open(file_path, "w")
 
     if not file then
