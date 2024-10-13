@@ -5,9 +5,10 @@ It contains the functions required to make the scripts work
 
 ####################
 ##    Version     ##
-##     1.0.0      ##
+##     1.0.1      ##
 ####################
 
+-> 1.0.1: Updated UseFCAction()
 -> 1.0.0: Initial release
 
 #################
@@ -1336,7 +1337,7 @@ function UseFCAction(action_name)
         local node_text = GetNodeText("FreeCompanyAction", 5, i, 3)
         node_text = string.lower(node_text)
         if node_text == action_name then
-            yield("/callback FreeCompanyAction true 1 0")
+            yield("/callback FreeCompanyAction true 1 " .. (i - 1))
             Sleep(0.2)
             yield("/callback ContextMenu true 0 0 0")
             repeat
