@@ -7,9 +7,10 @@
                   
 ####################
 ##    Version     ##
-##     1.0.2      ##
+##     1.0.3      ##
 ####################
 
+-> 1.0.3: Simplified swapping folder locations even more, shouldn't be so hard
 -> 1.0.2: Made it easier to swap paths for people who use multipe accounts with different XIVLauncher directories, but not different windows users. Also moved default backups and character data to the AutoRetainer directory itself.
 -> 1.0.1: Improved the backup functionality and adjusted a few things for consistency
 -> 1.0.0: Initial release
@@ -137,11 +138,8 @@ auto_retainer_config_path = "C:\\ff14\\XIVLauncher\\pluginConfigs\\AutoRetainer\
 -- Point this to DefaultConfig.json inside this accounts AutoRetainer config folder
 auto_retainer_config_path = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\AutoRetainer\\DefaultConfig.json"
 
--- Point this to wherever you want to store backups for this account, usually i keep this to the same folder as AR
-backup_folder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\AutoRetainer\\Overseer\\AR Config Backups\\"
-
--- Point this to wherever you want to store the data Overseer references for this account, by default it's in the AutoRetainer config directory
-ar_character_data_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\AutoRetainer\\Overseer\\"
+-- Point this to wherever you want to store the data Overseer uses, this is also where backups are stored
+overseer_folder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\AutoRetainer\\Overseer\\"
 
 
 --[[################################################
@@ -150,12 +148,12 @@ ar_character_data_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfi
 
 -- Load necessary libraries and set up paths
 load_functions_file_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
-
+backup_folder = overseer_folder .. "\\AR Config Backups\\"
 
 LoadFunctions = loadfile(load_functions_file_location)()
 LoadFileCheck()
+EnsureFolderExists(overseer_folder)
 EnsureFolderExists(backup_folder)
-EnsureFolderExists(ar_character_data_location)
 
 -- Load JSON library from vac_functions
 local json = CreateJSONLibrary()
@@ -921,7 +919,7 @@ end
 -- Function to save character data and global plans to a Lua file
 local function SaveCharacterDataToFile(character_data, global_data)
     local file_name = "ar_character_data.lua"
-    local file_path = ar_character_data_location .. file_name
+    local file_path = overseer_folder .. file_name
     local file, err = io.open(file_path, "w")
 
     if not file then
@@ -1147,7 +1145,7 @@ end
 -- Load specific character data and return it
 local function LoadOverseerCharacterData(character)
     LogInfo("[Overseer] Attempting to load data for " .. character)
-    local overseer_data_file = ar_character_data_location .. "ar_character_data.lua"
+    local overseer_data_file = overseer_folder .. "ar_character_data.lua"
 
     -- Safely load the data using pcall to catch errors from dofile
     local success, overseer_data = pcall(dofile, overseer_data_file)
