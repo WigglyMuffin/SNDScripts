@@ -7,9 +7,10 @@
                   
 ####################
 ##    Version     ##
-##     1.0.3      ##
+##     1.0.4      ##
 ####################
 
+-> 1.0.4: Added better error handling for certain parts of the script, also fixed a typo
 -> 1.0.3: Simplified swapping folder locations even more, shouldn't be so hard
 -> 1.0.2: Made it easier to swap paths for people who use multipe accounts with different XIVLauncher directories, but not different windows users. Also moved default backups and character data to the AutoRetainer directory itself.
 -> 1.0.1: Improved the backup functionality and adjusted a few things for consistency
@@ -670,9 +671,9 @@ local function UpdateFromAutoRetainerConfig()
         local chara_key = chara_data.Name .. "@" .. chara_data.World
         local chara = CreateDefaultCharacter(chara_data.Name, chara_data.World)
 
-        chara.id = tostring(chara_data.CID)
-        chara.name = chara_data.Name
-        chara.server = chara_data.World
+        chara.id = tostring(chara_data.CID) or ""
+        chara.name = chara_data.Name or ""
+        chara.server = chara_data.World or ""
         chara.ceruleum = chara_data.Ceruleum or 0
         chara.repair_kits = chara_data.RepairKits or 0
         chara.ventures = chara_data.Ventures or 0
@@ -683,16 +684,16 @@ local function UpdateFromAutoRetainerConfig()
         chara.gil = chara_data.Gil or 0
 
         -- Always set the free_company owner to the character's own name and id
-        chara.free_company.owner.id = chara.id
-        chara.free_company.owner.name = chara.name
+        chara.free_company.owner.id = chara.id or ""
+        chara.free_company.owner.name = chara.name or ""
 
         -- Assign FC data based on character's ID matching HolderChara
         local fc_found = false
         for fc_id, fc in pairs(fc_data) do
             if fc.holder_chara == chara.id then
-                chara.free_company.id = fc.id
-                chara.free_company.name = fc.name
-                chara.free_company.credits = fc.credits
+                chara.free_company.id = fc.id or ""
+                chara.free_company.name = fc.name or ""
+                chara.free_company.credits = fc.credits or 0
                 chara.free_company.gc_id = insert_logged_in_player_fc_id(chara_key) or 0
                 chara.free_company.gc_rank = insert_logged_in_player_fc_rank(chara_key) or 0
                 LogInfo(string.format("[Overseer] FC found for character %s: ID=%s, Name=%s", chara.name, fc.id, fc.name))
@@ -718,8 +719,8 @@ local function UpdateFromAutoRetainerConfig()
             local additional_retainer_data = additional_data[retainer_id .. " " .. retainer_name] or {}
 
             local retainer_entry = CreateDefaultRetainer()
-            retainer_entry.id = retainer_id
-            retainer_entry.name = retainer_name
+            retainer_entry.id = retainer_id or ""
+            retainer_entry.name = retainer_name or ""
             retainer_entry.job = tostring(retainer.Job or 0)
             retainer_entry.experience = retainer.Experience or 0
             retainer_entry.level = retainer.Level or 0
@@ -756,17 +757,33 @@ local function UpdateFromAutoRetainerConfig()
                 local add_submersible_data = chara_data.AdditionalSubmarineData and chara_data.AdditionalSubmarineData[submersible_data.Name or ("Submersible-" .. i)] or {}
 
                 local function IsSubmersibleEnabled(submersible_name)
+                    if not submersible_name or type(submersible_name) ~= "string" then
+                        return false
+                    end
+
+                    if not enabled_submersibles_data or type(enabled_submersibles_data) ~= "table" then
+                        return false
+                    end
+
                     for _, enabled_sub in ipairs(enabled_submersibles_data) do
                         if enabled_sub == submersible_name then
-                            return true -- Submersible is enabled
+                            return true
                         end
                     end
-                    return false -- Submersible is not enabled
+
+                    return false
                 end
 
                 -- Function to determine what the best unlock mode to use is
                 local function GetOptimalUnlockMode(sub_number, rank)
+                    if type(sub_number) ~= "number" or type(rank) ~= "number" or type(num_sub_slots) ~= "number" then
+                        return 2
+                    end
+
                     local optimal_build, optimal_plan_type, optimal_unlock_plan_guid, optimal_point_plan_guid = GetOptimalBuildForRank(rank)
+
+                    optimal_plan_type = optimal_plan_type or 0
+
                     if sub_number == 1 and optimal_plan_type == 3 and num_sub_slots < 4 then
                         return 1
                     else
@@ -775,20 +792,23 @@ local function UpdateFromAutoRetainerConfig()
                 end
 
                 -- Function to check if a plan needs change or not
-                local function GetIfPlanNedsChange(sub_unlock_plan, sub_point_plan, sub_optimal_plan, sub_plan_type)
+                local function GetIfPlanNeedsChange(sub_unlock_plan, sub_point_plan, sub_optimal_plan, sub_plan_type)
+                    sub_plan_type = tonumber(sub_plan_type) or 0
+
                     if sub_plan_type == 4 then
-                        return (sub_point_plan ~= sub_optimal_plan)
+                        return (sub_point_plan or "") ~= (sub_optimal_plan or "")
                     else
-                        return (sub_unlock_plan ~= sub_optimal_plan)
+                        return (sub_unlock_plan or "") ~= (sub_optimal_plan or "")
                     end
                 end
+
 
                 local submersible = CreateDefaultSubmersible(i, has_valid_fc)
                 if i == 1 or i <= num_sub_slots then
                     submersible.unlocked = true
                 end
                 if submersible_data.Name then
-                    submersible.name = submersible_data.Name
+                    submersible.name = submersible_data.Name or ""
                     submersible.experience = add_submersible_data.CurrentExp or 0
                     submersible.rank = add_submersible_data.Level or 0
                     submersible.part1 = tostring(add_submersible_data.Part1 or "")
@@ -806,7 +826,7 @@ local function UpdateFromAutoRetainerConfig()
                     submersible.points = add_submersible_data.Points or ""
                     submersible.decoded_points = DecodeSubmersiblePoints(submersible.points) or {0, 0, 0, 0, 0}
                     submersible.route = DecodePointsToRoute(submersible.decoded_points)
-                    submersible.return_time = submersible_data.ReturnTime
+                    submersible.return_time = submersible_data.ReturnTime or ""
 
                     -- Calculate guaranteed and potential bonus exp
                     submersible.guaranteed_exp = CalculateGuaranteedExp(submersible.decoded_points)
@@ -838,12 +858,12 @@ local function UpdateFromAutoRetainerConfig()
                         local unlock_plan = GetUnlockPlanByGUID(optimal_unlock_plan_guid)
                         submersible.optimal_plan = unlock_plan and unlock_plan.GUID or ""
                         submersible.optimal_plan_name = unlock_plan and unlock_plan.Name or ""
-                        submersible.plan_needs_change = GetIfPlanNedsChange(submersible.selected_unlock_plan, submersible.selected_point_plan, submersible.optimal_plan, submersible.optimal_plan_type)
+                        submersible.plan_needs_change = GetIfPlanNeedsChange(submersible.selected_unlock_plan, submersible.selected_point_plan, submersible.optimal_plan, submersible.optimal_plan_type)
                     elseif optimal_plan_type == 4 then
                         local point_plan = GetPointPlanByGUID(optimal_point_plan_guid)
                         submersible.optimal_plan = point_plan and point_plan.GUID or ""
                         submersible.optimal_plan_name = point_plan and point_plan.Name or ""
-                        submersible.plan_needs_change = GetIfPlanNedsChange(submersible.selected_unlock_plan, submersible.selected_point_plan, submersible.optimal_plan, submersible.optimal_plan_type)
+                        submersible.plan_needs_change = GetIfPlanNeedsChange(submersible.selected_unlock_plan, submersible.selected_point_plan, submersible.optimal_plan, submersible.optimal_plan_type)
                     else
                         submersible.optimal_plan = ""
                         submersible.optimal_plan_name = ""
@@ -863,12 +883,12 @@ local function UpdateFromAutoRetainerConfig()
                                 local future_unlock_plan = GetUnlockPlanByGUID(future_optimal_unlock_plan_guid)
                                 submersible.future_optimal_plan = future_unlock_plan and future_unlock_plan.GUID or ""
                                 submersible.future_optimal_plan_name = future_unlock_plan and future_unlock_plan.Name or ""
-                                submersible.plan_needs_change_after_levelup = GetIfPlanNedsChange(submersible.selected_unlock_plan, submersible.selected_point_plan, submersible.future_optimal_plan, submersible.future_optimal_plan_type)
+                                submersible.plan_needs_change_after_levelup = GetIfPlanNeedsChange(submersible.selected_unlock_plan, submersible.selected_point_plan, submersible.future_optimal_plan, submersible.future_optimal_plan_type)
                             elseif future_optimal_plan_type == 4 then
                                 local future_point_plan = GetPointPlanByGUID(future_optimal_point_plan_guid)
                                 submersible.future_optimal_plan = future_point_plan and future_point_plan.GUID or ""
                                 submersible.future_optimal_plan_name = future_point_plan and future_point_plan.Name or ""
-                                submersible.plan_needs_change_after_levelup = GetIfPlanNedsChange(submersible.selected_unlock_plan, submersible.selected_point_plan, submersible.future_optimal_plan, submersible.future_optimal_plan_type)
+                                submersible.plan_needs_change_after_levelup = GetIfPlanNeedsChange(submersible.selected_unlock_plan, submersible.selected_point_plan, submersible.future_optimal_plan, submersible.future_optimal_plan_type)
                             else
                                 submersible.future_optimal_plan = ""
                                 submersible.future_optimal_plan_name = ""
