@@ -32,6 +32,8 @@ Ensure you have the following plugins installed and enabled:
 - TextAdvance
 - vnavmesh
 
+Also please only use the retainer bell inside the workshop and not one placed inside the main house, it will interfere with how the plugin works for now.
+
 ## Installation
 
 1. Verify all required plugins are installed and enabled.
