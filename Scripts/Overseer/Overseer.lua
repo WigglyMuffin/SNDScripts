@@ -7,9 +7,10 @@
                   
 ####################
 ##    Version     ##
-##     1.0.4      ##
+##     1.0.5      ##
 ####################
 
+-> 1.0.5: This update should ensure that it will only perform a part swap when you actually have the required parts in both your inventory and on your sub, it will also fix issues with loading the entrust list causing the script to not start at all.
 -> 1.0.4: Added better error handling for certain parts of the script, also fixed a typo
 -> 1.0.3: Simplified swapping folder locations even more, shouldn't be so hard
 -> 1.0.2: Made it easier to swap paths for people who use multipe accounts with different XIVLauncher directories, but not different windows users. Also moved default backups and character data to the AutoRetainer directory itself.
@@ -331,21 +332,34 @@ end
 
 -- Helper function to get unlock plan by GUID
 local function GetUnlockPlanByGUID(guid)
+    if guid == nil then
+        LogInfo("[Oveseer] GetUnlockPlanByGUID: Unlock plan is nil, returning default")
+        return "00000000-0000-0000-0000-000000000000"
+    end
+
     for _, plan in ipairs(unlock_plans) do
-        if plan.GUID == guid then
+        if plan and plan.GUID == guid then
             return plan
         end
     end
+
+    LogInfo("[Oveseer] GetUnlockPlanByGUID: No unlock plan found for the provided GUID.")
     return nil
 end
 
 -- Helper function to get point plan by GUID
 local function GetPointPlanByGUID(guid)
+    if guid == nil then
+        LogInfo("[Oveseer] GetPointPlanByGUID: Point plan is nil, returning default")
+        return "00000000-0000-0000-0000-000000000000"
+    end
+
     for _, plan in ipairs(point_plans) do
         if plan.GUID == guid then
             return plan
         end
     end
+    LogInfo("[Oveseer] GetPointPlanByGUID: No point plan found for the provided GUID.")
     return nil
 end
 
@@ -581,7 +595,7 @@ local function UpdateFromAutoRetainerConfig()
         submarine_unlock_plans = {},
         submarine_point_plans = {},
         unoptimal_vessel_configurations = {},
-        entrust_plans = {}     
+        entrust_plans = {}
     }
 
     -- Process global plans
@@ -1009,19 +1023,19 @@ local function SaveCharacterDataToFile(character_data, global_data)
     file:write("      },\n")
     file:write("    },\n")
 
-    file:write("    entrust_plans = {\n")
-    for _, plan in ipairs(global_data.entrust_plans) do
-        file:write("      {\n")
-        file:write(string.format("        guid = \"%s\",\n", plan.guid))
-        file:write(string.format("        name = \"%s\",\n", plan.name))
-        file:write("        list = {\n")
-        for _, item in ipairs(plan.list) do
-            file:write(string.format("          { id = %d, num = %d },\n", item.ID, item.Num))
-        end
-        file:write("        },\n")
-        file:write("      },\n")
-    end
-    file:write("    },\n")
+    -- file:write("    entrust_plans = {\n")
+    -- for _, plan in ipairs(global_data.entrust_plans) do
+    --     file:write("      {\n")
+    --     file:write(string.format("        guid = \"%s\",\n", plan.guid))
+    --     file:write(string.format("        name = \"%s\",\n", plan.name))
+    --     file:write("        list = {\n")
+    --     for _, item in ipairs(plan.list) do
+    --         file:write(string.format("          { id = %d, num = %d },\n", item.ID, item.Num))
+    --     end
+    --     file:write("        },\n")
+    --     file:write("      },\n")
+    -- end
+    -- file:write("    },\n")
     file:write("  },\n")
 
     -- Write character data
@@ -2103,6 +2117,74 @@ local function AddPointPlansToDefaultConfig()
     end
 end
 
+-- helper function to check if we have all the parts needed for a specific build for a submersible
+function CheckIfWeHaveRequiredParts(abbreviation, submersible)
+    local parts_needed = {}
+    local part_counter = 1
+
+    local function GetSlotName(part_number)
+        if part_number == 1 then
+            return "Hull"
+        elseif part_number == 2 then
+            return "Stern"
+        elseif part_number == 3 then
+            return "Bow"
+        elseif part_number == 4 then
+            return "Bridge"
+        end
+    end
+
+    local i = 1
+    while i <= #abbreviation do
+        local current_abbr = abbreviation:sub(i, i)
+        local next_char = abbreviation:sub(i + 1, i + 1)
+
+        if current_abbr:match("%a") then
+            local found = false
+            if next_char == "+" then
+                current_abbr = current_abbr .. "+"
+                i = i + 1
+            end
+
+            for _, part in ipairs(Submersible_Part_List) do
+                if part.PartAbbreviation == current_abbr and part.SlotName == GetSlotName(part_counter) then
+                    local slot_name = part.SlotName
+                    table.insert(parts_needed, { PartName = part.PartName, SlotName = slot_name })
+                    found = true
+                    part_counter = part_counter + 1
+                    break
+                end
+                Sleep(0.0001)
+            end
+
+            if not found then
+                LogInfo("[Overseer] Invalid abbreviation sequence: " .. current_abbr)
+                return false
+            end
+        end
+
+        i = i + 1
+    end
+
+    if #parts_needed ~= 4 then
+        LogInfo("[Overseer] Error: Exactly 4 parts must be identified.")
+        return false
+    end
+
+    for k, part_entry in ipairs(parts_needed) do
+        local sub_part_id = tonumber(submersible["part" .. k])
+
+        local item_id = FindItemID(part_entry.PartName)
+        local item_count = GetItemCount(item_id)
+        LogInfo("[Overseer] Checking part: " .. part_entry.PartName .. " (ID: " .. item_id .. ", Slot: " .. part_entry.SlotName .. ") - Count: " .. item_count)
+        if not ((item_count > 1) or (sub_part_id == item_id)) then
+            return false
+        end
+    end
+
+    return true
+end
+
 -- This needs to be cleaned up and the variables need to be done in a better way, but it's an early draft
 local function Main()
     UpdateOverseerDataFile()
@@ -2140,7 +2222,7 @@ local function Main()
 
                 if not ARRetainersWaitingToBeProcessed() then
                     for _, submersible in ipairs(char_data.submersibles) do
-                        if submersible.build ~= submersible.optimal_build and submersible.name ~= "" and submersible.return_time == 0 then
+                        if (submersible.build ~= submersible.optimal_build and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) and submersible.name ~= "" and submersible.return_time == 0 then
                             likely_waiting_for_part_swap = true
                         end
                     end
@@ -2171,7 +2253,11 @@ end
 
 --This is the old main function, for testing only
 -- local function Main()
---     CreateConfigBackup()
+--     UpdateOverseerDataFile()
+--     local char_data = LoadOverseerCharacterData(GetCharacterName(true))
+--     for _, submersible in ipairs(char_data.submersibles) do
+--         Echo(CheckPartsInInventory("SSSS+", submersible))
+--     end
 --     Echo("[Overseer] Character data and global plans processing complete")
 --     LogInfo("[Overseer] All characters and global plans processed, script finished")
 -- end
