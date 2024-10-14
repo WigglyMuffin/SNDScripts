@@ -7,9 +7,10 @@
                   
 ####################
 ##    Version     ##
-##     1.0.5      ##
+##     1.0.6      ##
 ####################
 
+-> 1.0.6: Now should support retainer bells inside the house and not just inside the workshop
 -> 1.0.5: This update should ensure that it will only perform a part swap when you actually have the required parts in both your inventory and on your sub, it will also fix issues with loading the entrust list causing the script to not start at all.
 -> 1.0.4: Added better error handling for certain parts of the script, also fixed a typo
 -> 1.0.3: Simplified swapping folder locations even more, shouldn't be so hard
@@ -1524,7 +1525,7 @@ local function ModifyAdditionalSubmersibleData(submersible_number, config, confi
             if additional_data_started then
 
                 if line:find('"Ceruleum":', 1, true) then
-                    break 
+                    break
                 end
 
                 if line:find('"AdditionalSubmarineData":', 1, true) then
@@ -1654,7 +1655,7 @@ local function PreARTasks()
     Check and set any subs that need a build swap to finalize
     ]]
     for _, submersible in ipairs(char_data.submersibles) do
-        if (submersible.future_optimal_build ~= "" or submersible.build ~= submersible.optimal_build) and submersible.name ~= "" and submersible.vessel_behavior ~= 0 then
+        if (submersible.future_optimal_build ~= "" or submersible.build ~= submersible.optimal_build) and submersible.name ~= "" and submersible.vessel_behavior ~= 0 and (CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) then
             if HasPlugin("AutoRetainer") then
                 ManageCollection(ar_collection_name, false)
                 Sleep(1.0)
@@ -1721,6 +1722,19 @@ local function PostARTasks()
     -- Check and handle if we need to register any submarines
     for _, submersible in ipairs(char_data.submersibles) do
         if submersible.unlocked and submersible.name == "" then
+            if DoesObjectExist("Entrance to Additional Chambers") then
+                PathToObject("Entrance to Additional Chambers", 1)
+                Target("Entrance to Additional Chambers")
+                Interact()
+                repeat
+                    Sleep(0.1)
+                until IsAddonReady("SelectString")
+                yield("/callback SelectString true 0")
+                ZoneTransitions()
+            end
+            if not DoesObjectExist("Voyage Control Panel") then
+                break
+            end
             RegisterSubmersible()
             ForceARSave()
             Sleep(2)
@@ -1754,7 +1768,20 @@ local function PostARTasks()
     local in_submersible_menu = false
     local swap_done = false
     for _, submersible in ipairs(char_data.submersibles) do
-        if submersible.build ~= submersible.optimal_build and submersible.name ~= "" then
+        if DoesObjectExist("Entrance to Additional Chambers") then
+            PathToObject("Entrance to Additional Chambers", 1)
+            Target("Entrance to Additional Chambers")
+            Interact()
+            repeat
+                Sleep(0.1)
+            until IsAddonReady("SelectString")
+            yield("/callback SelectString true 0")
+            ZoneTransitions()
+        end
+        if not DoesObjectExist("Voyage Control Panel") then
+            break
+        end
+        if (submersible.build ~= submersible.optimal_build and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) and submersible.name ~= "" then
             if not in_submersible_menu then
                 PathToObject("Voyage Control Panel", 2) -- Move to the Voyage Control Panel
                 Target("Voyage Control Panel")
@@ -1870,7 +1897,19 @@ local function PostARTasks()
         local amount_to_buy = CalculateCeruleumPurchase()
 
         if amount_to_buy > 0 then
-            BuyCeruleum(amount_to_buy)
+            if DoesObjectExist("Entrance to Additional Chambers") then
+                PathToObject("Entrance to Additional Chambers", 1)
+                Target("Entrance to Additional Chambers")
+                Interact()
+                repeat
+                    Sleep(0.1)
+                until IsAddonReady("SelectString")
+                yield("/callback SelectString true 0")
+                ZoneTransitions()
+            end
+            if DoesObjectExist("Voyage Control Panel") then
+                BuyCeruleum(amount_to_buy)
+            end
         else
             Echo("Not enough credits to purchase ceruleum without going below the limit.")
         end
@@ -2187,6 +2226,11 @@ end
 
 -- This needs to be cleaned up and the variables need to be done in a better way, but it's an early draft
 local function Main()
+    ARSetMultiModeEnabled(false)
+    ARAbortAllTasks()
+    if HasPlugin("AutoRetainer") then
+        ManageCollection(ar_collection_name, false)
+    end
     UpdateOverseerDataFile()
     CreateConfigBackup()
     AddUnlockPlansToDefaultConfig()
