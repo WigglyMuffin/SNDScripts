@@ -6,7 +6,9 @@ There will potentially be bugs and weird things happening, please report any iss
 
 ## Disclaimer
 
-**IMPORTANT:** Overseer directly modifies the Auto Retainer configuration file. By using Overseer, you acknowledge and accept the following:
+**IMPORTANT:** Overseer directly modifies the Auto Retainer configuration file. There are periodic backups created aimed to prevent data loss in the event of file corruption. See [Backup](#backup-system) section for more info.
+
+By using Overseer, you acknowledge and accept the following:
 
 1. Overseer's modifications will affect Auto Retainer's behaviour.
 2. You are solely responsible for any issues, data loss, or unintended consequences arising from Overseer's use.
@@ -15,6 +17,10 @@ There will potentially be bugs and weird things happening, please report any iss
 5. Use Overseer at your own risk. We cannot guarantee it won't conflict with Auto Retainer or other software.
 
 By using Overseer, you agree to these terms and accept full responsibility for its use and any consequences thereof.
+
+## Known Issues
+
+- If a submersible is ready to have their part swapped, it will finalise the report for that FC and all additional FCs after, this persists until your current cycle is completed.
 
 ## Planned Features
 
@@ -74,6 +80,7 @@ Fine-tune Overseer's behaviour by adjusting these parameters in the script's con
 | `fc_credits_to_keep` | How many credits to always keep, this limit will be ignored when buying FC buffs for GC deliveries |
 | `use_fc_buff` | Will attempt to buy and use the seal sweetener buff when doing GC deliveries |
 | `ar_collection_name` | Name of the plugin collection which contains the "AutoRetainer" plugin |
+| `force_return_subs_that_need_swap` | Will force return submarines to swap parts even if they're already sent out, if set to false it will wait until they're back |
 
 You can also customise submersible builds and retainer venture types in their respective sections.
 
@@ -154,6 +161,8 @@ For levelling, all submersibles will follow the `unlock_plan` defined in the con
 - The second, third, and fourth submersibles will use "Unlock + Pick max amount of destinations".
 - Once each individual submersible reaches the configured rank value for farming, they will automatically switch to the `point_plan` you have set, while the remaining submersibles continue to level.
 
+By using Overseer, you agree to these terms and accept full responsibility for its use and any consequences thereof.
+
 ## Backup System
 
 Overseer implements a robust backup system for your Auto Retainer configuration:
@@ -161,15 +170,3 @@ Overseer implements a robust backup system for your Auto Retainer configuration:
 - Creates backups automatically
 - Maintains a rolling set of up to 50 recent backups
 - Ensures you can always revert to a previous stable configuration
-
-## Disclaimer
-
-**IMPORTANT:** Overseer directly modifies the Auto Retainer configuration file. By using Overseer, you acknowledge and accept the following:
-
-1. Overseer's modifications will affect Auto Retainer's behaviour.
-2. You are solely responsible for any issues, data loss, or unintended consequences arising from Overseer's use.
-3. Auto Retainer and its developers are not liable for any problems caused by Overseer's modifications.
-4. It is strongly recommended to manually backup your Auto Retainer configuration before first use of Overseer.
-5. Use Overseer at your own risk. We cannot guarantee it won't conflict with Auto Retainer or other software.
-
-By using Overseer, you agree to these terms and accept full responsibility for its use and any consequences thereof.
