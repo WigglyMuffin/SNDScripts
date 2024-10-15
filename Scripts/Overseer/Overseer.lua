@@ -7,9 +7,10 @@
                   
 ####################
 ##    Version     ##
-##     1.0.6      ##
+##     1.0.7      ##
 ####################
 
+-> 1.0.7: Fixed a bug causing the AR file to become incomplete when saving
 -> 1.0.6: Now should support retainer bells inside the house and not just inside the workshop
 -> 1.0.5: This update should ensure that it will only perform a part swap when you actually have the required parts in both your inventory and on your sub, it will also fix issues with loading the entrust list causing the script to not start at all.
 -> 1.0.4: Added better error handling for certain parts of the script, also fixed a typo
@@ -1524,12 +1525,7 @@ local function ModifyAdditionalSubmersibleData(submersible_number, config, confi
 
             if additional_data_started then
 
-                if line:find('"Ceruleum":', 1, true) then
-                    break
-                end
-
                 if line:find('"AdditionalSubmarineData":', 1, true) then
-
                     while true do
                         line = file:read()
 
@@ -1540,11 +1536,10 @@ local function ModifyAdditionalSubmersibleData(submersible_number, config, confi
                         end
 
                         if in_submersible_data then
-
                             if line:find('"' .. config .. '":') then
                                 config_found = true
                                 line = line:gsub('"' .. config .. '": "%s*[^"]-%s*"', '"' .. config .. '": "' .. config_option .. '"')
-                                line = line:gsub('"' .. config .. '": %s*(%d+)', '"' .. config .. '": ' .. config_option) -- Update for numeric values
+                                line = line:gsub('"' .. config .. '": %s*(%d+)', '"' .. config .. '": ' .. config_option)
                                 modified = true
                             end
                         end
@@ -1555,6 +1550,7 @@ local function ModifyAdditionalSubmersibleData(submersible_number, config, confi
                             if in_submersible_data then
                                 in_submersible_data = false
                             elseif line:find('"AdditionalSubmarineData":') then
+                                additional_data_started = false
                                 break
                             end
                         end
@@ -1574,7 +1570,6 @@ local function ModifyAdditionalSubmersibleData(submersible_number, config, confi
         end
         return nil, "Submersible not found or no modification made."
     end
-    
 
     if char_data.submersibles[submersible_number].build == "" then
         Echo("No submersible with that number found.")
@@ -1595,6 +1590,11 @@ local function ModifyAdditionalSubmersibleData(submersible_number, config, confi
     end
 
     local cid_to_find = char_data.id
+    if not cid_to_find then
+        Echo("Failed to find character data")
+        return
+    end
+
     local success, msg = update_config_in_additional_data(auto_retainer_config_path, cid_to_find, submersible_name, config, config_option)
 
     if success then
@@ -1639,7 +1639,7 @@ local function PreARTasks()
                     Sleep(0.1)
                 until not HasPlugin("AutoRetainer")
             end
-            ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior",submersible.optimal_plan_type)
+            ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", submersible.optimal_plan_type)
             ModifyAdditionalSubmersibleData(submersible.number,"UnlockMode", submersible.optimal_unlock_mode)
             if submersible.optimal_plan_type == 4 then
                 ModifyAdditionalSubmersibleData(submersible.number,"SelectedPointPlan",submersible.optimal_plan)
@@ -1738,11 +1738,11 @@ local function PostARTasks()
             RegisterSubmersible()
             ForceARSave()
             Sleep(2)
-            UpdateOverseerDataFile()
-            char_data = LoadOverseerCharacterData(GetCharacterName(true))
             if HasPlugin("AutoRetainer") then
                 ManageCollection(ar_collection_name, false)
             end
+            UpdateOverseerDataFile()
+            char_data = LoadOverseerCharacterData(GetCharacterName(true))
             Sleep(1.0)
             repeat
                 Sleep(0.5)
