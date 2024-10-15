@@ -7,9 +7,10 @@
                   
 ####################
 ##    Version     ##
-##     1.0.7      ##
+##     1.0.8      ##
 ####################
 
+-> 1.0.8: Changed default behavior to not take submarines out of voyages when it needs a part swap, and instead made it a toggle that is default set to false
 -> 1.0.7: Fixed a bug causing the AR file to become incomplete when saving
 -> 1.0.6: Now should support retainer bells inside the house and not just inside the workshop
 -> 1.0.5: This update should ensure that it will only perform a part swap when you actually have the required parts in both your inventory and on your sub, it will also fix issues with loading the entrust list causing the script to not start at all.
@@ -46,14 +47,15 @@ Retainers are planned features, they are not currently supported.
 ##                    Settings                    ##
 ##################################################]]
 
-local venture_limit = 100                   -- Minimum value of ventures to trigger buying more ventures, requires Deliveroo to be correctly configured by doing GC deliveries
-local inventory_slot_limit = 30             -- Amount of inventory slots remaining before attempting a GC delivery to free up slots
-local buy_ceruleum = false                  -- Will attempt to buy ceruleum fuel based on the settings below, if set to false the characters will never attempt to refuel (buy ceruleum fuel off players)
-local ceruleum_limit = 100                  -- Minimum value of ceruleum fuel to trigger buying ceruleum fuel
-local ceruleum_buy_amount = 999             -- Amount of ceruleum fuel to be purchased when ceruleum_limit is triggered
-local fc_credits_to_keep = 10000            -- How many credits to always keep, this limit will be ignored when buying FC buffs for GC deliveries
-local use_fc_buff = false                   -- Will attempt to buy and use the seal sweetener buff when doing GC deliveries
-local ar_collection_name = "AutoRetainer"   -- Name of the plugin collection which contains the "AutoRetainer" plugin
+local venture_limit = 100                        -- Minimum value of ventures to trigger buying more ventures, requires Deliveroo to be correctly configured by doing GC deliveries
+local inventory_slot_limit = 30                  -- Amount of inventory slots remaining before attempting a GC delivery to free up slots
+local buy_ceruleum = false                       -- Will attempt to buy ceruleum fuel based on the settings below, if set to false the characters will never attempt to refuel (buy ceruleum fuel off players)
+local ceruleum_limit = 100                       -- Minimum value of ceruleum fuel to trigger buying ceruleum fuel
+local ceruleum_buy_amount = 999                  -- Amount of ceruleum fuel to be purchased when ceruleum_limit is triggered
+local fc_credits_to_keep = 10000                 -- How many credits to always keep, this limit will be ignored when buying FC buffs for GC deliveries
+local use_fc_buff = false                        -- Will attempt to buy and use the seal sweetener buff when doing GC deliveries
+local ar_collection_name = "AutoRetainer"        -- Name of the plugin collection which contains the "AutoRetainer" plugin
+local force_return_subs_that_need_swap = false   -- This setting will force bring back even already sent out submarines that need part swaps, generally not needed but probably recommended
 
 -- Configuration for retainer levels and venture types
 -- min_level = minimum level value, starts at 0
@@ -1763,25 +1765,27 @@ local function PostARTasks()
             break
         end
     end
-
     -- Check and handle if we need to swap builds of a submarine
     local in_submersible_menu = false
     local swap_done = false
     for _, submersible in ipairs(char_data.submersibles) do
-        if DoesObjectExist("Entrance to Additional Chambers") then
-            PathToObject("Entrance to Additional Chambers", 1)
-            Target("Entrance to Additional Chambers")
-            Interact()
-            repeat
-                Sleep(0.1)
-            until IsAddonReady("SelectString")
-            yield("/callback SelectString true 0")
-            ZoneTransitions()
-        end
-        if not DoesObjectExist("Voyage Control Panel") then
-            break
-        end
         if (submersible.build ~= submersible.optimal_build and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) and submersible.name ~= "" then
+            if submersible.return_time ~= 0 and not force_return_subs_that_need_swap then
+                break
+            end
+            if DoesObjectExist("Entrance to Additional Chambers") then
+                PathToObject("Entrance to Additional Chambers", 1)
+                Target("Entrance to Additional Chambers")
+                Interact()
+                repeat
+                    Sleep(0.1)
+                until IsAddonReady("SelectString")
+                yield("/callback SelectString true 0")
+                ZoneTransitions()
+            end
+            if not DoesObjectExist("Voyage Control Panel") then
+                break
+            end
             if not in_submersible_menu then
                 PathToObject("Voyage Control Panel", 2) -- Move to the Voyage Control Panel
                 Target("Voyage Control Panel")
