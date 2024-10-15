@@ -20,7 +20,7 @@ By using Overseer, you agree to these terms and accept full responsibility for i
 
 ## Known Issues
 
-- If a submersible is ready to have their part swapped, it will finalise the report for that FC and all additional FCs after, this persists until your current cycle is completed.
+- None!
 
 ## Planned Features
 
