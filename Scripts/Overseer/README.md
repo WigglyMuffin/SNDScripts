@@ -1,11 +1,20 @@
-# THIS SCRIPT IS CURRENTLY NOT WORKING PROPERLY
-it will almost certainly break, and require you to store the automatic backup of your AR config, please refrain from using it until this message is gone.
-
 # Overseer
 
 Overseer is a script designed to improve your Auto Retainer experience. It provides automated backup, management and optimisation features for Auto Retainer, ensuring data integrity and enhancing overall efficiency.
 
 There will potentially be bugs and weird things happening, please report any issues you encounter, this should be considered a script in the testing period, while all attempts have been made to ensure things run smoothly, there is no guarantee they will.
+
+## Disclaimer
+
+**IMPORTANT:** Overseer directly modifies the Auto Retainer configuration file. By using Overseer, you acknowledge and accept the following:
+
+1. Overseer's modifications will affect Auto Retainer's behaviour.
+2. You are solely responsible for any issues, data loss, or unintended consequences arising from Overseer's use.
+3. Auto Retainer and its developers are not liable for any problems caused by Overseer's modifications.
+4. It is strongly recommended to manually backup your Auto Retainer configuration before first use of Overseer.
+5. Use Overseer at your own risk. We cannot guarantee it won't conflict with Auto Retainer or other software.
+
+By using Overseer, you agree to these terms and accept full responsibility for its use and any consequences thereof.
 
 ## Planned Features
 
