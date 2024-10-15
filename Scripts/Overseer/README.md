@@ -18,6 +18,10 @@ By using Overseer, you acknowledge and accept the following:
 
 By using Overseer, you agree to these terms and accept full responsibility for its use and any consequences thereof.
 
+## Known Issues
+
+- If a submersible is ready to have their part swapped, it will finalise the report for that FC and all additional FCs after, this persists until your current cycle is completed.
+
 ## Planned Features
 
 - **Character & Retainer Management**: Streamline data handling for all your characters and retainers.
