@@ -7,9 +7,10 @@
                   
 ####################
 ##    Version     ##
-##     1.0.8      ##
+##     1.0.9      ##
 ####################
 
+-> 1.0.9: Fixed a logic issue causing the script to think you do not have the parts you actually do have
 -> 1.0.8: Changed default behavior to not take submarines out of voyages when it needs a part swap, and instead made it a toggle that is default set to false
 -> 1.0.7: Fixed a bug causing the AR file to become incomplete when saving
 -> 1.0.6: Now should support retainer bells inside the house and not just inside the workshop
@@ -77,7 +78,7 @@ local retainer_level_config = {
 -- point_plan = GUID corresponding to the point_plan below
 local submersible_build_config = {
     {min_rank = 1, max_rank = 14, build = "SSSS", plan_type = 3, unlock_plan = "31d90475-c6a1-4174-9f66-5ec2e1d01074", point_plan = "6e38ab7a-05c2-40b7-84a1-06f087704371"},
-    {min_rank = 15, max_rank = 89, build = "SSUS", plan_type = 3, unlock_plan = "31d90475-c6a1-4174-9f66-5ec2e1d01074", point_plan = "6e38ab7a-05c2-40b7-84a1-06f087704371"},
+    {min_rank = 15, max_rank = 89, build = "SSSS", plan_type = 3, unlock_plan = "31d90475-c6a1-4174-9f66-5ec2e1d01074", point_plan = "6e38ab7a-05c2-40b7-84a1-06f087704371"},
     {min_rank = 90, max_rank = 120, build = "SSUC", plan_type = 4, unlock_plan = "31d90475-c6a1-4174-9f66-5ec2e1d01074", point_plan = "6e38ab7a-05c2-40b7-84a1-06f087704371"},
 }
 
@@ -1657,7 +1658,7 @@ local function PreARTasks()
     Check and set any subs that need a build swap to finalize
     ]]
     for _, submersible in ipairs(char_data.submersibles) do
-        if (submersible.future_optimal_build ~= "" or submersible.build ~= submersible.optimal_build) and submersible.name ~= "" and submersible.vessel_behavior ~= 0 and (CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) then
+        if submersible.future_optimal_build ~= "" or submersible.build ~= submersible.optimal_build and submersible.name ~= "" and submersible.vessel_behavior ~= 0 and (CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) then
             if HasPlugin("AutoRetainer") then
                 ManageCollection(ar_collection_name, false)
                 Sleep(1.0)
@@ -1768,6 +1769,9 @@ local function PostARTasks()
     -- Check and handle if we need to swap builds of a submarine
     local in_submersible_menu = false
     local swap_done = false
+    ForceARSave()
+    UpdateOverseerDataFile()
+    local char_data = LoadOverseerCharacterData(GetCharacterName(true))
     for _, submersible in ipairs(char_data.submersibles) do
         if (submersible.build ~= submersible.optimal_build and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) and submersible.name ~= "" then
             if submersible.return_time ~= 0 and not force_return_subs_that_need_swap then
@@ -2216,11 +2220,12 @@ function CheckIfWeHaveRequiredParts(abbreviation, submersible)
 
     for k, part_entry in ipairs(parts_needed) do
         local sub_part_id = tonumber(submersible["part" .. k])
-
         local item_id = FindItemID(part_entry.PartName)
         local item_count = GetItemCount(item_id)
+
         LogInfo("[Overseer] Checking part: " .. part_entry.PartName .. " (ID: " .. item_id .. ", Slot: " .. part_entry.SlotName .. ") - Count: " .. item_count)
-        if not ((item_count > 1) or (sub_part_id == item_id)) then
+
+        if not ((item_count > 0) or (sub_part_id == item_id)) then
             return false
         end
     end
@@ -2304,7 +2309,7 @@ end
 --     UpdateOverseerDataFile()
 --     local char_data = LoadOverseerCharacterData(GetCharacterName(true))
 --     for _, submersible in ipairs(char_data.submersibles) do
---         Echo(CheckPartsInInventory("SSSS+", submersible))
+--         Echo(CheckIfWeHaveRequiredParts("SSSS", submersible))
 --     end
 --     Echo("[Overseer] Character data and global plans processing complete")
 --     LogInfo("[Overseer] All characters and global plans processed, script finished")
