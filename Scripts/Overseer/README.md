@@ -1,3 +1,6 @@
+# THIS SCRIPT IS CURRENTLY NOT WORKING PROPERLY
+it will almost certainly break, and require you to store the automatic backup of your AR config, please refrain from using it until this message is gone.
+
 # Overseer
 
 Overseer is a script designed to improve your Auto Retainer experience. It provides automated backup, management and optimisation features for Auto Retainer, ensuring data integrity and enhancing overall efficiency.
