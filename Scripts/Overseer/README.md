@@ -6,7 +6,7 @@ There will potentially be bugs and weird things happening, please report any iss
 
 ## Disclaimer
 
-**IMPORTANT:** Overseer directly modifies the Auto Retainer configuration file. But it does keep constant backups for you to restore if anything happens. See [Backup](#backup-system) section for more info
+**IMPORTANT:** Overseer directly modifies the Auto Retainer configuration file. There are periodic backups created aimed to prevent data loss in the event of file corruption. See [Backup](#backup-system) section for more info.
 
 By using Overseer, you acknowledge and accept the following:
 
