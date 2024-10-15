@@ -10,7 +10,7 @@
 ##     1.1.2      ##
 ####################
 
--> 1.1.2: 
+-> 1.1.2: Potentially dealt with a couple more minor bugs that relate to part swapping
 -> 1.1.1: Fixed yet another logic issue causing submarines that have been set to finalize to stay finalized
 -> 1.1.0: Should fix another logic issue where the parts don't get swapped even if they should be
 -> 1.0.9: Fixed a logic issue causing the script to think you do not have the parts you actually do have
