@@ -7,9 +7,10 @@
                   
 ####################
 ##    Version     ##
-##     1.1.1      ##
+##     1.1.2      ##
 ####################
 
+-> 1.1.2: 
 -> 1.1.1: Fixed yet another logic issue causing submarines that have been set to finalize to stay finalized
 -> 1.1.0: Should fix another logic issue where the parts don't get swapped even if they should be
 -> 1.0.9: Fixed a logic issue causing the script to think you do not have the parts you actually do have
@@ -1288,10 +1289,12 @@ end
 
 -- Simple function to force ar to save to file, since for some reason closing/opening the ui does this
 local function ForceARSave()
-    yield("/ays")
-    Sleep(0.1)
-    yield("/ays")
-    Sleep(0.5) -- Some extra time to save, just in case
+    if HasPlugin("AutoRetainer") then
+        yield("/ays")
+        Sleep(0.1)
+        yield("/ays")
+        Sleep(0.5)
+    end
 end
 
 -- Will run after AR has finished processing if a submersible can be created
@@ -1418,91 +1421,6 @@ local function EnableSubmersible(submersible_number)
     end
 end
 
--- Function to disable a specific submersible number for a character
-local function DisableSubmersible(submersible_number)
-    UpdateOverseerDataFile()
-    local char_data = LoadOverseerCharacterData(GetCharacterName(true))
-
-    local function remove_submersible_from_cid(file_path, target_cid, submersible_name)
-        local file = io.open(file_path, "r")
-        if not file then
-            return nil, "Unable to open file"
-        end
-        local cid_pattern = '"CID": ' .. target_cid .. ','
-        local lines = {}
-        local enabled_subs_started = false
-        local sub_found = false
-
-        for line in file:lines() do
-            table.insert(lines, line)
-
-            if line:find(cid_pattern, 1, true) then
-
-                for sub_line in file:lines() do
-                    table.insert(lines, sub_line)
-
-                    if sub_line:find('"EnabledSubs":', 1, true) then
-                        enabled_subs_started = true
-                    end
-
-                    if enabled_subs_started then
-
-                        if sub_line:find('"' .. submersible_name .. '"', 1, true) then
-                            sub_found = true
-                            table.remove(lines, #lines)
-                        end
-
-                        if sub_line:find("]", 1, true) then
-                            if sub_found then
-
-                                if lines[#lines - 1]:find("%[") and not lines[#lines - 1]:find(",") then
-                                    lines[#lines -1] = '      "EnabledSubs": [],'
-                                    table.remove(lines, #lines)
-                                else
-                                    local prev_line = lines[#lines - 1]
-                                    lines[#lines - 1] = prev_line:gsub(",%s*$", "")
-                                end
-                            end
-                            enabled_subs_started = false
-                            break
-                        end
-                    end
-                end
-            end
-        end
-        file:close()
-
-        if sub_found then
-            local out_file = io.open(file_path, "w")
-            for _, modified_line in ipairs(lines) do
-                out_file:write(modified_line .. "\n")
-            end
-            out_file:close()
-            return true, "Successfully disabled submersible."
-        end
-        return nil, "Submersible not found or no modification made"
-    end
-
-    local submersible_name = ""
-    for _, submersible in ipairs(char_data.submersibles) do
-        if submersible.number == submersible_number then
-            submersible_name = submersible.name
-        end
-    end
-    if submersible_name ~= "" then
-        local cid_to_find = char_data.id
-        local success, msg = remove_submersible_from_cid(auto_retainer_config_path, cid_to_find, submersible_name)
-        if success then
-            Echo(msg)
-        else
-            Echo("Error: " .. msg)
-        end
-    else
-        LogInfo("[Overseer] Requested submersible doesn't have a name, not removing")
-        return
-    end
-end
-
 -- Function to Set specific unlock mode for a submersible
 local function ModifyAdditionalSubmersibleData(submersible_number, config, config_option)
     UpdateOverseerDataFile()
@@ -1611,6 +1529,9 @@ end
 
 -- Function to handle any tasks that need to be done before AR does it's things, like part swapping
 local function PreARTasks()
+    if HasPlugin("AutoRetainer") then
+        ManageCollection(ar_collection_name, false)
+    end
     UpdateOverseerDataFile()
     local char_data = LoadOverseerCharacterData(GetCharacterName(true))
 
@@ -1660,7 +1581,7 @@ local function PreARTasks()
     Check and set any subs that need a build swap to finalize
     ]]
     for _, submersible in ipairs(char_data.submersibles) do
-        if (submersible.future_optimal_build ~= "" or (submersible.build ~= submersible.optimal_build and submersible.name ~= "" and submersible.vessel_behavior ~= 0 and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible))) then
+        if (submersible.future_optimal_build ~= "" and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) or (submersible.build ~= submersible.optimal_build and submersible.name ~= "" and submersible.vessel_behavior ~= 0 and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) then
             if HasPlugin("AutoRetainer") then
                 ManageCollection(ar_collection_name, false)
                 Sleep(1.0)
@@ -1692,6 +1613,14 @@ local function PostARTasks()
     repeat
         Sleep(0.1)
     until IsPlayerAvailable()
+
+    if HasPlugin("AutoRetainer") then
+        ManageCollection(ar_collection_name, false)
+        Sleep(1.0)
+        repeat
+            Sleep(0.5)
+        until not HasPlugin("AutoRetainer")
+    end
 
     -- variables
     local overseer_need_ceruleum = false
@@ -1743,15 +1672,9 @@ local function PostARTasks()
             RegisterSubmersible()
             ForceARSave()
             Sleep(2)
-            if HasPlugin("AutoRetainer") then
-                ManageCollection(ar_collection_name, false)
-            end
             UpdateOverseerDataFile()
             char_data = LoadOverseerCharacterData(GetCharacterName(true))
             Sleep(1.0)
-            repeat
-                Sleep(0.5)
-            until not HasPlugin("AutoRetainer")
             for _, submersible in ipairs(char_data.submersibles) do
                 if not submersible.enabled and submersible.name ~= "" then
                     EnableSubmersible(submersible.number)
@@ -1772,9 +1695,6 @@ local function PostARTasks()
     -- Check and handle if we need to swap builds of a submarine
     local in_submersible_menu = false
     local swap_done = false
-    ForceARSave()
-    UpdateOverseerDataFile()
-    local char_data = LoadOverseerCharacterData(GetCharacterName(true))
     for _, submersible in ipairs(char_data.submersibles) do
         if (submersible.build ~= submersible.optimal_build) and submersible.name ~= "" then
             if submersible.return_time ~= 0 and not force_return_subs_that_need_swap then
@@ -1829,13 +1749,6 @@ local function PostARTasks()
                     until IsAddonReady("SelectString")
                     Sleep(0.5)
                 end
-                if HasPlugin("AutoRetainer") then
-                    ManageCollection(ar_collection_name, false)
-                    Sleep(1.0)
-                    repeat
-                        Sleep(0.5)
-                    until not HasPlugin("AutoRetainer")
-                end
                 yield("/callback SelectString true 2")
                 repeat
                     Sleep(0.1)
@@ -1857,13 +1770,6 @@ local function PostARTasks()
                     ModifyAdditionalSubmersibleData(submersible.number,"SelectedUnlockPlan",submersible.optimal_plan)
                 end
             elseif submersible.return_time == 0 and not CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible) then
-                if HasPlugin("AutoRetainer") then
-                    ManageCollection(ar_collection_name, false)
-                    Sleep(1.0)
-                    repeat
-                        Sleep(0.5)
-                    until not HasPlugin("AutoRetainer")
-                end
                 ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior",submersible.optimal_plan_type)
                 if submersible.optimal_plan_type == 4 then
                     ModifyAdditionalSubmersibleData(submersible.number,"SelectedPointPlan",submersible.optimal_plan)
@@ -1887,7 +1793,7 @@ local function PostARTasks()
         until IsAddonReady("SelectString") or IsPlayerAvailable()
     end
 
-    -- Reenable AutoRetainer if it's disabled
+    -- Reenable AutoRetainer
     if not HasPlugin("AutoRetainer") then
         ManageCollection(ar_collection_name, true)
         Sleep(1.0)
@@ -1895,6 +1801,7 @@ local function PostARTasks()
             Sleep(0.5)
         until HasPlugin("AutoRetainer") and type(ARGetInventoryFreeSlotCount()) == "number"
         yield("/ays")
+        Sleep(1.0)
     end
 
     -- Handle any subs we might have modified
@@ -2252,9 +2159,12 @@ function CheckIfWeHaveRequiredParts(abbreviation, submersible)
     return true
 end
 
--- This needs to be cleaned up and the variables need to be done in a better way, but it's an early draft
+-- This needs to be cleaned up
 local function Main()
     ARSetMultiModeEnabled(false)
+    repeat
+        Sleep(1.0)
+    until IsPlayerAvailable()
     ARAbortAllTasks()
     if HasPlugin("AutoRetainer") then
         ManageCollection(ar_collection_name, false)
@@ -2265,7 +2175,6 @@ local function Main()
     AddPointPlansToDefaultConfig()
     Echo("[Overseer] Character data and global plans processing complete")
     LogInfo("[Overseer] All characters processed, starting main loop")
-
     -- Main overseer loop
 
     while true do
@@ -2289,9 +2198,7 @@ local function Main()
                         Sleep(0.1)
                     until IsPlayerAvailable()
                 end
-                UpdateOverseerDataFile()
                 local char_data = LoadOverseerCharacterData(GetCharacterName(true))
-
                 if not ARRetainersWaitingToBeProcessed() then
                     for _, submersible in ipairs(char_data.submersibles) do
                         if (submersible.build ~= submersible.optimal_build and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) and submersible.name ~= "" and submersible.return_time == 0 then
@@ -2299,10 +2206,14 @@ local function Main()
                         end
                     end
                 end
+
                 if (not ARAnyWaitingToBeProcessed() and not ARIsBusy()) or (not ARRetainersWaitingToBeProcessed() and not ARIsBusy() and ARSubsWaitingToBeProcessed() and likely_waiting_for_part_swap) then -- Needs better handling
                     ARSetMultiModeEnabled(false) -- Disable multi so we can safely check tasks
+                    ARAbortAllTasks()
                     ar_finished = true
                 end
+
+                UpdateOverseerDataFile()
                 Sleep(1.0)
             end
 
