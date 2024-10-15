@@ -7,9 +7,10 @@
                   
 ####################
 ##    Version     ##
-##     1.1.0      ##
+##     1.1.1      ##
 ####################
 
+-> 1.1.1: Fixed yet another logic issue causing submarines that have been set to finalize to stay finalized
 -> 1.1.0: Should fix another logic issue where the parts don't get swapped even if they should be
 -> 1.0.9: Fixed a logic issue causing the script to think you do not have the parts you actually do have
 -> 1.0.8: Changed default behavior to not take submarines out of voyages when it needs a part swap, and instead made it a toggle that is default set to false
@@ -1659,7 +1660,7 @@ local function PreARTasks()
     Check and set any subs that need a build swap to finalize
     ]]
     for _, submersible in ipairs(char_data.submersibles) do
-        if submersible.future_optimal_build ~= "" or submersible.build ~= submersible.optimal_build and submersible.name ~= "" and submersible.vessel_behavior ~= 0 and (CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) then
+        if (submersible.future_optimal_build ~= "" or (submersible.build ~= submersible.optimal_build and submersible.name ~= "" and submersible.vessel_behavior ~= 0 and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible))) then
             if HasPlugin("AutoRetainer") then
                 ManageCollection(ar_collection_name, false)
                 Sleep(1.0)
@@ -1775,10 +1776,10 @@ local function PostARTasks()
     UpdateOverseerDataFile()
     local char_data = LoadOverseerCharacterData(GetCharacterName(true))
     for _, submersible in ipairs(char_data.submersibles) do
-        if (submersible.build ~= submersible.optimal_build and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) and submersible.name ~= "" then
+        if (submersible.build ~= submersible.optimal_build) and submersible.name ~= "" then
             if submersible.return_time ~= 0 and not force_return_subs_that_need_swap then
                 -- do nothing
-            elseif submersible.return_time == 0 then -- Only swap subs that are actually back
+            elseif (submersible.return_time == 0 and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) or (submersible.return_time ~= 0 and force_return_subs_that_need_swap and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) then -- Only swap subs that are actually back
                 if DoesObjectExist("Entrance to Additional Chambers") then
                     PathToObject("Entrance to Additional Chambers", 1)
                     Target("Entrance to Additional Chambers")
@@ -1855,7 +1856,22 @@ local function PostARTasks()
                 else
                     ModifyAdditionalSubmersibleData(submersible.number,"SelectedUnlockPlan",submersible.optimal_plan)
                 end
+            elseif submersible.return_time == 0 and not CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible) then
+                if HasPlugin("AutoRetainer") then
+                    ManageCollection(ar_collection_name, false)
+                    Sleep(1.0)
+                    repeat
+                        Sleep(0.5)
+                    until not HasPlugin("AutoRetainer")
+                end
+                ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior",submersible.optimal_plan_type)
+                if submersible.optimal_plan_type == 4 then
+                    ModifyAdditionalSubmersibleData(submersible.number,"SelectedPointPlan",submersible.optimal_plan)
+                else
+                    ModifyAdditionalSubmersibleData(submersible.number,"SelectedUnlockPlan",submersible.optimal_plan)
+                end
             end
+
         end
         UpdateOverseerDataFile()
         char_data = LoadOverseerCharacterData(GetCharacterName(true))
