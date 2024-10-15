@@ -76,7 +76,7 @@ Fine-tune Overseer's behaviour by adjusting these parameters in the script's con
 | `fc_credits_to_keep` | How many credits to always keep, this limit will be ignored when buying FC buffs for GC deliveries |
 | `use_fc_buff` | Will attempt to buy and use the seal sweetener buff when doing GC deliveries |
 | `ar_collection_name` | Name of the plugin collection which contains the "AutoRetainer" plugin |
-| `force_return_subs_that_need_swap` | Force return submarines to swap parts even if they're already sent out |
+| `force_return_subs_that_need_swap` | Will force return submarines to swap parts even if they're already sent out, if set to false it will wait until they're back |
 
 You can also customise submersible builds and retainer venture types in their respective sections.
 
