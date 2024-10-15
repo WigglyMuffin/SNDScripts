@@ -1702,10 +1702,10 @@ local function PostARTasks()
     CreateConfigBackup()
     local char_data = LoadOverseerCharacterData(GetCharacterName(true))
 
-    -- Check if we need to buy ceruleum
+    -- Check if we need to buy ceruleum, but only if we have submarines
     if not overseer_need_ceruleum and buy_ceruleum then
         LogInfo(char_data.ceruleum)
-        if char_data.ceruleum <= ceruleum_limit then
+        if char_data.ceruleum <= ceruleum_limit and char_data.submersibles[1].name ~= "" then
             LogInfo("[Overseer] Setting overseer_need_ceruleum variable to true")
             overseer_need_ceruleum = true
         end
