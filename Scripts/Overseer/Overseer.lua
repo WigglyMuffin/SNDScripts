@@ -7,9 +7,10 @@
                   
 ####################
 ##    Version     ##
-##     1.0.9      ##
+##     1.1.0      ##
 ####################
 
+-> 1.1.0: Should fix another logic issue where the parts don't get swapped even if they should be
 -> 1.0.9: Fixed a logic issue causing the script to think you do not have the parts you actually do have
 -> 1.0.8: Changed default behavior to not take submarines out of voyages when it needs a part swap, and instead made it a toggle that is default set to false
 -> 1.0.7: Fixed a bug causing the AR file to become incomplete when saving
@@ -1766,6 +1767,7 @@ local function PostARTasks()
             break
         end
     end
+
     -- Check and handle if we need to swap builds of a submarine
     local in_submersible_menu = false
     local swap_done = false
@@ -1775,83 +1777,84 @@ local function PostARTasks()
     for _, submersible in ipairs(char_data.submersibles) do
         if (submersible.build ~= submersible.optimal_build and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) and submersible.name ~= "" then
             if submersible.return_time ~= 0 and not force_return_subs_that_need_swap then
-                break
-            end
-            if DoesObjectExist("Entrance to Additional Chambers") then
-                PathToObject("Entrance to Additional Chambers", 1)
-                Target("Entrance to Additional Chambers")
-                Interact()
-                repeat
-                    Sleep(0.1)
-                until IsAddonReady("SelectString")
-                yield("/callback SelectString true 0")
-                ZoneTransitions()
-            end
-            if not DoesObjectExist("Voyage Control Panel") then
-                break
-            end
-            if not in_submersible_menu then
-                PathToObject("Voyage Control Panel", 2) -- Move to the Voyage Control Panel
-                Target("Voyage Control Panel")
-                Sleep(0.5)
-                yield("/lockon")
-                Sleep(1)
-                yield("/interact")
-                repeat
-                    Sleep(0.1)
-                until IsAddonReady("SelectString")
-                yield("/callback SelectString true 1")
-                repeat
-                    Sleep(0.1)
-                until IsAddonReady("SelectString")
-                in_submersible_menu = true
-            end
-            yield("/callback SelectString true "..(submersible.number - 1))
-            repeat
-                Sleep(0.1)
-            until IsAddonReady("SelectString")
-            local node_text = GetNodeText("SelectString",2,1,3)
-            if string.find(node_text, "Recall") then -- Handling if a sub is somehow not done when this is called
-                yield("/callback SelectString true 0")
-                repeat
-                    Sleep(0.1)
-                until IsAddonReady("AirShipExplorationDetail")
-                yield("/callback AirShipExplorationDetail true 0")
-                repeat
-                    Sleep(0.1)
-                until IsAddonReady("SelectYesno")
-                yield("/callback SelectYesno true 0")
-                repeat
-                    Sleep(0.1)
-                until IsAddonReady("SelectString")
-                Sleep(0.5)
-            end
-            if HasPlugin("AutoRetainer") then
-                ManageCollection(ar_collection_name, false)
-                Sleep(1.0)
-                repeat
+                -- do nothing
+            elseif submersible.return_time == 0 then -- Only swap subs that are actually back
+                if DoesObjectExist("Entrance to Additional Chambers") then
+                    PathToObject("Entrance to Additional Chambers", 1)
+                    Target("Entrance to Additional Chambers")
+                    Interact()
+                    repeat
+                        Sleep(0.1)
+                    until IsAddonReady("SelectString")
+                    yield("/callback SelectString true 0")
+                    ZoneTransitions()
+                end
+                if not DoesObjectExist("Voyage Control Panel") then
+                    break
+                end
+                if not in_submersible_menu then
+                    PathToObject("Voyage Control Panel", 2) -- Move to the Voyage Control Panel
+                    Target("Voyage Control Panel")
                     Sleep(0.5)
-                until not HasPlugin("AutoRetainer")
-            end
-            yield("/callback SelectString true 2")
-            repeat
-                Sleep(0.1)
-            until IsAddonReady("CompanyCraftSupply")
-            ChangeSubmersibleParts(submersible.optimal_build)
-            yield("/callback CompanyCraftSupply true 5")
-            repeat
-                Sleep(0.1)
-            until IsAddonReady("SelectString")
-            yield("/callback SelectString true -1 0")
-            repeat
-                Sleep(0.1)
-            until IsAddonReady("SelectString")
-            swap_done = true
-            ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior",submersible.optimal_plan_type)
-            if submersible.optimal_plan_type == 4 then
-                ModifyAdditionalSubmersibleData(submersible.number,"SelectedPointPlan",submersible.optimal_plan)
-            else
-                ModifyAdditionalSubmersibleData(submersible.number,"SelectedUnlockPlan",submersible.optimal_plan)
+                    yield("/lockon")
+                    Sleep(1)
+                    yield("/interact")
+                    repeat
+                        Sleep(0.1)
+                    until IsAddonReady("SelectString")
+                    yield("/callback SelectString true 1")
+                    repeat
+                        Sleep(0.1)
+                    until IsAddonReady("SelectString")
+                    in_submersible_menu = true
+                end
+                yield("/callback SelectString true "..(submersible.number - 1))
+                repeat
+                    Sleep(0.1)
+                until IsAddonReady("SelectString")
+                local node_text = GetNodeText("SelectString",2,1,3)
+                if string.find(node_text, "Recall") then -- Handling if a sub is somehow not done when this is called
+                    yield("/callback SelectString true 0")
+                    repeat
+                        Sleep(0.1)
+                    until IsAddonReady("AirShipExplorationDetail")
+                    yield("/callback AirShipExplorationDetail true 0")
+                    repeat
+                        Sleep(0.1)
+                    until IsAddonReady("SelectYesno")
+                    yield("/callback SelectYesno true 0")
+                    repeat
+                        Sleep(0.1)
+                    until IsAddonReady("SelectString")
+                    Sleep(0.5)
+                end
+                if HasPlugin("AutoRetainer") then
+                    ManageCollection(ar_collection_name, false)
+                    Sleep(1.0)
+                    repeat
+                        Sleep(0.5)
+                    until not HasPlugin("AutoRetainer")
+                end
+                yield("/callback SelectString true 2")
+                repeat
+                    Sleep(0.1)
+                until IsAddonReady("CompanyCraftSupply")
+                ChangeSubmersibleParts(submersible.optimal_build)
+                yield("/callback CompanyCraftSupply true 5")
+                repeat
+                    Sleep(0.1)
+                until IsAddonReady("SelectString")
+                yield("/callback SelectString true -1 0")
+                repeat
+                    Sleep(0.1)
+                until IsAddonReady("SelectString")
+                swap_done = true
+                ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior",submersible.optimal_plan_type)
+                if submersible.optimal_plan_type == 4 then
+                    ModifyAdditionalSubmersibleData(submersible.number,"SelectedPointPlan",submersible.optimal_plan)
+                else
+                    ModifyAdditionalSubmersibleData(submersible.number,"SelectedUnlockPlan",submersible.optimal_plan)
+                end
             end
         end
         UpdateOverseerDataFile()
@@ -2308,9 +2311,7 @@ end
 -- local function Main()
 --     UpdateOverseerDataFile()
 --     local char_data = LoadOverseerCharacterData(GetCharacterName(true))
---     for _, submersible in ipairs(char_data.submersibles) do
---         Echo(CheckIfWeHaveRequiredParts("SSSS", submersible))
---     end
+--     PostARTasks()
 --     Echo("[Overseer] Character data and global plans processing complete")
 --     LogInfo("[Overseer] All characters and global plans processed, script finished")
 -- end
