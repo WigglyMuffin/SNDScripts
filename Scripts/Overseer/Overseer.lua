@@ -7,9 +7,11 @@
                   
 ####################
 ##    Version     ##
-##     1.1.2      ##
+##     1.1.4      ##
 ####################
 
+-> 1.1.4: maybe this time.
+-> 1.1.3: Surely i've finally fixed the bug where it won't swap parts properly and not introduced any new ones right haha
 -> 1.1.2: Potentially dealt with a couple more minor bugs that relate to part swapping
 -> 1.1.1: Fixed yet another logic issue causing submarines that have been set to finalize to stay finalized
 -> 1.1.0: Should fix another logic issue where the parts don't get swapped even if they should be
@@ -156,6 +158,10 @@ overseer_folder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\AutoRet
 ##                  Script Start                  ##
 ##################################################]]
 
+-- This is here to make sure that when the script gets started, it stops AR fast enough
+ARAbortAllTasks()
+ARSetMultiModeEnabled(false)
+
 -- Load necessary libraries and set up paths
 load_functions_file_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
 backup_folder = overseer_folder .. "\\AR Config Backups\\"
@@ -184,9 +190,23 @@ if HasPlugin("BossMod") or HasPlugin("BossModReborn") then
     yield("/vbmai off")
 end
 
+-- To enable debug logs
+local debug = false
+
 LogInfo("[Overseer] ##############################")
 LogInfo("[Overseer] Starting overseer...")
 LogInfo("[Overseer] ##############################")
+
+-- Globals
+Overseer_current_character = ""
+Overseer_char_data = {}
+
+-- Function which logs a lot to the xllog if debug is true 
+function LogToInfo(...)
+    if debug then
+       LogToInfo(...)
+    end
+end
 
 -- Helper function to create config backups of DefaultConfig.json
 local function CreateConfigBackup()
@@ -291,7 +311,7 @@ local function FindPartAbbreviation(part_name)
         return string.upper(class:sub(1, 1))
     end
 
-    LogInfo(string.format("[Overseer] Warning: Unable to find or infer abbreviation for part %s", part_name))
+    LogToInfo(string.format("[Overseer] Warning: Unable to find or infer abbreviation for part %s", part_name))
     return "?"  -- Return '?' if no abbreviation can be determined
 end
 
@@ -304,7 +324,7 @@ local function GenerateBuildString(part1, part2, part3, part4)
     for i, part_id in ipairs(parts) do
         local part_name = FindItemName(tonumber(part_id))
         if not part_name then
-            LogInfo(string.format("[Overseer] Warning: Unable to find name for part ID %s", tostring(part_id)))
+            LogToInfo(string.format("[Overseer] Warning: Unable to find name for part ID %s", tostring(part_id)))
             abbrs[i] = "?"
         else
             local abbr = FindPartAbbreviation(part_name)
@@ -341,7 +361,7 @@ end
 -- Helper function to get unlock plan by GUID
 local function GetUnlockPlanByGUID(guid)
     if guid == nil then
-        LogInfo("[Oveseer] GetUnlockPlanByGUID: Unlock plan is nil, returning default")
+        LogToInfo("[Oveseer] GetUnlockPlanByGUID: Unlock plan is nil, returning default")
         return "00000000-0000-0000-0000-000000000000"
     end
 
@@ -351,14 +371,14 @@ local function GetUnlockPlanByGUID(guid)
         end
     end
 
-    LogInfo("[Oveseer] GetUnlockPlanByGUID: No unlock plan found for the provided GUID.")
+    LogToInfo("[Oveseer] GetUnlockPlanByGUID: No unlock plan found for the provided GUID.")
     return nil
 end
 
 -- Helper function to get point plan by GUID
 local function GetPointPlanByGUID(guid)
     if guid == nil then
-        LogInfo("[Oveseer] GetPointPlanByGUID: Point plan is nil, returning default")
+        LogToInfo("[Oveseer] GetPointPlanByGUID: Point plan is nil, returning default")
         return "00000000-0000-0000-0000-000000000000"
     end
 
@@ -367,7 +387,7 @@ local function GetPointPlanByGUID(guid)
             return plan
         end
     end
-    LogInfo("[Oveseer] GetPointPlanByGUID: No point plan found for the provided GUID.")
+    LogToInfo("[Oveseer] GetPointPlanByGUID: No point plan found for the provided GUID.")
     return nil
 end
 
@@ -577,7 +597,7 @@ local function UpdateFromAutoRetainerConfig()
     local file, err = io.open(auto_retainer_config_path, "r")
     if not file then
         Echo("[Overseer] Error: Unable to open DefaultConfig.json: " .. tostring(err))
-        LogInfo("[Overseer] Error: Unable to open DefaultConfig.json: " .. tostring(err))
+        LogToInfo("[Overseer] Error: Unable to open DefaultConfig.json: " .. tostring(err))
         return nil
     end
 
@@ -587,13 +607,13 @@ local function UpdateFromAutoRetainerConfig()
     -- Remove BOM if present
     if content:sub(1, 3) == string.char(0xEF, 0xBB, 0xBF) then
         content = content:sub(4)
-        LogInfo("[Overseer] BOM removed from the content")
+        LogToInfo("[Overseer] BOM removed from the content")
     end
 
     local success, config = pcall(json.decode, content)
     if not success or not config then
         Echo("[Overseer] Error parsing JSON: " .. tostring(config))
-        LogInfo("[Overseer] Error parsing JSON: " .. tostring(config))
+        LogToInfo("[Overseer] Error parsing JSON: " .. tostring(config))
         return nil
     end
 
@@ -661,11 +681,11 @@ local function UpdateFromAutoRetainerConfig()
             gc_rank = fc_info.gc_rank,
             holder_chara = tostring(fc_info.HolderChara or 0)
         }
-        LogInfo(string.format("[Overseer] Processed FC: ID=%s, Name=%s, Holder=%s", fc_id_str, fc_info.Name, fc_data[fc_id_str].holder_chara))
+        LogToInfo(string.format("[Overseer] Processed FC: ID=%s, Name=%s, Holder=%s", fc_id_str, fc_info.Name, fc_data[fc_id_str].holder_chara))
     end
 
     local function insert_logged_in_player_gc(char)
-        if string.lower(char) == string.lower(GetCharacterName(true)) then
+        if string.lower(char) == string.lower(Overseer_current_character) then
             return GetPlayerGC()
         else
             return false
@@ -673,7 +693,7 @@ local function UpdateFromAutoRetainerConfig()
     end
 
     local function insert_logged_in_player_fc_id(char)
-        if string.lower(char) == string.lower(GetCharacterName(true)) then
+        if string.lower(char) == string.lower(Overseer_current_character) then
             return GetFCGCID()
         else
             return false
@@ -681,7 +701,7 @@ local function UpdateFromAutoRetainerConfig()
     end
 
     local function insert_logged_in_player_fc_rank(char)
-        if string.lower(char) == string.lower(GetCharacterName(true)) then
+        if string.lower(char) == string.lower(Overseer_current_character) then
             return GetFCRank()
         else
             return false
@@ -718,7 +738,7 @@ local function UpdateFromAutoRetainerConfig()
                 chara.free_company.credits = fc.credits or 0
                 chara.free_company.gc_id = insert_logged_in_player_fc_id(chara_key) or 0
                 chara.free_company.gc_rank = insert_logged_in_player_fc_rank(chara_key) or 0
-                LogInfo(string.format("[Overseer] FC found for character %s: ID=%s, Name=%s", chara.name, fc.id, fc.name))
+                LogToInfo(string.format("[Overseer] FC found for character %s: ID=%s, Name=%s", chara.name, fc.id, fc.name))
                 fc_found = true
                 break
             end
@@ -729,7 +749,7 @@ local function UpdateFromAutoRetainerConfig()
             chara.free_company = CreateDefaultFreeCompany(chara.server)
             chara.free_company.owner.id = chara.id
             chara.free_company.owner.name = chara.name
-            LogInfo(string.format("[Overseer] No FC found for character %s", chara.name))
+            LogToInfo(string.format("[Overseer] No FC found for character %s", chara.name))
         end
 
         -- Process RetainerData
@@ -762,10 +782,10 @@ local function UpdateFromAutoRetainerConfig()
 
             table.insert(chara.retainers, retainer_entry)
 
-            LogInfo(string.format("[Overseer] Processed retainer: %s (ID: %s)", retainer_name, retainer_id))
-            LogInfo(string.format("[Overseer] Current venture type: %s", retainer_entry.current_venture_type))
-            LogInfo(string.format("[Overseer] Optimal venture type: %s", retainer_entry.optimal_venture_type))
-            LogInfo(string.format("[Overseer] Venture needs change: %s", tostring(retainer_entry.venture_needs_change)))
+            LogToInfo(string.format("[Overseer] Processed retainer: %s (ID: %s)", retainer_name, retainer_id))
+            LogToInfo(string.format("[Overseer] Current venture type: %s", retainer_entry.current_venture_type))
+            LogToInfo(string.format("[Overseer] Optimal venture type: %s", retainer_entry.optimal_venture_type))
+            LogToInfo(string.format("[Overseer] Venture needs change: %s", tostring(retainer_entry.venture_needs_change)))
         end
 
         -- Process OfflineSubmarineData and AdditionalSubmarineData only if character has a valid FC
@@ -937,19 +957,19 @@ local function UpdateFromAutoRetainerConfig()
 
                     submersible.build_needs_change_after_levelup = (future_optimal_build ~= nil and submersible.build ~= future_optimal_build)
                     
-                    LogInfo(string.format("[Overseer] Processed submersible: %s", submersible.name))
-                    LogInfo(string.format("[Overseer] Current rank: %d, Potential final rank: %d", submersible.rank, submersible.rank_after_levelup))
-                    LogInfo(string.format("[Overseer] Current build: %s, Optimal build: %s, Future optimal build: %s", submersible.build, submersible.optimal_build, submersible.future_optimal_build))
-                    LogInfo(string.format("[Overseer] Current plan type: %d, Future plan type: %d", submersible.optimal_plan_type, submersible.future_optimal_plan_type))
-                    LogInfo(string.format("[Overseer] Current plan: %s, Future plan: %s", submersible.optimal_plan_name, submersible.future_optimal_plan_name))
-                    LogInfo(string.format("[Overseer] Build needs change: %s, Plan needs change: %s", tostring(submersible.build_needs_change), tostring(submersible.plan_needs_change)))
-                    LogInfo(string.format("[Overseer] Build needs change after levelup: %s, Plan needs change after levelup: %s", tostring(submersible.build_needs_change_after_levelup), tostring(submersible.plan_needs_change_after_levelup)))
+                    LogToInfo(string.format("[Overseer] Processed submersible: %s", submersible.name))
+                    LogToInfo(string.format("[Overseer] Current rank: %d, Potential final rank: %d", submersible.rank, submersible.rank_after_levelup))
+                    LogToInfo(string.format("[Overseer] Current build: %s, Optimal build: %s, Future optimal build: %s", submersible.build, submersible.optimal_build, submersible.future_optimal_build))
+                    LogToInfo(string.format("[Overseer] Current plan type: %d, Future plan type: %d", submersible.optimal_plan_type, submersible.future_optimal_plan_type))
+                    LogToInfo(string.format("[Overseer] Current plan: %s, Future plan: %s", submersible.optimal_plan_name, submersible.future_optimal_plan_name))
+                    LogToInfo(string.format("[Overseer] Build needs change: %s, Plan needs change: %s", tostring(submersible.build_needs_change), tostring(submersible.plan_needs_change)))
+                    LogToInfo(string.format("[Overseer] Build needs change after levelup: %s, Plan needs change after levelup: %s", tostring(submersible.build_needs_change_after_levelup), tostring(submersible.plan_needs_change_after_levelup)))
                 end
 
                 table.insert(chara.submersibles, submersible)
             end
         else
-            LogInfo(string.format("[Overseer] No submersibles created for character %s (No valid FC)", chara.name))
+            LogToInfo(string.format("[Overseer] No submersibles created for character %s (No valid FC)", chara.name))
         end
 
         ar_character_data[chara_key] = chara
@@ -966,7 +986,7 @@ local function SaveCharacterDataToFile(character_data, global_data)
 
     if not file then
         Echo("[Overseer] Error: Unable to open file for writing: " .. tostring(err))
-        LogInfo("[Overseer] Error: Unable to open file for writing: " .. tostring(err))
+        LogToInfo("[Overseer] Error: Unable to open file for writing: " .. tostring(err))
         return
     end
 
@@ -1169,7 +1189,7 @@ local function SaveCharacterDataToFile(character_data, global_data)
     file:write("}\n")
     file:close()
     -- Echo("[Overseer] Character data and global plans saved to " .. file_path)
-    LogInfo("[Overseer] Character data and global plans saved to " .. file_path)
+    LogToInfo("[Overseer] Character data and global plans saved to " .. file_path)
 end
 
 -- Call this every time you want to update the ar_character_data file with new info
@@ -1178,7 +1198,7 @@ local function UpdateOverseerDataFile()
     if not ar_character_data then
         local error_msg = "[Overseer] Error: Failed to update character list from DefaultConfig.json"
         Echo(error_msg)
-        LogInfo(error_msg)
+        LogToInfo(error_msg)
         return
     end
     SaveCharacterDataToFile(ar_character_data, global_data)
@@ -1186,22 +1206,22 @@ end
 
 -- Load specific character data and return it
 local function LoadOverseerCharacterData(character)
-    LogInfo("[Overseer] Attempting to load data for " .. character)
+    LogToInfo("[Overseer] Attempting to load data for " .. character)
     local overseer_data_file = overseer_folder .. "ar_character_data.lua"
 
     -- Safely load the data using pcall to catch errors from dofile
     local success, overseer_data = pcall(dofile, overseer_data_file)
     if not success then
-        LogInfo("[Overseer] Error: Failed to load overseer data file")
+        LogToInfo("[Overseer] Error: Failed to load overseer data file")
         return nil
     end
 
     local character_data = overseer_data.characters[character]
     if character_data then
-        LogInfo("[Overseer] Successfully loaded data for " .. character)
+        LogToInfo("[Overseer] Successfully loaded data for " .. character)
         return character_data
     else
-        LogInfo("[Overseer] Error: No data found for " .. character)
+        LogToInfo("[Overseer] Error: No data found for " .. character)
         return nil
     end
 end
@@ -1209,14 +1229,12 @@ end
 -- walks up to the vendor and buys/uses gc seal buff, should only be called when already at the GC
 -- yeah this is a function of all time
 local function UseFCBuff()
-    UpdateOverseerDataFile()
-    local char_data = LoadOverseerCharacterData(GetCharacterName(true))
     -- Attempt to use "Seal Sweetener II"
     if UseFCAction("Seal Sweetener II") then
         return true
     end
 
-    local fc_gc_id = char_data.free_company.gc_id
+    local fc_gc_id = Overseer_char_data.free_company.gc_id
     if fc_gc_id == 1 then
         yield("/li gc 1")
         Sleep(1)
@@ -1282,7 +1300,7 @@ local function PerformGCDelivery()
         Sleep(0.1)
     until IsPlayerAvailable()
     GCDeliverooExpertDelivery() -- Call a function from vac_functions
-    LogInfo("[Overseer] GC run finished, resuming multi")
+    LogToInfo("[Overseer] GC run finished, resuming multi")
     ARSetMultiModeEnabled(true)
     Teleporter("li","fc")
 end
@@ -1293,7 +1311,7 @@ local function ForceARSave()
         yield("/ays")
         Sleep(0.1)
         yield("/ays")
-        Sleep(0.5)
+        Sleep(0.1)
     end
 end
 
@@ -1332,7 +1350,7 @@ end
 -- Function to enable a specific submersible number for a character
 local function EnableSubmersible(submersible_number)
     UpdateOverseerDataFile()
-    local char_data = LoadOverseerCharacterData(GetCharacterName(true))
+    Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
 
     local function append_submersible_to_cid(file_path, target_cid, submersible_name)
         local file = io.open(file_path, "r")
@@ -1402,13 +1420,13 @@ local function EnableSubmersible(submersible_number)
     end
 
     local submersible_name = ""
-    for _, submersible in ipairs(char_data.submersibles) do
+    for _, submersible in ipairs(Overseer_char_data.submersibles) do
         if submersible.number == submersible_number then
             submersible_name = submersible.name
         end
     end
     if submersible_name ~= "" then
-        local cid_to_find = char_data.id
+        local cid_to_find = Overseer_char_data.id
         local success, msg = append_submersible_to_cid(auto_retainer_config_path, cid_to_find, submersible_name)
         if success then
             Echo(msg)
@@ -1416,7 +1434,7 @@ local function EnableSubmersible(submersible_number)
             Echo("Error: " .. msg)
         end
     else
-        LogInfo("[Overseer] Requested submersible doesn't have a name, not appending")
+        LogToInfo("[Overseer] Requested submersible doesn't have a name, not appending")
         return
     end
 end
@@ -1424,7 +1442,7 @@ end
 -- Function to Set specific unlock mode for a submersible
 local function ModifyAdditionalSubmersibleData(submersible_number, config, config_option)
     UpdateOverseerDataFile()
-    local char_data = LoadOverseerCharacterData(GetCharacterName(true))
+    Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
 
     local function update_config_in_additional_data(file_path, target_cid, submersible_name, config, config_option)
         local file = io.open(file_path, "r")
@@ -1494,13 +1512,13 @@ local function ModifyAdditionalSubmersibleData(submersible_number, config, confi
         return nil, "Submersible not found or no modification made."
     end
 
-    if char_data.submersibles[submersible_number].build == "" then
+    if Overseer_char_data.submersibles[submersible_number].build == "" then
         Echo("No submersible with that number found.")
         return
     end
 
     local submersible_name = ""
-    for _, submersible in ipairs(char_data.submersibles) do
+    for _, submersible in ipairs(Overseer_char_data.submersibles) do
         if submersible.number == submersible_number then
             submersible_name = submersible.name
             break
@@ -1512,7 +1530,7 @@ local function ModifyAdditionalSubmersibleData(submersible_number, config, confi
         return
     end
 
-    local cid_to_find = char_data.id
+    local cid_to_find = Overseer_char_data.id
     if not cid_to_find then
         Echo("Failed to find character data")
         return
@@ -1527,44 +1545,67 @@ local function ModifyAdditionalSubmersibleData(submersible_number, config, confi
     end
 end
 
+-- my own version of ARSubsWaitingToBeProcessed
+function SubsWaitingToBeProcessed()
+    UpdateOverseerDataFile()
+    Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
+    local current_time = os.time()
+
+    for _, submersible in ipairs(Overseer_char_data.submersibles) do
+        if submersible.return_time < current_time and submersible.return_time > 0 then
+            return true
+        end
+    end
+    return false
+end
+
+-- Function to disable Auto retainer
+local function DisableAR()
+    if HasPlugin("AutoRetainer") then
+        ForceARSave()
+        ManageCollection(ar_collection_name, false)
+        repeat
+            Sleep(0.1)
+        until not HasPlugin("AutoRetainer")
+    end
+end
+
+-- Function to enable Auto retainer
+local function EnableAR()
+    if not HasPlugin("AutoRetainer") then
+        ManageCollection(ar_collection_name, true)
+        Sleep(1.0)
+        repeat
+            Sleep(0.5)
+        until HasPlugin("AutoRetainer") and type(ARGetInventoryFreeSlotCount()) == "number"
+        yield("/ays")
+        Sleep(1.0)
+    end
+end
+
 -- Function to handle any tasks that need to be done before AR does it's things, like part swapping
 local function PreARTasks()
-    if HasPlugin("AutoRetainer") then
-        ManageCollection(ar_collection_name, false)
-    end
+    DisableAR()
     UpdateOverseerDataFile()
-    local char_data = LoadOverseerCharacterData(GetCharacterName(true))
+    Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
 
     --[[
     Enable all disabled character subs
     ]]
-    for _, submersible in ipairs(char_data.submersibles) do -- Enable all disabled subs
+    for _, submersible in ipairs(Overseer_char_data.submersibles) do -- Enable all disabled subs
         if not submersible.enabled and submersible.name ~= "" then
-            if HasPlugin("AutoRetainer") then
-                ManageCollection(ar_collection_name, false)
-                Sleep(1.0)
-                repeat
-                    Sleep(0.1)
-                until not HasPlugin("AutoRetainer")
-            end
             EnableSubmersible(submersible.number)
         end
         UpdateOverseerDataFile()
-        char_data = LoadOverseerCharacterData(GetCharacterName(true))
+        Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
     end
 
     --[[
     Change all needed plans
     ]]
-    for _, submersible in ipairs(char_data.submersibles) do
+    for _, submersible in ipairs(Overseer_char_data.submersibles) do
         if (submersible.plan_needs_change or submersible.vessel_behavior ~= submersible.optimal_plan_type or submersible.optimal_unlock_mode ~= submersible.unlock_mode) and submersible.name ~= "" then
-            if HasPlugin("AutoRetainer") then
-                ManageCollection(ar_collection_name, false)
-                Sleep(1.0)
-                repeat
-                    Sleep(0.1)
-                until not HasPlugin("AutoRetainer")
-            end
+            DisableAR()
             ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", submersible.optimal_plan_type)
             ModifyAdditionalSubmersibleData(submersible.number,"UnlockMode", submersible.optimal_unlock_mode)
             if submersible.optimal_plan_type == 4 then
@@ -1574,53 +1615,36 @@ local function PreARTasks()
             end
         end
         UpdateOverseerDataFile()
-        char_data = LoadOverseerCharacterData(GetCharacterName(true))
+        Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
     end
 
     --[[
     Check and set any subs that need a build swap to finalize
     ]]
-    for _, submersible in ipairs(char_data.submersibles) do
-        if (submersible.future_optimal_build ~= "" and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) or (submersible.build ~= submersible.optimal_build and submersible.name ~= "" and submersible.vessel_behavior ~= 0 and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) then
-            if HasPlugin("AutoRetainer") then
-                ManageCollection(ar_collection_name, false)
-                Sleep(1.0)
-                repeat
-                    Sleep(0.1)
-                until not HasPlugin("AutoRetainer")
-            end
+    for _, submersible in ipairs(Overseer_char_data.submersibles) do
+        if (submersible.future_optimal_build ~= "" and CheckIfWeHaveRequiredParts(submersible.future_optimal_build, submersible) and submersible.future_optimal_build ~= submersible.build) or (submersible.build ~= submersible.optimal_build and submersible.vessel_behavior ~= 0 and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible) and submersible.name ~= "") then
             ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", 0)
+        --elseif (((submersible.vessel_behavior == 0 and not CheckIfWeHaveRequiredParts(submersible.future_optimal_build, submersible)) or (submersible.vessel_behavior == 0 and submersible.build_needs_change)) and submersible.name ~= "") then
+        --    ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", submersible.optimal_plan_type)
         end
         UpdateOverseerDataFile()
-        char_data = LoadOverseerCharacterData(GetCharacterName(true))
+        Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
     end
 
     -- Enable AR again if it was disabled
-    if not HasPlugin("AutoRetainer") then
-        ManageCollection(ar_collection_name, true)
-        Sleep(1.0)
-        repeat
-            Sleep(0.5)
-        until HasPlugin("AutoRetainer") and type(ARGetInventoryFreeSlotCount()) == "number"
-        yield("/ays")
+    EnableAR()
+    if (ARRetainersWaitingToBeProcessed() or SubsWaitingToBeProcessed()) and not ARIsBusy() then
+        ARSetMultiModeEnabled(true)
     end
-    ARSetMultiModeEnabled(true)
 end
 
 -- Function to handle any tasks that need to be done after AR is finished
 local function PostARTasks()
     -- Wait until the player is available before updating any data, to try to ensure the data is properly saved so we can use it.
+    ARSetMultiModeEnabled(false)
     repeat
         Sleep(0.1)
     until IsPlayerAvailable()
-
-    if HasPlugin("AutoRetainer") then
-        ManageCollection(ar_collection_name, false)
-        Sleep(1.0)
-        repeat
-            Sleep(0.5)
-        until not HasPlugin("AutoRetainer")
-    end
 
     -- variables
     local overseer_need_ceruleum = false
@@ -1630,31 +1654,31 @@ local function PostARTasks()
     ForceARSave()
     UpdateOverseerDataFile()
     CreateConfigBackup()
-    local char_data = LoadOverseerCharacterData(GetCharacterName(true))
+    Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
 
     -- Check if we need to buy ceruleum, but only if we have submarines
     if not overseer_need_ceruleum and buy_ceruleum then
-        LogInfo(char_data.ceruleum)
-        if char_data.ceruleum <= ceruleum_limit and char_data.submersibles[1].name ~= "" then
-            LogInfo("[Overseer] Setting overseer_need_ceruleum variable to true")
+        LogToInfo(Overseer_char_data.ceruleum)
+        if Overseer_char_data.ceruleum <= ceruleum_limit and Overseer_char_data.submersibles[1].name ~= "" then
+            LogToInfo("[Overseer] Setting overseer_need_ceruleum variable to true")
             overseer_need_ceruleum = true
         end
     end
 
     -- Check if we even have any retainers
-    if char_data.retainers and char_data.retainers[1] and char_data.retainers[1].name then
+    if Overseer_char_data.retainers and Overseer_char_data.retainers[1] and Overseer_char_data.retainers[1].name then
         -- Check if we need to perform a GC delivery based on venture or inventory limits
-        if char_data.ventures < venture_limit then
-            LogInfo("[Overseer] Under Venture limit, disabling Multi and doing a GC run")
+        if Overseer_char_data.ventures < venture_limit then
+            LogToInfo("[Overseer] Under Venture limit, doing a GC run")
             overseer_need_expert_delivery = true
         elseif GetInventoryFreeSlotCount() < inventory_slot_limit then
-            LogInfo("[Overseer] Under Inventory limit, disabling Multi and doing a GC run")
+            LogToInfo("[Overseer] Under Inventory limit, doing a GC run")
             overseer_need_expert_delivery = true
         end
     end
 
     -- Check and handle if we need to register any submarines
-    for _, submersible in ipairs(char_data.submersibles) do
+    for _, submersible in ipairs(Overseer_char_data.submersibles) do
         if submersible.unlocked and submersible.name == "" then
             if DoesObjectExist("Entrance to Additional Chambers") then
                 PathToObject("Entrance to Additional Chambers", 1)
@@ -1673,9 +1697,10 @@ local function PostARTasks()
             ForceARSave()
             Sleep(2)
             UpdateOverseerDataFile()
-            char_data = LoadOverseerCharacterData(GetCharacterName(true))
+            Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
             Sleep(1.0)
-            for _, submersible in ipairs(char_data.submersibles) do
+            DisableAR()
+            for _, submersible in ipairs(Overseer_char_data.submersibles) do
                 if not submersible.enabled and submersible.name ~= "" then
                     EnableSubmersible(submersible.number)
                     ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior",submersible.optimal_plan_type)
@@ -1687,7 +1712,7 @@ local function PostARTasks()
                 end
             end
             UpdateOverseerDataFile()
-            char_data = LoadOverseerCharacterData(GetCharacterName(true))
+            Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
             break
         end
     end
@@ -1695,11 +1720,9 @@ local function PostARTasks()
     -- Check and handle if we need to swap builds of a submarine
     local in_submersible_menu = false
     local swap_done = false
-    for _, submersible in ipairs(char_data.submersibles) do
+    for _, submersible in ipairs(Overseer_char_data.submersibles) do
         if (submersible.build ~= submersible.optimal_build) and submersible.name ~= "" then
-            if submersible.return_time ~= 0 and not force_return_subs_that_need_swap then
-                -- do nothing
-            elseif (submersible.return_time == 0 and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) or (submersible.return_time ~= 0 and force_return_subs_that_need_swap and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) then -- Only swap subs that are actually back
+            if (submersible.return_time == 0 and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) or (submersible.return_time ~= 0 and force_return_subs_that_need_swap and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) then -- Only swap subs that are actually back
                 if DoesObjectExist("Entrance to Additional Chambers") then
                     PathToObject("Entrance to Additional Chambers", 1)
                     Target("Entrance to Additional Chambers")
@@ -1763,6 +1786,7 @@ local function PostARTasks()
                     Sleep(0.1)
                 until IsAddonReady("SelectString")
                 swap_done = true
+                DisableAR()
                 ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior",submersible.optimal_plan_type)
                 if submersible.optimal_plan_type == 4 then
                     ModifyAdditionalSubmersibleData(submersible.number,"SelectedPointPlan",submersible.optimal_plan)
@@ -1770,6 +1794,7 @@ local function PostARTasks()
                     ModifyAdditionalSubmersibleData(submersible.number,"SelectedUnlockPlan",submersible.optimal_plan)
                 end
             elseif submersible.return_time == 0 and not CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible) then
+                DisableAR()
                 ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior",submersible.optimal_plan_type)
                 if submersible.optimal_plan_type == 4 then
                     ModifyAdditionalSubmersibleData(submersible.number,"SelectedPointPlan",submersible.optimal_plan)
@@ -1780,7 +1805,7 @@ local function PostARTasks()
 
         end
         UpdateOverseerDataFile()
-        char_data = LoadOverseerCharacterData(GetCharacterName(true))
+        Overseer_char_data = LoadOverseerCharacterData(GetCharacterName(true))
     end
     if swap_done then
         yield("/callback SelectString true -1 0")
@@ -1794,21 +1819,13 @@ local function PostARTasks()
     end
 
     -- Reenable AutoRetainer
-    if not HasPlugin("AutoRetainer") then
-        ManageCollection(ar_collection_name, true)
-        Sleep(1.0)
-        repeat
-            Sleep(0.5)
-        until HasPlugin("AutoRetainer") and type(ARGetInventoryFreeSlotCount()) == "number"
-        yield("/ays")
-        Sleep(1.0)
-    end
+    EnableAR()
 
     -- Handle any subs we might have modified
     if ARSubsWaitingToBeProcessed() then
         ARSetMultiModeEnabled(true)
         repeat
-            Sleep(1.0)
+            Sleep(0.1)
         until not ARSubsWaitingToBeProcessed()
         ARSetMultiModeEnabled(false)
         repeat
@@ -1821,7 +1838,7 @@ local function PostARTasks()
         local function CalculateCeruleumPurchase()
             local ceruleum_price = 100
 
-            local available_credits = char_data.free_company.credits - fc_credits_to_keep
+            local available_credits = Overseer_char_data.free_company.credits - fc_credits_to_keep
             local max_ceruleum_to_buy = math.floor(available_credits / ceruleum_price)
             local amount_to_buy = math.min(ceruleum_buy_amount, max_ceruleum_to_buy)
 
@@ -1851,7 +1868,7 @@ local function PostARTasks()
 
     -- Run this if we need to do an expert delivery
     if overseer_need_expert_delivery then
-        LogInfo("Attempting GC Expert Delivery")
+        LogToInfo("Attempting GC Expert Delivery")
         PerformGCDelivery()
     end
 
@@ -1872,7 +1889,7 @@ local function AddUnlockPlansToDefaultConfig()
         -- Remove BOM if present
         if content:sub(1, 3) == string.char(0xEF, 0xBB, 0xBF) then
             content = content:sub(4)
-            LogInfo("[Overseer] BOM removed from the content")
+            LogToInfo("[Overseer] BOM removed from the content")
         end
 
         file:close()
@@ -1896,11 +1913,6 @@ local function AddUnlockPlansToDefaultConfig()
                 return nil, "Unlock plan already exists."
             end
         end
-
-        if HasPlugin("AutoRetainer") then
-            ManageCollection(ar_collection_name, false)
-        end
-        Sleep(1.0)
 
         local file = io.open(file_path, "r")
         if not file then
@@ -1970,7 +1982,7 @@ local function AddUnlockPlansToDefaultConfig()
         if success then
             Echo(msg)
         else
-            LogInfo("Error: " .. msg)
+            LogToInfo("Error: " .. msg)
         end
     end
 end
@@ -1989,7 +2001,7 @@ local function AddPointPlansToDefaultConfig()
         -- Remove BOM if present
         if content:sub(1, 3) == string.char(0xEF, 0xBB, 0xBF) then
             content = content:sub(4)
-            LogInfo("[Overseer] BOM removed from the content")
+            LogToInfo("[Overseer] BOM removed from the content")
         end
 
         file:close()
@@ -2013,11 +2025,6 @@ local function AddPointPlansToDefaultConfig()
                 return nil, "Point plan already exists."
             end
         end
-
-        if HasPlugin("AutoRetainer") then
-            ManageCollection(ar_collection_name, false)
-        end
-        Sleep(1.0)
 
         local file = io.open(file_path, "r")
         if not file then
@@ -2085,12 +2092,12 @@ local function AddPointPlansToDefaultConfig()
         if success then
             Echo(msg)
         else
-            LogInfo("Error: " .. msg)
+            LogToInfo("Error: " .. msg)
         end
     end
 end
 
--- helper function to check if we have all the parts needed for a specific build for a submersible
+-- Helper function to check if we have all the parts needed for a specific build for a submersible
 function CheckIfWeHaveRequiredParts(abbreviation, submersible)
     local parts_needed = {}
     local part_counter = 1
@@ -2127,11 +2134,10 @@ function CheckIfWeHaveRequiredParts(abbreviation, submersible)
                     part_counter = part_counter + 1
                     break
                 end
-                Sleep(0.0001)
             end
 
             if not found then
-                LogInfo("[Overseer] Invalid abbreviation sequence: " .. current_abbr)
+                LogToInfo("[Overseer] Invalid abbreviation sequence: " .. current_abbr)
                 return false
             end
         end
@@ -2140,7 +2146,7 @@ function CheckIfWeHaveRequiredParts(abbreviation, submersible)
     end
 
     if #parts_needed ~= 4 then
-        LogInfo("[Overseer] Error: Exactly 4 parts must be identified.")
+        LogToInfo("[Overseer] Error: Exactly 4 parts must be identified.")
         return false
     end
 
@@ -2149,7 +2155,7 @@ function CheckIfWeHaveRequiredParts(abbreviation, submersible)
         local item_id = FindItemID(part_entry.PartName)
         local item_count = GetItemCount(item_id)
 
-        LogInfo("[Overseer] Checking part: " .. part_entry.PartName .. " (ID: " .. item_id .. ", Slot: " .. part_entry.SlotName .. ") - Count: " .. item_count)
+        LogToInfo("[Overseer] Checking part: " .. part_entry.PartName .. " (ID: " .. item_id .. ", Slot: " .. part_entry.SlotName .. ") - Count: " .. item_count)
 
         if not ((item_count > 0) or (sub_part_id == item_id)) then
             return false
@@ -2159,77 +2165,55 @@ function CheckIfWeHaveRequiredParts(abbreviation, submersible)
     return true
 end
 
--- This needs to be cleaned up
 local function Main()
-    ARSetMultiModeEnabled(false)
     repeat
         Sleep(1.0)
     until IsPlayerAvailable()
-    ARAbortAllTasks()
-    if HasPlugin("AutoRetainer") then
-        ManageCollection(ar_collection_name, false)
-    end
+    DisableAR()
     UpdateOverseerDataFile()
     CreateConfigBackup()
     AddUnlockPlansToDefaultConfig()
     AddPointPlansToDefaultConfig()
     Echo("[Overseer] Character data and global plans processing complete")
-    LogInfo("[Overseer] All characters processed, starting main loop")
-    -- Main overseer loop
+    LogToInfo("[Overseer] All characters processed, starting main loop")
 
     while true do
         if IsPlayerAvailable() and GetCharacterName() then
+            Overseer_current_character = GetCharacterName(true)
             yield("/at e") -- Enable textadvance
-
-            LogInfo("[Overseer] Logged into character " .. GetCharacterName(true))
-
-            -- Load the character's saved data
-            LogInfo("[Overseer] Loading character data")
+            LogToInfo("[Overseer] Logged into character " .. Overseer_current_character)
+            LogToInfo("[Overseer] Loading character data")
 
             -- Perform pre AR tasks
             PreARTasks()
-
-            -- Loops until AR is done with all it's tasks
             local ar_finished = false
-            local likely_waiting_for_part_swap = false
-            while not ar_finished do
-                if not IsPlayerAvailable() then
-                    repeat
-                        Sleep(0.1)
-                    until IsPlayerAvailable()
-                end
-                local char_data = LoadOverseerCharacterData(GetCharacterName(true))
-                if not ARRetainersWaitingToBeProcessed() then
-                    for _, submersible in ipairs(char_data.submersibles) do
-                        if (submersible.build ~= submersible.optimal_build and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) and submersible.name ~= "" and submersible.return_time == 0 then
-                            likely_waiting_for_part_swap = true
-                        end
-                    end
-                end
 
-                if (not ARAnyWaitingToBeProcessed() and not ARIsBusy()) or (not ARRetainersWaitingToBeProcessed() and not ARIsBusy() and ARSubsWaitingToBeProcessed() and likely_waiting_for_part_swap) then -- Needs better handling
-                    ARSetMultiModeEnabled(false) -- Disable multi so we can safely check tasks
-                    ARAbortAllTasks()
+            while not ar_finished do
+                LogToInfo("[overseer] in main loop")
+                if not ARRetainersWaitingToBeProcessed() and not SubsWaitingToBeProcessed() and not ARIsBusy() then
+                    LogToInfo("[Overseer] ar_finished set to true")
+                    ARSetMultiModeEnabled(false)
                     ar_finished = true
                 end
-
-                UpdateOverseerDataFile()
-                Sleep(1.0)
+                if not ar_finished then
+                    Sleep(1.0)
+                end
             end
 
-            -- Run overseer post AutoRetainer tasks
             PostARTasks()
 
             if not ARGetMultiModeEnabled() then
+                LogToInfo("[Overser] multi enabled after post tasks ")
                 ARSetMultiModeEnabled(true)
             end
 
+            Overseer_char_data = {}
+            Overseer_current_character = ""
             repeat
                 Sleep(1.0)
             until not IsPlayerAvailable() or not GetCharacterName()
         end
 
-        -- Sleep and check again in case player is unavailable
         Sleep(1.0)
     end
 end
@@ -2237,12 +2221,11 @@ end
 --This is the old main function, for testing only
 -- local function Main()
 --     UpdateOverseerDataFile()
---     local char_data = LoadOverseerCharacterData(GetCharacterName(true))
---     PostARTasks()
+--     ModifyOfflineReturnTime("Submersible-1",2)
 --     Echo("[Overseer] Character data and global plans processing complete")
---     LogInfo("[Overseer] All characters and global plans processed, script finished")
+--     LogToInfo("[Overseer] All characters and global plans processed, script finished")
 -- end
--- Run the main function
+
 Main()
 
 if HasPlugin("YesAlready") then
