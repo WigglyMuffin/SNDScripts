@@ -7,9 +7,10 @@
                   
 ####################
 ##    Version     ##
-##     1.1.6      ##
+##     1.1.7      ##
 ####################
 
+-> 1.1.7: Fixed the previous issue properly this time
 -> 1.1.6: Fixed an issue where multi wouldn't reenable once it had finished all tasks
 -> 1.1.5: Properly disabled multi once it starts processing retainers/submersibles so it doesn't prematurely log out
 -> 1.1.4: More submersible part swapping fixes.
@@ -2202,6 +2203,9 @@ local function Main()
                     until not IsPlayerAvailable()
                     Sleep(0.5)
                     ARSetMultiModeEnabled(false)
+                    repeat
+                        Sleep(0.1)
+                    until IsPlayerAvailable()
                     subs_processed = true
                 end
                 if (ARRetainersWaitingToBeProcessed() and GetTargetName() == "Summoning Bell" and not retainers_processed) then
@@ -2213,7 +2217,13 @@ local function Main()
                     until not IsPlayerAvailable()
                     Sleep(0.5)
                     ARSetMultiModeEnabled(false)
+                    repeat
+                        Sleep(0.1)
+                    until IsPlayerAvailable()
                     retainers_processed = true
+                end
+                if ARRetainersWaitingToBeProcessed() or SubsWaitingToBeProcessed() then
+                    ARSetMultiModeEnabled(true)
                 end
                 if not ARRetainersWaitingToBeProcessed() and not SubsWaitingToBeProcessed() and not ARIsBusy() then
                     LogToInfo("[Overseer] ar_finished set to true")
