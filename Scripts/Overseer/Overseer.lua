@@ -7,9 +7,10 @@
                   
 ####################
 ##    Version     ##
-##     1.1.5      ##
+##     1.1.6      ##
 ####################
 
+-> 1.1.6: Fixed an issue where multi wouldn't reenable once it had finished all tasks
 -> 1.1.5: Properly disabled multi once it starts processing retainers/submersibles so it doesn't prematurely log out
 -> 1.1.4: More submersible part swapping fixes.
 -> 1.1.3: Fixed the bug preventing parts from being swapped correctly
@@ -1872,7 +1873,7 @@ local function PostARTasks()
         LogToInfo("Attempting GC Expert Delivery")
         PerformGCDelivery()
     end
-
+    ARSetMultiModeEnabled(true)
 end
 
 -- Function to add all listed unlock plans to the autoretainer default config
