@@ -7,9 +7,10 @@
                   
 ####################
 ##    Version     ##
-##     1.1.4      ##
+##     1.1.5      ##
 ####################
 
+-> 1.1.5: Properly disabled multi once it starts processing retainers/submersibles so it doesn't prematurely log out
 -> 1.1.4: maybe this time.
 -> 1.1.3: Surely i've finally fixed the bug where it won't swap parts properly and not introduced any new ones right haha
 -> 1.1.2: Potentially dealt with a couple more minor bugs that relate to part swapping
@@ -1624,8 +1625,8 @@ local function PreARTasks()
     for _, submersible in ipairs(Overseer_char_data.submersibles) do
         if (submersible.future_optimal_build ~= "" and CheckIfWeHaveRequiredParts(submersible.future_optimal_build, submersible) and submersible.future_optimal_build ~= submersible.build) or (submersible.build ~= submersible.optimal_build and submersible.vessel_behavior ~= 0 and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible) and submersible.name ~= "") then
             ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", 0)
-        --elseif (((submersible.vessel_behavior == 0 and not CheckIfWeHaveRequiredParts(submersible.future_optimal_build, submersible)) or (submersible.vessel_behavior == 0 and submersible.build_needs_change)) and submersible.name ~= "") then
-        --    ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", submersible.optimal_plan_type)
+        elseif (((submersible.vessel_behavior == 0 and not CheckIfWeHaveRequiredParts(submersible.future_optimal_build, submersible)) or (submersible.vessel_behavior == 0 and submersible.build_needs_change)) and submersible.name ~= "") then
+            ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", submersible.optimal_plan_type)
         end
         UpdateOverseerDataFile()
         Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
@@ -2176,7 +2177,8 @@ local function Main()
     AddPointPlansToDefaultConfig()
     Echo("[Overseer] Character data and global plans processing complete")
     LogToInfo("[Overseer] All characters processed, starting main loop")
-
+    local subs_processed = false
+    local retainers_processed = false
     while true do
         if IsPlayerAvailable() and GetCharacterName() then
             Overseer_current_character = GetCharacterName(true)
@@ -2190,6 +2192,28 @@ local function Main()
 
             while not ar_finished do
                 LogToInfo("[overseer] in main loop")
+                if (SubsWaitingToBeProcessed() and GetTargetName() == "Voyage Control Panel" and not subs_processed) then
+                    if not ARGetMultiModeEnabled() then
+                        ARSetMultiModeEnabled(true)
+                    end
+                    repeat
+                        Sleep(0.1)
+                    until not IsPlayerAvailable()
+                    Sleep(0.5)
+                    ARSetMultiModeEnabled(false)
+                    subs_processed = true
+                end
+                if (ARRetainersWaitingToBeProcessed() and GetTargetName() == "Summoning Bell" and not retainers_processed) then
+                    if not ARGetMultiModeEnabled() then
+                        ARSetMultiModeEnabled(true)
+                    end
+                    repeat
+                        Sleep(0.1)
+                    until not IsPlayerAvailable()
+                    Sleep(0.5)
+                    ARSetMultiModeEnabled(false)
+                    retainers_processed = true
+                end
                 if not ARRetainersWaitingToBeProcessed() and not SubsWaitingToBeProcessed() and not ARIsBusy() then
                     LogToInfo("[Overseer] ar_finished set to true")
                     ARSetMultiModeEnabled(false)
@@ -2199,7 +2223,8 @@ local function Main()
                     Sleep(1.0)
                 end
             end
-
+            subs_processed = false
+            retainers_processed = false
             PostARTasks()
 
             if not ARGetMultiModeEnabled() then
