@@ -58,7 +58,7 @@ Also please only use the retainer bell inside the workshop and not one placed in
 2. Download the latest vac_functions file from [SNDScripts](https://github.com/WigglyMuffin/SNDScripts).
 3. Place the vac_functions file in your SND config folder.
 4. Download the latest Overseer script files (both Overseer and Overseer Launcher) from the [Overseer folder](https://github.com/WigglyMuffin/SNDScripts/tree/main/Scripts/Overseer).
-5. Place Overseer and Overseer Launcher inside your SND environment.
+5. Place Overseer and Overseer Launcher inside your SND environment (`/snd` and add/import the scripts).
 6. Set Overseer Launcher as the script to run on AutoRetainer CharacterPostProcess.
 
 ## Getting Started
