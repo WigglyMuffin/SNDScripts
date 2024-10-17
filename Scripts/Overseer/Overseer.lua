@@ -7,27 +7,8 @@
                   
 ####################
 ##    Version     ##
-##     1.1.7      ##
+##     1.1.8      ##
 ####################
-
--> 1.1.7: Fixed the previous issue properly this time
--> 1.1.6: Fixed an issue where multi wouldn't reenable once it had finished all tasks
--> 1.1.5: Properly disabled multi once it starts processing retainers/submersibles so it doesn't prematurely log out
--> 1.1.4: More submersible part swapping fixes.
--> 1.1.3: Fixed the bug preventing parts from being swapped correctly
--> 1.1.2: Potentially fixed minor bugs relating to submersible part swapping
--> 1.1.1: Fixed yet another logic issue causing submarines that have been set to finalize to stay finalized
--> 1.1.0: Should fix another logic issue where the parts don't get swapped even if they should be
--> 1.0.9: Fixed a logic issue causing the script to think you do not have the parts you actually do have
--> 1.0.8: Changed default behavior to not take submarines out of voyages when it needs a part swap, and instead made it a toggle that is default set to false
--> 1.0.7: Fixed a bug causing the AR file to become incomplete when saving
--> 1.0.6: Now should support retainer bells inside the house and not just inside the workshop
--> 1.0.5: This update should ensure that it will only perform a part swap when you actually have the required parts in both your inventory and on your sub, it will also fix issues with loading the entrust list causing the script to not start at all.
--> 1.0.4: Added better error handling for certain parts of the script, also fixed a typo
--> 1.0.3: Simplified swapping folder locations even more, shouldn't be so hard
--> 1.0.2: Made it easier to swap paths for people who use multipe accounts with different XIVLauncher directories, but not different windows users. Also moved default backups and character data to the AutoRetainer directory itself.
--> 1.0.1: Improved the backup functionality and adjusted a few things for consistency
--> 1.0.0: Initial release
 
 ####################################################
 ##                  Description                   ##
@@ -196,9 +177,7 @@ end
 -- To enable debug logs
 local debug = false
 
-LogInfo("[Overseer] ##############################")
 LogInfo("[Overseer] Starting overseer...")
-LogInfo("[Overseer] ##############################")
 
 -- Globals
 Overseer_current_character = ""
@@ -207,7 +186,7 @@ Overseer_char_data = {}
 -- Function which logs a lot to the xllog if debug is true 
 function LogToInfo(...)
     if debug then
-       LogToInfo(...)
+    LogToInfo(...)
     end
 end
 
@@ -513,6 +492,7 @@ local function CreateDefaultCharacter(name, server)
         id = "",
         name = name,
         server = server,
+        retainers_enabled = false,
         free_company = CreateDefaultFreeCompany(server),
         ceruleum = 0,
         repair_kits = 0,
@@ -532,6 +512,7 @@ local function CreateDefaultRetainer()
     return {
         id = "",
         name = "",
+        enabled = "",
         job = "",
         experience = 0,
         level = 0,
@@ -545,7 +526,8 @@ local function CreateDefaultRetainer()
         entrust_plan = "00000000-0000-0000-0000-000000000000",
         current_venture_type = "",
         optimal_venture_type = "",
-        venture_needs_change = false
+        venture_needs_change = false,
+        venture_ends_at = 0
     }
 end
 
@@ -719,6 +701,7 @@ local function UpdateFromAutoRetainerConfig()
         chara.id = tostring(chara_data.CID) or ""
         chara.name = chara_data.Name or ""
         chara.server = chara_data.World or ""
+        chara.retainers_enabled = chara_data.Enabled or false
         chara.ceruleum = chara_data.Ceruleum or 0
         chara.repair_kits = chara_data.RepairKits or 0
         chara.ventures = chara_data.Ventures or 0
@@ -755,6 +738,18 @@ local function UpdateFromAutoRetainerConfig()
             LogToInfo(string.format("[Overseer] No FC found for character %s", chara.name))
         end
 
+        local function IsRetainerEnabled(retainer)
+            local char_id = tostring(chara_data.CID)
+            local selected_retainers = config.SelectedRetainers[char_id]
+            if not selected_retainers then return false end
+            for _, name in ipairs(selected_retainers) do
+                if retainer == name then
+                    return true
+                end
+            end
+            return false
+        end
+
         -- Process RetainerData
         chara.retainers = {}
         local additional_data = config.AdditionalData or {}
@@ -766,6 +761,7 @@ local function UpdateFromAutoRetainerConfig()
             local retainer_entry = CreateDefaultRetainer()
             retainer_entry.id = retainer_id or ""
             retainer_entry.name = retainer_name or ""
+            retainer_entry.enabled = IsRetainerEnabled(retainer_name) or false
             retainer_entry.job = tostring(retainer.Job or 0)
             retainer_entry.experience = retainer.Experience or 0
             retainer_entry.level = retainer.Level or 0
@@ -777,6 +773,7 @@ local function UpdateFromAutoRetainerConfig()
             retainer_entry.gathering = additional_retainer_data.Gathering or 0
             retainer_entry.perception = additional_retainer_data.Perception or 0
             retainer_entry.entrust_plan = additional_retainer_data.EntrustPlan or "00000000-0000-0000-0000-000000000000"
+            retainer_entry.venture_ends_at = retainer.VentureEndsAt or 0
 
             -- Determine optimal venture type and if change is needed
             retainer_entry.current_venture_type = additional_retainer_data.CurrentVentureType or ""
@@ -959,7 +956,6 @@ local function UpdateFromAutoRetainerConfig()
                     end
 
                     submersible.build_needs_change_after_levelup = (future_optimal_build ~= nil and submersible.build ~= future_optimal_build)
-                    
                     LogToInfo(string.format("[Overseer] Processed submersible: %s", submersible.name))
                     LogToInfo(string.format("[Overseer] Current rank: %d, Potential final rank: %d", submersible.rank, submersible.rank_after_levelup))
                     LogToInfo(string.format("[Overseer] Current build: %s, Optimal build: %s, Future optimal build: %s", submersible.build, submersible.optimal_build, submersible.future_optimal_build))
@@ -1053,20 +1049,6 @@ local function SaveCharacterDataToFile(character_data, global_data)
     end
     file:write("      },\n")
     file:write("    },\n")
-
-    -- file:write("    entrust_plans = {\n")
-    -- for _, plan in ipairs(global_data.entrust_plans) do
-    --     file:write("      {\n")
-    --     file:write(string.format("        guid = \"%s\",\n", plan.guid))
-    --     file:write(string.format("        name = \"%s\",\n", plan.name))
-    --     file:write("        list = {\n")
-    --     for _, item in ipairs(plan.list) do
-    --         file:write(string.format("          { id = %d, num = %d },\n", item.ID, item.Num))
-    --     end
-    --     file:write("        },\n")
-    --     file:write("      },\n")
-    -- end
-    -- file:write("    },\n")
     file:write("  },\n")
 
     -- Write character data
@@ -1087,6 +1069,7 @@ local function SaveCharacterDataToFile(character_data, global_data)
         file:write(string.format("      id = \"%s\",\n", chara.id))
         file:write(string.format("      name = \"%s\",\n", chara.name))
         file:write(string.format("      server = \"%s\",\n", chara.server))
+        file:write(string.format("      retainers_enabled = %s,\n", tostring(chara.retainers_enabled)))
         file:write(string.format("      ceruleum = %d,\n", chara.ceruleum))
         file:write(string.format("      repair_kits = %d,\n", chara.repair_kits))
         file:write(string.format("      ventures = %d,\n", chara.ventures))
@@ -1114,6 +1097,7 @@ local function SaveCharacterDataToFile(character_data, global_data)
             file:write(string.format("          id = \"%s\",\n", retainer.id))
             file:write(string.format("          name = \"%s\",\n", retainer.name))
             file:write(string.format("          job = \"%s\",\n", retainer.job))
+            file:write(string.format("          enabled = %s,\n", tostring(retainer.enabled)))
             file:write(string.format("          experience = %d,\n", retainer.experience))
             file:write(string.format("          level = %d,\n", retainer.level))
             file:write(string.format("          gil = %d,\n", retainer.gil))
@@ -1128,6 +1112,8 @@ local function SaveCharacterDataToFile(character_data, global_data)
             file:write(string.format("          optimal_venture_type = \"%s\",\n", retainer.optimal_venture_type))
             file:write(string.format("          venture_needs_change = %s,\n", tostring(retainer.venture_needs_change)))
             file:write(string.format("          optimal_saved_plan = \"%s\",\n", retainer.optimal_saved_plan))
+            file:write(string.format("          venture_ends_at = %d,\n", retainer.venture_ends_at))
+            file:write(string.format("          optimal_saved_plan = %s,\n", retainer.optimal_saved_plan))
             file:write("        },\n")
         end
         file:write("      },\n")
@@ -1314,7 +1300,6 @@ local function ForceARSave()
         yield("/ays")
         Sleep(0.1)
         yield("/ays")
-        Sleep(0.1)
     end
 end
 
@@ -1548,14 +1533,34 @@ local function ModifyAdditionalSubmersibleData(submersible_number, config, confi
     end
 end
 
--- my own version of ARSubsWaitingToBeProcessed
+-- our own version of ARSubsWaitingToBeProcessed
 function SubsWaitingToBeProcessed()
+    if DoesObjectExist("Voyage Control Panel") and GetDistanceToObject("Voyage Control Panel") < 4.5 and IsPlayerAvailable() then
+        ForceARSave()
+    end
     UpdateOverseerDataFile()
     Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
     local current_time = os.time()
 
     for _, submersible in ipairs(Overseer_char_data.submersibles) do
-        if submersible.return_time < current_time and submersible.return_time > 0 then
+        if submersible.return_time < current_time and submersible.return_time > 0 and submersible.name ~= "" then
+            return true
+        end
+    end
+    return false
+end
+
+-- our own version of ARRetainersWaitingToBeProcessed
+function RetainersWaitingToBeProcessed()
+    if DoesObjectExist("Summoning Bell") and GetDistanceToObject("Summoning Bell") < 4.5 and IsPlayerAvailable() then
+        ForceARSave()
+    end
+    UpdateOverseerDataFile()
+    Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
+    local current_time = os.time()
+
+    for _, retainer in ipairs(Overseer_char_data.retainers) do
+        if retainer.venture_ends_at < current_time and retainer.venture_ends_at > 0 and retainer.name ~= "" and retainer.enabled and Overseer_char_data.retainers_enabled then
             return true
         end
     end
@@ -1577,18 +1582,16 @@ end
 local function EnableAR()
     if not HasPlugin("AutoRetainer") then
         ManageCollection(ar_collection_name, true)
-        Sleep(1.0)
         repeat
             Sleep(0.5)
         until HasPlugin("AutoRetainer") and type(ARGetInventoryFreeSlotCount()) == "number"
         yield("/ays")
-        Sleep(1.0)
     end
 end
 
 -- Function to handle any tasks that need to be done before AR does it's things, like part swapping
 local function PreARTasks()
-    DisableAR()
+    ForceARSave()
     UpdateOverseerDataFile()
     Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
 
@@ -1626,8 +1629,10 @@ local function PreARTasks()
     ]]
     for _, submersible in ipairs(Overseer_char_data.submersibles) do
         if (submersible.future_optimal_build ~= "" and CheckIfWeHaveRequiredParts(submersible.future_optimal_build, submersible) and submersible.future_optimal_build ~= submersible.build) or (submersible.build ~= submersible.optimal_build and submersible.vessel_behavior ~= 0 and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible) and submersible.name ~= "") then
+            DisableAR()
             ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", 0)
         elseif (((submersible.vessel_behavior == 0 and not CheckIfWeHaveRequiredParts(submersible.future_optimal_build, submersible)) or (submersible.vessel_behavior == 0 and submersible.build_needs_change)) and submersible.name ~= "") then
+            DisableAR()
             ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", submersible.optimal_plan_type)
         end
         UpdateOverseerDataFile()
@@ -1636,9 +1641,6 @@ local function PreARTasks()
 
     -- Enable AR again if it was disabled
     EnableAR()
-    if (ARRetainersWaitingToBeProcessed() or SubsWaitingToBeProcessed()) and not ARIsBusy() then
-        ARSetMultiModeEnabled(true)
-    end
 end
 
 -- Function to handle any tasks that need to be done after AR is finished
@@ -1698,10 +1700,8 @@ local function PostARTasks()
             end
             RegisterSubmersible()
             ForceARSave()
-            Sleep(2)
             UpdateOverseerDataFile()
             Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
-            Sleep(1.0)
             DisableAR()
             for _, submersible in ipairs(Overseer_char_data.submersibles) do
                 if not submersible.enabled and submersible.name ~= "" then
@@ -1825,11 +1825,11 @@ local function PostARTasks()
     EnableAR()
 
     -- Handle any subs we might have modified
-    if ARSubsWaitingToBeProcessed() then
+    if SubsWaitingToBeProcessed() then
         ARSetMultiModeEnabled(true)
         repeat
             Sleep(0.1)
-        until not ARSubsWaitingToBeProcessed()
+        until not SubsWaitingToBeProcessed()
         ARSetMultiModeEnabled(false)
         repeat
             Sleep(0.1)
@@ -2170,78 +2170,99 @@ end
 
 local function Main()
     repeat
-        Sleep(1.0)
+        Sleep(1.1)
     until IsPlayerAvailable()
+    ForceARSave()
     DisableAR()
     UpdateOverseerDataFile()
     CreateConfigBackup()
     AddUnlockPlansToDefaultConfig()
     AddPointPlansToDefaultConfig()
+    EnableAR()
     Echo("[Overseer] Character data and global plans processing complete")
     LogToInfo("[Overseer] All characters processed, starting main loop")
     local subs_processed = false
     local retainers_processed = false
+    local ar_finished = false
+    local already_in_workshop = false
     while true do
-        if IsPlayerAvailable() and GetCharacterName() then
+        ar_finished = false
+        if IsPlayerAvailable() then
             Overseer_current_character = GetCharacterName(true)
             yield("/at e") -- Enable textadvance
-            LogToInfo("[Overseer] Logged into character " .. Overseer_current_character)
-            LogToInfo("[Overseer] Loading character data")
-
+            if DoesObjectExist("Voyage Control Panel") then
+                already_in_workshop = true
+            end
+            if not DoesObjectExist("Entrance to Additional Chambers") and not already_in_workshop then
+                ARSetMultiModeEnabled(true)
+            end
+            repeat
+                Sleep(0.5)
+            until DoesObjectExist("Entrance to Additional Chambers") or already_in_workshop
+            ARSetMultiModeEnabled(false)
+            ARAbortAllTasks()
+            repeat
+                Sleep(0.1)
+            until IsPlayerAvailable()
             -- Perform pre AR tasks
             PreARTasks()
-            local ar_finished = false
-
+            if not DoesObjectExist("Summoning Bell") and not already_in_workshop then
+                PathToObject("Entrance to Additional Chambers", 1)
+                Target("Entrance to Additional Chambers")
+                Interact()
+                repeat
+                    Sleep(0.1)
+                until IsAddonReady("SelectString")
+                yield("/callback SelectString true 0")
+                ZoneTransitions()
+            end
+            ARSetMultiModeEnabled(true)
             while not ar_finished do
-                LogToInfo("[overseer] in main loop")
-                if (SubsWaitingToBeProcessed() and GetTargetName() == "Voyage Control Panel" and not subs_processed) then
-                    if not ARGetMultiModeEnabled() then
-                        ARSetMultiModeEnabled(true)
-                    end
-                    repeat
-                        Sleep(0.1)
-                    until not IsPlayerAvailable()
-                    Sleep(0.5)
-                    ARSetMultiModeEnabled(false)
+                if GetCharacterCondition(45) or GetCharacterCondition(51) then
                     repeat
                         Sleep(0.1)
                     until IsPlayerAvailable()
-                    subs_processed = true
                 end
-                if (ARRetainersWaitingToBeProcessed() and GetTargetName() == "Summoning Bell" and not retainers_processed) then
-                    if not ARGetMultiModeEnabled() then
-                        ARSetMultiModeEnabled(true)
-                    end
-                    repeat
-                        Sleep(0.1)
-                    until not IsPlayerAvailable()
-                    Sleep(0.5)
-                    ARSetMultiModeEnabled(false)
-                    repeat
-                        Sleep(0.1)
-                    until IsPlayerAvailable()
-                    retainers_processed = true
-                end
-                if ARRetainersWaitingToBeProcessed() or SubsWaitingToBeProcessed() then
-                    ARSetMultiModeEnabled(true)
-                end
-                if not ARRetainersWaitingToBeProcessed() and not SubsWaitingToBeProcessed() and not ARIsBusy() then
-                    LogToInfo("[Overseer] ar_finished set to true")
+                if (not RetainersWaitingToBeProcessed() and not SubsWaitingToBeProcessed()) then
                     ARSetMultiModeEnabled(false)
                     ar_finished = true
+                else
+                    ARSetMultiModeEnabled(true)
+                end
+                if (GetTargetName() == "Voyage Control Panel" and not subs_processed) then
+                    if SubsWaitingToBeProcessed() then
+                        repeat
+                            Sleep(0.1)
+                        until not IsPlayerAvailable()
+                        Sleep(0.5)
+                        ARSetMultiModeEnabled(false)
+                        repeat
+                            Sleep(0.5)
+                        until not SubsWaitingToBeProcessed() and IsPlayerAvailable()
+                        subs_processed = true
+                    end
+                end
+                if (GetTargetName() == "Summoning Bell" and not retainers_processed) then
+                    if RetainersWaitingToBeProcessed() then
+                        repeat
+                            Sleep(0.1)
+                        until not IsPlayerAvailable()
+                        Sleep(0.5)
+                        ARSetMultiModeEnabled(false)
+                        repeat
+                            Sleep(0.5)
+                        until not RetainersWaitingToBeProcessed() and IsPlayerAvailable()
+                        retainers_processed = true
+                    end
                 end
                 if not ar_finished then
-                    Sleep(1.0)
+                    Sleep(0.5)
                 end
             end
             subs_processed = false
             retainers_processed = false
+            already_in_workshop = false
             PostARTasks()
-
-            if not ARGetMultiModeEnabled() then
-                LogToInfo("[Overser] multi enabled after post tasks ")
-                ARSetMultiModeEnabled(true)
-            end
 
             Overseer_char_data = {}
             Overseer_current_character = ""
@@ -2249,15 +2270,15 @@ local function Main()
                 Sleep(1.0)
             until not IsPlayerAvailable() or not GetCharacterName()
         end
-
         Sleep(1.0)
     end
 end
 
 --This is the old main function, for testing only
 -- local function Main()
+--     Overseer_current_character = GetCharacterName(true)
 --     UpdateOverseerDataFile()
---     ModifyOfflineReturnTime("Submersible-1",2)
+--     Echo(RetainersWaitingToBeProcessed())
 --     Echo("[Overseer] Character data and global plans processing complete")
 --     LogToInfo("[Overseer] All characters and global plans processed, script finished")
 -- end
