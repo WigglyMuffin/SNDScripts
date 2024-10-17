@@ -170,3 +170,25 @@ Overseer implements a robust backup system for your Auto Retainer configuration:
 - Creates backups automatically
 - Maintains a rolling set of up to 50 recent backups
 - Ensures you can always revert to a previous stable configuration
+
+## Changelog
+
+- **1.1.8**: Fixed an issue where characters without retainers did not swap parts properly. 
+- **1.1.7**: Properly resolved the previous issue.  
+- **1.1.6**: Fixed a bug where multi-tasking wouldn't reenable after completing all tasks.  
+- **1.1.5**: Ensured multi-tasking is disabled correctly during retainer/submersible processing to prevent premature logout.  
+- **1.1.4**: Additional fixes for submersible part swapping.  
+- **1.1.3**: Fixed a bug preventing parts from being swapped correctly.  
+- **1.1.2**: Potential fix for minor bugs related to submersible part swapping.  
+- **1.1.1**: Fixed a logic issue causing submarines set to finalize to stay finalized.  
+- **1.1.0**: Resolved a logic issue where parts wouldn’t swap even when they should.  
+- **1.0.9**: Fixed a logic issue where the script misinterpreted available parts.  
+- **1.0.8**: Changed default behavior to keep submarines on voyages during part swaps; added a toggle (default: off).  
+- **1.0.7**: Fixed a bug causing the AR file to save incompletely.  
+- **1.0.6**: Added support for retainer bells inside houses, not just workshops.  
+- **1.0.5**: Improved part swap logic to ensure required parts are available; fixed loading issues with the entrust list.  
+- **1.0.4**: Added better error handling and fixed a typo.  
+- **1.0.3**: Simplified folder swapping further.  
+- **1.0.2**: Made it easier to swap paths for multiple accounts using the same Windows user; moved backups and character data to the AutoRetainer directory.  
+- **1.0.1**: Enhanced backup functionality and adjusted settings for consistency.  
+- **1.0.0**: Initial release.
