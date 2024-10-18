@@ -7,7 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.2.1      ##
+##     1.2.2      ##
 ####################
 
 ####################################################
@@ -1314,20 +1314,20 @@ local function RegisterSubmersible()
         return
     end
 
-    PathToObject("Voyage Control Panel", 2) -- Move to the Voyage Control Panel
-    Target("Voyage Control Panel")
-    Sleep(0.5)
-    yield("/lockon")
-    Sleep(0.5)
-    yield("/interact")
+    Movement(3.25, -0.00, 6.93, 1)
     repeat
-        Sleep(0.1)
+        Target("Voyage Control Panel")
+        Sleep(0.5)
+        yield("/lockon")
+        Sleep(1)
+        yield("/interact")
+        Sleep(0.5)
     until IsAddonReady("SelectString")
     yield("/callback SelectString true 1")
     repeat
         Sleep(0.1)
     until IsAddonReady("SelectString")
-    RegisterNewSubmersible() -- calls the function from vac_functions
+    RegisterNewSubmersible()
     repeat
         Sleep(0.1)
     until IsAddonReady("SelectString")
@@ -1732,14 +1732,14 @@ local function PostProcessTasks()
                     break
                 end
                 if not in_submersible_menu then
-                    PathToObject("Voyage Control Panel", 2)
-                    Target("Voyage Control Panel")
-                    Sleep(0.5)
-                    yield("/lockon")
-                    Sleep(1)
-                    yield("/interact")
+                    Movement(3.25, -0.00, 6.93, 1)
                     repeat
-                        Sleep(0.1)
+                        Target("Voyage Control Panel")
+                        Sleep(0.5)
+                        yield("/lockon")
+                        Sleep(0.5)
+                        yield("/interact")
+                        Sleep(0.5)
                     until IsAddonReady("SelectString")
                     yield("/callback SelectString true 1")
                     repeat
@@ -1813,9 +1813,9 @@ local function PostProcessTasks()
         until IsAddonReady("SelectString") or IsPlayerAvailable()
     end
 
-    -- Force any subs that are brought back but not sent out to be sent out again, to mitigate a bug
+    -- Force any subs that are brought back but not sent out to be sent out again
     for _, submersible in ipairs(overseer_char_data.submersibles) do
-        if submersible.return_time == 0 and submersible.vessel_behavior == 0 and submersible.name ~= "" then
+        if ((submersible.vessel_behavior == 0) or (submersible.vessel_behavior ~= submersible.optimal_plan_type and submersible.build ~= submersible.optimal_build)) and submersible.return_time == 0 and submersible.name ~= "" then
             DisableAR()
             ModifyAdditionalSubmersibleData(submersible.number, "VesselBehavior", 3)
             UpdateOverseerDataFile()
@@ -2161,9 +2161,6 @@ function CheckIfWeHaveRequiredParts(abbreviation, submersible)
 end
 
 local function Main()
-    repeat
-        Sleep(1)
-    until IsPlayerAvailable()
     ForceARSave()
     DisableAR()
     UpdateOverseerDataFile()
