@@ -7,7 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.1.9      ##
+##     1.2.0      ##
 ####################
 
 ####################################################
@@ -1808,6 +1808,16 @@ local function PostProcessTasks()
         repeat
             Sleep(0.1)
         until IsAddonReady("SelectString") or IsPlayerAvailable()
+    end
+
+    -- Force any subs that are brought back but not sent out to be sent out again, to mitigate a bug
+    for _, submersible in ipairs(overseer_char_data.submersibles) do
+        if (submersible.return_time == 0 and submersible.vessel_behavior == 0) and submersible.name ~= "" then
+            DisableAR()
+            ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", submersible.optimal_plan_type)
+            UpdateOverseerDataFile()
+            overseer_char_data = LoadOverseerCharacterData(GetCharacterName(true))
+        end
     end
 
     EnableAR()
