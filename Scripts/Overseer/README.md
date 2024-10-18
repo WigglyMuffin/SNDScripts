@@ -50,7 +50,9 @@ Ensure you have the following plugins installed and enabled:
 - TextAdvance
 - vnavmesh
 
-Also please only use the retainer bell inside the workshop and not one placed inside the main house, it will interfere with how the plugin works for now.
+### Optional
+Only if you are using the alternative but better method to launch the script
+- Automaton
 
 ## Installation
 
@@ -60,7 +62,7 @@ Also please only use the retainer bell inside the workshop and not one placed in
 4. Download the latest Overseer script files (both Overseer and Overseer Launcher) from the [Overseer folder](https://github.com/WigglyMuffin/SNDScripts/tree/main/Scripts/Overseer).
 5. Place Overseer and Overseer Launcher inside your SND environment (`/snd` and add/import the scripts).
 6. Set Overseer Launcher as the script to run on AutoRetainer CharacterPostProcess
-6. Another option is to use Automaton plugins "Enhanced login" feature to run the command `/runmacro "Overseer Launcher"` upon logging in with AR enabled, which is recommended over the postprocess method since then the first fc is processed properly
+6. Another option is to use the Automaton plugins "Enhanced login" feature to run the command `/runmacro "Overseer Launcher"` upon logging in with AR enabled, which is recommended over the postprocess method since then the first fc is processed properly
 
 ## Getting Started
 
