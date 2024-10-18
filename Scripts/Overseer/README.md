@@ -20,7 +20,7 @@ By using Overseer, you agree to these terms and accept full responsibility for i
 
 ## Known Issues
 
-- If a character does not have any retainers, part swapping does not work correctly and submersibles will be set to finalize.
+- None
 
 ## Planned Features
 
