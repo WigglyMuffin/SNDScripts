@@ -7,7 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.2.0      ##
+##     1.2.1      ##
 ####################
 
 ####################################################
@@ -1650,8 +1650,11 @@ local function IfAdditionalEntranceExistsPathToIt()
     if DoesObjectExist("Entrance to Additional Chambers") then
         PathToObject("Entrance to Additional Chambers", 1)
         Target("Entrance to Additional Chambers")
-        Interact()
         repeat
+            if not GetTargetName() == "Entrance to Additional Chambers" then
+                yield('/target "Entrance to Additional Chambers"')
+            end
+            Interact()
             Sleep(0.1)
         until IsAddonReady("SelectString")
         yield("/callback SelectString true 0")
@@ -1812,9 +1815,9 @@ local function PostProcessTasks()
 
     -- Force any subs that are brought back but not sent out to be sent out again, to mitigate a bug
     for _, submersible in ipairs(overseer_char_data.submersibles) do
-        if (submersible.return_time == 0 and submersible.vessel_behavior == 0) and submersible.name ~= "" then
+        if submersible.return_time == 0 and submersible.vessel_behavior == 0 and submersible.name ~= "" then
             DisableAR()
-            ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", submersible.optimal_plan_type)
+            ModifyAdditionalSubmersibleData(submersible.number, "VesselBehavior", 3)
             UpdateOverseerDataFile()
             overseer_char_data = LoadOverseerCharacterData(GetCharacterName(true))
         end

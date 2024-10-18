@@ -176,6 +176,7 @@ Overseer implements a robust backup system for your Auto Retainer configuration:
 
 ## Changelog
 
+- **1.2.1**: Consistency improvements
 - **1.2.0**: Fixed a bug causing finalized subs to sometimes not be sent out.
 - **1.1.9**: Reworked parts of the script to further address inconsistencies.
 - **1.1.8**: Fixed an issue where characters without retainers did not swap parts properly. 
