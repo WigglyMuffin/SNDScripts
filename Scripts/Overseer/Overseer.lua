@@ -1,13 +1,13 @@
 --[[
-     ___                               
+     ___ 
     / _ \__   _____ _ __ ___  ___  ___ _ __ 
    | | | \ \ / / _ \ '__/ __|/ _ \/ _ \ '__|
-   | |_| |\ V /  __/ |  \__ \  __/  __/ |   
-    \___/  \_/ \___|_|  |___/\___|\___|_|   
-                  
+   | |_| |\ V /  __/ |  \__ \  __/  __/ |
+    \___/  \_/ \___|_|  |___/\___|\___|_|
+
 ####################
 ##    Version     ##
-##     1.1.8      ##
+##     1.1.9      ##
 ####################
 
 ####################################################
@@ -42,7 +42,7 @@ local inventory_slot_limit = 30                  -- Amount of inventory slots re
 local buy_ceruleum = false                       -- Will attempt to buy ceruleum fuel based on the settings below, if set to false the characters will never attempt to refuel (buy ceruleum fuel off players)
 local ceruleum_limit = 100                       -- Minimum value of ceruleum fuel to trigger buying ceruleum fuel
 local ceruleum_buy_amount = 999                  -- Amount of ceruleum fuel to be purchased when ceruleum_limit is triggered
-local fc_credits_to_keep = 10000                 -- How many credits to always keep, this limit will be ignored when buying FC buffs for GC deliveries
+local fc_credits_to_keep = 13000                 -- How many credits to always keep, this limit will be ignored when buying FC buffs for GC deliveries
 local use_fc_buff = false                        -- Will attempt to buy and use the seal sweetener buff when doing GC deliveries
 local ar_collection_name = "AutoRetainer"        -- Name of the plugin collection which contains the "AutoRetainer" plugin
 local force_return_subs_that_need_swap = false   -- This setting will force bring back even already sent out submarines that need part swaps, generally not needed but probably recommended
@@ -180,8 +180,13 @@ local debug = false
 LogInfo("[Overseer] Starting overseer...")
 
 -- Globals
-Overseer_current_character = ""
-Overseer_char_data = {}
+overseer_current_character = ""
+overseer_char_data = {}
+overseer_char_performed_gc_delivery = false
+overseer_char_bought_ceruleum = false
+overseer_first_run = false
+overseer_char_processing_subs = false
+overseer_char_processing_retainers = false
 
 -- Function which logs a lot to the xllog if debug is true 
 function LogToInfo(...)
@@ -670,7 +675,7 @@ local function UpdateFromAutoRetainerConfig()
     end
 
     local function insert_logged_in_player_gc(char)
-        if string.lower(char) == string.lower(Overseer_current_character) then
+        if string.lower(char) == string.lower(overseer_current_character) then
             return GetPlayerGC()
         else
             return false
@@ -678,7 +683,7 @@ local function UpdateFromAutoRetainerConfig()
     end
 
     local function insert_logged_in_player_fc_id(char)
-        if string.lower(char) == string.lower(Overseer_current_character) then
+        if string.lower(char) == string.lower(overseer_current_character) then
             return GetFCGCID()
         else
             return false
@@ -686,7 +691,7 @@ local function UpdateFromAutoRetainerConfig()
     end
 
     local function insert_logged_in_player_fc_rank(char)
-        if string.lower(char) == string.lower(Overseer_current_character) then
+        if string.lower(char) == string.lower(overseer_current_character) then
             return GetFCRank()
         else
             return false
@@ -836,7 +841,6 @@ local function UpdateFromAutoRetainerConfig()
                 -- Function to check if a plan needs change or not
                 local function GetIfPlanNeedsChange(sub_unlock_plan, sub_point_plan, sub_optimal_plan, sub_plan_type)
                     sub_plan_type = tonumber(sub_plan_type) or 0
-
                     if sub_plan_type == 4 then
                         return (sub_point_plan or "") ~= (sub_optimal_plan or "")
                     else
@@ -1219,35 +1223,37 @@ end
 -- yeah this is a function of all time
 local function UseFCBuff()
     -- Attempt to use "Seal Sweetener II"
+    if HasStatus("Seal Sweetener") then
+        return true
+    end
     if UseFCAction("Seal Sweetener II") then
         return true
     end
 
-    local fc_gc_id = Overseer_char_data.free_company.gc_id
+    local fc_gc_id = overseer_char_data.free_company.gc_id
     if fc_gc_id == 1 then
         yield("/li gc 1")
-        Sleep(1)
+        Sleep(5)
         repeat
             Sleep(1)
         until not LifestreamIsBusy()
         Movement(93.46, 40.28, 71.52, 1)    -- Maelstrom
     elseif fc_gc_id == 2 then
         yield("/li gc 2")
-        Sleep(1)
+        Sleep(5)
         repeat
             Sleep(1)
         until not LifestreamIsBusy()
         Movement(-70.24, -0.50, -7.09, 1)   -- Twin Adder
     elseif fc_gc_id == 3 then
         yield("/li gc 3")
-        Sleep(1)
+        Sleep(5)
         repeat
             Sleep(1)
         until not LifestreamIsBusy()
         Movement(-143.86, 4.11, -104.04, 1) -- Immortal Flames
     end
 
-    -- Try to buy "Seal Sweetener II" and use it
     local buy_action_II_success, buy_action_II_msg = BuyFCAction("Seal Sweetener II")
     if buy_action_II_success then
         if UseFCAction("Seal Sweetener II") then
@@ -1255,23 +1261,22 @@ local function UseFCBuff()
         else
             return false, "Failed to use Seal Sweetener II"
         end
-    elseif buy_action_II_msg == "Missing rank requirement" then
-        -- If missing rank requirement, try to buy and use "Seal Sweetener"
-        local buy_action_I_success, buy_action_I_msg = BuyFCAction("Seal Sweetener")
-        if buy_action_I_success then
-            if UseFCAction("Seal Sweetener") then
-                return true
-            else
-                return false, "Failed to use Seal Sweetener"
-            end
-        else
-            return false, "Failed to buy Seal Sweetener"
-        end
-    else
-        return false, "Failed to buy Seal Sweetener II"
     end
 
-    return true
+    if UseFCAction("Seal Sweetener") then
+        return true
+    end
+    local buy_action_I_success, buy_action_I_msg = BuyFCAction("Seal Sweetener")
+    if buy_action_I_success then
+        if UseFCAction("Seal Sweetener") then
+            LogInfo("[Overseer] Seal Sweetener successfully used")
+            return true
+        else
+            return false, "Failed to use Seal Sweetener"
+        end
+    else
+        return false
+    end
 end
 
 -- Checks and triggers a gc expert delivery if low on ventures or inventory space
@@ -1289,9 +1294,7 @@ local function PerformGCDelivery()
         Sleep(0.1)
     until IsPlayerAvailable()
     GCDeliverooExpertDelivery() -- Call a function from vac_functions
-    LogToInfo("[Overseer] GC run finished, resuming multi")
-    ARSetMultiModeEnabled(true)
-    Teleporter("li","fc")
+    LogToInfo("[Overseer] GC run finished")
 end
 
 -- Simple function to force ar to save to file, since for some reason closing/opening the ui does this
@@ -1338,7 +1341,7 @@ end
 -- Function to enable a specific submersible number for a character
 local function EnableSubmersible(submersible_number)
     UpdateOverseerDataFile()
-    Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
+    overseer_char_data = LoadOverseerCharacterData(overseer_current_character)
 
     local function append_submersible_to_cid(file_path, target_cid, submersible_name)
         local file = io.open(file_path, "r")
@@ -1408,13 +1411,13 @@ local function EnableSubmersible(submersible_number)
     end
 
     local submersible_name = ""
-    for _, submersible in ipairs(Overseer_char_data.submersibles) do
+    for _, submersible in ipairs(overseer_char_data.submersibles) do
         if submersible.number == submersible_number then
             submersible_name = submersible.name
         end
     end
     if submersible_name ~= "" then
-        local cid_to_find = Overseer_char_data.id
+        local cid_to_find = overseer_char_data.id
         local success, msg = append_submersible_to_cid(auto_retainer_config_path, cid_to_find, submersible_name)
         if success then
             Echo(msg)
@@ -1430,7 +1433,7 @@ end
 -- Function to Set specific unlock mode for a submersible
 local function ModifyAdditionalSubmersibleData(submersible_number, config, config_option)
     UpdateOverseerDataFile()
-    Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
+    overseer_char_data = LoadOverseerCharacterData(overseer_current_character)
 
     local function update_config_in_additional_data(file_path, target_cid, submersible_name, config, config_option)
         local file = io.open(file_path, "r")
@@ -1500,13 +1503,13 @@ local function ModifyAdditionalSubmersibleData(submersible_number, config, confi
         return nil, "Submersible not found or no modification made."
     end
 
-    if Overseer_char_data.submersibles[submersible_number].build == "" then
+    if overseer_char_data.submersibles[submersible_number].build == "" then
         Echo("No submersible with that number found.")
         return
     end
 
     local submersible_name = ""
-    for _, submersible in ipairs(Overseer_char_data.submersibles) do
+    for _, submersible in ipairs(overseer_char_data.submersibles) do
         if submersible.number == submersible_number then
             submersible_name = submersible.name
             break
@@ -1518,7 +1521,7 @@ local function ModifyAdditionalSubmersibleData(submersible_number, config, confi
         return
     end
 
-    local cid_to_find = Overseer_char_data.id
+    local cid_to_find = overseer_char_data.id
     if not cid_to_find then
         Echo("Failed to find character data")
         return
@@ -1539,10 +1542,10 @@ function SubsWaitingToBeProcessed()
         ForceARSave()
     end
     UpdateOverseerDataFile()
-    Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
+    overseer_char_data = LoadOverseerCharacterData(overseer_current_character)
     local current_time = os.time()
 
-    for _, submersible in ipairs(Overseer_char_data.submersibles) do
+    for _, submersible in ipairs(overseer_char_data.submersibles) do
         if submersible.return_time < current_time and submersible.return_time > 0 and submersible.name ~= "" then
             return true
         end
@@ -1556,11 +1559,11 @@ function RetainersWaitingToBeProcessed()
         ForceARSave()
     end
     UpdateOverseerDataFile()
-    Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
+    overseer_char_data = LoadOverseerCharacterData(overseer_current_character)
     local current_time = os.time()
 
-    for _, retainer in ipairs(Overseer_char_data.retainers) do
-        if retainer.venture_ends_at < current_time and retainer.venture_ends_at > 0 and retainer.name ~= "" and retainer.enabled and Overseer_char_data.retainers_enabled then
+    for _, retainer in ipairs(overseer_char_data.retainers) do
+        if retainer.venture_ends_at < current_time and retainer.venture_ends_at > 0 and retainer.name ~= "" and retainer.enabled and overseer_char_data.retainers_enabled then
             return true
         end
     end
@@ -1593,23 +1596,23 @@ end
 local function PreARTasks()
     ForceARSave()
     UpdateOverseerDataFile()
-    Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
+    overseer_char_data = LoadOverseerCharacterData(overseer_current_character)
 
     --[[
     Enable all disabled character subs
     ]]
-    for _, submersible in ipairs(Overseer_char_data.submersibles) do -- Enable all disabled subs
+    for _, submersible in ipairs(overseer_char_data.submersibles) do -- Enable all disabled subs
         if not submersible.enabled and submersible.name ~= "" then
             EnableSubmersible(submersible.number)
         end
         UpdateOverseerDataFile()
-        Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
+        overseer_char_data = LoadOverseerCharacterData(overseer_current_character)
     end
 
     --[[
     Change all needed plans
     ]]
-    for _, submersible in ipairs(Overseer_char_data.submersibles) do
+    for _, submersible in ipairs(overseer_char_data.submersibles) do
         if (submersible.plan_needs_change or submersible.vessel_behavior ~= submersible.optimal_plan_type or submersible.optimal_unlock_mode ~= submersible.unlock_mode) and submersible.name ~= "" then
             DisableAR()
             ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", submersible.optimal_plan_type)
@@ -1621,13 +1624,13 @@ local function PreARTasks()
             end
         end
         UpdateOverseerDataFile()
-        Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
+        overseer_char_data = LoadOverseerCharacterData(overseer_current_character)
     end
 
     --[[
     Check and set any subs that need a build swap to finalize
     ]]
-    for _, submersible in ipairs(Overseer_char_data.submersibles) do
+    for _, submersible in ipairs(overseer_char_data.submersibles) do
         if (submersible.future_optimal_build ~= "" and CheckIfWeHaveRequiredParts(submersible.future_optimal_build, submersible) and submersible.future_optimal_build ~= submersible.build) or (submersible.build ~= submersible.optimal_build and submersible.vessel_behavior ~= 0 and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible) and submersible.name ~= "") then
             DisableAR()
             ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", 0)
@@ -1636,54 +1639,48 @@ local function PreARTasks()
             ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", submersible.optimal_plan_type)
         end
         UpdateOverseerDataFile()
-        Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
+        overseer_char_data = LoadOverseerCharacterData(overseer_current_character)
     end
 
     -- Enable AR again if it was disabled
     EnableAR()
 end
 
--- Function to handle any tasks that need to be done after AR is finished
-local function PostARTasks()
-    -- Wait until the player is available before updating any data, to try to ensure the data is properly saved so we can use it.
-    ARSetMultiModeEnabled(false)
-    repeat
-        Sleep(0.1)
-    until IsPlayerAvailable()
+local function IfAdditionalEntranceExistsPathToIt()
+    if DoesObjectExist("Entrance to Additional Chambers") then
+        PathToObject("Entrance to Additional Chambers", 1)
+        Target("Entrance to Additional Chambers")
+        Interact()
+        repeat
+            Sleep(0.1)
+        until IsAddonReady("SelectString")
+        yield("/callback SelectString true 0")
+        ZoneTransitions()
+    end
+end
 
-    -- variables
-    local overseer_need_ceruleum = false
-    local overseer_need_expert_delivery = false
+function HasEnabledRetainers()
+    if not overseer_char_data.retainers then
+        return false
+    end
+    for _, retainer in pairs(overseer_char_data.retainers) do
+        if retainer.enabled and retainer.name ~= "" then
+            return true
+        end
+    end
+    return false
+end
 
-    -- Try to force a save and load the character data
+-- Function to handle any tasks that need to be done after subs are finished
+local function PostProcessTasks()
     ForceARSave()
     UpdateOverseerDataFile()
     CreateConfigBackup()
-    Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
-
-    -- Check if we need to buy ceruleum, but only if we have submarines
-    if not overseer_need_ceruleum and buy_ceruleum then
-        LogToInfo(Overseer_char_data.ceruleum)
-        if Overseer_char_data.ceruleum <= ceruleum_limit and Overseer_char_data.submersibles[1].name ~= "" then
-            LogToInfo("[Overseer] Setting overseer_need_ceruleum variable to true")
-            overseer_need_ceruleum = true
-        end
-    end
-
-    -- Check if we even have any retainers
-    if Overseer_char_data.retainers and Overseer_char_data.retainers[1] and Overseer_char_data.retainers[1].name then
-        -- Check if we need to perform a GC delivery based on venture or inventory limits
-        if Overseer_char_data.ventures < venture_limit then
-            LogToInfo("[Overseer] Under Venture limit, doing a GC run")
-            overseer_need_expert_delivery = true
-        elseif GetInventoryFreeSlotCount() < inventory_slot_limit then
-            LogToInfo("[Overseer] Under Inventory limit, doing a GC run")
-            overseer_need_expert_delivery = true
-        end
-    end
+    overseer_char_data = LoadOverseerCharacterData(overseer_current_character)
 
     -- Check and handle if we need to register any submarines
-    for _, submersible in ipairs(Overseer_char_data.submersibles) do
+    local registered_sub = false
+    for _, submersible in ipairs(overseer_char_data.submersibles) do
         if submersible.unlocked and submersible.name == "" then
             if DoesObjectExist("Entrance to Additional Chambers") then
                 PathToObject("Entrance to Additional Chambers", 1)
@@ -1701,9 +1698,9 @@ local function PostARTasks()
             RegisterSubmersible()
             ForceARSave()
             UpdateOverseerDataFile()
-            Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
+            overseer_char_data = LoadOverseerCharacterData(overseer_current_character)
             DisableAR()
-            for _, submersible in ipairs(Overseer_char_data.submersibles) do
+            for _, submersible in ipairs(overseer_char_data.submersibles) do
                 if not submersible.enabled and submersible.name ~= "" then
                     EnableSubmersible(submersible.number)
                     ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior",submersible.optimal_plan_type)
@@ -1715,32 +1712,24 @@ local function PostARTasks()
                 end
             end
             UpdateOverseerDataFile()
-            Overseer_char_data = LoadOverseerCharacterData(Overseer_current_character)
+            overseer_char_data = LoadOverseerCharacterData(overseer_current_character)
+            registered_sub = true
             break
         end
     end
 
-    -- Check and handle if we need to swap builds of a submarine
+    -- Part swapping 
     local in_submersible_menu = false
     local swap_done = false
-    for _, submersible in ipairs(Overseer_char_data.submersibles) do
+    for _, submersible in ipairs(overseer_char_data.submersibles) do
         if (submersible.build ~= submersible.optimal_build) and submersible.name ~= "" then
-            if (submersible.return_time == 0 and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) or (submersible.return_time ~= 0 and force_return_subs_that_need_swap and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) then -- Only swap subs that are actually back
-                if DoesObjectExist("Entrance to Additional Chambers") then
-                    PathToObject("Entrance to Additional Chambers", 1)
-                    Target("Entrance to Additional Chambers")
-                    Interact()
-                    repeat
-                        Sleep(0.1)
-                    until IsAddonReady("SelectString")
-                    yield("/callback SelectString true 0")
-                    ZoneTransitions()
-                end
+            if (submersible.return_time == 0 and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) or (submersible.return_time ~= 0 and force_return_subs_that_need_swap and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) then
+                IfAdditionalEntranceExistsPathToIt()
                 if not DoesObjectExist("Voyage Control Panel") then
                     break
                 end
                 if not in_submersible_menu then
-                    PathToObject("Voyage Control Panel", 2) -- Move to the Voyage Control Panel
+                    PathToObject("Voyage Control Panel", 2)
                     Target("Voyage Control Panel")
                     Sleep(0.5)
                     yield("/lockon")
@@ -1808,7 +1797,7 @@ local function PostARTasks()
 
         end
         UpdateOverseerDataFile()
-        Overseer_char_data = LoadOverseerCharacterData(GetCharacterName(true))
+        overseer_char_data = LoadOverseerCharacterData(GetCharacterName(true))
     end
     if swap_done then
         yield("/callback SelectString true -1 0")
@@ -1821,27 +1810,24 @@ local function PostARTasks()
         until IsAddonReady("SelectString") or IsPlayerAvailable()
     end
 
-    -- Reenable AutoRetainer
     EnableAR()
-
-    -- Handle any subs we might have modified
-    if SubsWaitingToBeProcessed() then
+    if swap_done or registered_sub then
         ARSetMultiModeEnabled(true)
         repeat
             Sleep(0.1)
-        until not SubsWaitingToBeProcessed()
+        until not IsPlayerAvailable()
         ARSetMultiModeEnabled(false)
         repeat
             Sleep(0.1)
         until IsPlayerAvailable()
     end
 
-    -- Run this if we need ceruleum
-    if overseer_need_ceruleum then
+    if overseer_char_data.ceruleum <= ceruleum_limit and overseer_char_data.submersibles[1].name ~= "" and buy_ceruleum and not overseer_char_bought_ceruleum then
+        overseer_char_bought_ceruleum = true
         local function CalculateCeruleumPurchase()
             local ceruleum_price = 100
 
-            local available_credits = Overseer_char_data.free_company.credits - fc_credits_to_keep
+            local available_credits = overseer_char_data.free_company.credits - fc_credits_to_keep
             local max_ceruleum_to_buy = math.floor(available_credits / ceruleum_price)
             local amount_to_buy = math.min(ceruleum_buy_amount, max_ceruleum_to_buy)
 
@@ -1851,16 +1837,7 @@ local function PostARTasks()
         local amount_to_buy = CalculateCeruleumPurchase()
 
         if amount_to_buy > 0 then
-            if DoesObjectExist("Entrance to Additional Chambers") then
-                PathToObject("Entrance to Additional Chambers", 1)
-                Target("Entrance to Additional Chambers")
-                Interact()
-                repeat
-                    Sleep(0.1)
-                until IsAddonReady("SelectString")
-                yield("/callback SelectString true 0")
-                ZoneTransitions()
-            end
+            IfAdditionalEntranceExistsPathToIt()
             if DoesObjectExist("Voyage Control Panel") then
                 BuyCeruleum(amount_to_buy)
             end
@@ -1869,12 +1846,14 @@ local function PostARTasks()
         end
     end
 
-    -- Run this if we need to do an expert delivery
-    if overseer_need_expert_delivery then
-        LogToInfo("Attempting GC Expert Delivery")
-        PerformGCDelivery()
+    if HasEnabledRetainers() and not overseer_char_performed_gc_delivery and overseer_char_processing_retainers then
+        overseer_char_performed_gc_delivery = true
+        if overseer_char_data.ventures < venture_limit then
+            PerformGCDelivery()
+        elseif GetInventoryFreeSlotCount() < inventory_slot_limit then
+            PerformGCDelivery()
+        end
     end
-    ARSetMultiModeEnabled(true)
 end
 
 -- Function to add all listed unlock plans to the autoretainer default config
@@ -1990,6 +1969,7 @@ local function AddUnlockPlansToDefaultConfig()
     end
 end
 
+-- Function to add all listed point plans to the autoretainer default config
 local function AddPointPlansToDefaultConfig()
     UpdateOverseerDataFile()
 
@@ -2001,7 +1981,6 @@ local function AddPointPlansToDefaultConfig()
 
         local content = file:read("*a")
 
-        -- Remove BOM if present
         if content:sub(1, 3) == string.char(0xEF, 0xBB, 0xBF) then
             content = content:sub(4)
             LogToInfo("[Overseer] BOM removed from the content")
@@ -2170,7 +2149,7 @@ end
 
 local function Main()
     repeat
-        Sleep(1.1)
+        Sleep(1)
     until IsPlayerAvailable()
     ForceARSave()
     DisableAR()
@@ -2181,15 +2160,14 @@ local function Main()
     EnableAR()
     Echo("[Overseer] Character data and global plans processing complete")
     LogToInfo("[Overseer] All characters processed, starting main loop")
-    local subs_processed = false
-    local retainers_processed = false
     local ar_finished = false
     local already_in_workshop = false
     while true do
         ar_finished = false
+        already_in_workshop = false
         if IsPlayerAvailable() then
-            Overseer_current_character = GetCharacterName(true)
-            yield("/at e") -- Enable textadvance
+            overseer_current_character = GetCharacterName(true)
+            yield("/at e")
             if DoesObjectExist("Voyage Control Panel") then
                 already_in_workshop = true
             end
@@ -2202,81 +2180,74 @@ local function Main()
             ARSetMultiModeEnabled(false)
             ARAbortAllTasks()
             repeat
-                Sleep(0.1)
+                Sleep(0.1003)
             until IsPlayerAvailable()
-            -- Perform pre AR tasks
             PreARTasks()
             if not DoesObjectExist("Summoning Bell") and not already_in_workshop then
-                PathToObject("Entrance to Additional Chambers", 1)
-                Target("Entrance to Additional Chambers")
-                Interact()
-                repeat
-                    Sleep(0.1)
-                until IsAddonReady("SelectString")
-                yield("/callback SelectString true 0")
-                ZoneTransitions()
+                IfAdditionalEntranceExistsPathToIt()
             end
-            ARSetMultiModeEnabled(true)
+            if overseer_first_run then
+                PostProcessTasks()
+                overseer_first_run = false
+            end
             while not ar_finished do
                 if GetCharacterCondition(45) or GetCharacterCondition(51) then
                     repeat
                         Sleep(0.1)
                     until IsPlayerAvailable()
                 end
-                if (not RetainersWaitingToBeProcessed() and not SubsWaitingToBeProcessed()) then
+                ARSetMultiModeEnabled(true)
+                if (GetTargetName() == "Voyage Control Panel") then
+                    overseer_char_processing_subs = true
+                    repeat
+                        Sleep(0.1)
+                    until not IsPlayerAvailable()
+                    Sleep(0.5)
                     ARSetMultiModeEnabled(false)
+                    repeat
+                        Sleep(0.5)
+                    until not SubsWaitingToBeProcessed() and IsPlayerAvailable()
+                    PostProcessTasks()
+                    overseer_char_processing_subs = false
+                end
+                if (GetTargetName() == "Summoning Bell") then
+                    overseer_char_processing_retainers = true
+                    repeat
+                        Sleep(0.1)
+                    until not IsPlayerAvailable()
+                    Sleep(0.5)
+                    ARSetMultiModeEnabled(false)
+                    repeat
+                        Sleep(0.5)
+                    until not RetainersWaitingToBeProcessed() and IsPlayerAvailable()
+                    PostProcessTasks()
+                    overseer_char_processing_retainers = false
+                end
+                if GetCharacterCondition(53) then
                     ar_finished = true
                 else
-                    ARSetMultiModeEnabled(true)
-                end
-                if (GetTargetName() == "Voyage Control Panel" and not subs_processed) then
-                    if SubsWaitingToBeProcessed() then
-                        repeat
-                            Sleep(0.1)
-                        until not IsPlayerAvailable()
-                        Sleep(0.5)
-                        ARSetMultiModeEnabled(false)
-                        repeat
-                            Sleep(0.5)
-                        until not SubsWaitingToBeProcessed() and IsPlayerAvailable()
-                        subs_processed = true
-                    end
-                end
-                if (GetTargetName() == "Summoning Bell" and not retainers_processed) then
-                    if RetainersWaitingToBeProcessed() then
-                        repeat
-                            Sleep(0.1)
-                        until not IsPlayerAvailable()
-                        Sleep(0.5)
-                        ARSetMultiModeEnabled(false)
-                        repeat
-                            Sleep(0.5)
-                        until not RetainersWaitingToBeProcessed() and IsPlayerAvailable()
-                        retainers_processed = true
-                    end
-                end
-                if not ar_finished then
                     Sleep(0.5)
                 end
             end
-            subs_processed = false
-            retainers_processed = false
+            -- reset for next character
             already_in_workshop = false
-            PostARTasks()
-
-            Overseer_char_data = {}
-            Overseer_current_character = ""
+            overseer_char_data = {}
+            overseer_current_character = ""
+            overseer_char_performed_gc_delivery = false
+            overseer_char_bought_ceruleum = false
+            overseer_char_processing_subs = false
+            overseer_char_processing_retainers = false
             repeat
-                Sleep(1.0)
+                Sleep(1)
             until not IsPlayerAvailable() or not GetCharacterName()
         end
-        Sleep(1.0)
+        Sleep(1.01)
     end
 end
 
 --This is the old main function, for testing only
 -- local function Main()
---     Overseer_current_character = GetCharacterName(true)
+--     overseer_current_character = GetCharacterName(true)
 --     UpdateOverseerDataFile()
 --     Echo(RetainersWaitingToBeProcessed())
 --     Echo("[Overseer] Character data and global plans processing complete")

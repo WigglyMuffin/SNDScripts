@@ -5,9 +5,10 @@ It contains the functions required to make the scripts work
 
 ####################
 ##    Version     ##
-##     1.0.1      ##
+##     1.0.2      ##
 ####################
 
+-> 1.0.2: Minor adjustments to adress inconsistencies
 -> 1.0.1: Updated UseFCAction()
 -> 1.0.0: Initial release
 
@@ -1313,13 +1314,13 @@ function UseFCAction(action_name)
     repeat
         Sleep(0.1)
     until IsPlayerAvailable()
-    local action_name = string.lower(tostring(action_name))
+    action_name = string.lower(tostring(action_name))
     yield("/freecompanycmd")
     repeat
         Sleep(0.1)
     until IsAddonReady("FreeCompany")
     yield("/callback FreeCompany true 0 4")
-    Sleep(0.2)
+    Sleep(1)
 
     -- Check if the requested buff is already active
     for i = 1, 15 do

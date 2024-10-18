@@ -20,7 +20,7 @@ By using Overseer, you agree to these terms and accept full responsibility for i
 
 ## Known Issues
 
-- If a character does not have any retainers, part swapping does not work correctly and submersibles will be set to finalize.
+- FC Actions will sometimes fail to apply when doing gc turnins, doesn't any other functionality or crash the script.
 
 ## Planned Features
 
@@ -173,6 +173,7 @@ Overseer implements a robust backup system for your Auto Retainer configuration:
 
 ## Changelog
 
+- **1.1.9**: Reworked parts of the script to further address inconsistencies.
 - **1.1.8**: Fixed an issue where characters without retainers did not swap parts properly. 
 - **1.1.7**: Properly resolved the previous issue.  
 - **1.1.6**: Fixed a bug where multi-tasking wouldn't reenable after completing all tasks.  
