@@ -7,7 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.2.3      ##
+##     1.2.4      ##
 ####################
 
 ####################################################
@@ -1761,7 +1761,10 @@ local function PostProcessTasks()
                 repeat
                     Sleep(0.1)
                 until IsAddonReady("CompanyCraftSupply")
-                ChangeSubmersibleParts(submersible.optimal_build)
+                repeat
+                    ChangeSubmersibleParts(submersible.optimal_build)
+                    Sleep(0.1)
+                until GetSubmersibleParts() == submersible.optimal_build
                 yield("/callback CompanyCraftSupply true 5")
                 repeat
                     Sleep(0.1)

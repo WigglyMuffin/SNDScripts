@@ -175,6 +175,7 @@ Overseer implements a robust backup system for your Auto Retainer configuration:
 - Ensures you can always revert to a previous stable configuration
 
 ## Changelog
+- **1.2.4**: Submersible parts should now properly retry if they somehow failed to swap correctly
 - **1.2.3**: Fixed the script rarely getting stuck
 - **1.2.2**: Even more consistency improvements
 - **1.2.1**: Consistency improvements

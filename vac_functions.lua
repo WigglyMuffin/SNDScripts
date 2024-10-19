@@ -3678,11 +3678,11 @@ function RegisterNewSubmersible()
             LogInfo("[VAC] (RegisterNewSubmersible) Submarine " .. i .. " possible to register, checking if we have the required parts")
 
             local required_items = { -- List of all items needed for creating a submersible
-                { id = 21794, name = "Shark-class Pressure Hull"},
-                { id = 21795, name = "Shark-class Stern"},
-                { id = 21792, name = "Shark-class Bow"},
-                { id = 21793, name = "Shark-class Bridge"},
-                { id = 22317, name = "Dive Credit"}
+                { id = 21794, name = "Shark-class Pressure Hull" },
+                { id = 21795, name = "Shark-class Stern" },
+                { id = 21792, name = "Shark-class Bow" },
+                { id = 21793, name = "Shark-class Bridge" },
+                { id = 22317, name = "Dive Credit" }
             }
 
             -- Check how many dive credits we need for the submersible
