@@ -61,13 +61,13 @@ Only if you are using the alternative but better method to launch the script
 3. Place the vac_functions and vac_lists files in your SND config folder.
 4. Download the latest Overseer script files (both Overseer and Overseer Launcher) from the [Overseer folder](https://github.com/WigglyMuffin/SNDScripts/tree/main/Scripts/Overseer).
 5. Place Overseer and Overseer Launcher inside your SND environment (`/snd` and add/import the scripts).
-6. Set Overseer Launcher as the script to run on AutoRetainer CharacterPostProcess
-6. Another option is to use the Automaton plugins "Enhanced login" feature to run the command `/runmacro "Overseer Launcher"` upon logging in with AR enabled, which is recommended over the postprocess method since then the first fc is processed properly
+6. Set Overseer Launcher as the script to run on AutoRetainer CharacterPostProcess, located in SND settings. Alternatively, use the Automaton plugins "Enhanced login" feature to run the command `/runmacro "Overseer Launcher"` upon logging in with AR enabled, which is recommended over the postprocess method since then the first fc is processed immediately.
 
 ## Getting Started
 
 1. Configure the settings in Overseer (see Configuration section) to match your preferences.
-2. Let Overseer optimise your Auto Retainer experience automatically upon AutoRetainer starting.
+2. Create a plugin collection which includes AutoRetainer within it, preferably named `AutoRetainer` as that is the default (configurable) naming option.
+3. Let Overseer optimise your Auto Retainer experience automatically upon AutoRetainer starting.
 
 ## Configuration
 
