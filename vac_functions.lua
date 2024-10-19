@@ -8,7 +8,7 @@ It contains the functions required to make the scripts work
 ##     1.0.3      ##
 ####################
 
--> 1.0.3: Vac_lists should now load from the same directory as vac_functions no matter here you put it
+-> 1.0.3: vac_lists should now load from the same directory as vac_functions no matter where you put it
 -> 1.0.2: Minor adjustments to adress inconsistencies
 -> 1.0.1: Updated UseFCAction()
 -> 1.0.0: Initial release
@@ -121,7 +121,7 @@ function Interact()
     Dismount()
     Sleep(0.5)
     yield("/interact")
-    
+
     repeat
         Sleep(0.1)
     until not IsPlayerCasting()
