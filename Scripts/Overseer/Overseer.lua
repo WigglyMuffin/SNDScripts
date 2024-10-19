@@ -7,7 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.2.2      ##
+##     1.2.3      ##
 ####################
 
 ####################################################
@@ -1313,13 +1313,13 @@ local function RegisterSubmersible()
         Echo("Player isn't available, register submersible attempt")
         return
     end
-
+    Movement(0.48, -0.00, 6.89, 1)
     Movement(3.25, -0.00, 6.93, 1)
     repeat
         Target("Voyage Control Panel")
         Sleep(0.5)
         yield("/lockon")
-        Sleep(1)
+        Sleep(0.5)
         yield("/interact")
         Sleep(0.5)
     until IsAddonReady("SelectString")
@@ -1327,6 +1327,7 @@ local function RegisterSubmersible()
     repeat
         Sleep(0.1)
     until IsAddonReady("SelectString")
+    Sleep(0.5)
     RegisterNewSubmersible()
     repeat
         Sleep(0.1)
@@ -1649,11 +1650,8 @@ end
 local function IfAdditionalEntranceExistsPathToIt()
     if DoesObjectExist("Entrance to Additional Chambers") then
         PathToObject("Entrance to Additional Chambers", 1)
-        Target("Entrance to Additional Chambers")
         repeat
-            if not GetTargetName() == "Entrance to Additional Chambers" then
-                yield('/target "Entrance to Additional Chambers"')
-            end
+            yield('/target "Entrance to Additional Chambers"')
             Interact()
             Sleep(0.1)
         until IsAddonReady("SelectString")
@@ -1685,16 +1683,7 @@ local function PostProcessTasks()
     local registered_sub = false
     for _, submersible in ipairs(overseer_char_data.submersibles) do
         if submersible.unlocked and submersible.name == "" then
-            if DoesObjectExist("Entrance to Additional Chambers") then
-                PathToObject("Entrance to Additional Chambers", 1)
-                Target("Entrance to Additional Chambers")
-                Interact()
-                repeat
-                    Sleep(0.1)
-                until IsAddonReady("SelectString")
-                yield("/callback SelectString true 0")
-                ZoneTransitions()
-            end
+            IfAdditionalEntranceExistsPathToIt()
             if not DoesObjectExist("Voyage Control Panel") then
                 break
             end
@@ -1732,6 +1721,7 @@ local function PostProcessTasks()
                     break
                 end
                 if not in_submersible_menu then
+                    Movement(0.48, -0.00, 6.89, 1)
                     Movement(3.25, -0.00, 6.93, 1)
                     repeat
                         Target("Voyage Control Panel")
