@@ -58,7 +58,7 @@ Only if you are using the alternative but better method to launch the script
 
 1. Verify all required plugins are installed and enabled.
 2. Download the latest vac_functions and vac_lists files from [SNDScripts](https://github.com/WigglyMuffin/SNDScripts).
-3. Place the vac_functions and vac_lists files in your SND config folder.
+3. Place the vac_functions and vac_lists files in your SND config folder (`%appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing`).
 4. Download the latest Overseer script files (both Overseer and Overseer Launcher) from the [Overseer folder](https://github.com/WigglyMuffin/SNDScripts/tree/main/Scripts/Overseer).
 5. Place Overseer and Overseer Launcher inside your SND environment (`/snd` and add/import the scripts).
 6. Set Overseer Launcher as the script to run on AutoRetainer CharacterPostProcess, located in SND settings. Alternatively, use the Automaton plugins "Enhanced login" feature to run the command `/runmacro "Overseer Launcher"` upon logging in with AR enabled, which is recommended over the postprocess method since then the first fc is processed immediately.
