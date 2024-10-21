@@ -1306,8 +1306,9 @@ end
 local function ForceARSave()
     if HasPlugin("AutoRetainer") then
         yield("/ays")
-        Sleep(0.05)
+        Sleep(0.2)
         yield("/ays")
+        Sleep(0.2)
     end
 end
 
@@ -1636,7 +1637,7 @@ local function PreARTasks()
         --[[
         Check and set any subs that need a build swap to finalize
         ]]
-        if (submersible.future_optimal_build ~= "" and CheckIfWeHaveRequiredParts(submersible.future_optimal_build, submersible) and submersible.future_optimal_build ~= submersible.build) or (submersible.build ~= submersible.optimal_build and submersible.vessel_behavior ~= 0 and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible) and submersible.name ~= "") then
+        if submersible.name ~= "" and ((submersible.future_optimal_build ~= "" and CheckIfWeHaveRequiredParts(submersible.future_optimal_build, submersible) and submersible.future_optimal_build ~= submersible.build) or (submersible.build ~= submersible.optimal_build and submersible.vessel_behavior ~= 0 and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible))) then
             DisableAR()
             ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", 0)
             finalized_plan = true
