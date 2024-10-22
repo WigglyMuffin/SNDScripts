@@ -1207,15 +1207,22 @@ local function LoadOverseerCharacterData(character)
 end
 
 -- Call this every time you want to update the ar_character_data file with new info
-local function UpdateOverseerDataFile()
+local function UpdateOverseerDataFile(update_char_data)
     local ar_character_data, global_data = UpdateFromAutoRetainerConfig()
     if not ar_character_data then
-        local error_msg = "[Overseer] Error: Failed to update character list from DefaultConfig.json"
-        Echo(error_msg)
-        LogToInfo(error_msg)
-        return
+        Sleep(3)
+        ar_character_data, global_data = UpdateFromAutoRetainerConfig()
+        if not ar_character_data then
+            local error_msg = "[Overseer] Error: Failed to update character list from DefaultConfig.json, retrying"
+            Echo(error_msg)
+            LogToInfo(error_msg)
+            return
+        end
     end
     SaveCharacterDataToFile(ar_character_data, global_data)
+    if update_char_data then
+        overseer_char_data = LoadOverseerCharacterData(overseer_current_character)
+    end
 end
 
 -- walks up to the vendor and buys/uses gc seal buff, should only be called when already at the GC
