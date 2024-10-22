@@ -1718,6 +1718,8 @@ local function PostARTasks()
         end
     end
 
+    UpdateOverseerDataFile(true)
+
     -- Part swapping 
     local in_submersible_menu = false
     local swap_done = false
@@ -1815,12 +1817,13 @@ local function PostARTasks()
         until IsAddonReady("SelectString") or IsPlayerAvailable()
     end
 
+    UpdateOverseerDataFile(true)
+
     -- Force any subs that are brought back but not sent out to be sent out again
     for _, submersible in ipairs(overseer_char_data.submersibles) do
         if ((submersible.vessel_behavior == 0) or (submersible.vessel_behavior ~= submersible.optimal_plan_type and submersible.build ~= submersible.optimal_build and submersible.vessel_behavior == 0)) and submersible.return_time == 0 and submersible.name ~= "" then
             DisableAR()
             ModifyAdditionalSubmersibleData(submersible.number, "VesselBehavior", 3)
-            UpdateOverseerDataFile(true)
         end
     end
 
