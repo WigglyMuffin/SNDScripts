@@ -1307,9 +1307,9 @@ end
 local function ForceARSave()
     if HasPlugin("AutoRetainer") then
         yield("/ays")
-        Sleep(0.3)
+        Sleep(0.2)
         yield("/ays")
-        Sleep(0.3)
+        Sleep(0.2)
     end
 end
 
