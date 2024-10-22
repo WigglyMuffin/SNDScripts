@@ -7,7 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.2.6      ##
+##     1.2.7      ##
 ####################
 
 ####################################################
@@ -175,7 +175,7 @@ if HasPlugin("BossMod") or HasPlugin("BossModReborn") then
 end
 
 -- To enable debug logs
-local debug = false
+local debug = true
 
 LogInfo("[Overseer] Starting overseer...")
 
@@ -190,7 +190,7 @@ overseer_char_processing_retainers = false
 -- Function which logs a lot to the xllog if debug is true 
 function LogToInfo(...)
     if debug then
-    LogToInfo(...)
+        LogInfo(...)
     end
 end
 
@@ -702,9 +702,9 @@ local function UpdateFromAutoRetainerConfig()
         local chara_key = chara_data.Name .. "@" .. chara_data.World
         local chara = CreateDefaultCharacter(chara_data.Name, chara_data.World)
 
-        chara.id = tostring(chara_data.CID) or ""
-        chara.name = chara_data.Name or ""
-        chara.server = chara_data.World or ""
+        chara.id = tostring(chara_data.CID)
+        chara.name = chara_data.Name
+        chara.server = chara_data.World
         chara.retainers_enabled = chara_data.Enabled or false
         chara.ceruleum = chara_data.Ceruleum or 0
         chara.repair_kits = chara_data.RepairKits or 0
@@ -716,16 +716,16 @@ local function UpdateFromAutoRetainerConfig()
         chara.gil = chara_data.Gil or 0
 
         -- Always set the free_company owner to the character's own name and id
-        chara.free_company.owner.id = chara.id or ""
-        chara.free_company.owner.name = chara.name or ""
+        chara.free_company.owner.id = chara.id
+        chara.free_company.owner.name = chara.name
 
         -- Assign FC data based on character's ID matching HolderChara
         local fc_found = false
         for fc_id, fc in pairs(fc_data) do
             if fc.holder_chara == chara.id then
-                chara.free_company.id = fc.id or ""
-                chara.free_company.name = fc.name or ""
-                chara.free_company.credits = fc.credits or 0
+                chara.free_company.id = fc.id
+                chara.free_company.name = fc.name
+                chara.free_company.credits = fc.credits
                 chara.free_company.gc_id = insert_logged_in_player_fc_id(chara_key) or 0
                 chara.free_company.gc_rank = insert_logged_in_player_fc_rank(chara_key) or 0
                 LogToInfo(string.format("[Overseer] FC found for character %s: ID=%s, Name=%s", chara.name, fc.id, fc.name))
@@ -763,9 +763,9 @@ local function UpdateFromAutoRetainerConfig()
             local additional_retainer_data = additional_data[retainer_id .. " " .. retainer_name] or {}
 
             local retainer_entry = CreateDefaultRetainer()
-            retainer_entry.id = retainer_id or ""
-            retainer_entry.name = retainer_name or ""
-            retainer_entry.enabled = IsRetainerEnabled(retainer_name) or false
+            retainer_entry.id = retainer_id
+            retainer_entry.name = retainer_name
+            retainer_entry.enabled = IsRetainerEnabled(retainer_name)
             retainer_entry.job = tostring(retainer.Job or 0)
             retainer_entry.experience = retainer.Experience or 0
             retainer_entry.level = retainer.Level or 0
@@ -847,13 +847,12 @@ local function UpdateFromAutoRetainerConfig()
                     end
                 end
 
-
                 local submersible = CreateDefaultSubmersible(i, has_valid_fc)
                 if i == 1 or i <= num_sub_slots then
                     submersible.unlocked = true
                 end
                 if submersible_data.Name then
-                    submersible.name = submersible_data.Name or ""
+                    submersible.name = submersible_data.Name
                     submersible.experience = add_submersible_data.CurrentExp or 0
                     submersible.rank = add_submersible_data.Level or 0
                     submersible.part1 = tostring(add_submersible_data.Part1 or "")
@@ -871,7 +870,7 @@ local function UpdateFromAutoRetainerConfig()
                     submersible.points = add_submersible_data.Points or ""
                     submersible.decoded_points = DecodeSubmersiblePoints(submersible.points) or {0, 0, 0, 0, 0}
                     submersible.route = DecodePointsToRoute(submersible.decoded_points)
-                    submersible.return_time = submersible_data.ReturnTime or ""
+                    submersible.return_time = submersible_data.ReturnTime
 
                     -- Calculate guaranteed and potential bonus exp
                     submersible.guaranteed_exp = CalculateGuaranteedExp(submersible.decoded_points)
@@ -1116,7 +1115,6 @@ local function SaveCharacterDataToFile(character_data, global_data)
             file:write(string.format("          venture_needs_change = %s,\n", tostring(retainer.venture_needs_change)))
             file:write(string.format("          optimal_saved_plan = \"%s\",\n", retainer.optimal_saved_plan))
             file:write(string.format("          venture_ends_at = %d,\n", retainer.venture_ends_at))
-            file:write(string.format("          optimal_saved_plan = %s,\n", retainer.optimal_saved_plan))
             file:write("        },\n")
         end
         file:write("      },\n")
@@ -1718,8 +1716,6 @@ local function PostARTasks()
         end
     end
 
-    UpdateOverseerDataFile(true)
-
     -- Part swapping 
     local in_submersible_menu = false
     local swap_done = false
@@ -1816,8 +1812,6 @@ local function PostARTasks()
             Sleep(0.1)
         until IsAddonReady("SelectString") or IsPlayerAvailable()
     end
-
-    UpdateOverseerDataFile(true)
 
     -- Force any subs that are brought back but not sent out to be sent out again
     for _, submersible in ipairs(overseer_char_data.submersibles) do
