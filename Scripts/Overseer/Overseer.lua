@@ -7,7 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.2.5      ##
+##     1.2.6      ##
 ####################
 
 ####################################################
@@ -1207,21 +1207,15 @@ local function LoadOverseerCharacterData(character)
 end
 
 -- Call this every time you want to update the ar_character_data file with new info
-local function UpdateOverseerDataFile(update_char_data)
+local function UpdateOverseerDataFile()
     local ar_character_data, global_data = UpdateFromAutoRetainerConfig()
     if not ar_character_data then
-        local error_msg = "[Overseer] Error: Failed to update character list from DefaultConfig.json, retrying"
-        repeat
-            Echo(error_msg)
-            LogToInfo(error_msg)
-            ar_character_data, global_data = UpdateFromAutoRetainerConfig()
-            Sleep(1)
-        until ar_character_data
+        local error_msg = "[Overseer] Error: Failed to update character list from DefaultConfig.json"
+        Echo(error_msg)
+        LogToInfo(error_msg)
+        return
     end
     SaveCharacterDataToFile(ar_character_data, global_data)
-    if update_char_data then
-        overseer_char_data = LoadOverseerCharacterData(overseer_current_character)
-    end
 end
 
 -- walks up to the vendor and buys/uses gc seal buff, should only be called when already at the GC
@@ -1306,9 +1300,9 @@ end
 local function ForceARSave()
     if HasPlugin("AutoRetainer") then
         yield("/ays")
-        Sleep(0.2)
+        Sleep(0.3)
         yield("/ays")
-        Sleep(0.2)
+        Sleep(0.3)
     end
 end
 
@@ -1545,7 +1539,7 @@ end
 
 -- our own version of ARSubsWaitingToBeProcessed
 function SubsWaitingToBeProcessed()
-    if DoesObjectExist("Voyage Control Panel") and GetDistanceToObject("Voyage Control Panel") < 4.5 then
+    if DoesObjectExist("Voyage Control Panel") and GetDistanceToObject("Voyage Control Panel") < 4.5 and IsPlayerAvailable() then
         ForceARSave()
     end
     UpdateOverseerDataFile(true)
@@ -1561,7 +1555,7 @@ end
 
 -- our own version of ARRetainersWaitingToBeProcessed
 function RetainersWaitingToBeProcessed()
-    if DoesObjectExist("Summoning Bell") and GetDistanceToObject("Summoning Bell") < 4.5 then
+    if DoesObjectExist("Summoning Bell") and GetDistanceToObject("Summoning Bell") < 4.5 and IsPlayerAvailable() then
         ForceARSave()
     end
     UpdateOverseerDataFile(true)
