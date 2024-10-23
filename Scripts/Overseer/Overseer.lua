@@ -7,7 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.2.7      ##
+##     1.2.8      ##
 ####################
 
 ####################################################
@@ -137,6 +137,9 @@ auto_retainer_config_path = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfig
 -- Point this to wherever you want to store the data Overseer uses, this is also where backups are stored
 overseer_folder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\AutoRetainer\\Overseer\\"
 
+-- If you want to put the vac_functions and vac_lists file into a non default location you want to change this to wherever you put vac_functions
+-- Generally this is not something you need to change
+load_functions_file_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
 
 --[[################################################
 ##                  Script Start                  ##
@@ -147,7 +150,6 @@ ARAbortAllTasks()
 ARSetMultiModeEnabled(false)
 
 -- Load necessary libraries and set up paths
-load_functions_file_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
 backup_folder = overseer_folder .. "\\AR Config Backups\\"
 
 LoadFunctions = loadfile(load_functions_file_location)()
@@ -1619,7 +1621,7 @@ local function PreARTasks()
         --[[
         Change all needed plans
         ]]
-        if (submersible.plan_needs_change or submersible.vessel_behavior ~= submersible.optimal_plan_type or submersible.optimal_unlock_mode ~= submersible.unlock_mode) and submersible.name ~= "" then
+        if (submersible.plan_needs_change or submersible.vessel_behavior ~= submersible.optimal_plan_type or submersible.optimal_unlock_mode ~= submersible.unlock_mode) and submersible.name ~= "" and not submersible.vessel_behavior ~= 0 then
             DisableAR()
             ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", submersible.optimal_plan_type)
             ModifyAdditionalSubmersibleData(submersible.number,"UnlockMode", submersible.optimal_unlock_mode)
@@ -1636,11 +1638,13 @@ local function PreARTasks()
         --[[
         Check and set any subs that need a build swap to finalize
         ]]
-        if submersible.name ~= "" and ((submersible.future_optimal_build ~= "" and CheckIfWeHaveRequiredParts(submersible.future_optimal_build, submersible) and submersible.future_optimal_build ~= submersible.build) or (submersible.build ~= submersible.optimal_build and submersible.vessel_behavior ~= 0 and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible))) then
+        if submersible.name ~= "" and
+            ((submersible.future_optimal_build ~= "" and submersible.future_optimal_build ~= submersible.build and CheckIfWeHaveRequiredParts(submersible.future_optimal_build, submersible)) or
+            (submersible.build_needs_change and submersible.vessel_behavior ~= 0 and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible))) then
             DisableAR()
             ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", 0)
             finalized_plan = true
-        elseif (((submersible.vessel_behavior == 0 and not CheckIfWeHaveRequiredParts(submersible.future_optimal_build, submersible)) or (submersible.vessel_behavior == 0 and submersible.build_needs_change)) and submersible.name ~= "") then
+        elseif (submersible.vessel_behavior == 0 and not (CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible) or CheckIfWeHaveRequiredParts(submersible.future_optimal_build, submersible)) and submersible.build_needs_change) and submersible.name ~= "" then
             DisableAR()
             ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", submersible.optimal_plan_type)
             finalized_plan = true
@@ -1734,21 +1738,21 @@ local function PostARTasks()
                     repeat
                         Target("Voyage Control Panel")
                         Sleep(0.1)
-                        yield("/lockon")
-                        Sleep(0.2)
                         yield("/interact")
                         Sleep(0.2)
-                    until IsAddonReady("SelectString")
+                    until IsAddonReady("SelectString") and string.find(GetNodeText("SelectString", 2,2,3), "Submersible Management")
                     yield("/callback SelectString true 1")
+                    Sleep(0.5)
                     repeat
                         Sleep(0.1)
-                    until IsAddonReady("SelectString")
+                    until IsAddonReady("SelectString") and string.find(GetNodeText("SelectString", 3), "Vessels deployed")
                     in_submersible_menu = true
                 end
                 yield("/callback SelectString true "..(submersible.number - 1))
+                Sleep(0.3)
                 repeat
                     Sleep(0.1)
-                until IsAddonReady("SelectString")
+                until IsAddonReady("SelectString") and string.find(GetNodeText("SelectString", 3), "Vessels deployed")
                 local node_text = GetNodeText("SelectString",2,1,3)
                 if string.find(node_text, "Recall") then -- Handling if a sub is somehow not done when this is called
                     yield("/callback SelectString true 0")
@@ -1798,11 +1802,17 @@ local function PostARTasks()
                     ModifyAdditionalSubmersibleData(submersible.number,"SelectedUnlockPlan",submersible.optimal_plan)
                 end
             end
-
         end
-        UpdateOverseerDataFile(true)
     end
     if swap_done then
+        for _, submersible in ipairs(overseer_char_data.submersibles) do
+            if not submersible.vessel_behavior == submersible.optimal_plan_type and submersible.return_time == 0 then
+                repeat
+                    UpdateOverseerDataFile(true)
+                    Sleep(1)
+                until submersible.vessel_behavior == submersible.optimal_plan_type
+            end
+        end
         yield("/callback SelectString true -1 0")
         repeat
             Sleep(0.1)
@@ -1815,7 +1825,7 @@ local function PostARTasks()
 
     -- Force any subs that are brought back but not sent out to be sent out again
     for _, submersible in ipairs(overseer_char_data.submersibles) do
-        if ((submersible.vessel_behavior == 0) or (submersible.vessel_behavior ~= submersible.optimal_plan_type and submersible.build ~= submersible.optimal_build and submersible.vessel_behavior == 0)) and submersible.return_time == 0 and submersible.name ~= "" then
+        if (submersible.vessel_behavior == 0 or (submersible.vessel_behavior ~= submersible.optimal_plan_type and submersible.build ~= submersible.optimal_build)) and submersible.return_time == 0 and submersible.name ~= "" then
             DisableAR()
             ModifyAdditionalSubmersibleData(submersible.number, "VesselBehavior", 3)
         end
@@ -2094,6 +2104,10 @@ function CheckIfWeHaveRequiredParts(abbreviation, submersible)
     local parts_needed = {}
     local part_counter = 1
 
+    if abbreviation == "" then
+        return false
+    end
+
     local function GetSlotName(part_number)
         if part_number == 1 then
             return "Hull"
@@ -2201,32 +2215,36 @@ local function Main()
                 end
                 ARSetMultiModeEnabled(true)
                 if (GetTargetName() == "Voyage Control Panel") then
+                    local submersible_waiting_override = 0
                     repeat
                         Sleep(0.1)
                     until not IsPlayerAvailable()
                     Sleep(0.5)
                     ARSetMultiModeEnabled(false)
                     repeat
-                        Sleep(0.5)
-                    until not SubsWaitingToBeProcessed()
-                    repeat
                         Sleep(0.1)
                     until IsPlayerAvailable()
+                    repeat
+                        Sleep(0.5)
+                    until not SubsWaitingToBeProcessed() or submersible_waiting_override >= 10
                     PostARTasks()
                 end
+                ARSetMultiModeEnabled(true)
                 if (GetTargetName() == "Summoning Bell") then
                     overseer_char_processing_retainers = true
+                    local retainer_waiting_override = 0
                     repeat
                         Sleep(0.1)
                     until not IsPlayerAvailable()
                     Sleep(0.5)
                     ARSetMultiModeEnabled(false)
                     repeat
-                        Sleep(0.5)
-                    until not RetainersWaitingToBeProcessed()
-                    repeat
                         Sleep(0.1)
                     until IsPlayerAvailable()
+                    repeat
+                        Sleep(0.5)
+                        retainer_waiting_override = retainer_waiting_override + 1
+                    until not RetainersWaitingToBeProcessed() or retainer_waiting_override >= 10
                     PostARTasks()
                     overseer_char_processing_retainers = false
                 end

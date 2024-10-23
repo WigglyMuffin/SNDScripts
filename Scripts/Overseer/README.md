@@ -176,6 +176,7 @@ Overseer implements a robust backup system for your Auto Retainer configuration:
 
 ## Changelog
 
+- **1.2.8**: Various optimizations and fixed a couple more bugs related to part swapping and submersible vessel behavior
 - **1.2.7**: Fixed an issue causing data not to be saved/read properly so the script took the wrong actions
 - **1.2.6**: Reverted some optimization due to bugs
 - **1.2.5**: Optimized some areas of the script and fixed a bug causing it to rarely fail when accessing the AR config file
