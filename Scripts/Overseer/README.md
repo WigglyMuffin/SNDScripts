@@ -2,6 +2,8 @@
 
 Overseer is a script designed to improve your Auto Retainer experience. It provides automated backup, management and optimisation features for Auto Retainer, ensuring data integrity and enhancing overall efficiency.
 
+The default values inside the configuration can be used straight away, though it is recommended to look them over and adjust anything to suit your required needs, see [Configuration](#configuration) section for more info.
+
 There will potentially be bugs and weird things happening, please report any issues you encounter, this should be considered a script in the testing period, while all attempts have been made to ensure things run smoothly, there is no guarantee they will.
 
 ## Disclaimer
@@ -33,7 +35,7 @@ By using Overseer, you agree to these terms and accept full responsibility for i
 - **Automated Backups**: Safeguard your Auto Retainer configuration with backup rotation (up to 50 backups).
 - **Submersible Optimisation**:
   - Automatic creation and enabling of submersibles
-  - Part swapping for optimal voyaging based on submersible rank and configuration
+  - Part swapping for optimal voyaging based on submersible rank and configuration, there are submersible and inventory checks to ensure you have the parts
   - Route handling and plan management
   - Optimal vessel behaviour based on number of unlocked submersibles
 - **Silent Operation**: Works seamlessly in the background with no interruptions.
@@ -110,7 +112,7 @@ Each entry in the table represents a configuration for a specific rank range and
 
 ### Unlock Plans Configuration
 
-Unlock plans are defined in the "Open Voyage Unlockable Planner". Here's an example of how to configure them:
+Unlock plans are defined in the "Open Voyage Unlockable Planner" of AutoRetainer. Here's an example of how to configure them:
 
 ```lua
 local unlock_plans = {
@@ -132,7 +134,7 @@ local unlock_plans = {
 
 ### Point Plans Configuration
 
-Point plans are defined in the "Open Voyage Route Planner". Here's an example of how to configure them:
+Point plans are defined in the "Open Voyage Route Planner" of AutoRetainer. Here's an example of how to configure them:
 
 ```lua
 local point_plans = {
