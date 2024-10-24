@@ -33,7 +33,7 @@ By using Overseer, you agree to these terms and accept full responsibility for i
 - **Automated Backups**: Safeguard your Auto Retainer configuration with backup rotation (up to 50 backups).
 - **Submersible Optimisation**:
   - Automatic creation and enabling of submersibles
-  - Part swapping for optimal voyaging based on submersible rank and configuration
+  - Part swapping for optimal voyaging based on submersible rank and configuration, there are submersible and inventory checks to ensure you have the parts
   - Route handling and plan management
   - Optimal vessel behaviour based on number of unlocked submersibles
 - **Silent Operation**: Works seamlessly in the background with no interruptions.
