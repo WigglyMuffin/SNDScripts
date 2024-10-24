@@ -112,7 +112,7 @@ Each entry in the table represents a configuration for a specific rank range and
 
 ### Unlock Plans Configuration
 
-Unlock plans are defined in the "Open Voyage Unlockable Planner". Here's an example of how to configure them:
+Unlock plans are defined in the "Open Voyage Unlockable Planner" of AutoRetainer. Here's an example of how to configure them:
 
 ```lua
 local unlock_plans = {
@@ -134,7 +134,7 @@ local unlock_plans = {
 
 ### Point Plans Configuration
 
-Point plans are defined in the "Open Voyage Route Planner". Here's an example of how to configure them:
+Point plans are defined in the "Open Voyage Route Planner" of AutoRetainer. Here's an example of how to configure them:
 
 ```lua
 local point_plans = {
