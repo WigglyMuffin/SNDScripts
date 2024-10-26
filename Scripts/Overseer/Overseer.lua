@@ -7,7 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.2.9      ##
+##     1.3.0      ##
 ####################
 
 ####################################################
@@ -1670,13 +1670,9 @@ local function PreARTasks()
         if submersible.name ~= "" and
             ((submersible.future_optimal_build ~= "" and submersible.future_optimal_build ~= submersible.build and CheckIfWeHaveRequiredParts(submersible.future_optimal_build, submersible)) or
             (submersible.build_needs_change and submersible.vessel_behavior ~= 0 and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible))) then
-            Echo(submersible.name)
-            Echo("finalize 1")
             ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", 0)
             finalized_plan = true
         elseif (submersible.vessel_behavior == 0 and not (CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible) or CheckIfWeHaveRequiredParts(submersible.future_optimal_build, submersible)) and not submersible.build_needs_change) and submersible.name ~= "" then
-            Echo(submersible.name)
-            Echo("finalize 2")
             ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", submersible.optimal_plan_type)
             finalized_plan = true
         end
@@ -1723,6 +1719,19 @@ local function PostARTasks()
     UpdateOverseerDataFile(true)
     CreateConfigBackup()
 
+    for _, submersible in ipairs(overseer_char_data.submersibles) do
+        if submersible.return_time < os.time() and submersible.return_time ~= 0 and submersible.vessel_behavior == 0 then
+            local retries = 0
+            local max_retries = 20
+            repeat
+                ForceARSave()
+                UpdateOverseerDataFile(true)
+                Sleep(1)
+                retries = retries + 1
+            until submersible.return_time == 0 or retries >= max_retries
+        end
+    end
+
     -- Part swapping 
     local in_submersible_menu = false
     local swap_done = false
@@ -1757,7 +1766,7 @@ local function PostARTasks()
                     Sleep(0.1)
                 until IsAddonReady("SelectString") and string.find(GetNodeText("SelectString", 3), "Vessels deployed")
                 local node_text = GetNodeText("SelectString",2,1,3)
-                if string.find(node_text, "Recall") then -- Handling if a sub is somehow not done when this is called
+                if string.find(node_text, "Recall") then
                     yield("/callback SelectString true 0")
                     repeat
                         Sleep(0.1)
@@ -2259,7 +2268,7 @@ local function Main()
                     until IsPlayerAvailable()
                     repeat
                         Sleep(0.5)
-                    until not SubsWaitingToBeProcessed() or submersible_waiting_override >= 10
+                    until not SubsWaitingToBeProcessed() or submersible_waiting_override >= 20
                     PostARTasks()
                 end
                 ARSetMultiModeEnabled(true)
@@ -2277,7 +2286,7 @@ local function Main()
                     repeat
                         Sleep(0.5)
                         retainer_waiting_override = retainer_waiting_override + 1
-                    until not RetainersWaitingToBeProcessed() or retainer_waiting_override >= 10
+                    until not RetainersWaitingToBeProcessed() or retainer_waiting_override >= 20
                     PostARTasks()
                     overseer_char_processing_retainers = false
                 end
