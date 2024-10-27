@@ -43,12 +43,14 @@ Will also modify a lot of settings inside of Rotation solver so beware of that b
 ####################################################
 
 -> AutoDuty - https://puni.sh/api/repository/herc
--> Boss Mod - https://puni.sh/api/repository/veyn OR BossMod Reborn - https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
+-> AutoRetainer : https://love.puni.sh/ment.json
+-> BossMod Reborn - https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
 -> Lifestream - https://raw.githubusercontent.com/NightmareXIV/MyDalamudPlugins/main/pluginmaster.json
 -> Pandora - https://love.puni.sh/ment.json
 -> Questionable - https://plugins.carvel.li/
 -> Rotation Solver Reborn - https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
 -> Something Need Doing (Expanded Edition) - https://puni.sh/api/repository/croizat
+-> Teleporter : In the default first party dalamud repository
 -> Textadvance - https://raw.githubusercontent.com/NightmareXIV/MyDalamudPlugins/main/pluginmaster.json
 -> Vnavmesh - https://puni.sh/api/repository/veyn
 
@@ -90,6 +92,14 @@ LoadFunctionsFileLocation = SNDConfigFolder.."vac_functions.lua"
 LoadFunctions = loadfile(LoadFunctionsFileLocation)
 LoadFunctions()
 LoadFileCheck()
+
+if not CheckPluginsEnabled("AutoDuty", "AutoRetainer", "BossModReborn", "Lifestream", "PandorasBox", "Questionable", "RotationSolver", "SomethingNeedDoing", "TeleporterPlugin", "TextAdvance", "vnavmesh") then
+    return -- Stops script as plugins not available
+end
+
+if HasPlugin("YesAlready") then
+    PauseYesAlready()
+end
 
 local whitelisted_duties = {
     "Sastasha",
@@ -514,3 +524,7 @@ for _, char in ipairs(chars) do
     Teleporter("Limsa", "tp")
 end
 LogOut()
+
+if HasPlugin("YesAlready") then
+    RestoreYesAlready()
+end
