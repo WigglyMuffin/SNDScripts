@@ -83,9 +83,10 @@ Archive of deprecated scripts. No active support provided.
 ## Installation
 1. Verify all required plugins are installed and enabled.
 2. Download the latest vac_functions and vac_lists files.
-3. Place the vac_functions and vac_lists files in your SND config folder (`%appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing`).
+3. Place the vac_functions and vac_lists files in your SND config folder (`%appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing`), this location will need to be changed manually in each script if you have a different environment or default location set.
 4. Download the latest script files of your choice from their respective locations.
 5. Place scripts inside your SND environment (`/snd` and import the scripts).
+6. Each script can have a configuration/settings section, ensure that you correctly set it up for your needs.
 
 ## License
 This project is licensed under the [GNU GPL v3](https://www.gnu.org/licenses/gpl-3.0.en.html).
