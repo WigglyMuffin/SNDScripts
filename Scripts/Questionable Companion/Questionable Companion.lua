@@ -6,9 +6,10 @@
 
 ####################
 ##    Version     ##
-##     0.1.9      ##
+##     0.2.0      ##
 ####################
 
+-> 0.2.0: Updated plugin requirements
 -> 0.1.9: Added an option to force bossmod ai on if it detects the character is under X health, very basic implementation and will probably be improved in the future
 -> 0.1.8: Fixed the script being broken due to an SND update
 -> 0.1.7: Unexpected combat should be fixed
