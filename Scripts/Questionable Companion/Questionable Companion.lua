@@ -6,9 +6,10 @@
 
 ####################
 ##    Version     ##
-##     0.2.1      ##
+##     0.2.2      ##
 ####################
 
+-> 0.2.2: Added a few more bossmod settings
 -> 0.2.1: Updated the settings companion sets when starting to more optimal ones
 -> 0.2.0: Updated plugin requirements
 -> 0.1.9: Added an option to force bossmod ai on if it detects the character is under X health, very basic implementation and will probably be improved in the future
@@ -42,7 +43,7 @@ Will also modify a lot of settings inside of Rotation solver and some in bossmod
 
 ####################################################
 ##                  Requirements                  ##
-####################################################
+####################################################    
 
 -> AutoDuty - https://puni.sh/api/repository/herc
 -> AutoRetainer : https://love.puni.sh/ment.json
@@ -338,6 +339,8 @@ for _, char in ipairs(chars) do
         -- VBM settings
         yield("/vbm ar toggle")
         yield("/vbm cfg ZoneModuleConfig EnableQuestBattles True")
+        yield("/vbm cfg ZoneModuleConfig MinMaturity 1")
+        yield("/vbm cfg BossModuleConfig MinMaturity 1")
         yield("/vbm cfg AiConfig AutoFate False")
     end
     if bossmod_ai_outside_of_instances then
