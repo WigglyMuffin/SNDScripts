@@ -6,9 +6,10 @@
 
 ####################
 ##    Version     ##
-##     0.2.0      ##
+##     0.2.1      ##
 ####################
 
+-> 0.2.1: Updated the settings companion sets when starting to more optimal ones
 -> 0.2.0: Updated plugin requirements
 -> 0.1.9: Added an option to force bossmod ai on if it detects the character is under X health, very basic implementation and will probably be improved in the future
 -> 0.1.8: Fixed the script being broken due to an SND update
@@ -37,7 +38,7 @@
 Just a simple script you can run alongside questionable to have it automatically queue and finish dungeons, it will enter and try to do instances but not every instance is doable.
 Also has a stuck checker that reloads vnav, and if stuck for long enough, rebuilds the zone entirely.
  
-Will also modify a lot of settings inside of Rotation solver so beware of that before using.
+Will also modify a lot of settings inside of Rotation solver and some in bossmod so beware of that before using.
 
 ####################################################
 ##                  Requirements                  ##
@@ -45,7 +46,7 @@ Will also modify a lot of settings inside of Rotation solver so beware of that b
 
 -> AutoDuty - https://puni.sh/api/repository/herc
 -> AutoRetainer : https://love.puni.sh/ment.json
--> BossMod Reborn - https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
+-> BossMod or BossMod Reborn - https://puni.sh/api/repository/veyn // https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
 -> Lifestream - https://raw.githubusercontent.com/NightmareXIV/MyDalamudPlugins/main/pluginmaster.json
 -> Pandora - https://love.puni.sh/ment.json
 -> Questionable - https://plugins.carvel.li/
@@ -59,14 +60,17 @@ Will also modify a lot of settings inside of Rotation solver so beware of that b
 ##                    Settings                    ##
 ##################################################]]
 
--- leave this empty if you don't want the chars to stop at any specific quest, but this will cause it to never try to rotate to another char
-local quest_name_to_stop_at = ""
-
 -- Toggle if you want bossmod ai to be enabled all the time or only when it's required
 local bossmod_ai_outside_of_instances = true
 
 -- This setting will force enable bossmod if it finds your character below x% health, set to 0 if you want it disabled
 local enable_bossmod_ai_hp_treshold = 50
+
+-- This setting will enforce recommended settings for both Bossmod and RSR once the script starts
+local enforce_settings = true
+
+-- leave this empty if you don't want the chars to stop at any specific quest, but this will cause it to never try to rotate to another char
+local quest_name_to_stop_at = ""
 
 -- Here you provide it a character list to go through, this used alongside the above option will let you get a lot of different character to X quest
 local chars = {
@@ -80,8 +84,8 @@ local chars = {
 ##################################################]]
 
 -- will attempt to reload qst whenever it detects it's stuck on a step
-local qst_reloader_enabled = false
-local qst_reloader_threshold = 20 -- this is how many seconds quest reloader will wait before it triggers a reload if it finds you being stuck, set this higher if you end up having issues with follow quests and similar
+local qst_reloader_enabled = true
+local qst_reloader_threshold = 15 -- this is how many loops quest reloader will wait before it triggers a reload if it finds you being stuck, set this higher if you end up having issues with follow quests and similar
 local qst_reloader_echo = true -- set this to false if you want to disable quest reloader outputting timer info into the chat
 
 
@@ -94,7 +98,11 @@ LoadFunctions = loadfile(LoadFunctionsFileLocation)
 LoadFunctions()
 LoadFileCheck()
 
-if not CheckPluginsEnabled("AutoDuty", "AutoRetainer", "BossModReborn", "Lifestream", "PandorasBox", "Questionable", "RotationSolver", "SomethingNeedDoing", "TeleporterPlugin", "TextAdvance", "vnavmesh") then
+if not CheckPluginsEnabled("BossMod") and not CheckPluginsEnabled("BossModReborn") then
+    return
+end
+
+if not CheckPluginsEnabled("AutoDuty", "AutoRetainer", "Lifestream", "PandorasBox", "Questionable", "RotationSolver", "SomethingNeedDoing", "TeleporterPlugin", "TextAdvance", "vnavmesh") then
     return -- Stops script as plugins not available
 end
 
@@ -174,7 +182,7 @@ function IsDutyWhitelisted(duty_name)
     local function ReplaceDashes(s)
         return s:gsub("–", "-"):gsub("—", "-"):gsub("‑", "-"):gsub("‐", "-")
     end
-    
+
     -- lowers the string in case there's inconsistencies
     local duty_name_lower = ReplaceDashes(string.lower(duty_name))
 
@@ -231,7 +239,16 @@ local function WithinThreeUnits(x1, y1, z1, x2, y2, z2)
     end
 end
 
+local function CheckForQuestSpecificActions()
+    -- currently none
+end
+
+local function CheckForQuestSpecificInstanceActions()
+    -- currently none
+end
+
 local function WaitforInstanceFinishAndStartQst()
+    CheckForQuestSpecificInstanceActions()
     LogInfo("[QSTC] Wait for instance finish active")
     repeat
         Sleep(1)
@@ -300,19 +317,29 @@ for _, char in ipairs(chars) do
     until IsPlayerAvailable()
     yield("/at e")
     yield("/qst start")
-    -- rsr settings
     RSRChangeOperatingMode(1)
-    yield("/rotation Settings AutoOffBetweenArea False")
-    yield("/rotation Settings AutoOffSwitchClass False")
-    yield("/rotation Settings AutoOffWhenDutyCompleted True")
-    yield("/rotation Settings AutoOffCutScene False")
-    yield("/rotation Settings AddEnemyListToHostile True")
-    yield("/rotation Settings OnlyAttackInEnemyList False")
-    yield("/rotation Settings AutoOffAfterCombat False")
-    yield("/rotation Settings AutoOffWhenDead False")
-    yield("/rotation Settings AutoOffWhenDutyCompleted False")
-    yield("/rotation Settings AoEType Full")
-    yield("/rotation Settings HostileType AllTargetsWhenSoloInDuty")
+    if enforce_settings then
+        -- RSR Settings
+        yield("/rotation Settings HostileType AllTargetsWhenSoloInDuty")
+        yield("/rotation Settings TargetFatePriority False")
+        yield("/rotation Settings SwitchTargetFriendly True")
+        yield("/rotation Settings UseHpPotions True")
+        yield("/rotation Settings NoNewHostiles True")
+        yield("/rotation Settings AoEType Full")
+        yield("/rotation Settings HostileType AllTargetsWhenSoloInDuty")
+        yield("/rotation Settings AutoOffWhenDutyCompleted False")
+        yield("/rotation Settings AutoOffSwitchClass False")
+        yield("/rotation Settings AutoOffWhenDead False")
+        yield("/rotation Settings AutoOffAfterCombat False")
+        yield("/rotation Settings AutoOffCutScene False")
+        yield("/rotation Settings AutoOffBetweenArea False")
+        yield("/rotation Settings TargetingTypes removeall")
+        yield("/rotation Settings TargetingTypes add LowHP")
+        -- VBM settings
+        yield("/vbm ar toggle")
+        yield("/vbm cfg ZoneModuleConfig EnableQuestBattles True")
+        yield("/vbm cfg AiConfig AutoFate False")
+    end
     if bossmod_ai_outside_of_instances then
         yield("/vbmai on")
     else
@@ -455,6 +482,9 @@ for _, char in ipairs(chars) do
             finished = true
             LogInfo("[QSTC] Quest checker not longer active")
         end
+
+        -- Quest specific actions
+        CheckForQuestSpecificActions()
 
         -- Duty helper
         if IsAddonReady("ContentsFinder") and DoesObjectExist("Entrance") then
