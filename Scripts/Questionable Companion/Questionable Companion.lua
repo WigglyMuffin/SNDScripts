@@ -6,9 +6,10 @@
 
 ####################
 ##    Version     ##
-##     0.2.2      ##
+##     0.2.3      ##
 ####################
 
+-> 0.2.3: Added an option to remove the entrance restriction placed to stop erroneous duty queueing 
 -> 0.2.2: Added a few more bossmod settings
 -> 0.2.1: Updated the settings companion sets when starting to more optimal ones
 -> 0.2.0: Updated plugin requirements
@@ -72,6 +73,10 @@ local enforce_settings = true
 
 -- leave this empty if you don't want the chars to stop at any specific quest, but this will cause it to never try to rotate to another char
 local quest_name_to_stop_at = ""
+
+-- This setting will remove the nearby entrance check implemented to stop the script from queueing if you accidentally open the duty window at any point.
+-- Turning it off will cause the script to attempt queuing upon opening the duty finder window, no matter if it was opened by you or questionable
+local remove_entrance_restriction = false
 
 -- Here you provide it a character list to go through, this used alongside the above option will let you get a lot of different character to X quest
 local chars = {
@@ -490,7 +495,7 @@ for _, char in ipairs(chars) do
         CheckForQuestSpecificActions()
 
         -- Duty helper
-        if IsAddonReady("ContentsFinder") and DoesObjectExist("Entrance") then
+        if IsAddonReady("ContentsFinder") and (remove_entrance_restriction or DoesObjectExist("Entrance")) then
             LogInfo("[QSTC] Duty helper active, attempting to pull the duty name from JournalDetail")
             repeat
                 Sleep(1)
