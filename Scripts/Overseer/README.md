@@ -53,10 +53,6 @@ Ensure you have the following plugins installed and enabled:
 - TextAdvance
 - vnavmesh
 
-### Optional
-Only if you are using the alternative but better method to launch the script
-- Automaton
-
 ## Installation
 
 1. Verify all required plugins are installed and enabled.
@@ -65,7 +61,7 @@ Only if you are using the alternative but better method to launch the script
 4. Download the latest Overseer script files (both Overseer and Overseer Launcher) from the [Overseer folder](https://github.com/WigglyMuffin/SNDScripts/tree/main/Scripts/Overseer).
 5. Edit Overseer OUTSIDE of snd to set your settings, and use the import button to import the script. Due to size limits the script will fail to allow you to edit once inside snd and this the workaround.
 6. Import Overseer and Overseer Launcher into your SND environment (`/snd` and import the scripts).
-7. Set Overseer Launcher as the script to run on AutoRetainer CharacterPostProcess, located in SND settings. Alternatively, use the Automaton plugins "Enhanced login" feature to run the command `/runmacro "Overseer Launcher"` upon logging in with AR enabled, which is recommended over the postprocess method since then the first fc is processed immediately.
+7. Set Overseer Launcher as the script to run on AutoRetainer CharacterPostProcess, located in SND settings.
 
 ## Getting Started
 
