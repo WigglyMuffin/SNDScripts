@@ -176,6 +176,7 @@ Overseer implements a robust backup system for your Auto Retainer configuration:
 
 ## Changelog
 
+- **1.3.1**: More fixes related to plan assignment and inconsistent finalizing
 - **1.3.0**: Added another check to try to remedy inconsistencies in part swapping.
 - **1.2.9**: Attempted to further fix inconsistencies with part swapping. Also added a character exclusion list so you can exclude certain characters from submersible processing
 - **1.2.8**: Various optimizations and fixed a couple more bugs related to part swapping and submersible vessel behavior

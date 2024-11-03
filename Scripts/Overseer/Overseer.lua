@@ -7,7 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.3.0      ##
+##     1.3.1      ##
 ####################
 
 ####################################################
@@ -196,6 +196,7 @@ overseer_char_bought_ceruleum = false
 overseer_char_processing_subs = false
 overseer_char_processing_retainers = false
 overseer_char_subs_excluded = false
+overseer_attempt_swap_table = {}
 
 -- Function which logs a lot to the xllog if debug is true 
 function LogToInfo(...)
@@ -358,10 +359,10 @@ end
 local function GetOptimalBuildForRank(rank)
     for _, config in ipairs(submersible_build_config) do
         if rank >= config.min_rank and rank <= config.max_rank then
-            return config.build, config.plan_type, config.unlock_plan, config.point_plan
+            return config.build, config.plan_type, config.unlock_plan, config.point_plan, config.min_rank, config.max_rank
         end
     end
-    return nil, nil, nil, nil  -- Return nil for all values if no matching range found
+    return nil, nil, nil, nil, nil, nil  -- Return nil for all values if no matching range found
 end
 
 -- Helper function to get unlock plan by GUID
@@ -399,7 +400,7 @@ end
 
 local function InExclusionList(char_name)
     for _, name in ipairs(excluded_submersible_character) do
-        if string.find(string.lower(name), string.lower(char_name)) then
+        if string.lower(name) == string.lower(char_name) then
             return true
         end
     end
@@ -424,7 +425,7 @@ end
 -- Helper function to calculate bonus experience based on route
 local function EstimateMaxBonusExp(base_exp)
     -- This is a simplified estimation, because the actual relies on items brought back based on breakpoints
-    return math.floor(base_exp * 0.25)
+    return base_exp -- Was originally 0.25 of the base_xp, but since we realized that the max possible bonus is 100% we just return the same value and assume based on that. Really doesn't need to be a function anymore.
 end
 
 -- Helper function to get optimal venture for retainer level
@@ -572,6 +573,7 @@ local function CreateDefaultSubmersible(number, has_valid_fc)
         experience = 0,
         rank = 0,
         rank_after_levelup = 0,
+        rank_needed_for_next_swap = 0,
         build = "",
         optimal_build = "",
         future_optimal_build = "",
@@ -603,7 +605,7 @@ local function CreateDefaultSubmersible(number, has_valid_fc)
         return_time = 0,
         guaranteed_exp = 0,
         potential_bonus_exp = 0,
-        can_level_up = false,
+        will_level_up = false,
         potential_level_up = false,
         exp_after_levelup = 0,
         points = ""
@@ -906,7 +908,7 @@ local function UpdateFromAutoRetainerConfig()
                     submersible.potential_bonus_exp = EstimateMaxBonusExp(submersible.guaranteed_exp)
 
                     -- Determine if submersible can level up or potentially level up
-                    submersible.can_level_up = (submersible.current_exp + submersible.guaranteed_exp >= submersible.next_level_exp)
+                    submersible.will_level_up = (submersible.current_exp + submersible.guaranteed_exp >= submersible.next_level_exp)
                     submersible.potential_level_up = (submersible.current_exp + submersible.guaranteed_exp + submersible.potential_bonus_exp >= submersible.next_level_exp)
 
                     -- Calculate rank_after_levelup
@@ -921,7 +923,10 @@ local function UpdateFromAutoRetainerConfig()
 
                     -- Determine optimal configurations based on the higher of current rank and rank_after_levelup
                     local optimal_build, optimal_plan_type, optimal_unlock_plan_guid, optimal_point_plan_guid = GetOptimalBuildForRank(submersible.rank)
+                    -- Determine future optimals
+                    local future_optimal_build, future_optimal_plan_type, future_optimal_unlock_plan_guid, future_optimal_point_plan_guid, future_optimal_min_rank, future_optimal_max_rank = GetOptimalBuildForRank(submersible.rank_after_levelup)
 
+                    submersible.rank_needed_for_next_swap = future_optimal_min_rank or 0
                     submersible.optimal_build = optimal_build or ""
                     submersible.optimal_plan_type = optimal_plan_type or 0
                     submersible.build_needs_change = (optimal_build ~= nil and submersible.build ~= optimal_build)
@@ -945,7 +950,6 @@ local function UpdateFromAutoRetainerConfig()
 
                     -- Check if there's a different future optimal build
                     if submersible.rank_after_levelup > submersible.rank then
-                        local future_optimal_build, future_optimal_plan_type, future_optimal_unlock_plan_guid, future_optimal_point_plan_guid = GetOptimalBuildForRank(submersible.rank_after_levelup)
                         if future_optimal_build ~= submersible.optimal_build then
                             submersible.future_optimal_build = future_optimal_build or ""
                             submersible.future_optimal_plan_type = future_optimal_plan_type or 0
@@ -986,7 +990,6 @@ local function UpdateFromAutoRetainerConfig()
                         submersible.plan_needs_change_after_levelup = false
                     end
 
-                    submersible.build_needs_change_after_levelup = (future_optimal_build ~= nil and submersible.build ~= future_optimal_build)
                     LogToInfo(string.format("[Overseer] Processed submersible: %s", submersible.name))
                     LogToInfo(string.format("[Overseer] Current rank: %d, Potential final rank: %d", submersible.rank, submersible.rank_after_levelup))
                     LogToInfo(string.format("[Overseer] Current build: %s, Optimal build: %s, Future optimal build: %s", submersible.build, submersible.optimal_build, submersible.future_optimal_build))
@@ -1155,6 +1158,7 @@ local function SaveCharacterDataToFile(character_data, global_data)
             file:write(string.format("          experience = %d,\n", submersible.experience))
             file:write(string.format("          rank = %d,\n", submersible.rank))
             file:write(string.format("          rank_after_levelup = %d,\n", submersible.rank_after_levelup))
+            file:write(string.format("          rank_needed_for_next_swap = %d,\n", submersible.rank_needed_for_next_swap))
             file:write(string.format("          build = \"%s\",\n", submersible.build))
             file:write(string.format("          optimal_build = \"%s\",\n", submersible.optimal_build))
             file:write(string.format("          future_optimal_build = \"%s\",\n", submersible.future_optimal_build))
@@ -1196,7 +1200,7 @@ local function SaveCharacterDataToFile(character_data, global_data)
             file:write(string.format("          return_time = %d,\n", submersible.return_time))
             file:write(string.format("          guaranteed_exp = %d,\n", submersible.guaranteed_exp))
             file:write(string.format("          potential_bonus_exp = %d,\n", submersible.potential_bonus_exp))
-            file:write(string.format("          can_level_up = %s,\n", tostring(submersible.can_level_up)))
+            file:write(string.format("          will_level_up = %s,\n", tostring(submersible.will_level_up)))
             file:write(string.format("          potential_level_up = %s,\n", tostring(submersible.potential_level_up)))
             file:write(string.format("          exp_after_levelup = %d,\n", submersible.exp_after_levelup))
             file:write("        },\n")
@@ -1349,15 +1353,19 @@ local function RegisterSubmersible()
         return
     end
     if GetDistanceToObject("Voyage Control Panel") > 4.5 then
-        Movement(0.48, -0.00, 6.89, 1)
-        Movement(3.25, -0.00, 6.93, 1)
+        Target("Voyage Control Panel")
+        yield("/lockon")
+        yield("/automove")
+        repeat
+            Sleep(0.1)
+        until GetDistanceToObject("Voyage Control Panel") < 4
     end
     repeat
         Target("Voyage Control Panel")
-        Sleep(0.3)
+        Sleep(0.1)
         yield("/interact")
-        Sleep(0.3)
-    until IsAddonReady("SelectString")
+        Sleep(0.2)
+    until IsAddonReady("SelectString") and string.find(GetNodeText("SelectString", 2,2,3), "Submersible Management")
     yield("/callback SelectString true 1")
     repeat
         Sleep(0.1)
@@ -1547,7 +1555,6 @@ local function ModifyAdditionalSubmersibleData(submersible_number, config, confi
     for _, submersible in ipairs(overseer_char_data.submersibles) do
         if submersible.number == submersible_number then
             submersible_name = submersible.name
-            break
         end
     end
 
@@ -1668,17 +1675,15 @@ local function PreARTasks()
         Check and set any subs that need a build swap to finalize
         ]]
         if submersible.name ~= "" and
-            ((submersible.future_optimal_build ~= "" and submersible.future_optimal_build ~= submersible.build and CheckIfWeHaveRequiredParts(submersible.future_optimal_build, submersible)) or
+            ((submersible.future_optimal_build ~= "" and submersible.future_optimal_build ~= submersible.build and CheckIfWeHaveRequiredParts(submersible.future_optimal_build, submersible) and submersible.will_level_up) or
             (submersible.build_needs_change and submersible.vessel_behavior ~= 0 and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible))) then
             ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", 0)
-            finalized_plan = true
-        elseif (submersible.vessel_behavior == 0 and not (CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible) or CheckIfWeHaveRequiredParts(submersible.future_optimal_build, submersible)) and not submersible.build_needs_change) and submersible.name ~= "" then
-            ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", submersible.optimal_plan_type)
             finalized_plan = true
         end
         if finalized_plan then
             UpdateOverseerDataFile(true)
         end
+
         enabled_sub = false
         changed_plan = false
         finalized_plan = false
@@ -1690,11 +1695,18 @@ end
 
 local function IfAdditionalEntranceExistsPathToIt()
     if DoesObjectExist("Entrance to Additional Chambers") then
-        PathToObject("Entrance to Additional Chambers", 1)
+        if GetDistanceToObject("Entrance to Additional Chambers") > 3.5 then
+            Target("Entrance to Additional Chambers")
+            yield("/lockon")
+            yield("/automove")
+            repeat
+                Sleep(0.1)
+            until GetDistanceToObject("Entrance to Additional Chambers") < 3 and not IsMoving()
+        end
         repeat
-            yield('/target "Entrance to Additional Chambers"')
-            Interact()
-            Sleep(0.1)
+            Target("Entrance to Additional Chambers")
+            yield("/interact")
+            Sleep(0.2)
         until IsAddonReady("SelectString")
         yield("/callback SelectString true 0")
         ZoneTransitions()
@@ -1722,7 +1734,7 @@ local function PostARTasks()
     for _, submersible in ipairs(overseer_char_data.submersibles) do
         if submersible.return_time < os.time() and submersible.return_time ~= 0 and submersible.vessel_behavior == 0 then
             local retries = 0
-            local max_retries = 20
+            local max_retries = 10
             repeat
                 ForceARSave()
                 UpdateOverseerDataFile(true)
@@ -1732,24 +1744,36 @@ local function PostARTasks()
         end
     end
 
-    -- Part swapping 
+    -- Set any sub that hasn't actually reached the right level back on the right path
+    for _, submersible in ipairs(overseer_char_data.submersibles) do
+        if submersible.vessel_behavior == 0 and submersible.rank < submersible.rank_needed_for_next_swap and submersible.return_time == 0 and submersible.name ~= "" and not overseer_char_subs_excluded then
+            ModifyAdditionalSubmersibleData(submersible.number, "VesselBehavior", submersible.optimal_plan_type)
+        end
+    end
+
+    UpdateOverseerDataFile(true)
+
+    -- Part swapping
     local in_submersible_menu = false
     local swap_done = false
     for _, submersible in ipairs(overseer_char_data.submersibles) do
-        if submersible.build_needs_change and submersible.name ~= "" and not overseer_char_subs_excluded then
-            if (submersible.return_time == 0 and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) or (submersible.return_time ~= 0 and force_return_subs_that_need_swap and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)) then
+        if submersible.vessel_behavior == 0 and submersible.name ~= "" and not overseer_char_subs_excluded then
+            if (submersible.return_time < os.time() or force_return_subs_that_need_swap) and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible) then
                 IfAdditionalEntranceExistsPathToIt()
                 if not DoesObjectExist("Voyage Control Panel") then
                     break
                 end
                 if not in_submersible_menu then
                     if GetDistanceToObject("Voyage Control Panel") > 4.5 then
-                        Movement(0.48, -0.00, 6.89, 1)
-                        Movement(3.25, -0.00, 6.93, 1)
+                        Target("Voyage Control Panel")
+                        yield("/lockon")
+                        yield("/automove")
+                        repeat
+                            Sleep(0.1)
+                        until GetDistanceToObject("Voyage Control Panel") < 4
                     end
                     repeat
                         Target("Voyage Control Panel")
-                        Sleep(0.1)
                         yield("/interact")
                         Sleep(0.2)
                     until IsAddonReady("SelectString") and string.find(GetNodeText("SelectString", 2,2,3), "Submersible Management")
@@ -1766,7 +1790,7 @@ local function PostARTasks()
                     Sleep(0.1)
                 until IsAddonReady("SelectString") and string.find(GetNodeText("SelectString", 3), "Vessels deployed")
                 local node_text = GetNodeText("SelectString",2,1,3)
-                if string.find(node_text, "Recall") then
+                if string.find(node_text, "Recall") and force_return_subs_that_need_swap then
                     yield("/callback SelectString true 0")
                     repeat
                         Sleep(0.1)
@@ -1780,6 +1804,12 @@ local function PostARTasks()
                         Sleep(0.1)
                     until IsAddonReady("SelectString")
                     Sleep(0.5)
+                elseif string.find(node_text, "Recall") and not force_return_subs_that_need_swap then
+                    yield("/callback SelectString true 4")
+                    repeat
+                        Sleep(0.1)
+                    until IsAddonReady("SelectString") or IsPlayerAvailable()
+                    break
                 end
                 yield("/callback SelectString true 2")
                 repeat
@@ -1804,7 +1834,7 @@ local function PostARTasks()
                 else
                     ModifyAdditionalSubmersibleData(submersible.number,"SelectedUnlockPlan",submersible.optimal_plan)
                 end
-            elseif submersible.return_time == 0 and not CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible) then
+            elseif submersible.return_time < os.time() and not CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible) then
                 ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior",submersible.optimal_plan_type)
                 if submersible.optimal_plan_type == 4 then
                     ModifyAdditionalSubmersibleData(submersible.number,"SelectedPointPlan",submersible.optimal_plan)
@@ -1815,14 +1845,7 @@ local function PostARTasks()
         end
     end
     if swap_done then
-        for _, submersible in ipairs(overseer_char_data.submersibles) do
-            if not submersible.vessel_behavior == submersible.optimal_plan_type and submersible.return_time == 0 and not overseer_char_subs_excluded then
-                repeat
-                    UpdateOverseerDataFile(true)
-                    Sleep(1)
-                until submersible.vessel_behavior == submersible.optimal_plan_type
-            end
-        end
+        UpdateOverseerDataFile(true)
         yield("/callback SelectString true -1 0")
         repeat
             Sleep(0.1)
@@ -1830,7 +1853,7 @@ local function PostARTasks()
         yield("/callback SelectString true -1 0")
         repeat
             Sleep(0.1)
-        until IsAddonReady("SelectString") or IsPlayerAvailable()
+        until IsPlayerAvailable()
     end
 
     -- Check and handle if we need to register any submarines
@@ -1844,29 +1867,30 @@ local function PostARTasks()
             RegisterSubmersible()
             ForceARSave()
             UpdateOverseerDataFile(true)
-            for _, submersible in ipairs(overseer_char_data.submersibles) do
-                if not submersible.enabled and submersible.name ~= "" then
-                    EnableSubmersible(submersible.number)
-                    ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior",submersible.optimal_plan_type)
-                    if submersible.optimal_plan_type == 4 then
-                        ModifyAdditionalSubmersibleData(submersible.number,"SelectedPointPlan",submersible.optimal_plan)
-                    else
-                        ModifyAdditionalSubmersibleData(submersible.number,"SelectedUnlockPlan",submersible.optimal_plan)
-                    end
+            repeat
+                EnableSubmersible(submersible.number)
+                Sleep(0.5)
+            until submersible.enabled
+            repeat
+                ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", submersible.optimal_plan_type)
+                if submersible.optimal_plan_type == 4 then
+                    ModifyAdditionalSubmersibleData(submersible.number,"SelectedPointPlan",submersible.optimal_plan)
+                else
+                    ModifyAdditionalSubmersibleData(submersible.number,"SelectedUnlockPlan",submersible.optimal_plan)
                 end
-            end
+                Sleep(0.5)
+            until submersible.vessel_behavior == submersible.optimal_plan_type and (submersible.optimal_plan == submersible.selected_point_plan or submersible.optimal_plan == submersible.selected_unlock_plan)
             UpdateOverseerDataFile(true)
             registered_sub = true
-            break
         end
     end
 
     -- Force any subs that are brought back but not sent out to be sent out again
-    for _, submersible in ipairs(overseer_char_data.submersibles) do
-        if (submersible.vessel_behavior == 0 or (submersible.vessel_behavior ~= submersible.optimal_plan_type and submersible.build ~= submersible.optimal_build)) and submersible.return_time == 0 and submersible.name ~= "" and not overseer_char_subs_excluded then
-            ModifyAdditionalSubmersibleData(submersible.number, "VesselBehavior", 3)
-        end
-    end
+    -- for _, submersible in ipairs(overseer_char_data.submersibles) do
+    --     if (submersible.vessel_behavior == 0 or (submersible.vessel_behavior ~= submersible.optimal_plan_type and submersible.build ~= submersible.optimal_build)) and submersible.return_time == 0 and submersible.name ~= "" and not overseer_char_subs_excluded then
+    --         ModifyAdditionalSubmersibleData(submersible.number, "VesselBehavior", 3)
+    --     end
+    -- end
 
     EnableAR()
     if swap_done or registered_sub then
@@ -1906,7 +1930,7 @@ local function PostARTasks()
 
     if HasEnabledRetainers() and not overseer_char_performed_gc_delivery and overseer_char_processing_retainers then
         overseer_char_performed_gc_delivery = true
-        if overseer_char_data.ventures < venture_limit then
+        if overseer_char_data.ventures < venture_limit and overseer_char_data.ventures ~= 0  then
             PerformGCDelivery()
         elseif GetInventoryFreeSlotCount() < inventory_slot_limit then
             PerformGCDelivery()
@@ -2268,7 +2292,8 @@ local function Main()
                     until IsPlayerAvailable()
                     repeat
                         Sleep(0.5)
-                    until not SubsWaitingToBeProcessed() or submersible_waiting_override >= 20
+                        submersible_waiting_override = submersible_waiting_override + 1
+                    until not SubsWaitingToBeProcessed() or submersible_waiting_override >= 10
                     PostARTasks()
                 end
                 ARSetMultiModeEnabled(true)
@@ -2286,7 +2311,7 @@ local function Main()
                     repeat
                         Sleep(0.5)
                         retainer_waiting_override = retainer_waiting_override + 1
-                    until not RetainersWaitingToBeProcessed() or retainer_waiting_override >= 20
+                    until not RetainersWaitingToBeProcessed() or retainer_waiting_override >= 10
                     PostARTasks()
                     overseer_char_processing_retainers = false
                 end
