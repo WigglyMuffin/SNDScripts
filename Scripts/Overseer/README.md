@@ -176,6 +176,7 @@ Overseer implements a robust backup system for your Auto Retainer configuration:
 
 ## Changelog
 
+- **1.3.3**: Fixed a bug caused by the previous update causing it to not part swap at all
 - **1.3.2**: A lot of bugfixes
 - **1.3.1**: More fixes related to plan assignment and inconsistent finalizing
 - **1.3.0**: Added another check to try to remedy inconsistencies in part swapping.

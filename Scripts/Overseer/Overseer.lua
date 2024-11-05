@@ -7,7 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.3.2      ##
+##     1.3.3      ##
 ####################
 
 ####################################################
@@ -577,6 +577,7 @@ local function CreateDefaultSubmersible(number, has_valid_fc)
         rank = 0,
         rank_after_levelup = 0,
         rank_needed_for_next_swap = 0,
+        min_rank_needed_for_next_swap = 0,
         build = "",
         optimal_build = "",
         future_optimal_build = "",
@@ -937,6 +938,7 @@ local function UpdateFromAutoRetainerConfig()
                     local future_optimal_build, future_optimal_plan_type, future_optimal_unlock_plan_guid, future_optimal_point_plan_guid, future_optimal_min_rank, future_optimal_max_rank = GetOptimalBuildForRank(submersible.rank_after_levelup)
 
                     submersible.rank_needed_for_next_swap = optimal_max_rank + 1 or 0
+                    submersible.min_rank_needed_for_next_swap = optimal_min_rank or 0
                     submersible.optimal_build = optimal_build or ""
                     submersible.optimal_plan_type = optimal_plan_type or 0
                     submersible.build_needs_change = (optimal_build ~= nil and submersible.build ~= optimal_build)
@@ -1169,6 +1171,7 @@ local function SaveCharacterDataToFile(character_data, global_data)
             file:write(string.format("          rank = %d,\n", submersible.rank))
             file:write(string.format("          rank_after_levelup = %d,\n", submersible.rank_after_levelup))
             file:write(string.format("          rank_needed_for_next_swap = %d,\n", submersible.rank_needed_for_next_swap))
+            file:write(string.format("          min_rank_needed_for_next_swap = %d,\n", submersible.min_rank_needed_for_next_swap))
             file:write(string.format("          build = \"%s\",\n", submersible.build))
             file:write(string.format("          optimal_build = \"%s\",\n", submersible.optimal_build))
             file:write(string.format("          future_optimal_build = \"%s\",\n", submersible.future_optimal_build))
@@ -1758,7 +1761,7 @@ local function PostARTasks()
 
     -- Set any sub that hasn't actually reached the right level back on the right path
     for _, submersible in ipairs(overseer_char_data.submersibles) do
-        if submersible.vessel_behavior == 0 and submersible.rank < submersible.rank_needed_for_next_swap and submersible.return_time == 0 and submersible.name ~= "" and not overseer_char_subs_excluded then
+        if submersible.vessel_behavior == 0 and submersible.rank < submersible.min_rank_needed_for_next_swap and submersible.return_time == 0 and submersible.name ~= "" and not overseer_char_subs_excluded then
             local retries = 0
             repeat
                 ModifyAdditionalSubmersibleData(submersible.number, "VesselBehavior", submersible.optimal_plan_type)
@@ -1838,7 +1841,7 @@ local function PostARTasks()
                     ChangeSubmersibleParts(submersible.optimal_build)
                     Sleep(0.1)
                     part_retries = part_retries + 1
-                until GetSubmersibleParts() == submersible.optimal_build or part_retries == 10
+                until GetSubmersibleParts() == submersible.optimal_build or part_retries >= 10
                 yield("/callback CompanyCraftSupply true 5")
                 repeat
                     Sleep(0.1)
