@@ -7,7 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.3.3      ##
+##     1.3.4      ##
 ####################
 
 ####################################################
@@ -1892,15 +1892,21 @@ local function PostARTasks()
             RegisterSubmersible()
             ForceARSave()
             EnableSubmersible(submersible.number)
+            EnableAR()
+            ForceARSave()
             UpdateOverseerDataFile(true)
-            ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", submersible.optimal_plan_type)
-            if submersible.optimal_plan_type == 4 then
-                ModifyAdditionalSubmersibleData(submersible.number,"SelectedPointPlan",submersible.optimal_plan)
-            else
-                ModifyAdditionalSubmersibleData(submersible.number,"SelectedUnlockPlan",submersible.optimal_plan)
-            end
-            UpdateOverseerDataFile(true)
-            Sleep(0.5)
+            local retries = 0
+            repeat
+                ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", submersible.optimal_plan_type)
+                if submersible.optimal_plan_type == 4 then
+                    ModifyAdditionalSubmersibleData(submersible.number,"SelectedPointPlan",submersible.optimal_plan)
+                else
+                    ModifyAdditionalSubmersibleData(submersible.number,"SelectedUnlockPlan",submersible.optimal_plan)
+                end
+                UpdateOverseerDataFile(true)
+                Sleep(1)
+                retries = retries + 1
+            until (submersible.vessel_behavior == submersible.optimal_plan_type and (submersible.selected_point_plan == submersible.optimal_plan or submersible.selected_unlock_plan == submersible.optimal_plan)) or retries > 10
             registered_sub = true
         end
     end
