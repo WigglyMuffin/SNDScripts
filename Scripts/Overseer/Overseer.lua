@@ -7,7 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.3.1      ##
+##     1.3.2      ##
 ####################
 
 ####################################################
@@ -196,7 +196,6 @@ overseer_char_bought_ceruleum = false
 overseer_char_processing_subs = false
 overseer_char_processing_retainers = false
 overseer_char_subs_excluded = false
-overseer_attempt_swap_table = {}
 
 -- Function which logs a lot to the xllog if debug is true 
 function LogToInfo(...)
@@ -241,6 +240,7 @@ local function CreateConfigBackup()
     local last_backup_handle = io.open(last_backup_file, "w")
     if last_backup_handle then
         last_backup_handle:write(tostring(timestamp))
+        last_backup_handle:flush()
         last_backup_handle:close()
     end
 
@@ -261,6 +261,7 @@ local function CreateConfigBackup()
         return
     end
     dest:write(content)
+    dest:flush()
     dest:close()
 
     -- Log the new backup
@@ -268,6 +269,7 @@ local function CreateConfigBackup()
     local log_file = io.open(log_file_path, "a")
     if log_file then
         log_file:write(backup_file .. "\n")
+        log_file:flush()
         log_file:close()
     end
 
@@ -299,6 +301,7 @@ local function CreateConfigBackup()
         for _, backup in ipairs(backups) do
             log_file_write:write(backup .. "\n")
         end
+        log_file_write:flush()
         log_file_write:close()
     end
 end
@@ -882,6 +885,13 @@ local function UpdateFromAutoRetainerConfig()
                 if i == 1 or i <= num_sub_slots then
                     submersible.unlocked = true
                 end
+                local function ReturnSubmersiblePoints()
+                    if submersible_data.ReturnTime == 0 then
+                        return ""
+                    else
+                        return add_submersible_data.Points or ""
+                    end
+                end
                 if submersible_data.Name then
                     submersible.name = submersible_data.Name
                     submersible.experience = add_submersible_data.CurrentExp or 0
@@ -898,7 +908,7 @@ local function UpdateFromAutoRetainerConfig()
                     submersible.enabled = IsSubmersibleEnabled(submersible_data.Name)
                     submersible.selected_unlock_plan = add_submersible_data.SelectedUnlockPlan or "00000000-0000-0000-0000-000000000000"
                     submersible.selected_point_plan = add_submersible_data.SelectedPointPlan or "00000000-0000-0000-0000-000000000000"
-                    submersible.points = add_submersible_data.Points or ""
+                    submersible.points = ReturnSubmersiblePoints()
                     submersible.decoded_points = DecodeSubmersiblePoints(submersible.points) or {0, 0, 0, 0, 0}
                     submersible.route = DecodePointsToRoute(submersible.decoded_points)
                     submersible.return_time = submersible_data.ReturnTime
@@ -922,11 +932,11 @@ local function UpdateFromAutoRetainerConfig()
                     submersible.build = GenerateBuildString(submersible.part1, submersible.part2, submersible.part3, submersible.part4)
 
                     -- Determine optimal configurations based on the higher of current rank and rank_after_levelup
-                    local optimal_build, optimal_plan_type, optimal_unlock_plan_guid, optimal_point_plan_guid = GetOptimalBuildForRank(submersible.rank)
+                    local optimal_build, optimal_plan_type, optimal_unlock_plan_guid, optimal_point_plan_guid, optimal_min_rank, optimal_max_rank = GetOptimalBuildForRank(submersible.rank)
                     -- Determine future optimals
                     local future_optimal_build, future_optimal_plan_type, future_optimal_unlock_plan_guid, future_optimal_point_plan_guid, future_optimal_min_rank, future_optimal_max_rank = GetOptimalBuildForRank(submersible.rank_after_levelup)
 
-                    submersible.rank_needed_for_next_swap = future_optimal_min_rank or 0
+                    submersible.rank_needed_for_next_swap = optimal_max_rank + 1 or 0
                     submersible.optimal_build = optimal_build or ""
                     submersible.optimal_plan_type = optimal_plan_type or 0
                     submersible.build_needs_change = (optimal_build ~= nil and submersible.build ~= optimal_build)
@@ -1210,6 +1220,7 @@ local function SaveCharacterDataToFile(character_data, global_data)
     end
     file:write("  },\n")
     file:write("}\n")
+    file:flush()
     file:close()
     -- Echo("[Overseer] Character data and global plans saved to " .. file_path)
     LogToInfo("[Overseer] Character data and global plans saved to " .. file_path)
@@ -1220,7 +1231,6 @@ local function LoadOverseerCharacterData(character)
     LogToInfo("[Overseer] Attempting to load data for " .. character)
     local overseer_data_file = overseer_folder .. "ar_character_data.lua"
 
-    -- Safely load the data using pcall to catch errors from dofile
     local success, overseer_data = pcall(dofile, overseer_data_file)
     if not success then
         LogToInfo("[Overseer] Error: Failed to load overseer data file")
@@ -1263,12 +1273,12 @@ local function UpdateOverseerDataFile(update_char_data)
     end
     SaveCharacterDataToFile(ar_character_data, global_data)
     if update_char_data then
+        overseer_char_data = {}
         overseer_char_data = LoadOverseerCharacterData(overseer_current_character)
     end
 end
 
 -- walks up to the vendor and buys/uses gc seal buff, should only be called when already at the GC
--- yeah this is a function of all time
 local function UseFCBuff()
     -- Attempt to use "Seal Sweetener II"
     if HasStatus("Seal Sweetener") then
@@ -1447,6 +1457,7 @@ local function EnableSubmersible(submersible_number)
             for _, modified_line in ipairs(lines) do
                 out_file:write(modified_line .. "\n")
             end
+            out_file:flush()
             out_file:close()
             return true, "Successfully enabled submersible."
         end
@@ -1490,7 +1501,7 @@ local function ModifyAdditionalSubmersibleData(submersible_number, config, confi
         local additional_data_started = false
         local in_submersible_data = false
         local config_found = false
-
+        local read_too_far = false
         for line in file:lines() do
             table.insert(lines, line)
 
@@ -1506,11 +1517,11 @@ local function ModifyAdditionalSubmersibleData(submersible_number, config, confi
 
                         if not line then break end
 
-                        if line:find('"' .. submersible_name .. '"', 1, true) then
+                        if line:find('"' .. submersible_name .. '"', 1, true) and not read_too_far then
                             in_submersible_data = true
                         end
 
-                        if in_submersible_data then
+                        if in_submersible_data and not read_too_far then
                             if line:find('"' .. config .. '":') then
                                 config_found = true
                                 line = line:gsub('"' .. config .. '": "%s*[^"]-%s*"', '"' .. config .. '": "' .. config_option .. '"')
@@ -1521,9 +1532,10 @@ local function ModifyAdditionalSubmersibleData(submersible_number, config, confi
 
                         table.insert(lines, line)
 
-                        if line:find("}", 1, true) then
+                        if line:find("}", 1, true) or line:find('"Ceruleum":', 1, true) then
                             if in_submersible_data then
                                 in_submersible_data = false
+                                read_too_far = true
                             elseif line:find('"AdditionalSubmarineData":') then
                                 additional_data_started = false
                                 break
@@ -1540,6 +1552,7 @@ local function ModifyAdditionalSubmersibleData(submersible_number, config, confi
             for _, modified_line in ipairs(lines) do
                 out_file:write(modified_line .. "\n")
             end
+            out_file:flush()
             out_file:close()
             return true, config .. " updated successfully."
         end
@@ -1675,7 +1688,7 @@ local function PreARTasks()
         Check and set any subs that need a build swap to finalize
         ]]
         if submersible.name ~= "" and
-            ((submersible.future_optimal_build ~= "" and submersible.future_optimal_build ~= submersible.build and CheckIfWeHaveRequiredParts(submersible.future_optimal_build, submersible) and submersible.will_level_up) or
+            ((submersible.future_optimal_build ~= "" and submersible.future_optimal_build ~= submersible.build and CheckIfWeHaveRequiredParts(submersible.future_optimal_build, submersible) and submersible.rank_after_levelup >= submersible.rank_needed_for_next_swap) or
             (submersible.build_needs_change and submersible.vessel_behavior ~= 0 and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible))) then
             ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", 0)
             finalized_plan = true
@@ -1734,20 +1747,25 @@ local function PostARTasks()
     for _, submersible in ipairs(overseer_char_data.submersibles) do
         if submersible.return_time < os.time() and submersible.return_time ~= 0 and submersible.vessel_behavior == 0 then
             local retries = 0
-            local max_retries = 10
             repeat
                 ForceARSave()
                 UpdateOverseerDataFile(true)
                 Sleep(1)
                 retries = retries + 1
-            until submersible.return_time == 0 or retries >= max_retries
+            until submersible.return_time == 0 or retries >= 10
         end
     end
 
     -- Set any sub that hasn't actually reached the right level back on the right path
     for _, submersible in ipairs(overseer_char_data.submersibles) do
         if submersible.vessel_behavior == 0 and submersible.rank < submersible.rank_needed_for_next_swap and submersible.return_time == 0 and submersible.name ~= "" and not overseer_char_subs_excluded then
-            ModifyAdditionalSubmersibleData(submersible.number, "VesselBehavior", submersible.optimal_plan_type)
+            local retries = 0
+            repeat
+                ModifyAdditionalSubmersibleData(submersible.number, "VesselBehavior", submersible.optimal_plan_type)
+                UpdateOverseerDataFile(true)
+                retries = retries + 1
+                Sleep(0.2)
+            until submersible.vessel_behavior == submersible.optimal_plan_type or retries > 5
         end
     end
 
@@ -1815,10 +1833,12 @@ local function PostARTasks()
                 repeat
                     Sleep(0.1)
                 until IsAddonReady("CompanyCraftSupply")
+                local part_retries = 0
                 repeat
                     ChangeSubmersibleParts(submersible.optimal_build)
                     Sleep(0.1)
-                until GetSubmersibleParts() == submersible.optimal_build
+                    part_retries = part_retries + 1
+                until GetSubmersibleParts() == submersible.optimal_build or part_retries == 10
                 yield("/callback CompanyCraftSupply true 5")
                 repeat
                     Sleep(0.1)
@@ -1834,6 +1854,7 @@ local function PostARTasks()
                 else
                     ModifyAdditionalSubmersibleData(submersible.number,"SelectedUnlockPlan",submersible.optimal_plan)
                 end
+                UpdateOverseerDataFile(true)
             elseif submersible.return_time < os.time() and not CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible) then
                 ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior",submersible.optimal_plan_type)
                 if submersible.optimal_plan_type == 4 then
@@ -1841,6 +1862,7 @@ local function PostARTasks()
                 else
                     ModifyAdditionalSubmersibleData(submersible.number,"SelectedUnlockPlan",submersible.optimal_plan)
                 end
+                UpdateOverseerDataFile(true)
             end
         end
     end
@@ -1866,31 +1888,19 @@ local function PostARTasks()
             end
             RegisterSubmersible()
             ForceARSave()
+            EnableSubmersible(submersible.number)
             UpdateOverseerDataFile(true)
-            repeat
-                EnableSubmersible(submersible.number)
-                Sleep(0.5)
-            until submersible.enabled
-            repeat
-                ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", submersible.optimal_plan_type)
-                if submersible.optimal_plan_type == 4 then
-                    ModifyAdditionalSubmersibleData(submersible.number,"SelectedPointPlan",submersible.optimal_plan)
-                else
-                    ModifyAdditionalSubmersibleData(submersible.number,"SelectedUnlockPlan",submersible.optimal_plan)
-                end
-                Sleep(0.5)
-            until submersible.vessel_behavior == submersible.optimal_plan_type and (submersible.optimal_plan == submersible.selected_point_plan or submersible.optimal_plan == submersible.selected_unlock_plan)
+            ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", submersible.optimal_plan_type)
+            if submersible.optimal_plan_type == 4 then
+                ModifyAdditionalSubmersibleData(submersible.number,"SelectedPointPlan",submersible.optimal_plan)
+            else
+                ModifyAdditionalSubmersibleData(submersible.number,"SelectedUnlockPlan",submersible.optimal_plan)
+            end
             UpdateOverseerDataFile(true)
+            Sleep(0.5)
             registered_sub = true
         end
     end
-
-    -- Force any subs that are brought back but not sent out to be sent out again
-    -- for _, submersible in ipairs(overseer_char_data.submersibles) do
-    --     if (submersible.vessel_behavior == 0 or (submersible.vessel_behavior ~= submersible.optimal_plan_type and submersible.build ~= submersible.optimal_build)) and submersible.return_time == 0 and submersible.name ~= "" and not overseer_char_subs_excluded then
-    --         ModifyAdditionalSubmersibleData(submersible.number, "VesselBehavior", 3)
-    --     end
-    -- end
 
     EnableAR()
     if swap_done or registered_sub then
@@ -1954,7 +1964,6 @@ local function AddUnlockPlansToDefaultConfig()
             content = content:sub(4)
             LogToInfo("[Overseer] BOM removed from the content")
         end
-
         file:close()
 
         local data, pos, err = json.decode(content, 1)
@@ -2033,6 +2042,7 @@ local function AddUnlockPlansToDefaultConfig()
             for _, modified_line in ipairs(lines) do
                 out_file:write(modified_line .. "\n")
             end
+            out_file:flush()
             out_file:close()
             return true, "Successfully added unlock plan."
         end
@@ -2066,7 +2076,6 @@ local function AddPointPlansToDefaultConfig()
             content = content:sub(4)
             LogToInfo("[Overseer] BOM removed from the content")
         end
-
         file:close()
 
         local data, pos, err = json.decode(content, 1)
@@ -2135,7 +2144,6 @@ local function AddPointPlansToDefaultConfig()
                 plans_started = false
             end
         end
-
         file:close()
 
         if modified then
@@ -2143,6 +2151,7 @@ local function AddPointPlansToDefaultConfig()
             for _, modified_line in ipairs(lines) do
                 out_file:write(modified_line .. "\n")
             end
+            out_file:flush()
             out_file:close()
             return true, "Successfully added point plan."
         end
