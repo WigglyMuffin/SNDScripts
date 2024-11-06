@@ -105,8 +105,10 @@ Each entry in the table represents a configuration for a specific rank range and
 - `max_rank`: Maximum rank value (inclusive)
 - `build`: String representing the parts the submersibles should use
 - `plan_type`: Vessel behavior (0 = Unlock, 1 = Redeploy, 2 = LevelUp, 3 = Unlock, 4 = Use plan)
-- `unlock_plan`: GUID corresponding to the unlock plan
-- `point_plan`: GUID corresponding to the point plan
+- `unlock_plan`: GUID corresponding to the unlock plan, this plan uses `plan_type = 3`
+- `point_plan`: GUID corresponding to the point plan, this plan uses `plan_type = 4`
+
+Keep in mind that `plan_type` determines which plan is used, for values 0-2 no plan is used and is managed by AutoRetainer, value 3 uses `unlock_plan` and value 4 uses `point_plan` for each submersible. Therefore, if you are levelling a submersible using a plan, you would use `plan_type = 3` with an appropriate `unlock_plan` set, if you are farming you would use `plan_type = 4` with an appropriate `point_plan` set instead.
 
 ### Unlock Plans Configuration
 
