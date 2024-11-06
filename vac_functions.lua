@@ -3591,7 +3591,7 @@ function ChangeSubmersibleParts(desired_parts)
                         menu_appeared = true
                         break
                     end
-                    Sleep(0.2)
+                    Sleep(0.5)
                 end
 
                 if not menu_appeared then
@@ -3612,7 +3612,7 @@ function ChangeSubmersibleParts(desired_parts)
                         menu_disappeared = true
                         break
                     end
-                    Sleep(0.2)
+                    Sleep(0.5)
                 end
 
                 if not menu_disappeared then
@@ -3620,7 +3620,7 @@ function ChangeSubmersibleParts(desired_parts)
                     break
                 end
 
-                Sleep(0.2) -- Delay after menu closes
+                Sleep(0.5) -- Delay after menu closes
 
                 -- Check if the part has been changed correctly
                 local new_parts = GetSubmersibleParts()
@@ -3637,7 +3637,7 @@ function ChangeSubmersibleParts(desired_parts)
 
                 -- If this is not the last attempt, prepare for the next attempt
                 if attempt < 4 then
-                    Sleep(0.2) -- Delay before next attempt
+                    Sleep(0.5) -- Delay before next attempt
                 else
                     LogInfo(string.format("[VAC] (ChangeSubmersibleParts) Failed to change %s to %s after all attempts", slot.name, desired_part))
                     return false
