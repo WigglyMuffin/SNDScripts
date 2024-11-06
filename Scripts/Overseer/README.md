@@ -176,6 +176,7 @@ Overseer implements a robust backup system for your Auto Retainer configuration:
 
 ## Changelog
 
+- **1.3.5**: More attempts at fixing inconsistencies
 - **1.3.4**: Potential fix to submersibles not being sent out after creation
 - **1.3.3**: Fixed a bug caused by the previous update causing it to not part swap at all
 - **1.3.2**: A lot of bugfixes

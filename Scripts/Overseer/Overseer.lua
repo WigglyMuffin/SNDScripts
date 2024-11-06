@@ -7,7 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.3.4      ##
+##     1.3.5      ##
 ####################
 
 ####################################################
@@ -1276,7 +1276,6 @@ local function UpdateOverseerDataFile(update_char_data)
     end
     SaveCharacterDataToFile(ar_character_data, global_data)
     if update_char_data then
-        overseer_char_data = {}
         overseer_char_data = LoadOverseerCharacterData(overseer_current_character)
     end
 end
@@ -1378,8 +1377,10 @@ local function RegisterSubmersible()
         Sleep(0.1)
         yield("/interact")
         Sleep(0.2)
-    until IsAddonReady("SelectString") and string.find(GetNodeText("SelectString", 2,2,3), "Submersible Management")
+    until IsAddonReady("SelectString")
+    Sleep(0.5)
     yield("/callback SelectString true 1")
+    Sleep(0.5)
     repeat
         Sleep(0.1)
     until IsAddonReady("SelectString")
@@ -1388,10 +1389,13 @@ local function RegisterSubmersible()
     repeat
         Sleep(0.1)
     until IsAddonReady("SelectString")
+    Sleep(0.5)
     yield("/callback SelectString true -1 0")
+    Sleep(0.5)
     repeat
         Sleep(0.1)
     until IsAddonReady("SelectString")
+    Sleep(0.5)
     yield("/callback SelectString true -1 0")
 end
 
@@ -1724,6 +1728,7 @@ local function IfAdditionalEntranceExistsPathToIt()
             yield("/interact")
             Sleep(0.2)
         until IsAddonReady("SelectString")
+        Sleep(0.3)
         yield("/callback SelectString true 0")
         ZoneTransitions()
     end
@@ -1743,8 +1748,6 @@ end
 
 -- Function to handle any tasks that need to be done after subs are finished
 local function PostARTasks()
-    ForceARSave()
-    UpdateOverseerDataFile(true)
     CreateConfigBackup()
 
     for _, submersible in ipairs(overseer_char_data.submersibles) do
@@ -1753,9 +1756,9 @@ local function PostARTasks()
             repeat
                 ForceARSave()
                 UpdateOverseerDataFile(true)
-                Sleep(1)
+                Sleep(2)
                 retries = retries + 1
-            until submersible.return_time == 0 or retries >= 10
+            until submersible.return_time == 0 or retries >= 5
         end
     end
 
@@ -1797,19 +1800,22 @@ local function PostARTasks()
                         Target("Voyage Control Panel")
                         yield("/interact")
                         Sleep(0.2)
-                    until IsAddonReady("SelectString") and string.find(GetNodeText("SelectString", 2,2,3), "Submersible Management")
+                    until IsAddonReady("SelectString")
+                    Sleep(0.5)
                     yield("/callback SelectString true 1")
                     Sleep(0.5)
                     repeat
                         Sleep(0.1)
                     until IsAddonReady("SelectString") and string.find(GetNodeText("SelectString", 3), "Vessels deployed")
                     in_submersible_menu = true
+                    Sleep(0.5)
                 end
                 yield("/callback SelectString true "..(submersible.number - 1))
                 Sleep(0.3)
                 repeat
                     Sleep(0.1)
                 until IsAddonReady("SelectString") and string.find(GetNodeText("SelectString", 3), "Vessels deployed")
+                Sleep(0.5)
                 local node_text = GetNodeText("SelectString",2,1,3)
                 if string.find(node_text, "Recall") and force_return_subs_that_need_swap then
                     yield("/callback SelectString true 0")
@@ -1846,7 +1852,9 @@ local function PostARTasks()
                 repeat
                     Sleep(0.1)
                 until IsAddonReady("SelectString")
+                Sleep(0.5)
                 yield("/callback SelectString true -1 0")
+                Sleep(0.5)
                 repeat
                     Sleep(0.1)
                 until IsAddonReady("SelectString")
@@ -1883,6 +1891,7 @@ local function PostARTasks()
 
     -- Check and handle if we need to register any submarines
     local registered_sub = false
+    local registered_subs_array = {}
     for _, submersible in ipairs(overseer_char_data.submersibles) do
         if submersible.unlocked and submersible.name == "" and not overseer_char_subs_excluded then
             IfAdditionalEntranceExistsPathToIt()
@@ -1892,22 +1901,29 @@ local function PostARTasks()
             RegisterSubmersible()
             ForceARSave()
             EnableSubmersible(submersible.number)
-            EnableAR()
-            ForceARSave()
-            UpdateOverseerDataFile(true)
-            local retries = 0
-            repeat
-                ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", submersible.optimal_plan_type)
-                if submersible.optimal_plan_type == 4 then
-                    ModifyAdditionalSubmersibleData(submersible.number,"SelectedPointPlan",submersible.optimal_plan)
-                else
-                    ModifyAdditionalSubmersibleData(submersible.number,"SelectedUnlockPlan",submersible.optimal_plan)
-                end
-                UpdateOverseerDataFile(true)
-                Sleep(1)
-                retries = retries + 1
-            until (submersible.vessel_behavior == submersible.optimal_plan_type and (submersible.selected_point_plan == submersible.optimal_plan or submersible.selected_unlock_plan == submersible.optimal_plan)) or retries > 10
+            table.insert(registered_subs_array, submersible.number)
             registered_sub = true
+        end
+    end
+
+    -- Apply plan to newly registered subs
+    if registered_sub then
+        EnableAR()
+        Sleep(2)
+        DisableAR()
+        Sleep(2)
+        UpdateOverseerDataFile(true)
+        for _, submersible in ipairs(overseer_char_data.submersibles) do
+            for _, sub_number in ipairs(registered_subs_array) do
+                if sub_number == submersible.number then
+                    ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior",submersible.optimal_plan_type)
+                    if submersible.optimal_plan_type == 4 then
+                        ModifyAdditionalSubmersibleData(submersible.number,"SelectedPointPlan",submersible.optimal_plan)
+                    else
+                        ModifyAdditionalSubmersibleData(submersible.number,"SelectedUnlockPlan",submersible.optimal_plan)
+                    end
+                end
+            end
         end
     end
 
@@ -1959,7 +1975,6 @@ end
 
 -- Function to add all listed unlock plans to the autoretainer default config
 local function AddUnlockPlansToDefaultConfig()
-    UpdateOverseerDataFile()
 
     local function load_existing_plans(file_path)
         local file = io.open(file_path, "r")
@@ -2071,7 +2086,6 @@ end
 
 -- Function to add all listed point plans to the autoretainer default config
 local function AddPointPlansToDefaultConfig()
-    UpdateOverseerDataFile()
 
     local function LoadExistingPlans(file_path)
         local file = io.open(file_path, "r")
