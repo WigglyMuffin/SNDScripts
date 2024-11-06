@@ -23,6 +23,7 @@ By using Overseer, you agree to these terms and accept full responsibility for i
 ## Known Issues
 
 - FC Actions will sometimes fail to apply when doing gc turnins, doesn't affect any other functionality or crash the script.
+- Sometimes fails to swap parts
 
 ## Planned Features
 
@@ -52,10 +53,6 @@ Ensure you have the following plugins installed and enabled:
 - TextAdvance
 - vnavmesh
 
-### Optional
-Only if you are using the alternative but better method to launch the script
-- Automaton
-
 ## Installation
 
 1. Verify all required plugins are installed and enabled.
@@ -64,7 +61,7 @@ Only if you are using the alternative but better method to launch the script
 4. Download the latest Overseer script files (both Overseer and Overseer Launcher) from the [Overseer folder](https://github.com/WigglyMuffin/SNDScripts/tree/main/Scripts/Overseer).
 5. Edit Overseer OUTSIDE of snd to set your settings, and use the import button to import the script. Due to size limits the script will fail to allow you to edit once inside snd and this the workaround.
 6. Import Overseer and Overseer Launcher into your SND environment (`/snd` and import the scripts).
-7. Set Overseer Launcher as the script to run on AutoRetainer CharacterPostProcess, located in SND settings. Alternatively, use the Automaton plugins "Enhanced login" feature to run the command `/runmacro "Overseer Launcher"` upon logging in with AR enabled, which is recommended over the postprocess method since then the first fc is processed immediately.
+7. Set Overseer Launcher as the script to run on AutoRetainer CharacterPostProcess, located in SND settings.
 
 ## Getting Started
 
@@ -179,6 +176,10 @@ Overseer implements a robust backup system for your Auto Retainer configuration:
 
 ## Changelog
 
+- **1.3.4**: Potential fix to submersibles not being sent out after creation
+- **1.3.3**: Fixed a bug caused by the previous update causing it to not part swap at all
+- **1.3.2**: A lot of bugfixes
+- **1.3.1**: More fixes related to plan assignment and inconsistent finalizing
 - **1.3.0**: Added another check to try to remedy inconsistencies in part swapping.
 - **1.2.9**: Attempted to further fix inconsistencies with part swapping. Also added a character exclusion list so you can exclude certain characters from submersible processing
 - **1.2.8**: Various optimizations and fixed a couple more bugs related to part swapping and submersible vessel behavior
