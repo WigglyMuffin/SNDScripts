@@ -7,7 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.3.5      ##
+##     1.3.6      ##
 ####################
 
 ####################################################
@@ -155,6 +155,9 @@ load_functions_file_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginCon
 -- This is here to make sure that when the script gets started, it stops AR fast enough
 ARAbortAllTasks()
 ARSetMultiModeEnabled(false)
+
+-- Set the correct SND setting
+SetSNDProperty("StopMacroIfAddonNotFound", "False")
 
 -- Load necessary libraries and set up paths
 backup_folder = overseer_folder .. "\\AR Config Backups\\"
@@ -1378,9 +1381,10 @@ local function RegisterSubmersible()
         yield("/interact")
         Sleep(0.2)
     until IsAddonReady("SelectString")
-    Sleep(0.5)
-    yield("/callback SelectString true 1")
-    Sleep(0.5)
+    repeat
+        yield("/callback SelectString true 1")
+        Sleep(0.1)
+    until not IsAddonReady("SelectString")
     repeat
         Sleep(0.1)
     until IsAddonReady("SelectString")
@@ -1389,14 +1393,17 @@ local function RegisterSubmersible()
     repeat
         Sleep(0.1)
     until IsAddonReady("SelectString")
-    Sleep(0.5)
-    yield("/callback SelectString true -1 0")
-    Sleep(0.5)
+    repeat
+        yield("/callback SelectString true -1 0")
+        Sleep(0.1)
+    until not IsAddonReady("SelectString")
     repeat
         Sleep(0.1)
     until IsAddonReady("SelectString")
-    Sleep(0.5)
-    yield("/callback SelectString true -1 0")
+    repeat
+        yield("/callback SelectString true -1 0")
+        Sleep(0.1)
+    until not IsAddonReady("SelectString")
 end
 
 -- Function to enable a specific submersible number for a character
@@ -1728,8 +1735,10 @@ local function IfAdditionalEntranceExistsPathToIt()
             yield("/interact")
             Sleep(0.2)
         until IsAddonReady("SelectString")
-        Sleep(0.3)
-        yield("/callback SelectString true 0")
+        repeat
+            yield("/callback SelectString true 0")
+            Sleep(0.1)
+        until not IsAddonReady("SelectString")
         ZoneTransitions()
     end
 end
@@ -1801,36 +1810,47 @@ local function PostARTasks()
                         yield("/interact")
                         Sleep(0.2)
                     until IsAddonReady("SelectString")
-                    Sleep(0.5)
-                    yield("/callback SelectString true 1")
-                    Sleep(0.5)
+                    repeat
+                        yield("/callback SelectString true 1")
+                        Sleep(0.1)
+                    until not IsAddonReady("SelectString")
                     repeat
                         Sleep(0.1)
-                    until IsAddonReady("SelectString") and string.find(GetNodeText("SelectString", 3), "Vessels deployed")
+                    until IsAddonReady("SelectString") -- and string.find(GetNodeText("SelectString", 3), "Vessels deployed")
                     in_submersible_menu = true
                     Sleep(0.5)
                 end
-                yield("/callback SelectString true "..(submersible.number - 1))
-                Sleep(0.3)
+                repeat
+                    yield("/callback SelectString true "..(submersible.number - 1))
+                    Sleep(0.1)
+                until not IsAddonReady("SelectString")
                 repeat
                     Sleep(0.1)
-                until IsAddonReady("SelectString") and string.find(GetNodeText("SelectString", 3), "Vessels deployed")
+                until IsAddonReady("SelectString") -- and string.find(GetNodeText("SelectString", 3), "Vessels deployed")
                 Sleep(0.5)
                 local node_text = GetNodeText("SelectString",2,1,3)
                 if string.find(node_text, "Recall") and force_return_subs_that_need_swap then
-                    yield("/callback SelectString true 0")
+                    repeat
+                        yield("/callback SelectString true 0")
+                        Sleep(0.1)
+                    until not IsAddonReady("SelectString")
                     repeat
                         Sleep(0.1)
                     until IsAddonReady("AirShipExplorationDetail")
-                    yield("/callback AirShipExplorationDetail true 0")
+                    repeat
+                        yield("/callback AirShipExplorationDetail true 0")
+                        Sleep(0.1)
+                    until not IsAddonReady("AirShipExplorationDetail")
                     repeat
                         Sleep(0.1)
                     until IsAddonReady("SelectYesno")
-                    yield("/callback SelectYesno true 0")
+                    repeat
+                        yield("/callback SelectYesno true 0")
+                        Sleep(0.1)
+                    until not IsAddonReady("SelectYesno")
                     repeat
                         Sleep(0.1)
                     until IsAddonReady("SelectString")
-                    Sleep(0.5)
                 elseif string.find(node_text, "Recall") and not force_return_subs_that_need_swap then
                     yield("/callback SelectString true 4")
                     repeat
@@ -1838,7 +1858,9 @@ local function PostARTasks()
                     until IsAddonReady("SelectString") or IsPlayerAvailable()
                     break
                 end
-                yield("/callback SelectString true 2")
+                repeat
+                    yield("/callback SelectString true 2")
+                until not IsAddonReady("SelectString")
                 repeat
                     Sleep(0.1)
                 until IsAddonReady("CompanyCraftSupply")
@@ -1848,13 +1870,17 @@ local function PostARTasks()
                     Sleep(0.1)
                     part_retries = part_retries + 1
                 until GetSubmersibleParts() == submersible.optimal_build or part_retries >= 10
-                yield("/callback CompanyCraftSupply true 5")
+                repeat
+                    yield("/callback CompanyCraftSupply true 5")
+                    Sleep(0.1)
+                until not IsAddonReady("CompanyCraftSupply")
                 repeat
                     Sleep(0.1)
                 until IsAddonReady("SelectString")
-                Sleep(0.5)
-                yield("/callback SelectString true -1 0")
-                Sleep(0.5)
+                repeat
+                    yield("/callback SelectString true -1 0")
+                    Sleep(0.1)
+                until not IsAddonReady("CompanyCraftSupply")
                 repeat
                     Sleep(0.1)
                 until IsAddonReady("SelectString")
@@ -1879,14 +1905,17 @@ local function PostARTasks()
     end
     if swap_done then
         UpdateOverseerDataFile(true)
-        yield("/callback SelectString true -1 0")
+        repeat
+            yield("/callback SelectString true -1 0")
+            Sleep(0.1)
+        until not IsAddonVisible("SelectString")
         repeat
             Sleep(0.1)
         until IsAddonReady("SelectString") or IsPlayerAvailable()
-        yield("/callback SelectString true -1 0")
         repeat
+            yield("/callback SelectString true -1 0")
             Sleep(0.1)
-        until IsPlayerAvailable()
+        until not IsAddonVisible("SelectString") and IsPlayerAvailable()
     end
 
     -- Check and handle if we need to register any submarines
