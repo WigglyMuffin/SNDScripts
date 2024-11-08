@@ -5,9 +5,10 @@ It contains the functions required to make the scripts work
 
 ####################
 ##    Version     ##
-##     1.0.3      ##
+##     1.0.4      ##
 ####################
 
+-> 1.0.4: Fixed inconsistencies in BuyCeruleum
 -> 1.0.3: vac_lists should now load from the same directory as vac_functions no matter where you put it
 -> 1.0.2: Minor adjustments to adress inconsistencies
 -> 1.0.1: Updated UseFCAction()
@@ -30,6 +31,8 @@ Add error handling for nil/"" and convert lowercase or tostring/tonumber etc
 #####################################
 #####################################
 ###################################]]
+
+SetSNDProperty("StopMacroIfAddonNotFound", "False")
 
 function LoadFileCheck()
     LogInfo("[VAC] Successfully loaded the vac functions file")
@@ -3797,12 +3800,10 @@ function BuyCeruleum(amount)
     Target("Mammet Voyager #004A") -- Target the mammet we're buying ceruleum from
 
     yield("/lockon")
-    Sleep(1)
 
     LogInfo("[VAC] (BuyCeruleum) Moving towards the mammet")
     yield("/automove") -- Move to the mammet, i don't want to rely on Movement() here
     Sleep(1)
-
     repeat
         Sleep(0.1)
     until not IsMoving() -- Wait until we're no longer moving
@@ -3829,8 +3830,11 @@ function BuyCeruleum(amount)
     end
 
     local max_affordable_amount = math.floor(current_fc_credits / ceruleum_price)
+    Echo(max_affordable_amount)
 
     amount = math.min(amount, max_affordable_amount)
+
+    Echo(amount)
 
     if amount <= 0 then
         LogInfo("[VAC] (BuyCeruleum) Not enough credits to buy ceruleum")
@@ -3839,19 +3843,20 @@ function BuyCeruleum(amount)
     end
 
     while amount > 0 do
-        -- Limit the amount per buy to 999
-        local buy_amount = math.min(amount, 999)
-
+        local current_ceruleum_amount = GetItemCount(10155, true)
+        -- Limit the amount per buy to 99
+        local buy_amount = math.min(amount, 99)
+        local final_ceruleum_amount = current_ceruleum_amount + buy_amount
         LogInfo("[VAC] (BuyCeruleum) Buying " .. buy_amount .. " ceruleum")
-        yield("/callback FreeCompanyCreditShop true 0 0 " .. buy_amount) -- Buy X amount of ceruleum
         repeat
-            Sleep(0.01)
+            yield("/callback FreeCompanyCreditShop true 0 0 " .. buy_amount) -- Buy X amount of ceruleum
+            Sleep(0.5)
         until IsAddonReady("SelectYesno") -- Wait for confirm window
 
         yield("/callback SelectYesno true 0") -- Confirm
         repeat
-            Sleep(0.01)
-        until not IsAddonVisible("SelectYesno")
+            Sleep(0.1)
+        until not IsAddonVisible("SelectYesno") and GetItemCount(10155, true) == final_ceruleum_amount
 
         amount = amount - buy_amount
     end
