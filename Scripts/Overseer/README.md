@@ -57,17 +57,18 @@ Ensure you have the following plugins installed and enabled:
 
 1. Verify all required plugins are installed and enabled.
 2. Download the latest vac_functions and vac_lists files from [SNDScripts](https://github.com/WigglyMuffin/SNDScripts).
-3. Place the vac_functions and vac_lists files in your SND config folder (`%appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing`). You can place them elsewhere but then you need to adjust the `load_functions_file_location` line of the Overseer to point to the correct path.
+3. Place the vac_functions and vac_lists files in your SND config folder (`%appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing`). You can place them elsewhere but you will need to adjust the `load_functions_file_location` line of Overseer to point to the correct path.
 4. Download the latest Overseer script files (both Overseer and Overseer Launcher) from the [Overseer folder](https://github.com/WigglyMuffin/SNDScripts/tree/main/Scripts/Overseer).
 5. Edit Overseer ***OUTSIDE*** of the SND environment to configure the settings, and use the import button to import the script. This is due to Overseer exceeding the character limit for SND, requiring you to import the script and editing any configuration outside the SND environment.
-6. Import Overseer and Overseer Launcher into your SND environment (`/snd` and import the scripts).
+6. Import Overseer and Overseer Launcher into your SND environment (`/snd` and import the scripts). Make sure you name the imported scripts in SND to match the file name.
 7. Set Overseer Launcher as the script to run on AutoRetainer CharacterPostProcess, located in SND settings.
 
 ## Getting Started
 
 1. Configure the settings in Overseer (see Configuration section) to match your preferences.
-2. Create a plugin collection which includes AutoRetainer within it, preferably named `AutoRetainer` as that is the default (configurable) naming option.
-3. Let Overseer optimise your Auto Retainer experience automatically upon AutoRetainer starting.
+2. Create a plugin collection which includes AutoRetainer within it, preferably named `AutoRetainer` as that is the default (configurable) naming option. This is case sensitive, so make sure the collection name matches the Overseer config name for the collection.
+3. Start the `Overseer Launcher` script, this will load and start Overseer.
+4. Let Overseer optimise your Auto Retainer experience automatically upon AutoRetainer starting.
 
 ## Configuration
 
