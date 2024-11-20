@@ -7,7 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.3.7      ##
+##     1.3.8      ##
 ####################
 
 ####################################################
@@ -1325,9 +1325,9 @@ local function LoadInventoryFile()
     local file_path = overseer_folder .. "sub_inventory_data.json"
     local file, err = io.open(file_path, "r")
     if not file then
-        -- Echo("[Overseer] Error: Unable to read sub_inventory_data.json: " .. tostring(err))
-        LogToInfo("[Overseer] Error: Unable to read sub_inventory_data.json: " .. tostring(err))
-        return nil
+        -- Echo("[Overseer] Unable to read sub_inventory_data.json: " .. tostring(err))
+        LogToInfo("[Overseer] Unable to read sub_inventory_data.json: " .. tostring(err))
+        return {}
     end
 
     local content = file:read("*all")
@@ -1337,7 +1337,7 @@ local function LoadInventoryFile()
     if not success then
         Echo("[Overseer] Error decoding JSON: " .. tostring(inventory_data))
         LogToInfo("[Overseer] Error decoding JSON: " .. tostring(inventory_data))
-        return nil
+        return {}
     end
 
     Echo("[Overseer] Inventory successfully loaded.")
@@ -2524,11 +2524,16 @@ function CheckIfWeHaveRequiredParts(abbreviation, submersible, character)
     end
 
     local character_parts_inventory = {}
+    local found_character = false
     for character_name, parts in pairs(overseer_inventory_data) do
         if character_name == character then
             character_parts_inventory = parts
+            found_character = true
             break
         end
+    end
+    if not found_character then
+        return false
     end
 
     for k, part_entry in ipairs(parts_needed) do
