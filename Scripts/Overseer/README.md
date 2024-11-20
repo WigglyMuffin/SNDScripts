@@ -76,6 +76,7 @@ Fine-tune Overseer's behaviour by adjusting these parameters in the script's con
 
 | Setting | Description |
 |---------|-------------|
+| `disable_gc_delivery` | Disables attempting any kind of gc delivery on falling under either venture or inventory slot limits
 | `venture_limit` | Minimum value of ventures to trigger buying more ventures, requires Deliveroo to be correctly configured by doing GC deliveries |
 | `inventory_slot_limit` | Amount of inventory slots remaining before attempting a GC delivery to free up slots |
 | `buy_ceruleum` | Will attempt to buy ceruleum fuel based on the settings below, if set to false the characters will never attempt to refuel (buy ceruleum fuel off players) |
@@ -179,6 +180,7 @@ Overseer implements a robust backup system for your Auto Retainer configuration:
 
 ## Changelog
 
+- **1.3.7**: Overseer should now automatically fix submersibles that have not been sent out after a part swap
 - **1.3.6**: Further consistency improvements
 - **1.3.5**: More attempts at fixing inconsistencies
 - **1.3.4**: Potential fix to submersibles not being sent out after creation

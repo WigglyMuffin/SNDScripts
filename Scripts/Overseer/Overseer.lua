@@ -7,7 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.3.6      ##
+##     1.3.7      ##
 ####################
 
 ####################################################
@@ -37,6 +37,7 @@ Retainers are planned features, they are not currently supported.
 ##                    Settings                    ##
 ##################################################]]
 
+local disable_gc_delivery = false                -- Set this to true to disable retainers going to the GC and doing deliveries when under the inventory or venture limit
 local venture_limit = 100                        -- Minimum value of ventures to trigger buying more ventures, requires Deliveroo to be correctly configured by doing GC deliveries
 local inventory_slot_limit = 30                  -- Amount of inventory slots remaining before attempting a GC delivery to free up slots
 local buy_ceruleum = false                       -- Will attempt to buy ceruleum fuel based on the settings below, if set to false the characters will never attempt to refuel (buy ceruleum fuel off players)
@@ -187,7 +188,7 @@ if HasPlugin("BossMod") or HasPlugin("BossModReborn") then
 end
 
 -- To enable debug logs
-local debug = true
+local debug = false
 
 LogInfo("[Overseer] Starting overseer...")
 
@@ -199,6 +200,7 @@ overseer_char_bought_ceruleum = false
 overseer_char_processing_subs = false
 overseer_char_processing_retainers = false
 overseer_char_subs_excluded = false
+overseer_inventory_data = {}
 
 -- Function which logs a lot to the xllog if debug is true 
 function LogToInfo(...)
@@ -1232,17 +1234,24 @@ local function SaveCharacterDataToFile(character_data, global_data)
     LogToInfo("[Overseer] Character data and global plans saved to " .. file_path)
 end
 
--- Load specific character data and return it
-local function LoadOverseerCharacterData(character)
-    LogToInfo("[Overseer] Attempting to load data for " .. character)
+-- Loads all overseer data or specific character data
+local function LoadOverseerData(character)
     local overseer_data_file = overseer_folder .. "ar_character_data.lua"
 
+    LogToInfo("[Overseer] Attempting to load data")
     local success, overseer_data = pcall(dofile, overseer_data_file)
     if not success then
         LogToInfo("[Overseer] Error: Failed to load overseer data file")
         return nil
     end
 
+    -- If no character is provided, return the entire file
+    if not character then
+        LogToInfo("[Overseer] Successfully loaded overseer data")
+        return overseer_data
+    end
+
+    -- try to return data for the specific character
     local character_data = overseer_data.characters[character]
     if character_data then
         LogToInfo("[Overseer] Successfully loaded data for " .. character)
@@ -1251,6 +1260,95 @@ local function LoadOverseerCharacterData(character)
         LogToInfo("[Overseer] Error: No data found for " .. character)
         return nil
     end
+end
+
+-- Update the submersible part inventory file
+local function UpdateInventoryFile(character)
+    if not character then
+        return
+    end
+
+    local file_path = overseer_folder .. "sub_inventory_data.json"
+    local file, err = io.open(file_path, "r")
+    local inventory = {}
+
+    if file then
+        local content = file:read("*all")
+        file:close()
+
+        local success, parsed_data = pcall(json.decode, content)
+        if success and type(parsed_data) == "table" then
+            inventory = parsed_data
+        end
+    end
+
+    -- make sure the key exists
+    if not inventory[character] then
+        inventory[character] = {}
+    end
+
+    -- update the character's inventory
+    for _, part in ipairs(Submersible_Part_List) do
+        local partName = part.PartName
+        if partName then
+            local part_id = FindItemID(partName)
+            if part_id then
+                local part_count = GetItemCount(part_id, true)
+                inventory[character][partName] = part_count or 0
+            end
+        end
+    end
+
+    -- save updated inventory
+    file, err = io.open(file_path, "w")
+    if not file then
+        Echo("[Overseer] Error: Unable to write to sub_inventory_data.json: " .. tostring(err))
+        LogToInfo("[Overseer] Error: Unable to write to sub_inventory_data.json: " .. tostring(err))
+        return nil
+    end
+
+    local success, encoded_data = pcall(json.encode, inventory)
+    if not success then
+        Echo("[Overseer] Error encoding JSON: " .. tostring(encoded_data))
+        LogToInfo("[Overseer] Error encoding JSON: " .. tostring(encoded_data))
+        file:close()
+        return nil
+    end
+
+    file:write(encoded_data)
+    file:flush()
+    file:close()
+end
+
+-- Loads the submersible part inventory file into overseer
+local function LoadInventoryFile()
+    local file_path = overseer_folder .. "sub_inventory_data.json"
+    local file, err = io.open(file_path, "r")
+    if not file then
+        -- Echo("[Overseer] Error: Unable to read sub_inventory_data.json: " .. tostring(err))
+        LogToInfo("[Overseer] Error: Unable to read sub_inventory_data.json: " .. tostring(err))
+        return nil
+    end
+
+    local content = file:read("*all")
+    file:close()
+
+    local success, inventory_data = pcall(json.decode, content)
+    if not success then
+        Echo("[Overseer] Error decoding JSON: " .. tostring(inventory_data))
+        LogToInfo("[Overseer] Error decoding JSON: " .. tostring(inventory_data))
+        return nil
+    end
+
+    Echo("[Overseer] Inventory successfully loaded.")
+    return inventory_data
+end
+
+local function UpdateAndLoadInventoryFile(update_char)
+    if update_char then
+        UpdateInventoryFile(overseer_current_character)
+    end
+    overseer_inventory_data = LoadInventoryFile()
 end
 
 -- Function to disable Auto retainer
@@ -1279,7 +1377,7 @@ local function UpdateOverseerDataFile(update_char_data)
     end
     SaveCharacterDataToFile(ar_character_data, global_data)
     if update_char_data then
-        overseer_char_data = LoadOverseerCharacterData(overseer_current_character)
+        overseer_char_data = LoadOverseerData(overseer_current_character)
     end
 end
 
@@ -1410,12 +1508,12 @@ end
 local function EnableSubmersible(submersible_number)
     UpdateOverseerDataFile(true)
 
-    local function AppendSubmersibleToCid(file_path, target_cid, submersible_name)
+    local function AppendSubmersibleToCid(file_path, cid_to_find, submersible_name)
         local file = io.open(file_path, "r")
         if not file then
             return nil, "Unable to open file"
         end
-        local cid_pattern = '"CID": ' .. target_cid .. ','
+        local cid_pattern = '"CID": ' .. cid_to_find .. ','
         local lines = {}
         local modified = false
         local enabled_subs_started = false
@@ -1499,12 +1597,37 @@ local function EnableSubmersible(submersible_number)
     end
 end
 
--- Function to Set specific unlock mode for a submersible
+-- Function to set specific unlock mode for a submersible
 local function ModifyAdditionalSubmersibleData(submersible_number, config, config_option)
     UpdateOverseerDataFile(true)
 
-    local function UpdateConfigInAdditionalData(file_path, target_cid, submersible_name, config, config_option)
-        local file = io.open(file_path, "r")
+    if overseer_char_data.submersibles[submersible_number].build == "" then
+        Echo("No submersible with that number found.")
+        return
+    end
+
+    local submersible_name = ""
+    for _, submersible in ipairs(overseer_char_data.submersibles) do
+        if submersible.number == submersible_number then
+            submersible_name = submersible.name
+        end
+    end
+
+    if submersible_name == "" then
+        Echo("No submersible found with the given number.")
+        return
+    end
+
+    local target_cid = overseer_char_data.id
+    if not target_cid then
+        Echo("Failed to find character data")
+        return
+    end
+
+    DisableAR()
+
+    local function UpdateConfigInAdditionalData()
+        local file = io.open(auto_retainer_config_path, "r")
         if not file then
             return nil, "Unable to open file"
         end
@@ -1562,7 +1685,7 @@ local function ModifyAdditionalSubmersibleData(submersible_number, config, confi
         file:close()
 
         if modified and config_found then
-            local out_file = io.open(file_path, "w")
+            local out_file = io.open(auto_retainer_config_path, "w")
             for _, modified_line in ipairs(lines) do
                 out_file:write(modified_line .. "\n")
             end
@@ -1573,30 +1696,96 @@ local function ModifyAdditionalSubmersibleData(submersible_number, config, confi
         return nil, "Submersible not found or no modification made."
     end
 
-    if overseer_char_data.submersibles[submersible_number].build == "" then
-        Echo("No submersible with that number found.")
+    local success, msg = UpdateConfigInAdditionalData()
+
+    if success then
+        Echo(msg)
+    else
+        Echo("Error: " .. msg)
+    end
+end
+
+-- Functon to modify return time of submersibles on a character
+local function ModifyOfflineReturnTime(sub_name, return_time)
+    UpdateOverseerDataFile(true)
+
+    local target_cid = overseer_char_data.id
+    LogInfo(target_cid)
+    if not target_cid then
+        Echo("Failed to find character data.")
         return
     end
 
-    local submersible_name = ""
-    for _, submersible in ipairs(overseer_char_data.submersibles) do
-        if submersible.number == submersible_number then
-            submersible_name = submersible.name
-        end
-    end
-
-    if submersible_name == "" then
-        Echo("No submersible found with the given number.")
+    if not return_time or not sub_name then
+        Echo("No sub name and/or return time provided")
         return
     end
 
-    local cid_to_find = overseer_char_data.id
-    if not cid_to_find then
-        Echo("Failed to find character data")
-        return
-    end
     DisableAR()
-    local success, msg = UpdateConfigInAdditionalData(auto_retainer_config_path, cid_to_find, submersible_name, config, config_option)
+
+    local function UpdateReturnTimeInOfflineData()
+        local file = io.open(auto_retainer_config_path, "r")
+        if not file then
+            return nil, "Unable to open file"
+        end
+
+        local cid_pattern = '"CID": ' .. target_cid .. ','
+        local lines = {}
+        local modified = false
+        local in_offline_data = false
+        local in_correct_character_data = false
+        local read_too_far = false
+        local found_correct_submersible = false
+
+        for line in file:lines() do
+
+            if line:find(cid_pattern, 1, true) then
+                in_correct_character_data = true
+            end
+            if in_correct_character_data then
+                if line:find('"OfflineSubmarineData":', 1, true) then
+                    in_offline_data = true
+                elseif line:find('"EnabledAirships":', 1, true) then
+                    in_correct_character_data = false
+                    in_offline_data = false
+                    read_too_far = true
+                end
+            end
+
+            if in_offline_data and not read_too_far then
+                if line:find('"' .. sub_name .. '"', 1, true) then
+                    found_correct_submersible = true
+                end
+                if line and line:find('"ReturnTime":') and found_correct_submersible then
+                    line = line:gsub('("ReturnTime": )%d+', '%1' .. return_time)
+                    modified = true
+                    found_correct_submersible = false
+                end
+            end
+
+            if in_offline_data and line:find('"EnabledAirships":', 1, true) then
+                in_offline_data = false
+                in_correct_character_data = false
+                read_too_far = true
+            end
+            table.insert(lines, line)
+        end
+
+        file:close()
+
+        if modified then
+            local out_file = io.open(auto_retainer_config_path, "w")
+            for _, modified_line in ipairs(lines) do
+                out_file:write(modified_line .. "\n")
+            end
+            out_file:flush()
+            out_file:close()
+            return true, "Return time updated successfully."
+        end
+        return nil, "Submarine not found or no modification made."
+    end
+
+    local success, msg = UpdateReturnTimeInOfflineData()
 
     if success then
         Echo(msg)
@@ -1837,10 +2026,21 @@ local function PostARTasks()
                     repeat
                         Sleep(0.1)
                     until IsAddonReady("AirShipExplorationDetail")
+                    local retry_counter = 0
+                    local SelectYesno_ready = false
                     repeat
-                        yield("/callback AirShipExplorationDetail true 0")
+                        if retry_counter == 0 then
+                            yield("/callback AirShipExplorationDetail true 0")
+                        end
+                        if IsAddonReady("SelectYesno") then
+                            SelectYesno_ready = true
+                        end
+                        retry_counter = retry_counter + 1
+                        if retry_counter >= 50 then
+                            retry_counter = 0
+                        end
                         Sleep(0.1)
-                    until not IsAddonReady("AirShipExplorationDetail")
+                    until SelectYesno_ready
                     repeat
                         Sleep(0.1)
                     until IsAddonReady("SelectYesno")
@@ -1992,7 +2192,7 @@ local function PostARTasks()
         end
     end
 
-    if HasEnabledRetainers() and not overseer_char_performed_gc_delivery and overseer_char_processing_retainers then
+    if HasEnabledRetainers() and not overseer_char_performed_gc_delivery and overseer_char_processing_retainers and not disable_gc_delivery then
         overseer_char_performed_gc_delivery = true
         if overseer_char_data.ventures < venture_limit and overseer_char_data.ventures ~= 0  then
             PerformGCDelivery()
@@ -2221,13 +2421,58 @@ local function AddPointPlansToDefaultConfig()
     end
 end
 
+-- Goes through all characters and checks if any of the settings are wrong, then fixes them if they are
+local function CheckAndCorrectAllCharacters()
+    CreateConfigBackup()
+    DisableAR()
+    local overseer_data = LoadOverseerData()
+    for character_name, character_data in pairs(overseer_data.characters) do
+        if InExclusionList(character_name) then
+            overseer_char_subs_excluded = true
+        end
+        overseer_char_data = character_data
+        overseer_current_character = character_name
+        if not overseer_char_subs_excluded then
+            for _, submersible in ipairs(character_data.submersibles) do
+                if submersible.name ~= "" then
+                    -- Set any sub that hasn't actually reached the right level back on the right path
+                    if submersible.vessel_behavior == 0 and submersible.rank < submersible.min_rank_needed_for_next_swap and submersible.return_time == 0 then
+                        ModifyAdditionalSubmersibleData(submersible.number, "VesselBehavior", submersible.optimal_plan_type)
+                    end
+
+                    -- Check if a submarine failed a part swap and attempt a new part swap, needs refining but works well enough for now
+                    if submersible.vessel_behavior == 0 then
+                        local has_required_parts = CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible, overseer_current_character)
+                        if (submersible.return_time < os.time() or force_return_subs_that_need_swap) and has_required_parts then
+                            ModifyOfflineReturnTime(submersible.name, (os.time() - 3600))
+                        elseif submersible.return_time < os.time() and not has_required_parts then
+                            ModifyOfflineReturnTime(submersible.name, (os.time() - 3600))
+                        end
+                    end
+                end
+            end
+        end
+        overseer_char_data = {}
+        overseer_current_character = ""
+        overseer_char_subs_excluded = false
+    end
+    UpdateOverseerDataFile()
+    EnableAR()
+    ARSetMultiModeEnabled(true)
+end
+
 -- Helper function to check if we have all the parts needed for a specific build for a submersible
-function CheckIfWeHaveRequiredParts(abbreviation, submersible)
+function CheckIfWeHaveRequiredParts(abbreviation, submersible, character)
     local parts_needed = {}
     local part_counter = 1
 
     if abbreviation == "" then
         return false
+    end
+
+    -- If specific character not provided, set it to the logged in character
+    if not character then
+        character = GetCharacterName(true)
     end
 
     local function GetSlotName(part_number)
@@ -2274,20 +2519,34 @@ function CheckIfWeHaveRequiredParts(abbreviation, submersible)
     end
 
     if #parts_needed ~= 4 then
-        LogToInfo("[Overseer] Error: Exactly 4 parts must be identified.")
+        LogToInfo("[Overseer] Exactly 4 parts must be identified.")
         return false
     end
 
+    local character_parts_inventory = {}
+    for character_name, parts in pairs(overseer_inventory_data) do
+        if character_name == character then
+            character_parts_inventory = parts
+            break
+        end
+    end
+
     for k, part_entry in ipairs(parts_needed) do
+        -- LogToInfo("[Overseer] Checking part: " .. part_entry.PartName .. " (ID: " .. item_id .. ", Slot: " .. part_entry.SlotName .. ") - Count: " .. item_count)
+
         local sub_part_id = tonumber(submersible["part" .. k])
         local item_id = FindItemID(part_entry.PartName)
-        local item_count = GetItemCount(item_id)
 
-        LogToInfo("[Overseer] Checking part: " .. part_entry.PartName .. " (ID: " .. item_id .. ", Slot: " .. part_entry.SlotName .. ") - Count: " .. item_count)
-
-        if not ((item_count > 0) or (sub_part_id == item_id)) then
+        if not ((character_parts_inventory[part_entry.PartName] > 0) or (item_id == sub_part_id)) then
             return false
         end
+        -- local item_id = FindItemID(part_entry.PartName)
+        -- local item_count = GetItemCount(item_id)
+
+
+        -- if not ((item_count > 0) or (sub_part_id == item_id)) then
+        --     return false
+        -- end
     end
 
     return true
@@ -2301,6 +2560,8 @@ local function Main()
     AddUnlockPlansToDefaultConfig()
     AddPointPlansToDefaultConfig()
     EnableAR()
+    UpdateAndLoadInventoryFile()
+    CheckAndCorrectAllCharacters()
     Echo("[Overseer] Character data and global plans processing complete")
     LogToInfo("[Overseer] All characters processed, starting main loop")
     local ar_finished = false
@@ -2313,6 +2574,7 @@ local function Main()
                 overseer_char_subs_excluded = true
             end
             overseer_current_character = GetCharacterName(true)
+            UpdateAndLoadInventoryFile(true)
             yield("/at e")
             if DoesObjectExist("Voyage Control Panel") then
                 already_in_workshop = true
@@ -2393,15 +2655,17 @@ local function Main()
             overseer_char_processing_retainers = false
             overseer_char_subs_excluded = false
             repeat
-                Sleep(1)
+                Sleep(0.1)
             until not IsPlayerAvailable() or not GetCharacterName()
+            CheckAndCorrectAllCharacters()
         end
         Sleep(1.01)
     end
 end
 
-Main()
+-- local function Main()
+--     UpdateAndLoadInventoryFile()
+--     CheckAndCorrectAllCharacters()
+-- end
 
-if HasPlugin("YesAlready") then
-    RestoreYesAlready()
-end
+Main()
