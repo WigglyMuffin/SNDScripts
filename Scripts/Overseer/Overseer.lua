@@ -7,7 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.3.8      ##
+##     1.3.9      ##
 ####################
 
 ####################################################
@@ -37,7 +37,7 @@ Retainers are planned features, they are not currently supported.
 ##                    Settings                    ##
 ##################################################]]
 
-local disable_gc_delivery = false                -- Set this to true to disable retainers going to the GC and doing deliveries when under the inventory or venture limit
+local disable_gc_delivery = false                -- Disables attempting any kind of gc delivery on falling under either venture or inventory slot limits
 local venture_limit = 100                        -- Minimum value of ventures to trigger buying more ventures, requires Deliveroo to be correctly configured by doing GC deliveries
 local inventory_slot_limit = 30                  -- Amount of inventory slots remaining before attempting a GC delivery to free up slots
 local buy_ceruleum = false                       -- Will attempt to buy ceruleum fuel based on the settings below, if set to false the characters will never attempt to refuel (buy ceruleum fuel off players)
@@ -46,7 +46,7 @@ local ceruleum_buy_amount = 999                  -- Amount of ceruleum fuel to b
 local fc_credits_to_keep = 13000                 -- How many credits to always keep, this limit will be ignored when buying FC buffs for GC deliveries
 local use_fc_buff = false                        -- Will attempt to buy and use the seal sweetener buff when doing GC deliveries
 local ar_collection_name = "AutoRetainer"        -- Name of the plugin collection which contains the "AutoRetainer" plugin
-local force_return_subs_that_need_swap = false   -- This setting will force bring back even already sent out submarines that need part swaps, generally not needed but probably recommended
+local force_return_subs_that_need_swap = false   -- Will force return submarines to swap parts even if they're already sent out, if set to false it will wait until they're back
 
 -- Configuration for retainer levels and venture types
 -- min_level = minimum level value, starts at 0
@@ -2423,8 +2423,8 @@ end
 
 -- Goes through all characters and checks if any of the settings are wrong, then fixes them if they are
 local function CheckAndCorrectAllCharacters()
+    ARSetMultiModeEnabled(false)
     CreateConfigBackup()
-    DisableAR()
     local overseer_data = LoadOverseerData()
     for character_name, character_data in pairs(overseer_data.characters) do
         if InExclusionList(character_name) then
@@ -2435,19 +2435,20 @@ local function CheckAndCorrectAllCharacters()
         if not overseer_char_subs_excluded then
             for _, submersible in ipairs(character_data.submersibles) do
                 if submersible.name ~= "" then
-                    -- Set any sub that hasn't actually reached the right level back on the right path
-                    if submersible.vessel_behavior == 0 and submersible.rank < submersible.min_rank_needed_for_next_swap and submersible.return_time == 0 then
-                        ModifyAdditionalSubmersibleData(submersible.number, "VesselBehavior", submersible.optimal_plan_type)
-                    end
-
-                    -- Check if a submarine failed a part swap and attempt a new part swap, needs refining but works well enough for now
                     if submersible.vessel_behavior == 0 then
-                        local has_required_parts = CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible, overseer_current_character)
-                        if (submersible.return_time < os.time() or force_return_subs_that_need_swap) and has_required_parts then
-                            ModifyOfflineReturnTime(submersible.name, (os.time() - 3600))
-                        elseif submersible.return_time < os.time() and not has_required_parts then
+                        -- Set any sub that hasn't actually reached the right level back on the right path
+                        if submersible.rank < submersible.min_rank_needed_for_next_swap and submersible.return_time == 0 then
+                            ModifyAdditionalSubmersibleData(submersible.number, "VesselBehavior", submersible.optimal_plan_type)
+                        end
+                        -- Check if a submarine failed a part swap and attempt a new part swap, needs refining but works well enough for now
+                        if submersible.return_time == 0 then
                             ModifyOfflineReturnTime(submersible.name, (os.time() - 3600))
                         end
+                    end
+
+                    -- Force any subs that need a part swap to return and then part swap them if force_return_subs_that_need_swap is enabled
+                    if submersible.vessel_behavior ~= 0 and submersible.build_needs_change and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible, overseer_current_character) and force_return_subs_that_need_swap then
+                        ModifyOfflineReturnTime(submersible.name, (os.time() - 3600))
                     end
                 end
             end
@@ -2537,7 +2538,6 @@ function CheckIfWeHaveRequiredParts(abbreviation, submersible, character)
     end
 
     for k, part_entry in ipairs(parts_needed) do
-        -- LogToInfo("[Overseer] Checking part: " .. part_entry.PartName .. " (ID: " .. item_id .. ", Slot: " .. part_entry.SlotName .. ") - Count: " .. item_count)
 
         local sub_part_id = tonumber(submersible["part" .. k])
         local item_id = FindItemID(part_entry.PartName)
@@ -2545,13 +2545,6 @@ function CheckIfWeHaveRequiredParts(abbreviation, submersible, character)
         if not ((character_parts_inventory[part_entry.PartName] > 0) or (item_id == sub_part_id)) then
             return false
         end
-        -- local item_id = FindItemID(part_entry.PartName)
-        -- local item_count = GetItemCount(item_id)
-
-
-        -- if not ((item_count > 0) or (sub_part_id == item_id)) then
-        --     return false
-        -- end
     end
 
     return true
