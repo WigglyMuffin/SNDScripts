@@ -12,12 +12,15 @@
    - [Tools](#tools)
    - [Trading Scripts](#trading-scripts)
    - [Retired Scripts](#retired-scripts)
-4. [Installation](#installation)
-5. [License](#license)
-6. [Third-Party Libraries](#third-party-libraries)
+4. [Planned Changes](#planned-changes)
+5. [Installation](#installation)
+6. [License](#license)
+7. [Third-Party Libraries](#third-party-libraries)
 
 ## Introduction
 This repository contains a collection of SND scripts designed to automate various tasks. These scripts enhance efficiency and assist with management tasks, particularly for players managing multiple accounts or FCs.
+
+Please note that all our scripts disable the `Yes Already` plugin, that means if you stop a script early, the functionality the plugin provides (your own configured `/pyes` settings) will no longer work until you click the button to enable it again, other plugins share this behaviour and is not exclusive to the scripts we provide.
 
 ## Prerequisites
 - All scripts require `vac_functions.lua` and `vac_lists.lua` to be placed in your SND config folder.
@@ -79,6 +82,14 @@ Both include a CharListGen for easy configuration.
 
 ### Retired Scripts
 Archive of deprecated scripts. No active support provided.
+
+## Planned Changes
+- Rewriting [Job Unlocker](https://github.com/WigglyMuffin/SNDScripts/tree/main/Scripts/Job%20Unlocker) script
+- Rewriting [Questionable Companion](https://github.com/WigglyMuffin/SNDScripts/tree/main/Scripts/Questionable%20Companion) script
+- Rewriting [Retainer Maker](https://github.com/WigglyMuffin/SNDScripts/tree/main/Scripts/Retainer%20Maker) script
+- Changing plugins from Rotation Solver Reborn to Wrath Combo for auto rotations
+- Changing plugins from Teleporter to Lifestream for teleports
+- Changing plugins from BossMod Reborn to BossMod for duty solving support
 
 ## Installation
 1. Verify all required plugins are installed and enabled.
