@@ -200,7 +200,7 @@ LoadFunctions = loadfile(load_functions_file_location)
 LoadFunctions()
 LoadFileCheck()
 
-if not CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream", "AutoDuty", "BossModReborn", "PandorasBox", "Questionable", "RotationSolver", "SomethingNeedDoing", "TextAdvance", "vnavmesh") then
+if not CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream", "AutoDuty", "BossModReborn", "PandorasBox", "Questionable", "RotationSolver", "SomethingNeedDoing", "TextAdvance", "vnavmesh") and (CheckPluginsEnabled("BossMod") or CheckPluginsEnabled("BossModReborn")) then
     return -- Stops script as plugins not available
 end
 
