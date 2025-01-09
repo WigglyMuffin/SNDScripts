@@ -7,7 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.4.0      ##
+##     1.4.1      ##
 ####################
 
 ####################################################
@@ -2755,7 +2755,6 @@ local function Main()
             repeat
                 Sleep(0.1)
             until not IsPlayerAvailable() or not GetCharacterName()
-            ARAbortAllTasks()
             ARSetMultiModeEnabled(false)
             CheckAndCorrectAllCharacters()
             if ShutdownNeeded() then
