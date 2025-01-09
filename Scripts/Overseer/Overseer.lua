@@ -7,7 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.3.9      ##
+##     1.4.0      ##
 ####################
 
 ####################################################
@@ -47,6 +47,10 @@ local fc_credits_to_keep = 13000                 -- How many credits to always k
 local use_fc_buff = false                        -- Will attempt to buy and use the seal sweetener buff when doing GC deliveries
 local ar_collection_name = "AutoRetainer"        -- Name of the plugin collection which contains the "AutoRetainer" plugin
 local force_return_subs_that_need_swap = false   -- Will force return submarines to swap parts even if they're already sent out, if set to false it will wait until they're back
+
+-- You can use this setting to have the script automatically shut down the game after X minutes, good if you want to reset the token every day for example
+local enable_auto_shutdown = false               -- false to disable, true to enable
+local shutdown_timer = 1440                      -- 24 hours in minutes
 
 -- Configuration for retainer levels and venture types
 -- min_level = minimum level value, starts at 0
@@ -201,11 +205,62 @@ overseer_char_processing_subs = false
 overseer_char_processing_retainers = false
 overseer_char_subs_excluded = false
 overseer_inventory_data = {}
+overseer_start_time = os.time()
 
 -- Function which logs a lot to the xllog if debug is true 
 function LogToInfo(...)
     if debug then
         LogInfo(...)
+    end
+end
+
+-- Function that just returns true or false if the script has passed the configured shutdown limit and needs a restart
+local function ShutdownNeeded()
+    if enable_auto_shutdown then
+        local time_remaining = (overseer_start_time + shutdown_timer * 60) - os.time()
+        if time_remaining > 0 then
+            LogToInfo("[Overseer] Time until shutdown: " .. time_remaining .. " seconds")
+        else
+            LogToInfo("[Overseer] Shutdown timer expired")
+        end
+        return time_remaining <= 0
+    end
+    return false
+end
+
+-- Function to gracefully shutdown the game using AR's shutdown feature
+local function AutoShutdown()
+    ARAbortAllTasks()
+    yield("/ays multi d")
+    Sleep(0.5)
+    while true do
+        if IsPlayerAvailable() then
+            yield("/shutdown")
+            repeat
+                Sleep(0.1)
+            until IsAddonReady("SelectYesno")
+            yield("/callback SelectYesno true 0")
+            Sleep(5)
+        end
+        if IsAddonReady("_TitleLogo") then
+            yield("/callback _TitleMenu true 12")
+            Sleep(5)
+        end
+        if IsAddonReady("SelectOk") then
+            yield("/callback SelectOk true 0")
+            repeat
+                Sleep(0.1)
+            until IsAddonReady("SelectYesno") or IsPlayerAvailable()
+            if not IsPlayerAvailable() and IsAddonReady("SelectYesno") then
+                yield("/callback SelectYesno true 0")
+            end
+            Sleep(3)
+        end
+        if IsAddonReady("_CharaSelectReturn") then
+            yield("/callback _CharaSelectReturn true 19")
+            Sleep(5)
+        end
+        Sleep(1)
     end
 end
 
@@ -1874,7 +1929,7 @@ local function PreARTasks()
         --[[
         Change unlock mode and behavior
         ]]
-        if (submersible.vessel_behavior ~= 0 or (submersible.vessel_behavior == 0 and (not submersible.build_needs_change or (submersible.optimal_build ~= submersible.future_optimal_build and submersible.future_optimal_build ~= "")))) and submersible.name ~= "" then
+        if (submersible.vessel_behavior ~= 0 or (submersible.vessel_behavior == 0 and (not submersible.build_needs_change or (submersible.optimal_build ~= submersible.future_optimal_build and submersible.future_optimal_build ~= "")))) or (submersible.rank == 1 and submersible.build_needs_change) and submersible.name ~= "" then
             if (submersible.optimal_unlock_mode ~= submersible.unlock_mode) then
                 changed_behavior = true
                 ModifyAdditionalSubmersibleData(submersible.number,"UnlockMode", submersible.optimal_unlock_mode)
@@ -2435,6 +2490,16 @@ local function CheckAndCorrectAllCharacters()
         if not overseer_char_subs_excluded then
             for _, submersible in ipairs(character_data.submersibles) do
                 if submersible.name ~= "" then
+                    if not submersible.enabled then
+                        EnableSubmersible(submersible.number)
+                        ModifyAdditionalSubmersibleData(submersible.number, "VesselBehavior", submersible.optimal_plan_type)
+                        ModifyAdditionalSubmersibleData(submersible.number, "SelectedUnlockPlan", submersible.optimal_plan)
+                        ModifyAdditionalSubmersibleData(submersible.number, "UnlockMode", submersible.optimal_unlock_mode)
+                        ModifyOfflineReturnTime(submersible.name, (os.time() - 86400))
+                    end
+                    if submersible.enabled and submersible.rank == 1 and submersible.return_time == 0 then
+                        ModifyOfflineReturnTime(submersible.name, (os.time() - 86400))
+                    end
                     if submersible.vessel_behavior == 0 then
                         -- Set any sub that hasn't actually reached the right level back on the right path
                         if submersible.rank < submersible.min_rank_needed_for_next_swap and submersible.return_time == 0 then
@@ -2459,7 +2524,6 @@ local function CheckAndCorrectAllCharacters()
     end
     UpdateOverseerDataFile()
     EnableAR()
-    ARSetMultiModeEnabled(true)
 end
 
 -- Helper function to check if we have all the parts needed for a specific build for a submersible
@@ -2550,6 +2614,41 @@ function CheckIfWeHaveRequiredParts(abbreviation, submersible, character)
     return true
 end
 
+-- Timer to track how long we've been stuck on the voyage panel
+VoyagePanelStuckTimer = 0
+
+-- Function to handle unstucking from the voyage panel
+local function VoyagePanelUnstucker()
+    while IsAddonReady("SelectString") do
+        Sleep(0.1)
+        VoyagePanelStuckTimer = VoyagePanelStuckTimer + 0.1
+
+        -- If stuck on the voyage panel for 10+ seconds
+        if VoyagePanelStuckTimer >= 10 and not ARIsBusy() then
+            Echo("Voyage panel unstucker triggered")
+            while not IsPlayerAvailable() do
+                if IsAddonReady("SelectString") then
+                    yield("/callback SelectString true -1")
+                end
+                Sleep(0.1)
+            end
+
+            repeat
+                Sleep(0.1)
+            until IsPlayerAvailable()
+            yield("/ays multi")
+
+            repeat
+                Sleep(0.01)
+            until not IsPlayerAvailable() and IsAddonReady("SelectString")
+            yield("/ays multi d")
+        end
+    end
+
+    VoyagePanelStuckTimer = 0
+    Sleep(0.1)
+end
+
 local function Main()
     ForceARSave()
     DisableAR()
@@ -2560,6 +2659,7 @@ local function Main()
     EnableAR()
     UpdateAndLoadInventoryFile()
     CheckAndCorrectAllCharacters()
+    ARSetMultiModeEnabled(true)
     Echo("[Overseer] Character data and global plans processing complete")
     LogToInfo("[Overseer] All characters processed, starting main loop")
     local ar_finished = false
@@ -2604,12 +2704,12 @@ local function Main()
                 if (GetTargetName() == "Voyage Control Panel") and not overseer_char_subs_excluded then
                     local submersible_waiting_override = 0
                     repeat
-                        Sleep(0.1)
-                    until not IsPlayerAvailable()
+                        Sleep(0.01)
+                    until not IsPlayerAvailable() and IsAddonReady("SelectString")
                     Sleep(0.5)
                     ARSetMultiModeEnabled(false)
                     repeat
-                        Sleep(0.1)
+                        VoyagePanelUnstucker()
                     until IsPlayerAvailable()
                     repeat
                         Sleep(0.5)
@@ -2655,7 +2755,17 @@ local function Main()
             repeat
                 Sleep(0.1)
             until not IsPlayerAvailable() or not GetCharacterName()
+            ARAbortAllTasks()
+            ARSetMultiModeEnabled(false)
             CheckAndCorrectAllCharacters()
+            if ShutdownNeeded() then
+                -- Don't enable AR so the shutdown code further down shuts down the game properly
+            else
+                ARSetMultiModeEnabled(true)
+            end
+        end
+        if ShutdownNeeded() then
+            AutoShutdown()
         end
         Sleep(1.01)
     end
