@@ -180,6 +180,7 @@ Overseer implements a robust backup system for your Auto Retainer configuration:
 
 ## Changelog
 
+- **1.4.2**: Fixed another bug which could cause overseer to get stuck at the voyage panel
 - **1.4.1**: Made a minor adjustment to potentially fix an issue where it causes AR to get stuck on the main menu for some
 - **1.4.0**: Added a shutdown timer and made further consistency improvements, should now unstuck in locations where it had a chance to get stuck before. The script now also enables submersibles in enabled fcs that for some reason are disabled, which should also fix when the script fails to enable the submersible right after creation.
 - **1.3.9**: Further improved the automatic fixing of submersibles

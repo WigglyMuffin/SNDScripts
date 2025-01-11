@@ -7,7 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.4.1      ##
+##     1.4.2      ##
 ####################
 
 ####################################################
@@ -40,11 +40,11 @@ Retainers are planned features, they are not currently supported.
 local disable_gc_delivery = false                -- Disables attempting any kind of gc delivery on falling under either venture or inventory slot limits
 local venture_limit = 100                        -- Minimum value of ventures to trigger buying more ventures, requires Deliveroo to be correctly configured by doing GC deliveries
 local inventory_slot_limit = 30                  -- Amount of inventory slots remaining before attempting a GC delivery to free up slots
-local buy_ceruleum = false                       -- Will attempt to buy ceruleum fuel based on the settings below, if set to false the characters will never attempt to refuel (buy ceruleum fuel off players)
-local ceruleum_limit = 100                       -- Minimum value of ceruleum fuel to trigger buying ceruleum fuel
-local ceruleum_buy_amount = 999                  -- Amount of ceruleum fuel to be purchased when ceruleum_limit is triggered
+local buy_ceruleum = true                       -- Will attempt to buy ceruleum fuel based on the settings below, if set to false the characters will never attempt to refuel (buy ceruleum fuel off players)
+local ceruleum_limit = 1000                       -- Minimum value of ceruleum fuel to trigger buying ceruleum fuel
+local ceruleum_buy_amount = 99999                  -- Amount of ceruleum fuel to be purchased when ceruleum_limit is triggered
 local fc_credits_to_keep = 13000                 -- How many credits to always keep, this limit will be ignored when buying FC buffs for GC deliveries
-local use_fc_buff = false                        -- Will attempt to buy and use the seal sweetener buff when doing GC deliveries
+local use_fc_buff = true                        -- Will attempt to buy and use the seal sweetener buff when doing GC deliveries
 local ar_collection_name = "AutoRetainer"        -- Name of the plugin collection which contains the "AutoRetainer" plugin
 local force_return_subs_that_need_swap = false   -- Will force return submarines to swap parts even if they're already sent out, if set to false it will wait until they're back
 
@@ -72,11 +72,11 @@ local retainer_level_config = {
 -- point_plan = GUID corresponding to the point_plan below
 local submersible_build_config = {
     {min_rank = 1, max_rank = 14, build = "SSSS", plan_type = 3, unlock_plan = "31d90475-c6a1-4174-9f66-5ec2e1d01074", point_plan = "6e38ab7a-05c2-40b7-84a1-06f087704371"},
-    {min_rank = 15, max_rank = 89, build = "SSUS", plan_type = 3, unlock_plan = "31d90475-c6a1-4174-9f66-5ec2e1d01074", point_plan = "6e38ab7a-05c2-40b7-84a1-06f087704371"},
+    {min_rank = 15, max_rank = 89, build = "SSUS", plan_type = 2, unlock_plan = "31d90475-c6a1-4174-9f66-5ec2e1d01074", point_plan = "6e38ab7a-05c2-40b7-84a1-06f087704371"},
     {min_rank = 90, max_rank = 120, build = "SSUC", plan_type = 4, unlock_plan = "31d90475-c6a1-4174-9f66-5ec2e1d01074", point_plan = "6e38ab7a-05c2-40b7-84a1-06f087704371"},
 }
 
--- Unlock Plans Configuration
+-- Unlock Plans Configuration   
 -- Input your unlock plan here located in "Open Voyage Unlockable Planner"
 -- You cannot directly copy paste so you will need to manually copy paste each section so it meets the format required
 local unlock_plans = {
@@ -2184,6 +2184,13 @@ local function PostARTasks()
             end
             RegisterSubmersible()
             ForceARSave()
+            DisableAR()
+            Sleep(2)
+            EnableAR()
+            ForceARSave()
+            Sleep(1)
+            UpdateOverseerDataFile(true)
+            Sleep(1)
             EnableSubmersible(submersible.number)
             table.insert(registered_subs_array, submersible.number)
             registered_sub = true
@@ -2624,7 +2631,7 @@ local function VoyagePanelUnstucker()
         VoyagePanelStuckTimer = VoyagePanelStuckTimer + 0.1
 
         -- If stuck on the voyage panel for 10+ seconds
-        if VoyagePanelStuckTimer >= 10 and not ARIsBusy() then
+        if VoyagePanelStuckTimer >= 15 and not ARIsBusy() then
             Echo("Voyage panel unstucker triggered")
             while not IsPlayerAvailable() do
                 if IsAddonReady("SelectString") then
@@ -2642,6 +2649,7 @@ local function VoyagePanelUnstucker()
                 Sleep(0.01)
             until not IsPlayerAvailable() and IsAddonReady("SelectString")
             yield("/ays multi d")
+            VoyagePanelStuckTimer = 0
         end
     end
 
@@ -2753,13 +2761,15 @@ local function Main()
             overseer_char_processing_retainers = false
             overseer_char_subs_excluded = false
             repeat
-                Sleep(0.1)
+                Sleep(0.01)
             until not IsPlayerAvailable() or not GetCharacterName()
+            ARSetSuppressed(true)
             ARSetMultiModeEnabled(false)
             CheckAndCorrectAllCharacters()
             if ShutdownNeeded() then
                 -- Don't enable AR so the shutdown code further down shuts down the game properly
             else
+                ARSetSuppressed(false)
                 ARSetMultiModeEnabled(true)
             end
         end
