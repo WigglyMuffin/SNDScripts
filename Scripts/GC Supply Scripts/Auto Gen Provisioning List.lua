@@ -1,9 +1,22 @@
+--[[
+####################
+##    Version     ##
+##     1.0.0      ##
+####################
+
+-> 1.0.0: Initial release
+-> 1.0.1: Duplicate name across worlds fix
+
+####################################################
+##                  Description                   ##
+####################################################
+
 -- This script will rotate through your characters and generate a list of items needed for gc supply and output that file to the snd config folder
 -- This file can then be used in other scripts to automate other tasks
 
 -- ###########
 -- # CONFIGS #
--- ###########
+-- #########]]
 
 local use_external_character_list = true -- Options: true = uses the external character list in the same folder, default name being char_list.lua, false uses the list you put in this file
 local level_cap = 100                    -- Job level cap, adjust according to your current level cap
@@ -132,7 +145,7 @@ function GetAndSaveProvisioningToTable()
             LoginCheck()
         end
 
-        local char_name = GetCharacterName()
+        local char_name = GetCharacterName() .. "@" .. FindWorldByID(GetHomeWorld())
 
         repeat
             Sleep(0.1)
