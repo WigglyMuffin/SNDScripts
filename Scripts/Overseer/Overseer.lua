@@ -7,7 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.4.3      ##
+##     1.4.4      ##
 ####################
 
 ####################################################
@@ -2209,41 +2209,47 @@ local function PostARTasks()
                 break
             end
             RegisterSubmersible()
-            Echo("Waiting 60 seconds for AR to properly save it's data, will be made better at a later date")
-            Sleep(60)
+            Echo("Waiting 10 seconds for AR to properly save its data, will be made better at a later date")
+            ForceARSave()
+            Sleep(10)
             ForceARSave()
             DisableAR()
             EnableAR()
             ForceARSave()
             Sleep(1)
             UpdateOverseerDataFile(true)
+            local repeat_count = 0
+            local repeat_amount = 6
+            Echo("Attempting to enable submersible, each attempt will take approx 10 seconds, this will be faster in the future")
+            repeat
+                Echo("Attempting to enable submersible, "..tostring(repeat_amount - repeat_count).." attempts remain")
+                EnableSubmersible(submersible.number)
+                UpdateOverseerDataFile(true)
+                repeat_count = repeat_count + 1
+                Sleep(10)
+            until submersible.enabled or repeat_count >= repeat_amount
             EnableSubmersible(submersible.number)
             table.insert(registered_subs_array, submersible.number)
             registered_sub = true
         end
     end
 
-    -- Apply plan to newly registered subs
+    -- Apply plan to newly registered suzbs
     if registered_sub then
         EnableAR()
+        ForceARSave()
         DisableAR()
         UpdateOverseerDataFile(true)
-        local retries = 0
-        local max_retries = 10
         for _, submersible in ipairs(overseer_char_data.submersibles) do
             for _, sub_number in ipairs(registered_subs_array) do
                 if sub_number == submersible.number then
-                    repeat
-                        ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior",submersible.optimal_plan_type)
-                        if submersible.optimal_plan_type == 4 then
-                            ModifyAdditionalSubmersibleData(submersible.number,"SelectedPointPlan",submersible.optimal_plan)
-                        else
-                            ModifyAdditionalSubmersibleData(submersible.number,"SelectedUnlockPlan",submersible.optimal_plan)
-                        end
-                        UpdateOverseerDataFile(true)
-                        Sleep(3)
-                        retries = retries + 1
-                    until retries >= max_retries and submersible.vessel_behavior == submersible.optimal_plan_type and (submersible.selected_point_plan == submersible.optimal_plan or submersible.selected_unlock_plan == submersible.optimal_plan)
+                    ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior",submersible.optimal_plan_type)
+                    if submersible.optimal_plan_type == 4 then
+                        ModifyAdditionalSubmersibleData(submersible.number,"SelectedPointPlan",submersible.optimal_plan)
+                    else
+                        ModifyAdditionalSubmersibleData(submersible.number,"SelectedUnlockPlan",submersible.optimal_plan)
+                    end
+                    UpdateOverseerDataFile(true)
                 end
             end
         end

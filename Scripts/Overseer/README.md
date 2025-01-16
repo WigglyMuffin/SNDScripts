@@ -182,6 +182,7 @@ Overseer implements a robust backup system for your Auto Retainer configuration:
 
 ## Changelog
 
+- **1.4.4**: Adjusted some code which was causing overseer to get stuck for too long when dealing with new submersibles
 - **1.4.3**: Fixed an issue which has probably caused overseer to be inconsistent for months now, relating to how it calculates when to do part swaps. Also fixed or optimized many other smaller things. Likely the most stable release yet.
 - **1.4.2**: Fixed another bug which could cause overseer to get stuck at the voyage panel
 - **1.4.1**: Made a minor adjustment to potentially fix an issue where it causes AR to get stuck on the main menu for some
