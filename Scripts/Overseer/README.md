@@ -52,6 +52,7 @@ Ensure you have the following plugins installed and enabled:
 - Teleporter
 - TextAdvance
 - vnavmesh
+- Pandora
 
 ## Installation
 
@@ -62,6 +63,7 @@ Ensure you have the following plugins installed and enabled:
 5. Edit Overseer ***OUTSIDE*** of the SND environment to configure the settings, and use the import button to import the script. This is due to Overseer exceeding the character limit for SND, requiring you to import the script and editing any configuration outside the SND environment.
 6. Import Overseer and Overseer Launcher into your SND environment (`/snd` and import the scripts). Make sure you name the imported scripts in SND to match the file name.
 7. Set Overseer Launcher as the script to run on AutoRetainer CharacterPostProcess, located in SND settings.
+8. Make sure you have "Wait on login screen" enabled in your autoretainer settings.
 
 ## Getting Started
 
@@ -180,6 +182,7 @@ Overseer implements a robust backup system for your Auto Retainer configuration:
 
 ## Changelog
 
+- **1.4.3**: Fixed an issue which has probably caused overseer to be inconsistent for months now, relating to how it calculates when to do part swaps. Also fixed or optimized many other smaller things. Likely the most stable release yet.
 - **1.4.2**: Fixed another bug which could cause overseer to get stuck at the voyage panel
 - **1.4.1**: Made a minor adjustment to potentially fix an issue where it causes AR to get stuck on the main menu for some
 - **1.4.0**: Added a shutdown timer and made further consistency improvements, should now unstuck in locations where it had a chance to get stuck before. The script now also enables submersibles in enabled fcs that for some reason are disabled, which should also fix when the script fails to enable the submersible right after creation.
