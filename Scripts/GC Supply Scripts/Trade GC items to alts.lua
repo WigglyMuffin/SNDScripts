@@ -1,11 +1,12 @@
 --[[
 ####################
 ##    Version     ##
-##     1.0.1      ##
+##     1.0.2      ##
 ####################
 
 -> 1.0.0: Initial release
 -> 1.0.1: Duplicate name targetting fix and truncation of @World from provisioning_list character names
+-> 1.0.2: Fixed duplicate names when matching player to items they require and removed truncation of @World to facilitate this change
 
 ####################################################
 ##                  Description                   ##
@@ -100,7 +101,7 @@ for index_name, item in pairs(provisioning_list) do
     function TradeItems(item_list)
         Sleep(0.5)
         
-        if GetPartyMemberName(0) == party_member then
+        if GetPartyMemberName(1) .. "@" .. FindWorldByID(GetPartyMemberWorldId(1)) == party_member then
             yield("/target <2>")
             yield("/focustarget <2>")
             yield("/dropbox")
@@ -245,13 +246,10 @@ for index_name, item in pairs(provisioning_list) do
             Sleep(0.1)
         until IsInParty()
         
-        party_member = GetPartyMemberName(0)
+        party_member = GetPartyMemberName(1) .. "@" .. FindWorldByID(GetPartyMemberWorldId(1))
         
         for i, item_list in pairs(provisioning_list) do
-        
-            local name_without_world = string.match(i, "([^@]+)")
-        
-            if party_member == name_without_world then
+            if party_member == i then
                 Echo("############################")
                 Echo("Found " .. party_member .. " in trade list")
                 Echo("Getting Ready to trade")
