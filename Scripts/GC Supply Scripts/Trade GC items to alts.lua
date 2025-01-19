@@ -101,7 +101,7 @@ for index_name, item in pairs(provisioning_list) do
     function TradeItems(item_list)
         Sleep(0.5)
         
-        if GetPartyMemberName(1) .. "@" .. FindWorldByID(GetPartyMemberWorldId(1)) == party_member then
+        if GetPartyMemberName(0) .. "@" .. FindWorldByID(GetPartyMemberWorldId(0)) == party_member then
             yield("/target <2>")
             yield("/focustarget <2>")
             yield("/dropbox")
@@ -246,7 +246,7 @@ for index_name, item in pairs(provisioning_list) do
             Sleep(0.1)
         until IsInParty()
         
-        party_member = GetPartyMemberName(1) .. "@" .. FindWorldByID(GetPartyMemberWorldId(1))
+        party_member = GetPartyMemberName(0) .. "@" .. FindWorldByID(GetPartyMemberWorldId(0))
         
         for i, item_list in pairs(provisioning_list) do
             if party_member == i then
