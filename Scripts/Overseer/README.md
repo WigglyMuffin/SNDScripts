@@ -23,7 +23,6 @@ By using Overseer, you agree to these terms and accept full responsibility for i
 ## Known Issues
 
 - FC Actions will sometimes fail to apply when doing gc turnins, doesn't affect any other functionality or crash the script.
-- Sometimes fails to swap parts
 
 ## Planned Features
 
