@@ -7,7 +7,9 @@
 
 ####################
 ##    Version     ##
-##     1.4.4      ##
+##     1.4.5      ##
+##    TESTING     ##
+##     1.0.1      ##
 ####################
 
 ####################################################
@@ -2203,38 +2205,30 @@ local function PostARTasks()
     local registered_sub = false
     local registered_subs_array = {}
     for _, submersible in ipairs(overseer_char_data.submersibles) do
-        if submersible.unlocked and submersible.name == "" and not overseer_char_subs_excluded then
+        if submersible.unlocked and submersible.name == "" and not overseer_char_subs_excluded and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible, overseer_current_character) then
             IfAdditionalEntranceExistsPathToIt()
             if not DoesObjectExist("Voyage Control Panel") then
                 break
             end
             RegisterSubmersible()
-            Echo("Waiting 10 seconds for AR to properly save its data, will be made better at a later date")
+            Echo("Waiting 60 seconds for AR to properly save its data, will be made better at a later date")
             ForceARSave()
-            Sleep(10)
+            Sleep(60)
             ForceARSave()
-            DisableAR()
-            EnableAR()
-            ForceARSave()
-            Sleep(1)
+            Sleep(3)
             UpdateOverseerDataFile(true)
-            local repeat_count = 0
-            local repeat_amount = 6
-            Echo("Attempting to enable submersible, each attempt will take approx 10 seconds, this will be faster in the future")
-            repeat
-                Echo("Attempting to enable submersible, "..tostring(repeat_amount - repeat_count).." attempts remain")
-                EnableSubmersible(submersible.number)
-                UpdateOverseerDataFile(true)
-                repeat_count = repeat_count + 1
-                Sleep(10)
-            until submersible.enabled or repeat_count >= repeat_amount
+            DisableAR()
+            EnableSubmersible(submersible.number)
+            UpdateOverseerDataFile(true)
+            EnableAR()
+            Sleep(10)
             EnableSubmersible(submersible.number)
             table.insert(registered_subs_array, submersible.number)
             registered_sub = true
         end
     end
 
-    -- Apply plan to newly registered suzbs
+    -- Apply plan to newly registered subs
     if registered_sub then
         EnableAR()
         ForceARSave()
@@ -2792,8 +2786,9 @@ local function Main()
                 if (GetTargetName() == "Voyage Control Panel") and not overseer_char_subs_excluded then
                     local submersible_waiting_override = 0
                     repeat
-                        Sleep(0.05)
-                    until not IsPlayerAvailable() and IsAddonVisible("SelectString")
+                        Sleep(0.1)
+                    until not IsPlayerAvailable()
+                    Sleep(2)
                     LogToInfo(1,"[Overseer] Entered voyage panel")
                     Sleep(0.5)
                     ARSetMultiModeEnabled(false)
