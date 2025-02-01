@@ -4757,3 +4757,13 @@ function GetFCGCID()
         return false -- if it fails to find a gc with that name
     end
 end
+
+-- Usage: unpack()
+-- This allows unpack to be used for lua
+function unpack(t, i, n)
+    i = i or 1
+    n = n or #t
+    if i <= n then
+        return t[i], unpack(t, i + 1, n)
+    end
+end
