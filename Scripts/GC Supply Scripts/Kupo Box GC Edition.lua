@@ -33,7 +33,6 @@ Edit vac_char_list.lua (character_list) for configuring characters if using an e
 -> Lifestream : https://github.com/NightmareXIV/MyDalamudPlugins/raw/main/pluginmaster.json
 -> TextAdvance : https://github.com/NightmareXIV/MyDalamudPlugins/raw/main/pluginmaster.json
 -> Something Need Doing (Expanded Edition) : https://puni.sh/api/repository/croizat
--> Pandora's Box : https://love.puni.sh/ment.json
 -> vnavmesh : https://puni.sh/api/repository/veyn
 -> Dropbox : https://puni.sh/api/repository/kawaii
     -> Recommended settings in dropbox are 4 frames delay between trades and 1500ms trade open command throttle. (Ctrl + left click to specify exact values).
@@ -103,7 +102,7 @@ if use_external_character_list then
 end
 
 -- Plugin checker
-local required_plugins = {"AutoRetainer", "TeleporterPlugin", "Lifestream", "PandorasBox", "SomethingNeedDoing", "TextAdvance", "vnavmesh"}
+local required_plugins = {"AutoRetainer", "TeleporterPlugin", "Lifestream", "SomethingNeedDoing", "TextAdvance", "vnavmesh"}
 
 if expert_delivery then
     table.insert(required_plugins, "Deliveroo")
@@ -275,7 +274,12 @@ local function ProcessAltCharacters(character_list)
 
                 repeat
                     Sleep(0.1)
-                    yield("/pcall SelectYesno true 0")
+                until IsAddonReady("SelectYesno")
+                
+                yield("/callback SelectYesno true 0")
+                
+                repeat
+                    Sleep(0.1)
                 until not IsAddonVisible("SelectYesno")
 
                 -- Waits until main char is present

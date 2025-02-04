@@ -31,7 +31,6 @@ This script automatically trade GC items from your main character to your alt ch
 -> Lifestream : https://github.com/NightmareXIV/MyDalamudPlugins/raw/main/pluginmaster.json
 -> TextAdvance : https://github.com/NightmareXIV/MyDalamudPlugins/raw/main/pluginmaster.json
 -> Something Need Doing (Expanded Edition) : https://puni.sh/api/repository/croizat
--> Pandora's Box : https://love.puni.sh/ment.json
 -> vnavmesh : https://puni.sh/api/repository/veyn
 -> Dropbox : https://puni.sh/api/repository/kawaii
     -> Recommended settings in dropbox are 4 frames delay between trades and 1500ms trade open command throttle. (Ctrl + left click to specify exact values).
@@ -57,7 +56,7 @@ LoadFunctions = loadfile(load_functions_file_location)()
 LoadFileCheck()
 
 -- Plugin checker
-local required_plugins = {"AutoRetainer", "TeleporterPlugin", "Lifestream", "PandorasBox", "SomethingNeedDoing", "TextAdvance", "vnavmesh"}
+local required_plugins = {"AutoRetainer", "TeleporterPlugin", "Lifestream", "SomethingNeedDoing", "TextAdvance", "vnavmesh"}
 
 if not CheckPluginsEnabled(unpack(required_plugins)) then
     return -- Stops script as plugins not available
