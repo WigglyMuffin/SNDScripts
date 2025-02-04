@@ -34,10 +34,9 @@ Automate the process of leveling DoL jobs through GC turn-ins.
 
 | Script Name | Description | Requirements |
 |-------------|-------------|--------------|
-| `Auto Gen Provisioning List.lua` | Compiles required GC provision supply items | - |
-| `Generate list of items to gather.lua` | Creates a `list_to_gather.txt` file | - |
-| `Trade GC items to alts.lua` | Facilitates item trading between characters | Use with `Kupo Box.lua` |
-| `Deliver GC Items.lua` | Automates item delivery to GC | Configurable options |
+| `Auto Gen Provisioning List.lua` | Compiles required GC provision supply items and creates a `list_to_gather.txt` file | - |
+| `Trade GC Items.lua` | Facilitates item trading between characters | Use with `Kupo Box GC Edition.lua` |
+| `Kupo Box GC Edition.lua` | Facilitates item trading between characters and automates item delivery to GC | Use with `Trade GC Items.lua` |
 
 ### Job Unlocker
 Automates GC-related tasks including hunt logs, quest unlocks, and FC-related actions. This will be remade at some point, and is not as complete as the other scripts.
