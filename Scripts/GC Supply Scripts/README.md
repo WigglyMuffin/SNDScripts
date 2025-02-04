@@ -27,7 +27,7 @@ Ensure you have the following plugins installed and enabled:
     - Recommended settings in dropbox are 4 frames delay between trades and 1500ms trade open command throttle. (Ctrl + left click to specify exact values).
     - You NEED to enable "Enable auto-accept trades." under the dropbox settings.
 - Lifestream : https://github.com/NightmareXIV/MyDalamudPlugins/raw/main/pluginmaster.json
-- Something Need Doing (Expanded Edition)
+- Something Need Doing (Expanded Edition) : https://puni.sh/api/repository/croizat
 - Teleporter : In the default first party dalamud repository
 - TextAdvance : https://github.com/NightmareXIV/MyDalamudPlugins/raw/main/pluginmaster.json
 - vnavmesh : https://puni.sh/api/repository/veyn
