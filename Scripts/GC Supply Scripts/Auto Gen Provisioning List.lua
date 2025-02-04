@@ -41,12 +41,14 @@ Edit vac_char_list.lua (character_list) for configuring characters if using an e
 ##                    Settings                    ##
 ##################################################]]
 
-local use_external_character_list = true -- Options: true = uses the external character list in the same folder, default name being char_list.lua, false uses the list you put in this file
 local level_cap = 100                    -- Job level cap, adjust according to your current level cap
-local skip_level_capped_jobs = true      -- Options: true = will skip level capped jobs, false = will not skip level capped jobs
-local min_enabled = true                 -- Options: true = will store MIN items, false = will skip MIN items
-local btn_enabled = true                 -- Options: true = will store BTN items, false = will skip BTN items
-local fsh_enabled = true                 -- Options: true = will store FSH items, false = will skip FSH items
+local skip_level_capped_jobs = true      -- Options: true = Will skip level capped jobs, false = Will not skip level capped jobs
+local min_enabled = true                 -- Options: true = Will store MIN items, false = Will skip MIN items
+local btn_enabled = true                 -- Options: true = Will store BTN items, false = Will skip BTN items
+local fsh_enabled = true                 -- Options: true = Will store FSH items, false = Will skip FSH items
+
+-- Options: true = Uses the external character list in the same folder, default name being char_list.lua, false = Uses the list you put in this file
+local use_external_character_list = true
 
 -- This is where you put your character list if you choose to not use the external one
 -- If use_external_character_list is set to true then this list is completely skipped

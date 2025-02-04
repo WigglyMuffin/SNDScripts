@@ -43,11 +43,11 @@ Optional plugins:
 -> Deliveroo : https://plugins.carvel.li/
     -> Only required if expert_delivery is set to true
 
-#####################
-##    Settings     ##
-#####################
+####################################################
+##                    Settings                    ##
+####################################################
 
-Edit vac_char_list.lua file for configuring characters that this script uses (character_list), these are the characters you want to do turnins on
+Edit vac_char_list.lua file for configuring characters (character_list), these are the characters you want to do turnins on
 
 The settings below will be used on all characters set in the character_list
 You only need to set these here and you do not need to use the character_list_kupobox, or the CharListGen for Kupo Box ]]
@@ -59,7 +59,7 @@ local destination_aetheryte = "Aleport"     -- Aetheryte that characters need to
 local destination_house = 0                 -- Options: 0 = FC, 1 = Personal, 2 = Apartment
 local do_movement = true                    -- Options: true = Paths to chosen character, false = Does nothing and waits for chosen character to come to you
 local return_home = true                    -- Options: true = Returns home from destination, false = Does nothing and logs out
-local return_location = 0                   -- Options: 0 = do nothing, 1 = limsa, 2 = limsa bell, 3 = nearby bell, 4 = fc 
+local return_location = 0                   -- Options: 0 = Do nothing, 1 = Limsa, 2 = Limsa bell, 3 = Nearby bell, 4 = FC
 
 -- Options: true = invites character you are trading with to party for trading, false = uses distance based proximity check for trading
 -- Setting this to false will result in faster trades (marginally) but is less safe, recommended to set to true
@@ -69,12 +69,13 @@ local party_invite = true
 -- A good way to know how many chars you need to skip is to read the processing echo in chat which lists how many chars have finished already and which char is currently being processed ]]
 local skip_chars = 0 -- number of characters you'd like to skip
 
--- Options: true = will start Deliveroo expert delivery after GC supply turnins, false = do nothing
+-- Options: true = Will start Deliveroo expert delivery after GC supply turnins, false = Do nothing
 -- Requires Deliveroo plugin to be installed and will enable expert deliveries to be run after GC turnins
 -- Probably requires you to have set Deliveroo up beforehand
 local expert_delivery = false
 
-local use_external_character_list = true -- Options: true = uses the external character list in the same folder, default name being char_list.lua, false uses the list you put in this file
+-- Options: true = Uses the external character list in the same folder, default name being char_list.lua, false = Uses the list you put in this file
+local use_external_character_list = true
 
 -- This is where you put your character list if you choose to not use the external one
 -- If use_external_character_list is set to true then this list is completely skipped
@@ -123,6 +124,7 @@ LogInfo("[KupoBox] char_list: " .. char_list)
 LogInfo("[KupoBox] SNDConf+Char: " .. snd_config_folder .. "" .. char_list)
 LogInfo("[KupoBox] ##############################")
 
+-- Deliver GC Items
 local function DOL()
     local home_world = GetCurrentWorld() == GetHomeWorld()
 
@@ -169,6 +171,7 @@ local function DOL()
     CloseGcSupplyWindow()
 end
 
+-- Kupo
 local function ProcessAltCharacters(character_list)
     for i = 1, #character_list do
         -- Update alt character name
@@ -306,11 +309,13 @@ local function ProcessAltCharacters(character_list)
             end
 
             -- Disband party once gil trigger has happened
-            if party_invite then
+            if party_invite and IsInParty() then
                 LogInfo("[KupoBox] Disbanding party")
                 PartyDisband()
+                Sleep(0.1)
             end
 
+            -- Deliver GC Items
             DOL()
 
             -- Deliveroo expert delivery

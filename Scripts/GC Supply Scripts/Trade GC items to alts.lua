@@ -20,10 +20,7 @@
 ##                  Description                   ##
 ####################################################
 
-This script is to be used on your main to automatically trade the right items to your alts as they show up
-The alts should be running the improved tony script to come and pick stuff up at the location you've set in that script
-It bases the trades off the order the character list was in so make sure it's all consistent
-if you have everything configured right it's just start the script, go afk and you have eventually delivered all items to your alts
+This script automatically trade GC items from your main character to your alt characters as they show up
 
 ####################################################
 ##                  Requirements                  ##
@@ -40,28 +37,29 @@ if you have everything configured right it's just start the script, go afk and y
     -> Recommended settings in dropbox are 4 frames delay between trades and 1500ms trade open command throttle. (Ctrl + left click to specify exact values).
     -> You NEED to make sure the dropbox window is open on the Item Trade Queue tab when you start this script
 
-#####################
-##    Settings     ##
-#####################
-]]
+####################################################
+##                    Settings                    ##
+##################################################]]
 
--- Set your alt accounts %appdata% config location otherwise it will not work
+-- Set your alt accounts %appdata% config location otherwise this script will not work
+-- Replace "ff14lowres" with your alt account username if different
 snd_alt_config_folder = "C:\\Users\\ff14lowres\\AppData\\Roaming\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
 
--- #####################################
--- #  DON'T TOUCH ANYTHING BELOW HERE  #
--- # UNLESS YOU KNOW WHAT YOU'RE DOING #
--- #####################################
+--[[################################################
+##                  Script Start                  ##
+##################################################]]
 
 provisioning_list_name_to_load = "provisioning_list.lua"
 
 snd_config_folder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
 load_functions_file_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
-LoadFunctions = loadfile(load_functions_file_location)
-LoadFunctions()
+LoadFunctions = loadfile(load_functions_file_location)()
 LoadFileCheck()
 
-if not CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream", "PandorasBox", "SomethingNeedDoing", "TextAdvance", "vnavmesh") then
+-- Plugin checker
+local required_plugins = {"AutoRetainer", "TeleporterPlugin", "Lifestream", "PandorasBox", "SomethingNeedDoing", "TextAdvance", "vnavmesh"}
+
+if not CheckPluginsEnabled(unpack(required_plugins)) then
     return -- Stops script as plugins not available
 end
 
@@ -71,10 +69,6 @@ end
 
 alt_vac_config_folder = snd_alt_config_folder .. "VAC"
 dofile(alt_vac_config_folder .. '\\GC\\' .. provisioning_list_name_to_load)
-
--- ###############
--- # MAIN SCRIPT #
--- ###############
 
 DropboxClearAll()
 local list_length = 0
@@ -237,6 +231,11 @@ for index_name, item in pairs(provisioning_list) do
         end
         
         ClearFocusTarget()
+        
+        if gil_trade_succeeded and IsInParty() then
+            PartyLeave()
+            Sleep(0.1)
+        end
     end
     
     while not on_list do
