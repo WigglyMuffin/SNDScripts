@@ -4,7 +4,7 @@
 
 These scripts are for levelling your DoL jobs on an alt account, they require two accounts and are not compatible with a single account.
 
-They are designed to automatically tell you what GC turnins you need for your DoL jobs by giving you an items to gather list, which are then used to distribute from your main account to your alt account using the provided scripts.
+They are designed to automatically tell you what GC turnins you need for your DoL jobs by giving you an items to gather list, which are then used to distribute from your main account to your alt account using the provided scripts. 40 characters will take around 2 hours for all scripts to complete, with 2 minutes of manual work buying from the market board.
 
 It is also assumed you have all 3 city states unlocked.
 
@@ -50,7 +50,7 @@ Optional plugins:
 
 1. Configure the `character_list` inside the `vac_char_list.lua` file to include all of your chosen alt account characters following the format specified inside of the file, place this into your `%appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\` of the user account your alt account is located.
 2. Run `Auto gen Provisioning List.lua` on your alt account to generate a `provisioning_list.lua` file which is used for the later scripts, it will be found with GC related things in `%appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\VAC\GC\`, this will be your relevant user account %appdata%.
-3. Once this script has finished, another file called `list_to_gather.txt` will be generated located in `%appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\VAC\GC\`, once again your relevant user account %appdata%. This contains the items you need to gather on your main account.
+3. Once this script has finished, another file called `list_to_gather.txt` will be generated located in `%appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\VAC\GC\`, once again your relevant user account %appdata%. This contains the items you need to gather on your main account, such as purchasing items off the market board.
 4. When you have all the items on the account you are trading from, you need to run `Trade GC Items.lua` in the location the alts are coming to, and run a configured `Kupo Box GC Edition.lua` on the alt account so they come and pick up all the needed items.
 5. Each alt character will turn the provisioning items in automatically at their respective GC after picking them up from the main account
 
