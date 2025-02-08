@@ -7,9 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.4.5      ##
-##    TESTING     ##
-##     1.0.1      ##
+##     1.4.6      ##
 ####################
 
 ####################################################
@@ -940,6 +938,14 @@ local function UpdateFromAutoRetainerConfig()
                     return false
                 end
 
+                local function ReturnSubmersiblePoints()
+                    if submersible_data.ReturnTime == 0 then
+                        return ""
+                    else
+                        return add_submersible_data.Points or ""
+                    end
+                end
+
                 -- Function to determine what the best unlock mode to use is
                 local function GetOptimalUnlockMode(sub_number, rank)
                     if type(sub_number) ~= "number" or type(rank) ~= "number" or type(num_sub_slots) ~= "number" then
@@ -952,9 +958,18 @@ local function UpdateFromAutoRetainerConfig()
 
                     if sub_number == 1 and optimal_plan_type == 3 and num_sub_slots < 4 then
                         return 1
-                    else
-                        return 2
                     end
+                    if optimal_plan_type == 3 then
+                        local sub_points = ReturnSubmersiblePoints()
+                        local sub_points_decoded = DecodeSubmersiblePoints(sub_points) or {0, 0, 0, 0, 0}
+
+                        for _, point in ipairs(sub_points_decoded) do
+                            if point > 34 then
+                                return 2
+                            end
+                        end
+                    end
+                    return 1
                 end
 
                 -- Function to check if a plan needs change or not
@@ -970,13 +985,6 @@ local function UpdateFromAutoRetainerConfig()
                 local submersible = CreateDefaultSubmersible(i, has_valid_fc)
                 if i == 1 or i <= num_sub_slots then
                     submersible.unlocked = true
-                end
-                local function ReturnSubmersiblePoints()
-                    if submersible_data.ReturnTime == 0 then
-                        return ""
-                    else
-                        return add_submersible_data.Points or ""
-                    end
                 end
                 if submersible_data.Name then
                     submersible.name = submersible_data.Name
@@ -2708,7 +2716,7 @@ local function VoyagePanelUnstucker()
 end
 
 local function TitleScreenUnstucker()
-    while not IsAddonReady("_TitleLogo") or IsAddonReady("TitleDCWorldMapBg") and not ARIsBusy() do
+    while not IsAddonReady("_TitleLogo") or IsAddonReady("TitleDCWorldMapBg") do
         -- Check if we're stuck on the dc select screen
         if IsAddonReady("TitleDCWorldMapBg") then
             yield("/callback TitleDCWorldMap true 17 0")
@@ -2855,7 +2863,7 @@ local function Main()
                 -- Don't enable AR so the shutdown code further down shuts down the game properly
             else
                 repeat
-                    Sleep(0.1)
+                    TitleScreenUnstucker()
                 until IsAddonReady("_TitleLogo")
                 ARSetMultiModeEnabled(true)
             end

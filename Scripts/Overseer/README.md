@@ -51,7 +51,6 @@ Ensure you have the following plugins installed and enabled:
 - Teleporter
 - TextAdvance
 - vnavmesh
-- Pandora
 
 ## Installation
 
@@ -89,6 +88,13 @@ Fine-tune Overseer's behaviour by adjusting these parameters in the script's con
 | `force_return_subs_that_need_swap` | Will force return submarines to swap parts even if they're already sent out, if set to false it will wait until they're back |
 
 You can also customise submersible builds and retainer venture types in their respective sections.
+
+
+These settings allow the script to automatically shut down the game after X minutes, good if you want to reset the token every day and have something else start the game again
+| Setting | Description |
+|---------|-------------|
+| `enable_auto_shutdown` | Enables the auto shutdown feature, default is off |
+| `shutdown_timer` | How many minutes the script will wait before shutting the client down in minutes, as an example 1440 minutes is a day and also the default |
 
 ### Submersible Configuration
 
@@ -181,7 +187,8 @@ Overseer implements a robust backup system for your Auto Retainer configuration:
 
 ## Changelog
 
---**1.4.5**: Some improvements and some fixes. Overseer will now wait 60 seconds after creating a new submersible to mitigate an issue it has with AR.
+- **1.4.6**: Added requested logic changes
+- **1.4.5**: Some improvements and some fixes. Overseer will now wait 60 seconds after creating a new submersible to mitigate an issue it has with AR.
 - **1.4.4**: Adjusted some code which was causing overseer to get stuck for too long when dealing with new submersibles
 - **1.4.3**: Fixed an issue which has probably caused overseer to be inconsistent for months now, relating to how it calculates when to do part swaps. Also fixed or optimized many other smaller things. Likely the most stable release yet.
 - **1.4.2**: Fixed another bug which could cause overseer to get stuck at the voyage panel
