@@ -5,9 +5,10 @@ It contains the functions required to make the scripts work
 
 ####################
 ##    Version     ##
-##     1.0.4      ##
+##     1.0.5      ##
 ####################
 
+-> 1.0.5: Made minor changes to BuyCeruleum
 -> 1.0.4: Fixed inconsistencies in BuyCeruleum
 -> 1.0.3: vac_lists should now load from the same directory as vac_functions no matter where you put it
 -> 1.0.2: Minor adjustments to adress inconsistencies
@@ -3798,17 +3799,20 @@ function BuyCeruleum(amount)
         -- Limit the amount per buy to 99
         local buy_amount = math.min(amount, 99)
         local final_ceruleum_amount = current_ceruleum_amount + buy_amount
+        local amount_after_buying = amount - buy_amount
         LogInfo("[VAC] (BuyCeruleum) Buying " .. buy_amount .. " ceruleum")
         repeat
-            yield("/callback FreeCompanyCreditShop true 0 0 " .. buy_amount) -- Buy X amount of ceruleum
+            repeat
+                yield("/callback FreeCompanyCreditShop true 0 0 " .. buy_amount) -- Buy X amount of ceruleum
+                Sleep(0.1)
+            until IsAddonReady("SelectYesno") -- Wait for confirm window
+            yield("/callback SelectYesno true 0") -- Confirm
+            repeat
+                Sleep(0.1)
+            until not IsAddonVisible("SelectYesno")
             Sleep(0.5)
-        until IsAddonReady("SelectYesno") -- Wait for confirm window
-
-        yield("/callback SelectYesno true 0") -- Confirm
-        repeat
-            Sleep(0.1)
-        until not IsAddonVisible("SelectYesno") and GetItemCount(10155, true) == final_ceruleum_amount
-
+            current_ceruleum_amount = GetItemCount(10155, true)
+        until current_ceruleum_amount == amount_after_buying or current_ceruleum_amount == final_ceruleum_amount
         amount = amount - buy_amount
     end
     LogInfo("[VAC] (BuyCeruleum) Finished buying ceruleum")
