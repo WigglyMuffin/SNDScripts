@@ -1,5 +1,7 @@
 # GC Supply Scripts
 
+![Status](https://img.shields.io/badge/status-working-brightgreen)
+
 These scripts are for levelling your DoL jobs on an alt account, they require two accounts and are not compatible with a single account.
 
 They are designed to automatically tell you what GC turnins you need for your DoL jobs by giving you an items to gather list, which are then used to distribute from your main account to your alt account using the provided scripts.

@@ -1,3 +1,7 @@
+# Retainer Maker
+
+![Status](https://img.shields.io/badge/status-needs_testing-blue)
+
 ### Make sure you have `vac_functions.lua`, `vac_lists.lua` in your snd config folder.
 These can be found in the top directory of this repo.
 
