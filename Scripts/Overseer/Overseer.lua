@@ -35,9 +35,6 @@ Retainers are planned features, they are not currently supported.
 -> TextAdvance : https://github.com/NightmareXIV/MyDalamudPlugins/raw/main/pluginmaster.json
 -> vnavmesh : https://puni.sh/api/repository/veyn
 
-Probably temporary requirement
--> Pandora - https://love.puni.sh/ment.json
-
 ####################################################
 ##                    Settings                    ##
 ##################################################]]
@@ -75,8 +72,8 @@ local correct_once_at_start_of_script = false
 -- saved_plan = GUID corresponding to the saved_plan below
 -- !! Retainers not supported currently !!
 local retainer_level_config = {
-    {min_level = 0, max_level = 10, venture_type = "exploration", saved_plan = "00000000-0000-0000-0000-000000000000"},
-    {min_level = 11, max_level = 100, venture_type = "quick", saved_plan = "00000000-0000-0000-0000-000000000000"},
+    { min_level = 0, max_level = 10, venture_type = "exploration", saved_plan = "00000000-0000-0000-0000-000000000000" },
+    { min_level = 11, max_level = 100, venture_type = "quick", saved_plan = "00000000-0000-0000-0000-000000000000" },
 }
 
 -- Configuration of submersible builds
@@ -87,9 +84,9 @@ local retainer_level_config = {
 -- unlock_plan = GUID corresponding to the unlock_plan below
 -- point_plan = GUID corresponding to the point_plan below
 local submersible_build_config = {
-    {min_rank = 1, max_rank = 14, build = "SSSS", plan_type = 3, unlock_plan = "31d90475-c6a1-4174-9f66-5ec2e1d01074", point_plan = "6e38ab7a-05c2-40b7-84a1-06f087704371"},
-    {min_rank = 15, max_rank = 89, build = "SSUS", plan_type = 3, unlock_plan = "31d90475-c6a1-4174-9f66-5ec2e1d01074", point_plan = "6e38ab7a-05c2-40b7-84a1-06f087704371"},
-    {min_rank = 90, max_rank = 120, build = "SSUC", plan_type = 4, unlock_plan = "31d90475-c6a1-4174-9f66-5ec2e1d01074", point_plan = "6e38ab7a-05c2-40b7-84a1-06f087704371"},
+    { min_rank = 1, max_rank = 14, build = "SSSS", plan_type = 3, unlock_plan = "31d90475-c6a1-4174-9f66-5ec2e1d01074", point_plan = "6e38ab7a-05c2-40b7-84a1-06f087704371" },
+    { min_rank = 15, max_rank = 89, build = "SSUS", plan_type = 3, unlock_plan = "31d90475-c6a1-4174-9f66-5ec2e1d01074", point_plan = "6e38ab7a-05c2-40b7-84a1-06f087704371" },
+    { min_rank = 90, max_rank = 120, build = "SSUC", plan_type = 4, unlock_plan = "31d90475-c6a1-4174-9f66-5ec2e1d01074", point_plan = "6e38ab7a-05c2-40b7-84a1-06f087704371" },
 }
 
 -- Unlock Plans Configuration   
@@ -99,20 +96,20 @@ local unlock_plans = {
     {   -- Pinned plan, good enough to unlock OJ but not optimal
         GUID = "579ba94d-4b73-4afe-9be1-999225e24af2",
         Name = "Overseer OJ Unlocker",
-        ExcludedRoutes = {101,100,99,98,97,96,95,93,92,91,90,89,88,80,81,82,83,84,86,85,87,79,78,77,76,75,74,72,71,70,69,68,67,66,65,64,63,62,61,60,59,58,57,56,55,54,29,24,23,22,21,18,17,16,13,12,11,9,8,7,6,4,3,102,103,104,105,48,36,51,50,46,45,44,41,40,35,53},
+        ExcludedRoutes = { 101,100,99,98,97,96,95,93,92,91,90,89,88,80,81,82,83,84,86,85,87,79,78,77,76,75,74,72,71,70,69,68,67,66,65,64,63,62,61,60,59,58,57,56,55,54,29,24,23,22,21,18,17,16,13,12,11,9,8,7,6,4,3,102,103,104,105,48,36,51,50,46,45,44,41,40,35,53 },
         UnlockSubs = true
     },
     {   -- Overseer optimal, unlocks all salvage routes whilst being optimal (recommended)
         GUID = "31d90475-c6a1-4174-9f66-5ec2e1d01074",
         Name = "Overseer Optimal Unlocker",
-        ExcludedRoutes = {3,6,13,22,23,24,29,36,40,41,45,44,46,48,50,51,54,56,58,60,63,64,66,67,68,69,71,80,86,90,92,103,105,107,109,110,112},
+        ExcludedRoutes = { 3,6,13,22,23,24,29,36,40,41,45,44,46,48,50,51,54,56,58,60,63,64,66,67,68,69,71,80,86,90,92,103,105,107,109,110,112 },
         UnlockSubs = true
     },
     -- Add more unlock plans here as needed
     -- {
     --     GUID = "another-guid-here",
     --     Name = "Another Unlock Plan",
-    --     ExcludedRoutes = {1,2,3,4,5},
+    --     ExcludedRoutes = { 1,2,3,4,5 },
     --     UnlockSubs = true
     -- },
 }
@@ -124,23 +121,23 @@ local point_plans = {
     {   -- OJ
         GUID = "6e38ab7a-05c2-40b7-84a1-06f087704371",
         Name = "Overseer OJ",
-        Points = {15,10}
+        Points = { 15,10 }
     },
     {   -- JORZ
         GUID = "04fbb61c-5800-40e6-8c67-2467796bf80e",
         Name = "Overseer JORZ",
-        Points = {10,15,18,26}
+        Points = { 10,15,18,26 }
     },
     {   -- MROJZ
         GUID = "644317d3-34e1-44f3-a950-5fa5bdc8de04",
         Name = "Overseer MROJZ",
-        Points = {13,18,15,10,26}
+        Points = { 13,18,15,10,26 }
     },
     -- Add more point plans here as needed
     -- {
     --     GUID = "another-guid-here",
     --     Name = "Another Point Plan",
-    --     Points = {1,2,3,4,5}
+    --     Points = { 1,2,3,4,5 }
     -- },
 }
 
@@ -191,7 +188,10 @@ EnsureFolderExists(backup_folder)
 -- Load JSON library from vac_functions
 local json = CreateJSONLibrary()
 
-if not CheckPluginsEnabled("AutoRetainer", "Deliveroo", "Lifestream", "SomethingNeedDoing", "TeleporterPlugin", "TextAdvance", "vnavmesh", "PandorasBox") then
+-- Plugin checker
+local required_plugins = {"AutoRetainer", "Deliveroo", "Lifestream", "SomethingNeedDoing", "TeleporterPlugin", "TextAdvance", "vnavmesh"}
+
+if not CheckPluginsEnabled(unpack(required_plugins)) then
     return -- Stops script as plugins not available
 end
 
@@ -2711,11 +2711,11 @@ local function TitleScreenUnstucker()
     while not IsAddonReady("_TitleLogo") or IsAddonReady("TitleDCWorldMapBg") and not ARIsBusy() do
         -- Check if we're stuck on the dc select screen
         if IsAddonReady("TitleDCWorldMapBg") then
-            yield("/pcall TitleDCWorldMap true 17 0")
+            yield("/callback TitleDCWorldMap true 17 0")
         end
         -- Check if we're stuck on the character select screen
         if IsAddonReady("_CharaSelectTitle") then
-            yield("/pcall _CharaSelectReturn true 19")
+            yield("/callback _CharaSelectReturn true 19")
         end
         if not IsAddonReady("_TitleLogo") and not IsAddonReady("_CharaSelectTitle") then
             -- yike
