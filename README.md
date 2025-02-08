@@ -30,6 +30,8 @@ Please note that all our scripts disable the `Yes Already` plugin, that means if
 ## Script Categories
 
 ### GC Supply Scripts
+![Status](https://img.shields.io/badge/status-working-brightgreen)
+
 Automate the process of leveling DoL jobs through GC turn-ins.
 
 | Script Name | Description | Requirements |
@@ -39,9 +41,13 @@ Automate the process of leveling DoL jobs through GC turn-ins.
 | `Kupo Box GC Edition.lua` | Facilitates item trading between characters and automates item delivery to GC | Use with `Trade GC Items.lua` |
 
 ### Job Unlocker
+![Status](https://img.shields.io/badge/status-broken-red)
+
 Automates GC-related tasks including hunt logs, quest unlocks, and FC-related actions. This will be remade at some point, and is not as complete as the other scripts.
 
 ### Overseer
+![Status](https://img.shields.io/badge/status-working-brightgreen)
+
 Manages AutoRetainer tasks, including:
 - **Automated Backups**: Safeguard your Auto Retainer configuration with backup rotation (up to 50 backups).
 - **Submersible Optimisation**:
@@ -52,24 +58,30 @@ Manages AutoRetainer tasks, including:
 - **Silent Operation**: Works seamlessly in the background with no interruptions.
 
 ### Questionable Companion
+![Status](https://img.shields.io/badge/status-under_development-yellow)
+
 Enhances the Questionable plugin with features like:
 - Automatic duty support dungeon queueing
 - Solo instance automation
 - vnavmesh stuck checking
 
 ### Retainer Maker
+![Status](https://img.shields.io/badge/status-needs_testing-blue)
+
 Automates the process of creating new retainers. Includes a CharListGen for easy configuration.
 
 ### Tools
 Utility scripts for various tasks:
 
-| Script Name | Description |
-|-------------|-------------|
-| Items for FC Rank 6 | Calculates items needed for FC rank 6 |
-| Mail Opener | Automates mail management |
-| Pos Finder | Displays and logs current position |
+| Script Name | Description | Status |
+|-------------|-------------|-------------|
+| Items for FC Rank 6 | Calculates items needed for FC rank 6 | ![Status](https://img.shields.io/badge/status-working-brightgreen) |
+| Mail Opener | Automates mail management | ![Status](https://img.shields.io/badge/status-needs_testing-blue) |
+| Pos Finder | Displays and logs current position | ![Status](https://img.shields.io/badge/status-working-brightgreen) |
 
 ### Trading Scripts
+![Status](https://img.shields.io/badge/status-working-brightgreen)
+
 Facilitates item trading between multiple characters. Requires two service accounts.
 
 | Script Name | Description |
@@ -80,6 +92,8 @@ Facilitates item trading between multiple characters. Requires two service accou
 Both include a CharListGen for easy configuration.
 
 ### Retired Scripts
+![Status](https://img.shields.io/badge/status-retired-lightgrey)
+
 Archive of deprecated scripts. No active support provided.
 
 ## Planned Changes
