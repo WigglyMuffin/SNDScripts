@@ -618,7 +618,7 @@ function HuntLogCheck(target_name, class, rank)
 
     local function FindTargetNode()
         for sub_node = 5, 60 do
-            Sleep(0.001)
+            --Sleep(0.001)
             node_text = tostring(GetNodeText("MonsterNote", 2, sub_node, 4))
             if node_text == target_name then
                 return sub_node
@@ -3682,7 +3682,7 @@ function RegisterNewSubmersible()
                         enough_items = false
                     end
                 end
-                Sleep(0.001)
+                --Sleep(0.001)
             end
             if enough_items then
                 LogInfo("[VAC] (RegisterNewSubmersible) Can register submersible number " .. i)
@@ -3718,7 +3718,7 @@ function RegisterNewSubmersible()
                         until IsAddonReady("SelectString")
                         break
                     end
-                    Sleep(0.001)
+                    --Sleep(0.001)
                 end
             else
                 Echo("Missing items for submersible " .. i .. ". Skipping.")
@@ -3726,7 +3726,7 @@ function RegisterNewSubmersible()
         else
             LogInfo("[VAC] (RegisterNewSubmersible) Submarine " .. i .. " unavailable")
         end
-        Sleep(0.001)
+        --Sleep(0.001)
     end
 end
 
