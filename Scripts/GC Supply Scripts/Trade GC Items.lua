@@ -34,7 +34,8 @@ This script automatically trade GC items from your main character to your alt ch
 -> vnavmesh : https://puni.sh/api/repository/veyn
 -> Dropbox : https://puni.sh/api/repository/kawaii
     -> Recommended settings in dropbox are 4 frames delay between trades and 1500ms trade open command throttle. (Ctrl + left click to specify exact values).
-    -> You NEED to make sure the dropbox window is open on the Item Trade Queue tab when you start this script
+    -> You need to enable "Enable auto-accept trades." under the dropbox settings for receiving items.
+    -> Dropbox UI is required to be visible and on the "Item Trade Queue" tab for trading functionality to operate for giving items.
 
 ####################################################
 ##                    Settings                    ##

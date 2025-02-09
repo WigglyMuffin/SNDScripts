@@ -27,8 +27,8 @@ Ensure you have the following plugins installed and enabled:
 - AutoRetainer : https://love.puni.sh/ment.json
 - Dropbox : https://puni.sh/api/repository/kawaii
     - Recommended settings in dropbox are 4 frames delay between trades and 1500ms trade open command throttle. (Ctrl + left click to specify exact values).
-    - You NEED to enable "Enable auto-accept trades." under the dropbox settings.
-    - Dropbox UI is required to be visible for trading functionality to operate.
+    - You need to enable "Enable auto-accept trades." under the dropbox settings for receiving items.
+    - Dropbox UI is required to be visible and on the "Item Trade Queue" tab for trading functionality to operate for giving items.
 - Lifestream : https://github.com/NightmareXIV/MyDalamudPlugins/raw/main/pluginmaster.json
 - Something Need Doing (Expanded Edition) : https://puni.sh/api/repository/croizat
 - Teleporter : In the default first party dalamud repository
