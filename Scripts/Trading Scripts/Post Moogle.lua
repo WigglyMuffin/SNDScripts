@@ -345,7 +345,7 @@ local function Main(character_list_postmoogle)
                                 table.insert(items_to_trade, {id = item_id, amount = math.min(item_amount, current_count), initial_count = current_count})
                             end
                         end
-                        Sleep(0.0001)
+                        --Sleep(0.0001)
                     end
                     
                     -- Add always_include items, but only if they exist in the inventory
@@ -367,7 +367,7 @@ local function Main(character_list_postmoogle)
                                 table.insert(items_to_trade, {id = item_id, amount = math.min(item_amount, current_count), initial_count = current_count})
                             end
                         end
-                        Sleep(0.0001)
+                        --Sleep(0.0001)
                     end
 
                     -- Log the items that will be traded
@@ -447,7 +447,7 @@ local function Main(character_list_postmoogle)
                             end
                         end
                         
-                        Sleep(0.0001)
+                        --Sleep(0.0001)
                     end
 
                     DropboxStart()
@@ -486,7 +486,7 @@ local function Main(character_list_postmoogle)
                         else
                             LogInfo("[PostMoogle] Trade for item " .. item_id .. " fully succeeded")
                         end
-                        Sleep(0.0001)
+                        --Sleep(0.0001)
                     end
 
                     if not all_trades_succeeded then
@@ -658,7 +658,7 @@ local function Main(character_list_postmoogle)
             i_temp = i
         end
         skip = false
-        Sleep(0.0001)
+        --Sleep(0.0001)
     end
 end
 

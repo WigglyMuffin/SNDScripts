@@ -197,7 +197,7 @@ function CreateRetainerName()
             if name:find(combo) then
                 return true
             end
-            Sleep(0.0001)
+            --Sleep(0.0001)
         end
         return false
     end
@@ -229,7 +229,7 @@ function CreateRetainerName()
                 if IsValidSyllableTransition(name, middle) and #name + #middle < max_length - 3 then
                     name = name .. middle
                 end
-                Sleep(0.0001)
+                --Sleep(0.0001)
             end
 
             -- Add a random suffix
@@ -338,7 +338,7 @@ function SetRetainerJobAndEquipItem(retainers)
         local retainer = retainers[j]
         local retainer_amount = retainer[2]
         total_retainers = total_retainers + retainer_amount
-        Sleep(0.0001)
+        --Sleep(0.0001)
     end
     -- Loop over each retainer and set their weapons
     for j = 0, total_retainers - 1 do
@@ -367,7 +367,7 @@ function SetRetainerJobAndEquipItem(retainers)
                         assign_class_node_id = i - 1
                         break  -- Exit the loop once the text is found
                     end
-                    Sleep(0.0001)
+                    --Sleep(0.0001)
                 end
                 
                 yield("/pcall SelectString true " .. assign_class_node_id)
@@ -391,7 +391,7 @@ function SetRetainerJobAndEquipItem(retainers)
                         gear_node_id = i - 1
                         break  -- Exit the loop once the text is found
                     end
-                    Sleep(0.0001)
+                    --Sleep(0.0001)
                 end
                 yield("/pcall SelectString true " .. gear_node_id)
                 repeat
@@ -427,7 +427,7 @@ function SetRetainerJobAndEquipItem(retainers)
                 Echo("No retainer found")
             end
         end
-        Sleep(0.0001)
+        --Sleep(0.0001)
     end
     yield("/pcall RetainerList true -1")
     repeat
@@ -460,7 +460,7 @@ for i = 1, #chars do
             for k = 1, retainer_amount do
                 CreateRetainer()
             end
-            Sleep(0.0001)
+            --Sleep(0.0001)
         end
         -- Now attempt to buy all the items needed for the specified jobs
         -- Move to West hawkers' alley
@@ -470,7 +470,7 @@ for i = 1, #chars do
             local retainer_job = retainer[1]
             local retainer_amount = retainer[2]
             BuyRetainerJobItem(retainer_job, retainer_amount)
-            Sleep(0.0001)
+            --Sleep(0.0001)
         end
         -- Move back to retainer place
         Movement(-123.85, 18.00, 20.58)

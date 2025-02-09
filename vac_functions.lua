@@ -522,7 +522,7 @@ function NodeScanner(get_node_text_type, get_node_text_match)
     end
     for location = 0, node_type_count do
         for sub_node = 0, 60 do
-            Sleep(0.0001)
+            --Sleep(0.0001)
             local node_check = GetNodeText(get_node_text_type, location, sub_node)
             local clean_node_text = extractTask(node_check)
             if clean_node_text == nil then
@@ -538,7 +538,7 @@ function NodeScanner(get_node_text_type, get_node_text_match)
     for location = 0, node_type_count do
         for sub_node = 0, 60 do
             for sub_node2 = 0, 20 do
-                Sleep(0.0001)
+                --Sleep(0.0001)
                 local node_check = GetNodeText(get_node_text_type, location, sub_node, sub_node2)
                 local clean_node_text = extractTask(node_check)
                 if clean_node_text == nil then
@@ -1047,7 +1047,8 @@ function OpenTimers()
 
     repeat
         local current_time = os.time()
-        if current_time - last_trigger_time >= retry_interval then -- Activate once every x seconds
+
+        if current_time - last_trigger_time >= retry_interval and IsAddonReady("ContentsInfo") then -- Activate once every x seconds
             yield("/callback ContentsInfo True 12 1")
             last_trigger_time = current_time                       -- Store the last trigger time
         end
@@ -1338,7 +1339,7 @@ function UseFCAction(action_name)
             yield("/callback FreeCompany true -1")
             return true, "Action already active" -- send back a true because the buff is already active, so no action is needed
         end
-        Sleep(0.0001)
+        --Sleep(0.0001)
     end
 
     -- Find the requested buff and use it if it is found
@@ -1357,7 +1358,7 @@ function UseFCAction(action_name)
             yield("/callback FreeCompany true -1")
             return true, "Action successfully activated"
         end
-        Sleep(0.0001)
+        --Sleep(0.0001)
     end
     if IsAddonReady("FreeCompany") then
         yield("/callback FreeCompany true -1")
@@ -2913,7 +2914,7 @@ function DropboxSetAll(dropbox_gil)
             end
         end
     
-        Sleep(0.0001)
+        --Sleep(0.0001)
     end
 end
 
@@ -2930,7 +2931,7 @@ function DropboxClearAll()
             DropboxSetItemQuantity(id, false, 0) -- NQ
             DropboxSetItemQuantity(id, true, 0)  -- HQ
         end
-        Sleep(0.0001)
+        --Sleep(0.0001)
     end
 end
 
