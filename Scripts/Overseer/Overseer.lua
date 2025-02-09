@@ -7,7 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.4.6      ##
+##     1.4.7      ##
 ####################
 
 ####################################################
@@ -440,7 +440,7 @@ local function GetOptimalBuildForRank(rank)
             return config.build, config.plan_type, config.unlock_plan, config.point_plan, config.min_rank, config.max_rank
         end
     end
-    return nil, nil, nil, nil, nil, nil  -- Return nil for all values if no matching range found
+    return "", 0, "00000000-0000-0000-0000-000000000000", "00000000-0000-0000-0000-000000000000", 0, 0  -- Return default values for all values if no matching range found
 end
 
 -- Helper function to get unlock plan by GUID
