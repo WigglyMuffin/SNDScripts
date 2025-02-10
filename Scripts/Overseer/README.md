@@ -1,6 +1,7 @@
 # Overseer
 
-![Status](https://img.shields.io/badge/status-working-brightgreen)
+![Status](https://img.shields.io/badge/status-needs_testing-blue)
+![Status](https://img.shields.io/badge/working-probably%3F-aquamarine)
 
 Overseer is a script designed to improve your Auto Retainer experience. It provides automated backup, management and optimisation features for Auto Retainer, ensuring data integrity and enhancing overall efficiency.
 
@@ -189,6 +190,7 @@ Overseer implements a robust backup system for your Auto Retainer configuration:
 
 ## Changelog
 
+- **1.5.0**: Rewrote a couple functions to make overseer work with the updated AutoRetainer config layout
 - **1.4.7**: Fixed an issue where it would crash if character had no plot
 - **1.4.6**: Added requested logic changes
 - **1.4.5**: Some improvements and some fixes. Overseer will now wait 60 seconds after creating a new submersible to mitigate an issue it has with AR.
