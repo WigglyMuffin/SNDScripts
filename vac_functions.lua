@@ -1062,23 +1062,28 @@ function OpenTimers()
         Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerOccupied()
 
+    -- Check if ContentsInfoDetail is already open, do nothing if so
+    if IsAddonReady("ContentsInfoDetail") and IsAddonVisible("ContentsInfoDetail") then
+        return
+    end
+
     yield("/timers")
-    
+
     -- Wait until ContentsInfo is ready
     repeat
         Sleep(0.1)
     until IsAddonReady("ContentsInfo") and IsAddonVisible("ContentsInfo")
-    
+
     -- Open ContentsInfoDetail (GC Timers)
     if IsAddonVisible("ContentsInfo") then
         yield("/callback ContentsInfo true 12 1")
     end
-    
+
     -- Wait until ContentsInfoDetail is ready
     repeat
         Sleep(0.1)
     until IsAddonReady("ContentsInfoDetail")
-    
+
     -- Close ContentsInfo
     if IsAddonVisible("ContentsInfoDetail") then
         yield("/callback ContentsInfo true -1")
