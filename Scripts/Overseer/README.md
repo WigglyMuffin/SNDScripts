@@ -1,7 +1,7 @@
 # Overseer
 
 ![Status](https://img.shields.io/badge/status-needs_testing-blue)
-![Status](https://img.shields.io/badge/working-probably%3F-aquamarine)
+![Status](https://img.shields.io/badge/working%3F-probably-aquamarine)
 
 Overseer is a script designed to improve your Auto Retainer experience. It provides automated backup, management and optimisation features for Auto Retainer, ensuring data integrity and enhancing overall efficiency.
 
