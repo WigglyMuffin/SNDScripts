@@ -9,11 +9,12 @@
            |_|                                                                              
 ####################
 ##    Version     ##
-##     1.0.1      ##
+##     1.0.2      ##
 ####################
 
 -> 1.0.0: Initial release
 -> 1.0.1: GC Edition of Kupo Box tailored for GC Supply Script series
+-> 1.0.2: Movement distance fix for trading distance
 
 ####################################################
 ##                  Description                   ##
@@ -256,7 +257,7 @@ local function ProcessAltCharacters(character_list)
                 if do_movement then
                     -- Path to main char
                     LogInfo("[KupoBox] do_movement is set to true, moving towards " .. trading_with)
-                    PathToObject(trading_with, 3.5)
+                    PathToObject(trading_with, 3.0)
                 else
                     LogInfo("[KupoBox] do_movement is set to false, not moving")
                 end
@@ -292,7 +293,7 @@ local function ProcessAltCharacters(character_list)
                 if do_movement then
                     -- Path to main char
                     LogInfo("[KupoBox] do_movement is set to true, moving towards " .. trading_with)
-                    PathToObject(trading_with, 3.5)
+                    PathToObject(trading_with, 3.0)
                 else
                     LogInfo("[KupoBox] do_movement is set to false, not moving")
                 end
