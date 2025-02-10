@@ -46,7 +46,8 @@ Automate the process of leveling DoL jobs through GC turn-ins.
 Automates GC-related tasks including hunt logs, quest unlocks, and FC-related actions. This will be remade at some point, and is not as complete as the other scripts.
 
 ### Overseer
-![Status](https://img.shields.io/badge/status-working-brightgreen)
+![Status](https://img.shields.io/badge/status-needs_testing-blue)
+![Status](https://img.shields.io/badge/working%3F-probably-aquamarine)
 
 Manages AutoRetainer tasks, including:
 - **Automated Backups**: Safeguard your Auto Retainer configuration with backup rotation (up to 50 backups).
