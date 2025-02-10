@@ -1022,38 +1022,67 @@ end
 -- Usage: OpenTimers()
 -- this should probably be renamed to open gc timers
 -- Opens the timers window
-function OpenTimers()
-    local last_trigger_time = os.time()
-    local retry_interval = 5 -- x seconds interval between retries
+-- function OpenTimers()
+    -- local last_trigger_time = os.time()
+    -- local retry_interval = 5 -- x seconds interval between retries
 
+    -- repeat
+        -- Sleep(0.1)
+    -- until IsPlayerAvailable() and not IsPlayerOccupied()
+
+    -- yield("/timers")
+
+    -- repeat
+        -- local current_time = os.time()
+
+        -- if current_time - last_trigger_time >= retry_interval then -- Activate once every x seconds
+            -- yield("/timers")
+            -- last_trigger_time = current_time                       -- Store the last trigger time
+        -- end
+
+        -- Sleep(0.1)
+    -- until IsAddonReady("ContentsInfo")
+
+    -- last_trigger_time = 0 -- Reset the trigger time
+
+    -- repeat
+        -- local current_time = os.time()
+
+        -- if current_time - last_trigger_time >= retry_interval and IsAddonReady("ContentsInfo") then -- Activate once every x seconds
+            -- yield("/callback ContentsInfo true 12 1")
+            -- last_trigger_time = current_time                       -- Store the last trigger time
+        -- end
+        -- Sleep(0.1)
+    -- until IsAddonReady("ContentsInfoDetail")
+-- end
+
+-- Come back to the other one above at some point
+function OpenTimers()
     repeat
         Sleep(0.1)
     until IsPlayerAvailable() and not IsPlayerOccupied()
 
     yield("/timers")
-
+    
+    -- Wait until ContentsInfo is ready
     repeat
-        local current_time = os.time()
-
-        if current_time - last_trigger_time >= retry_interval then -- Activate once every x seconds
-            yield("/timers")
-            last_trigger_time = current_time                       -- Store the last trigger time
-        end
-
         Sleep(0.1)
-    until IsAddonReady("ContentsInfo")
-
-    last_trigger_time = 0 -- Reset the trigger time
-
+    until IsAddonReady("ContentsInfo") and IsAddonVisible("ContentsInfo")
+    
+    -- Open ContentsInfoDetail (GC Timers)
+    if IsAddonVisible("ContentsInfo") then
+        yield("/callback ContentsInfo true 12 1")
+    end
+    
+    -- Wait until ContentsInfoDetail is ready
     repeat
-        local current_time = os.time()
-
-        if current_time - last_trigger_time >= retry_interval and IsAddonReady("ContentsInfo") then -- Activate once every x seconds
-            yield("/callback ContentsInfo True 12 1")
-            last_trigger_time = current_time                       -- Store the last trigger time
-        end
         Sleep(0.1)
     until IsAddonReady("ContentsInfoDetail")
+    
+    -- Close ContentsInfo
+    if IsAddonVisible("ContentsInfoDetail") then
+        yield("/callback ContentsInfo true -1")
+    end
 end
 
 -- Usage: MarketBoardChecker()
@@ -1093,7 +1122,7 @@ function BuyFromStore(number_in_list, amount)
     end
 
     if IsAddonReady("Shop") and number_in_list and amount then
-        yield("/callback Shop True 0 " .. number_in_list .. " " .. amount)
+        yield("/callback Shop true 0 " .. number_in_list .. " " .. amount)
         repeat
             Sleep(0.1)
         until IsAddonReady("SelectYesno")
@@ -1133,7 +1162,7 @@ function BuyFromStoreSingle(number_in_list)
     end
 
     if IsAddonReady("Shop") and number_in_list then
-        yield("/callback Shop True 0 " .. number_in_list .. " 1")
+        yield("/callback Shop true 0 " .. number_in_list .. " 1")
         repeat
             Sleep(0.1)
         until IsAddonReady("SelectYesno")
@@ -1156,7 +1185,7 @@ end
 -- Function used to close store windows
 function CloseStore()
     if IsAddonReady("Shop") then
-        yield("/callback Shop True -1")
+        yield("/callback Shop true -1")
     end
 
     repeat
