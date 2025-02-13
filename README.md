@@ -24,8 +24,8 @@ Please note that all our scripts disable the `Yes Already` plugin, that means if
 
 ## Prerequisites
 - All scripts require `vac_functions.lua` and `vac_lists.lua` to be placed in your SND config folder.
-- Some scripts may require specific plugins, which will be noted in their respective sections.
-- Certain scripts require two service accounts to function properly.
+- Some scripts may require specific plugins, which will be noted in their respective sections, in addition to this the script will not run until it detects you have the required plugins.
+- Certain scripts require two service accounts to function properly, this will be noted in each script.
 - Some scripts require the following settings to operate properly:
   - SND settings:
     - `Use SND's targeting system.` set to true
@@ -39,7 +39,9 @@ Please note that all our scripts disable the `Yes Already` plugin, that means if
 ### GC Supply Scripts
 ![Status](https://img.shields.io/badge/status-working-brightgreen)
 
-Automate the process of leveling DoL jobs through GC turn-ins.
+Automate the process of leveling DoL jobs through GC turn-ins. Requires two service accounts.
+
+Recommended to not use the Enforce Expert Delivery hack inside CBT plugin.
 
 | Script Name | Description | Requirements |
 |-------------|-------------|--------------|
