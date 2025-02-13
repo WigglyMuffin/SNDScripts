@@ -26,6 +26,13 @@ Please note that all our scripts disable the `Yes Already` plugin, that means if
 - All scripts require `vac_functions.lua` and `vac_lists.lua` to be placed in your SND config folder.
 - Some scripts may require specific plugins, which will be noted in their respective sections.
 - Certain scripts require two service accounts to function properly.
+- Some scripts require the following settings to operate properly:
+  - SND settings:
+    - `Use SND's targeting system.` set to true
+    - `Stop macro if target not found (only applies to SND's targeting system).` set to false
+    - `/item` dropdown settings set to false
+  - Simple Tweaks settings:
+    - `Fix '/target' command` set to true
 
 ## Script Categories
 
@@ -46,16 +53,26 @@ Automate the process of leveling DoL jobs through GC turn-ins.
 Automates GC-related tasks including hunt logs, quest unlocks, and FC-related actions. This will be remade at some point, and is not as complete as the other scripts.
 
 ### Overseer
-![Status](https://img.shields.io/badge/status-working-brightgreen)
+![Status](https://img.shields.io/badge/status-needs_testing-blue)
+![Status](https://img.shields.io/badge/working%3F-probably-aquamarine)
 
 Manages AutoRetainer tasks, including:
 - **Automated Backups**: Safeguard your Auto Retainer configuration with backup rotation (up to 50 backups).
 - **Submersible Optimisation**:
-  - Automatic creation and enabling of submersibles
-  - Part swapping for optimal voyaging based on submersible rank and configuration, there are submersible and inventory checks to ensure you have the parts
-  - Route handling and plan management
-  - Optimal vessel behaviour based on number of unlocked submersibles
+  - Automatic creation and enabling of submersibles.
+  - Part swapping for optimal voyaging based on submersible rank and configuration, there are submersible and inventory checks to ensure you have the parts.
+  - Route handling and plan management.
+  - Optimal vessel behaviour based on number of unlocked submersibles.
+  - Incorrect submersible route and build corrections.
+- **Retainer Optimisation**:
+  - Plan management.
+- **FC Management**:
+  - GC expert delivery turnins with option for enabling Seal Sweetener I or II buffs.
+  - Ceruleum Tank purchasing and topup management.
+  - Venture purchasing and topup management.
 - **Silent Operation**: Works seamlessly in the background with no interruptions.
+- **Shutdown Timers**: Option to shutdown your client after a specified time for auth token renewal.
+- **Menu Bailouts**: Additional menu bailouts for when a menu gets stuck.
 
 ### Questionable Companion
 ![Status](https://img.shields.io/badge/status-under_development-yellow)
