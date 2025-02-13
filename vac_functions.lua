@@ -1352,6 +1352,27 @@ function CanGCRankUp()
     end
 end
 
+-- Usage: CanExpertDelivery()
+-- Returns true if character can use Expert Delivery
+function CanExpertDelivery()
+    local gc_rank = 0
+    local gc_id = GetPlayerGC()
+
+    if gc_id == 1 then -- Checks if GC is Maelstrom
+        gc_rank = GetMaelstromGCRank()
+    elseif gc_id == 2 then -- Checks if GC is Twin Adder
+        gc_rank = GetAddersGCRank()
+    elseif gc_id == 3 then -- Checks if GC is Immortal Flames
+        gc_rank = GetFlamesGCRank()
+    end
+
+    if gc_rank > 5 then
+        return true
+    else
+        return false
+    end
+end
+
 -- Attempts to use an fc buff with the name you provide
 function UseFCAction(action_name)
     repeat

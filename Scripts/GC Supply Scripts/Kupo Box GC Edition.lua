@@ -9,12 +9,13 @@
            |_|                                                                              
 ####################
 ##    Version     ##
-##     1.0.2      ##
+##     1.0.3      ##
 ####################
 
 -> 1.0.0: Initial release
 -> 1.0.1: GC Edition of Kupo Box tailored for GC Supply Script series
 -> 1.0.2: Movement distance fix for trading distance
+-> 1.0.3: Added checks to do_rankups and expert_delivery
 
 ####################################################
 ##                  Description                   ##
@@ -67,12 +68,17 @@ local return_location = 0                   -- Options: 0 = Do nothing, 1 = Lims
 local party_invite = true
 
 -- In case something goes wrong, you can set the amount of characters in the list to skip, this goes from the top of the list
--- A good way to know how many chars you need to skip is to read the processing echo in chat which lists how many chars have finished already and which char is currently being processed ]]
-local skip_chars = 0 -- number of characters you'd like to skip
+-- A good way to know how many chars you need to skip is to read the processing echo in chat which lists how many chars have finished already and which char is currently being processed
+local skip_chars = 0 -- Number of characters you want to skip
+
+-- Options: true = Automatically attempts to rank up your GC, false = Do nothing
+-- Requires the "Enforce Expert Delivery" option to be disabled in CBT plugin otherwise rank ups will not work properly
+local do_rankups = true
 
 -- Options: true = Will start Deliveroo expert delivery after GC supply turnins, false = Do nothing
--- Requires Deliveroo plugin to be installed and will enable expert deliveries to be run after GC turnins
--- Probably requires you to have set Deliveroo up beforehand
+-- Requires Deliveroo plugin to be installed and will run expert deliveries after GC turnins
+-- Deliveroo needs to be setup properly beforehand
+-- Will check if your character has the rank to do expert deliveries, so even if your character does not have the rank leaving it set to true is safe
 local expert_delivery = false
 
 -- Options: true = Uses the external character list in the same folder, default name being char_list.lua, false = Uses the list you put in this file
@@ -112,6 +118,11 @@ end
 
 if not CheckPluginsEnabled(unpack(required_plugins)) then
     return -- Stops script as plugins not available
+end
+
+-- CBT plugin check for "Enforce Expert Delivery" option
+if HasPlugin("Automaton") and (do_rankups or expert_delivery) then
+    Echo('Ensure you have the "Enforce Expert Delivery" option disabled in CBT plugin.')
 end
 
 if HasPlugin("YesAlready") then
@@ -325,7 +336,7 @@ local function ProcessAltCharacters(character_list)
             DOL()
 
             -- Deliveroo expert delivery
-            if expert_delivery then
+            if expert_delivery and CanExpertDelivery() then
                 GCDeliverooExpertDelivery()
             end
 
