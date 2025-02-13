@@ -26,6 +26,13 @@ Please note that all our scripts disable the `Yes Already` plugin, that means if
 - All scripts require `vac_functions.lua` and `vac_lists.lua` to be placed in your SND config folder.
 - Some scripts may require specific plugins, which will be noted in their respective sections.
 - Certain scripts require two service accounts to function properly.
+- Some scripts require the following settings to operate properly:
+  - SND settings:
+    - `Use SND's targeting system.` set to true
+    - `Stop macro if target not found (only applies to SND's targeting system).` set to false
+    - `/item` dropdown settings set to false
+  - Simple Tweaks settings:
+    - `Fix '/target' command` set to true
 
 ## Script Categories
 
