@@ -5,7 +5,7 @@
 
 Overseer is a script designed to improve your Auto Retainer experience. It provides automated backup, management and optimisation features for Auto Retainer, ensuring data integrity and enhancing overall efficiency.
 
-The default values inside the configuration can be used straight away, though it is recommended to look them over and adjust anything to suit your required needs, see [Configuration](#configuration) section for more info.
+The default values inside the configuration can be used straight away, though it is recommended to configure and adjust anything to suit your required needs, see [Configuration](#configuration) section for more info.
 
 There will potentially be bugs and weird things happening, please report any issues you encounter, preferably as an issue in this repo, this should be considered a script in the testing period, while all attempts have been made to ensure things run smoothly, there is no guarantee they will.
 
@@ -45,7 +45,7 @@ By using Overseer, you agree to these terms and accept full responsibility for i
 - **Retainer Optimisation**:
   - Plan management.
 - **Retainer Scheduling**:
-  - Set your retainers to run only between certain hours.
+  - Retainer timers to only allow ventures to be run during specific times.
 - **FC Management**:
   - GC expert delivery turnins with option for enabling Seal Sweetener I or II buffs.
   - Ceruleum Tank purchasing and topup management.
@@ -69,13 +69,13 @@ Ensure you have the following plugins installed and enabled:
 ## Installation
 
 1. Verify all required plugins are installed and enabled.
-2. Download the latest vac_functions and vac_lists files from [SNDScripts](https://github.com/WigglyMuffin/SNDScripts).
-3. Place the vac_functions and vac_lists files in your SND config folder (`%appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing`). You can place them elsewhere but you will need to adjust the `load_functions_file_location` line of Overseer to point to the correct path.
+2. Download the latest `vac_function.lua` and `vac_list.lua` files from [SNDScripts](https://github.com/WigglyMuffin/SNDScripts).
+3. Place the `vac_function.lua` and `vac_list.lua` files in your SND config folder (`%appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing`). You can place them elsewhere but you will need to adjust the `load_functions_file_location` line of Overseer to point to the correct path.
 4. Download the latest Overseer script files (both Overseer and Overseer Launcher) from the [Overseer folder](https://github.com/WigglyMuffin/SNDScripts/tree/main/Scripts/Overseer).
-5. Edit Overseer ***OUTSIDE*** of the SND environment to configure the settings, and use the import button to import the script. This is due to Overseer exceeding the character limit for SND, requiring you to import the script and editing any configuration outside the SND environment.
-6. Import Overseer and Overseer Launcher into your SND environment (`/snd` and import the scripts). Make sure you name the imported scripts in SND to match the file name.
-7. Set Overseer Launcher as the script to run on AutoRetainer CharacterPostProcess, located in SND settings.
-8. Make sure you have "Wait on login screen" enabled in your autoretainer settings.
+5. Edit Overseer ***OUTSIDE*** of the SND environment to configure the settings, and use the import button to import the script.
+6. Import Overseer and Overseer Launcher into your SND environment (`/snd` and import the scripts using the `Import macro from clipboard` button). Make sure you name the imported scripts in SND to match the file name, and ensure the scripts are listed as `Lua`.
+7. Optionally though recommended to set Overseer Launcher as the script to run on AutoRetainer CharacterPostProcess, located in SND settings (the `?` icon towards the top middle section of the UI).
+8. Make sure you have "Wait on login screen" enabled in your Auto Retainer settings.
 
 ## Getting Started
 
@@ -88,39 +88,41 @@ Ensure you have the following plugins installed and enabled:
 
 Fine-tune Overseer's behaviour by adjusting these parameters in the script's configuration section:
 
-| Setting | Description |
-|---------|-------------|
-| `disable_gc_delivery` | Disables attempting any kind of gc delivery on falling under either venture or inventory slot limits
-| `venture_limit` | Minimum value of ventures to trigger buying more ventures, requires Deliveroo to be correctly configured by doing GC deliveries |
-| `inventory_slot_limit` | Amount of inventory slots remaining before attempting a GC delivery to free up slots |
-| `buy_ceruleum` | Will attempt to buy ceruleum fuel based on the settings below, if set to false the characters will never attempt to refuel (buy ceruleum fuel off players) |
-| `ceruleum_limit` | Minimum value of ceruleum fuel to trigger buying ceruleum fuel |
-| `ceruleum_buy_amount` | Amount of ceruleum fuel to be purchased when ceruleum_limit is triggered |
-| `fc_credits_to_keep` | How many credits to always keep, this limit will be ignored when buying FC buffs for GC deliveries |
-| `use_fc_buff` | Will attempt to buy and use the seal sweetener buff when doing GC deliveries |
-| `ar_collection_name` | Name of the plugin collection which contains the "AutoRetainer" plugin |
-| `force_return_subs_that_need_swap` | Will force return submarines to swap parts even if they're already sent out, if set to false it will wait until they're back |
+| Setting | Description | Values Accepted | Default Value |
+|---------|-------------|-----------------|---------------| 
+| `disable_gc_delivery` | Disables attempting any kind of gc delivery on falling under either venture or inventory slot limits | `true` or `false` | `false` |
+| `venture_limit` | Minimum value of ventures to trigger buying more ventures, requires Deliveroo to be correctly configured by doing GC deliveries | A number between `1` and `9999` | `100` |
+| `inventory_slot_limit` | Amount of inventory slots remaining before attempting a GC delivery to free up slots | A number between `1` and `140` | `30` |
+| `buy_ceruleum` | Will attempt to buy ceruleum fuel based on the settings below, if set to false the characters will never attempt to refuel (buy ceruleum fuel off players) | `true` or `false` | `false` |
+| `ceruleum_limit` | Minimum value of ceruleum fuel to trigger buying ceruleum fuel | A number between `1` and `139860` | `1000` |
+| `ceruleum_buy_amount` | Amount of ceruleum fuel to be purchased when ceruleum_limit is triggered | A number between `1` and `139860` | `99999` |
+| `fc_credits_to_keep` | How many credits to always keep, this limit will be ignored when buying FC buffs for GC deliveries | A number between `1` and `999999999` | `13000` |
+| `use_fc_buff` | Will attempt to buy and use the seal sweetener buff when doing GC deliveries | `true` or `false` | `false` |
+| `ar_collection_name` | Name of the plugin collection which contains the "AutoRetainer" plugin | Any text string | `"AutoRetainer"` |
+| `force_return_subs_that_need_swap` | Will force return submarines to swap parts even if they're already sent out, if set to false it will wait until they're back | `true` or `false` | `false` |
 
 You can also customise submersible builds and retainer venture types in their respective sections.
 
+### Timers Configuration
 
 These settings allow the script to automatically shut down the game after X minutes, good if you want to reset the token every day and have something else start the game again
-| Setting | Description |
-|---------|-------------|
-| `enable_auto_shutdown` | Enables the auto shutdown feature, default is false |
-| `shutdown_timer` | How many minutes the script will wait before shutting the client down in minutes, as an example 1440 minutes is a day and also the default |
+| Setting | Description | Values Accepted | Default Value |
+|---------|-------------|-----------------|---------------| 
+| `enable_auto_shutdown` | Enables the auto shutdown feature | `true` or `false` | `false` |
+| `shutdown_timer` | How many minutes the script will wait before shutting the client down in minutes, as an example 1440 minutes is a day | A number between `1` and `4320` | `1440` |
 
-\
-If you want to set your retainers to only run between x and x hours of the day you can use these settings to set a schedule of active retainer hours
-This uses your computers time, just adjust the hours and minutes to your liking
-| Setting | Description |
-|---------|-------------|
-| `enable_retainer_schedule` | Enables the retainer schedule, default is false |
+If you want to set your retainers to only run between x and x hours of the day you can use these settings to set a schedule of active retainer hours.
+This uses your local PC time and in a 24 hour format, therefore adjust the hours and minutes to your requirements.
+| Setting | Description | Values Accepted | Default Value |
+|---------|-------------|-----------------|---------------|
+| `enable_retainer_schedule` | Enables the retainer schedule and to be used with `retainer_active_hours` | `true` or `false` | `false` |
+
+The script includes a configuration table for retainer active hours. Here's an example of how to configure them:
 
 ```lua
 local retainer_active_hours = {
-    start_time = {hour = 17, minute = 00}, -- 5:00 PM
-    end_time = {hour = 2, minute = 05}     -- 2:05 AM
+    start_time = { hour = 17, minute = 00 }, -- 5:00 PM
+    end_time = { hour = 2, minute = 05 }     -- 2:05 AM
 }
 ```
 
@@ -130,9 +132,9 @@ The script includes a configuration table for submersible builds. Here's an expl
 
 ```lua
 local submersible_build_config = {
-    {min_rank = 1, max_rank = 14, build = "SSSS", plan_type = 3, unlock_plan = "31d90475-c6a1-4174-9f66-5ec2e1d01074", point_plan = "6e38ab7a-05c2-40b7-84a1-06f087704371"},
-    {min_rank = 15, max_rank = 89, build = "SSUS", plan_type = 3, unlock_plan = "31d90475-c6a1-4174-9f66-5ec2e1d01074", point_plan = "6e38ab7a-05c2-40b7-84a1-06f087704371"},
-    {min_rank = 90, max_rank = 120, build = "SSUC", plan_type = 4, unlock_plan = "31d90475-c6a1-4174-9f66-5ec2e1d01074", point_plan = "6e38ab7a-05c2-40b7-84a1-06f087704371"},
+    { min_rank = 1, max_rank = 14, build = "SSSS", plan_type = 3, unlock_plan = "31d90475-c6a1-4174-9f66-5ec2e1d01074", point_plan = "6e38ab7a-05c2-40b7-84a1-06f087704371" },
+    { min_rank = 15, max_rank = 89, build = "SSUS", plan_type = 3, unlock_plan = "31d90475-c6a1-4174-9f66-5ec2e1d01074", point_plan = "6e38ab7a-05c2-40b7-84a1-06f087704371" },
+    { min_rank = 90, max_rank = 120, build = "SSUC", plan_type = 4, unlock_plan = "31d90475-c6a1-4174-9f66-5ec2e1d01074", point_plan = "6e38ab7a-05c2-40b7-84a1-06f087704371" },
 }
 ```
 
@@ -156,13 +158,13 @@ local unlock_plans = {
     {
         GUID = "579ba94d-4b73-4afe-9be1-999225e24af2",
         Name = "Overseer OJ Unlocker",
-        ExcludedRoutes = {101,100,99,98,97,96,95,93,92,91,90,89,88,80,81,82,83,84,86,85,87,79,78,77,76,75,74,72,71,70,69,68,67,66,65,64,63,62,61,60,59,58,57,56,55,54,29,24,23,22,21,18,17,16,13,12,11,9,8,7,6,4,3,102,103,104,105,48,36,51,50,46,45,44,41,40,35,53},
+        ExcludedRoutes = { 101,100,99,98,97,96,95,93,92,91,90,89,88,80,81,82,83,84,86,85,87,79,78,77,76,75,74,72,71,70,69,68,67,66,65,64,63,62,61,60,59,58,57,56,55,54,29,24,23,22,21,18,17,16,13,12,11,9,8,7,6,4,3,102,103,104,105,48,36,51,50,46,45,44,41,40,35,53 },
         UnlockSubs = true
     },
     {
         GUID = "31d90475-c6a1-4174-9f66-5ec2e1d01074",
         Name = "Overseer Optimal Unlocker",
-        ExcludedRoutes = {3,6,13,22,23,24,29,36,40,41,45,44,46,48,50,51,54,56,58,60,63,64,66,67,68,69,71,80,86,90,92,103,105,107,109,110,112},
+        ExcludedRoutes = { 3,6,13,22,23,24,29,36,40,41,45,44,46,48,50,51,54,56,58,60,63,64,66,67,68,69,71,80,86,90,92,103,105,107,109,110,112 },
         UnlockSubs = true
     },
     -- Add more unlock plans here as needed
@@ -183,12 +185,12 @@ local point_plans = {
     {
         GUID = "04fbb61c-5800-40e6-8c67-2467796bf80e",
         Name = "Overseer JORZ",
-        Points = {10,15,18,26}
+        Points = { 10,15,18,26 }
     },
     {
         GUID = "644317d3-34e1-44f3-a950-5fa5bdc8de04",
         Name = "Overseer MROJZ",
-        Points = {13,18,15,10,26}
+        Points = { 13,18,15,10,26 }
     },
     -- Add more point plans here as needed
 }
@@ -202,8 +204,6 @@ For levelling, all submersibles will follow the `unlock_plan` defined in the con
 - The first submersible will use "Unlock + Spam one destination" until all four submersibles are unlocked, then switch to "Unlock + Pick max amount of destinations".
 - The second, third, and fourth submersibles will use "Unlock + Pick max amount of destinations".
 - Once each individual submersible reaches the configured rank value for farming, they will automatically switch to the `point_plan` you have set, while the remaining submersibles continue to level.
-
-By using Overseer, you agree to these terms and accept full responsibility for its use and any consequences thereof.
 
 ## Backup System
 
