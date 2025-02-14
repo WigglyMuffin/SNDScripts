@@ -7,7 +7,7 @@ Overseer is a script designed to improve your Auto Retainer experience. It provi
 
 The default values inside the configuration can be used straight away, though it is recommended to look them over and adjust anything to suit your required needs, see [Configuration](#configuration) section for more info.
 
-There will potentially be bugs and weird things happening, please report any issues you encounter, this should be considered a script in the testing period, while all attempts have been made to ensure things run smoothly, there is no guarantee they will.
+There will potentially be bugs and weird things happening, please report any issues you encounter, preferably as an issue in this repo, this should be considered a script in the testing period, while all attempts have been made to ensure things run smoothly, there is no guarantee they will.
 
 ## Disclaimer
 
@@ -44,6 +44,8 @@ By using Overseer, you agree to these terms and accept full responsibility for i
   - Incorrect submersible route and build corrections.
 - **Retainer Optimisation**:
   - Plan management.
+- **Retainer Scheduling**:
+  - Set your retainers to run only between certain hours.
 - **FC Management**:
   - GC expert delivery turnins with option for enabling Seal Sweetener I or II buffs.
   - Ceruleum Tank purchasing and topup management.
@@ -105,8 +107,22 @@ You can also customise submersible builds and retainer venture types in their re
 These settings allow the script to automatically shut down the game after X minutes, good if you want to reset the token every day and have something else start the game again
 | Setting | Description |
 |---------|-------------|
-| `enable_auto_shutdown` | Enables the auto shutdown feature, default is off |
+| `enable_auto_shutdown` | Enables the auto shutdown feature, default is false |
 | `shutdown_timer` | How many minutes the script will wait before shutting the client down in minutes, as an example 1440 minutes is a day and also the default |
+
+\
+If you want to set your retainers to only run between x and x hours of the day you can use these settings to set a schedule of active retainer hours
+This uses your computers time, just adjust the hours and minutes to your liking
+| Setting | Description |
+|---------|-------------|
+| `enable_retainer_schedule` | Enables the retainer schedule, default is false |
+
+```lua
+local retainer_active_hours = {
+    start_time = {hour = 17, minute = 00}, -- 5:00 PM
+    end_time = {hour = 2, minute = 05}     -- 2:05 AM
+}
+```
 
 ### Submersible Configuration
 
@@ -199,6 +215,7 @@ Overseer implements a robust backup system for your Auto Retainer configuration:
 
 ## Changelog
 
+- **1.5.1**: Added a setting which allows you to set retainer active hours, so you can run retainers for only X hours a day if preferred. Also some potential improvements to stuck detection with minor code cleanup
 - **1.5.0**: Rewrote a couple functions to make overseer work with the updated AutoRetainer config layout
 - **1.4.7**: Fixed an issue where it would crash if character had no plot
 - **1.4.6**: Added requested logic changes

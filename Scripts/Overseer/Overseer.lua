@@ -7,7 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.5.0      ##
+##     1.5.1      ##
 ####################
 
 ####################################################
@@ -33,6 +33,11 @@ Retainers are planned features, they are not currently supported.
 -> TextAdvance : https://github.com/NightmareXIV/MyDalamudPlugins/raw/main/pluginmaster.json
 -> vnavmesh : https://puni.sh/api/repository/veyn
 
+Not required but recommended
+
+-> Simple tweaks : In the default first party dalamud repository
+    -> With the tweak "Disable Title Screen Movie" enabled
+
 ####################################################
 ##                    Settings                    ##
 ##################################################]]
@@ -51,6 +56,14 @@ local force_return_subs_that_need_swap = false   -- Will force return submarines
 -- You can use this setting to have the script automatically shut down the game after X minutes, good if you want to reset the token every day for example
 local enable_auto_shutdown = false               -- false to disable, true to enable
 local shutdown_timer = 1440                      -- 24 hours in minutes
+
+-- If you want to set your retainers to only run between x and x hours of the day you can use these settings to set a schedule of active retainer hours
+-- Uses your computers time, just adjust the hours and minutes to your liking
+local enable_retainer_schedule = false
+local retainer_active_hours = {
+    start_time = {hour = 17, minute = 00}, -- 5:00 PM
+    end_time = {hour = 2, minute = 05}     -- 2:05 AM
+}
 
 -- This option makes overseer attempt corrections on all characters every time it goes to the main menu
 -- This means that if overseer finds a sub that isn't sent out it will attempt to send it out again
@@ -233,7 +246,6 @@ function LogToInfo(debuglevel, ...)
     end
 end
 
-
 -- Function that just returns true or false if the script has passed the configured shutdown limit and needs a restart
 local function ShutdownNeeded()
     if enable_auto_shutdown then
@@ -253,6 +265,7 @@ local function AutoShutdown()
     ARAbortAllTasks()
     yield("/ays multi d")
     Sleep(0.5)
+
     while true do
         if IsPlayerAvailable() then
             yield("/shutdown")
@@ -262,24 +275,29 @@ local function AutoShutdown()
             yield("/callback SelectYesno true 0")
             Sleep(5)
         end
+
         if IsAddonReady("_TitleLogo") then
             yield("/callback _TitleMenu true 12")
             Sleep(5)
         end
+
         if IsAddonReady("SelectOk") then
             yield("/callback SelectOk true 0")
             repeat
                 Sleep(0.1)
             until IsAddonReady("SelectYesno") or IsPlayerAvailable()
+
             if not IsPlayerAvailable() and IsAddonReady("SelectYesno") then
                 yield("/callback SelectYesno true 0")
             end
             Sleep(3)
         end
+
         if IsAddonReady("_CharaSelectReturn") then
             yield("/callback _CharaSelectReturn true 19")
             Sleep(5)
         end
+
         Sleep(1)
     end
 end
@@ -288,7 +306,6 @@ end
 local function ForceARSave()
     if HasPlugin("AutoRetainer") then
         yield("/ays")
-        Sleep(0.2)
         yield("/ays")
         Sleep(0.2)
     end
@@ -1466,6 +1483,7 @@ local function DisableAR()
     if HasPlugin("AutoRetainer") then
         ForceARSave()
         ManageCollection(ar_collection_name, false)
+
         repeat
             Sleep(0.1)
         until not HasPlugin("AutoRetainer")
@@ -1475,9 +1493,11 @@ end
 -- Call this every time you want to update the ar_character_data file with new info
 local function UpdateOverseerDataFile(update_char_data)
     local ar_character_data, global_data = UpdateFromAutoRetainerConfig()
+
     if not ar_character_data then
         Sleep(3)
         ar_character_data, global_data = UpdateFromAutoRetainerConfig()
+
         if not ar_character_data then
             local error_msg = "UpdateOverseerDataFile: Failed to update character list from DefaultConfig.json, retrying"
             Echo(error_msg)
@@ -1485,7 +1505,9 @@ local function UpdateOverseerDataFile(update_char_data)
             return
         end
     end
+
     SaveCharacterDataToFile(ar_character_data, global_data)
+
     if update_char_data then
         overseer_char_data = LoadOverseerData(overseer_current_character)
     end
@@ -1493,40 +1515,34 @@ end
 
 -- walks up to the vendor and buys/uses gc seal buff, should only be called when already at the GC
 local function UseFCBuff()
-    -- Attempt to use "Seal Sweetener II"
     if HasStatus("Seal Sweetener") then
         return true
     end
+
     if UseFCAction("Seal Sweetener II") then
+        LogToInfo(1, "UseFCBuff: Seal Sweetener II successfully used")
         return true
     end
 
     local fc_gc_id = overseer_char_data.free_company.gc_id
-    if fc_gc_id == 1 then
-        yield("/li gc 1")
+    local gc_coords = {
+        [1] = {command = "/li gc 1", coords = {93.46, 40.28, 71.52}}, -- Maelstrom
+        [2] = {command = "/li gc 2", coords = {-70.24, -0.50, -7.09}}, -- Twin Adder
+        [3] = {command = "/li gc 3", coords = {-143.86, 4.11, -104.04}} -- Immortal Flames
+    }
+
+    local gc_info = gc_coords[fc_gc_id]
+    if gc_info then
+        yield(gc_info.command)
         Sleep(5)
         repeat
             Sleep(1)
         until not LifestreamIsBusy()
-        Movement(93.46, 40.28, 71.52, 1) -- Maelstrom
-    elseif fc_gc_id == 2 then
-        yield("/li gc 2")
-        Sleep(5)
-        repeat
-            Sleep(1)
-        until not LifestreamIsBusy()
-        Movement(-70.24, -0.50, -7.09, 1) -- Twin Adder
-    elseif fc_gc_id == 3 then
-        yield("/li gc 3")
-        Sleep(5)
-        repeat
-            Sleep(1)
-        until not LifestreamIsBusy()
-        Movement(-143.86, 4.11, -104.04, 1) -- Immortal Flames
+        Movement(table.unpack(gc_info.coords))
     end
 
-    local buy_action_II_success, buy_action_II_msg = BuyFCAction("Seal Sweetener II")
-    if buy_action_II_success then
+    -- Try buying and using "Seal Sweetener II"
+    if BuyFCAction("Seal Sweetener II") then
         if UseFCAction("Seal Sweetener II") then
             return true
         else
@@ -1534,13 +1550,15 @@ local function UseFCBuff()
         end
     end
 
+    -- Try using "Seal Sweetener" if "Seal Sweetener II" fails
     if UseFCAction("Seal Sweetener") then
+        LogToInfo(1, "UseFCBuff: Seal Sweetener successfully used")
         return true
     end
-    local buy_action_I_success, buy_action_I_msg = BuyFCAction("Seal Sweetener")
-    if buy_action_I_success then
+
+    -- Buy and use "Seal Sweetener" if not already available
+    if BuyFCAction("Seal Sweetener") then
         if UseFCAction("Seal Sweetener") then
-            LogToInfo(1, "UseFCBuff: Seal Sweetener successfully used")
             return true
         else
             return false, "Failed to use Seal Sweetener"
@@ -1553,28 +1571,35 @@ end
 -- Checks and triggers a gc expert delivery if low on ventures or inventory space
 local function PerformGCDelivery()
     ARSetMultiModeEnabled(false)
+
     if use_fc_buff then
         UseFCBuff()
     end
+
     yield("/li gc")
     Sleep(1)
+
     repeat
         Sleep(1)
     until not LifestreamIsBusy()
+
     repeat
         Sleep(0.1)
     until IsPlayerAvailable()
-    GCDeliverooExpertDelivery() -- Call a function from vac_functions
+
+    GCDeliverooExpertDelivery()
     LogToInfo(1, "PerformGCDelivery: GC run finished")
 end
 
 -- Will run after AR has finished processing if a submersible can be created
 local function RegisterSubmersible()
     ARSetMultiModeEnabled(false)
+
     if not IsPlayerAvailable() then
-        Echo("Player isn't available, register submersible attempt")
+        Echo("Player isn't available, register submersible attempt aborted")
         return
     end
+
     if GetDistanceToObject("Voyage Control Panel") > 4.5 then
         Target("Voyage Control Panel")
         yield("/lockon")
@@ -1583,31 +1608,39 @@ local function RegisterSubmersible()
             Sleep(0.1)
         until GetDistanceToObject("Voyage Control Panel") < 4
     end
+
     repeat
         Target("Voyage Control Panel")
         Sleep(0.1)
         yield("/interact")
         Sleep(0.2)
     until IsAddonReady("SelectString")
+
     repeat
         yield("/callback SelectString true 1")
         Sleep(0.1)
     until not IsAddonVisible("SelectString")
+
     repeat
         Sleep(0.1)
     until IsAddonReady("SelectString")
+
     Sleep(0.5)
     RegisterNewSubmersible()
+
     repeat
         Sleep(0.1)
     until IsAddonReady("SelectString")
+
     repeat
         yield("/callback SelectString true -1 0")
         Sleep(0.1)
     until not IsAddonVisible("SelectString")
+
     repeat
         Sleep(0.1)
     until IsAddonReady("SelectString")
+
     repeat
         yield("/callback SelectString true -1 0")
         Sleep(0.1)
@@ -1616,16 +1649,19 @@ end
 
 -- Function to return the AR file as json
 local function LoadARJson()
-    local ar_file = io.open(auto_retainer_config_path, "r")
+    local ar_file, err = io.open(auto_retainer_config_path, "r")
     if not ar_file then
+        LogToInfo(1, "LoadARJson: Failed to open file: " .. err)
         return nil
     end
+
     local ar_file_content = ar_file:read("*a")
+    ar_file:close()
+
     if ar_file_content:sub(1, 3) == string.char(0xEF, 0xBB, 0xBF) then
         ar_file_content = ar_file_content:sub(4)
         LogToInfo(1, "LoadARJson: BOM removed from the ar json file")
     end
-    ar_file:close()
 
     local success, json_data = pcall(json.decode, ar_file_content)
     if not success then
@@ -1664,57 +1700,7 @@ end
 local function EnableSubmersible(submersible_number)
     UpdateOverseerDataFile(true)
 
-    local function ModifyARFileAndEnableSubmersible(cid, submersible_name)
-        local ar_data = LoadARJson()
-        if not ar_data then
-            return false, "EnableSubmersible: Unable to open file"
-        end
-        for _, character in ipairs(ar_data.OfflineData) do
-            if tonumber(character.CID) == tonumber(cid) then
-                for _, sub in ipairs(character.EnabledSubs) do
-                    if sub == submersible_name then
-                        return nil, "EnableSubmersible: Submersible already enabled"
-                    end
-                end
-                table.insert(character.EnabledSubs, submersible_name)
-                WriteToARJson(ar_data)
-                return true, "EnableSubmersible: Successfully enabled "..submersible_name
-            end
-        end
-        return false, "EnableSubmersible: CID not found or no modification made"
-    end
-
-    local submersible_name = ""
-    for _, submersible in ipairs(overseer_char_data.submersibles) do
-        if submersible.number == submersible_number then
-            submersible_name = submersible.name
-        end
-    end
-    if submersible_name ~= "" then
-        local char_cid = overseer_char_data.id
-        DisableAR()
-        local success, msg = ModifyARFileAndEnableSubmersible(char_cid, submersible_name)
-        if success then
-            Echo(msg)
-        else
-            Echo("Error: " .. msg)
-        end
-    else
-        LogToInfo(1, "EnableSubmersible: Requested submersible doesn't have a name, not appending")
-        return
-    end
-end
-
--- Function to edit the additional submersible data in ar
-local function ModifyAdditionalSubmersibleData(submersible_number, config, config_option)
-    UpdateOverseerDataFile(true)
-
-    local submersible_name, char_cid = "", overseer_char_data.id
-    if overseer_char_data.submersibles[submersible_number].build == "" then
-        Echo("ModifyAdditionalSubmersibleData: No submersible with that number found.")
-        return
-    end
-
+    local submersible_name
     for _, submersible in ipairs(overseer_char_data.submersibles) do
         if submersible.number == submersible_number then
             submersible_name = submersible.name
@@ -1722,38 +1708,89 @@ local function ModifyAdditionalSubmersibleData(submersible_number, config, confi
         end
     end
 
+    if not submersible_name then
+        return LogToInfo(1, "EnableSubmersible: Requested submersible doesn't have a name")
+    end
+
+    local ar_data = LoadARJson()
+    if not ar_data then
+        Echo("Error: EnableSubmersible: Unable to open file")
+        return
+    end
+
+    local char_cid = overseer_char_data.id
+    local character
+    for _, char in ipairs(ar_data.OfflineData) do
+        if tonumber(char.CID) == tonumber(char_cid) then
+            character = char
+            break
+        end
+    end
+
+    if not character then
+        Echo("Error: EnableSubmersible: CID not found")
+        return
+    end
+
+    for _, sub in ipairs(character.EnabledSubs) do
+        if sub == submersible_name then
+            Echo("EnableSubmersible: Submersible already enabled")
+            return
+        end
+    end
+
+    DisableAR()
+    table.insert(character.EnabledSubs, submersible_name)
+    WriteToARJson(ar_data)
+    LogToInfo("EnableSubmersible: Successfully enabled "..submersible_name)
+    Echo("EnableSubmersible: Successfully enabled "..submersible_name)
+end
+
+-- Function to edit the additional submersible data in ar
+local function ModifyAdditionalSubmersibleData(submersible_number, config, config_option)
+    CreateConfigBackup()
+    UpdateOverseerDataFile(true)
+
+    local submersible = overseer_char_data.submersibles[submersible_number]
+    if not submersible or submersible.build == "" then
+        Echo("ModifyAdditionalSubmersibleData: No submersible with that number found.")
+        return
+    end
+
+    local submersible_name, char_cid = submersible.name, overseer_char_data.id
     if not submersible_name or not char_cid then
         Echo("ModifyAdditionalSubmersibleData: No submersible or character data found.")
         return
     end
 
-    DisableAR()
-
-    local function UpdateAdditionalSubmersibleData()
-        local ar_data = LoadARJson()
-        if not ar_data then return false, "ModifyAdditionalSubmersibleData: Unable to open file" end
-
-        for _, character in ipairs(ar_data.OfflineData) do
-            if tonumber(character.CID) == tonumber(char_cid) and character.AdditionalSubmarineData and character.AdditionalSubmarineData[submersible_name] then
-                local sub_data = character.AdditionalSubmarineData[submersible_name]
-                if sub_data[config] then
-                    sub_data[config] = config_option
-                    WriteToARJson(ar_data)
-                    return true, "ModifyAdditionalSubmersibleData: Successfully updated " .. submersible_name .. "." .. config
-                else
-                    return false, "ModifyAdditionalSubmersibleData: Config option not found"
-                end
-            end
-        end
-        return false, "ModifyAdditionalSubmersibleData: Submersible or CID not found"
+    local ar_data = LoadARJson()
+    if not ar_data then
+        Echo("Error: ModifyAdditionalSubmersibleData: Unable to open file")
+        return
     end
 
-    local success, msg = UpdateAdditionalSubmersibleData()
-    Echo(success and msg or "Error: " .. msg)
+    for _, character in ipairs(ar_data.OfflineData) do
+        if tonumber(character.CID) == tonumber(char_cid) and character.AdditionalSubmarineData and character.AdditionalSubmarineData[submersible_name] then
+            local sub_data = character.AdditionalSubmarineData[submersible_name]
+            if sub_data[config] then
+                DisableAR()
+                sub_data[config] = config_option
+                WriteToARJson(ar_data)
+                Echo("ModifyAdditionalSubmersibleData: Successfully updated " .. submersible_name .. "." .. config)
+                return
+            else
+                Echo("Error: ModifyAdditionalSubmersibleData: Config option not found")
+                return
+            end
+        end
+    end
+
+    Echo("Error: ModifyAdditionalSubmersibleData: Submersible or CID not found")
 end
 
 -- Functon to modify return time of submersibles on a character
 local function ModifyOfflineReturnTime(submersible_name, return_time)
+    CreateConfigBackup()
     UpdateOverseerDataFile(true)
 
     local char_cid = overseer_char_data.id
@@ -1767,32 +1804,111 @@ local function ModifyOfflineReturnTime(submersible_name, return_time)
         return
     end
 
-    DisableAR()
+    local ar_data = LoadARJson()
+    if not ar_data then
+        Echo("Error: ModifyOfflineReturnTime: Unable to open file")
+        return
+    end
 
-    local function UpdateReturnTimeInOfflineData()
-        local ar_data = LoadARJson()
-        if not ar_data then return false, "ModifyOfflineReturnTime: Unable to open file" end
-
-        for _, character in ipairs(ar_data.OfflineData) do
-            if tonumber(character.CID) == tonumber(char_cid) then
-                for _, sub in ipairs(character.OfflineSubmarineData) do
-                    if sub.Name == submersible_name then
-                        sub.ReturnTime = return_time
-                        WriteToARJson(ar_data)
-                        return true, "ModifyOfflineReturnTime: Successfully updated ReturnTime for " .. submersible_name
-                    end
+    for _, character in ipairs(ar_data.OfflineData) do
+        if tonumber(character.CID) == tonumber(char_cid) then
+            for _, sub in ipairs(character.OfflineSubmarineData) do
+                if sub.Name == submersible_name then
+                    DisableAR()
+                    sub.ReturnTime = return_time
+                    WriteToARJson(ar_data)
+                    Echo("ModifyOfflineReturnTime: Successfully updated ReturnTime for " .. submersible_name)
+                    return
                 end
             end
         end
-        return false, "ModifyOfflineReturnTime: Submersible not found or CID mismatch"
     end
 
-    local success, msg = UpdateReturnTimeInOfflineData()
+    Echo("Error: ModifyOfflineReturnTime: Submersible not found or CID mismatch")
+end
 
-    if success then
-        Echo(msg)
+-- Function to edit the OfflineData in AR, if CID is not passed it will modify all characters with the same setting, otherwise it will only modify the character with that CID
+local function ModifyOfflineData(setting, value, CID)
+    CreateConfigBackup()
+    local ar_data = LoadARJson()
+    if not ar_data then
+        Echo("ModifyOfflineData: Unable to open file")
+        return
+    end
+
+    local ar_json_modified = false
+
+    for _, character in ipairs(ar_data.OfflineData) do
+        if CID then
+            if character.CID == CID then
+                if character[setting] ~= nil then
+                    if character[setting] ~= value then
+                        character[setting] = value
+                        ar_json_modified = true
+                    end
+                else
+                    LogToInfo(1, "ModifyOfflineData: Setting '" .. setting .. "' not found for character " .. tostring(character.Name))
+                end
+                break
+            end
+        else
+            if character[setting] ~= nil then
+                if character[setting] ~= value then
+                    character[setting] = value
+                    ar_json_modified = true
+                end
+            else
+                LogToInfo(1, "ModifyOfflineData: Setting '" .. setting .. "' not found for character " .. tostring(character.Name))
+            end
+        end
+    end
+
+    if ar_json_modified then
+        DisableAR()
+        WriteToARJson(ar_data)
+        if not CID then
+            LogToInfo(1, "ModifyOfflineData: Successfully updated '" .. setting .. "' to " .. tostring(value) .. " for all characters")
+        else
+            LogToInfo(1, "ModifyOfflineData: Successfully updated '" .. setting .. "' to " .. tostring(value) .. " for CID: " .. tostring(CID))
+        end
+        return true
     else
-        Echo("Error: " .. msg)
+        LogToInfo(1, "ModifyOfflineData: No changes were made.")
+        return false
+    end
+end
+
+-- Function to check if retainers are currently within active hours
+local function IsWithinRetainerActiveHours()
+    local current_time = os.date("*t")
+    local current_minutes = current_time.hour * 60 + current_time.min
+
+    local start_minutes = retainer_active_hours.start_time.hour * 60 + retainer_active_hours.start_time.minute
+    local end_minutes = retainer_active_hours.end_time.hour * 60 + retainer_active_hours.end_time.minute
+
+    if start_minutes > end_minutes then
+        return current_minutes >= start_minutes or current_minutes < end_minutes
+    end
+
+    return current_minutes >= start_minutes and current_minutes < end_minutes
+end
+
+-- Function to enable or disable retainers if it's inside/outside of active hours
+local function EnforceRetainerSchedule()
+    if not enable_retainer_schedule then
+        return
+    end
+
+    if IsWithinRetainerActiveHours() then
+        if ModifyOfflineData("Enabled", true) then
+            EnableAR()
+            ARSetMultiModeEnabled(true)
+        end
+    else
+        if ModifyOfflineData("Enabled", false) then
+            EnableAR()
+            ARSetMultiModeEnabled(true)
+        end
     end
 end
 
@@ -1801,6 +1917,7 @@ function SubsWaitingToBeProcessed()
     if DoesObjectExist("Voyage Control Panel") and GetDistanceToObject("Voyage Control Panel") < 4.5 and IsPlayerAvailable() then
         ForceARSave()
     end
+
     UpdateOverseerDataFile(true)
     local current_time = os.time()
 
@@ -1817,6 +1934,7 @@ function RetainersWaitingToBeProcessed()
     if DoesObjectExist("Summoning Bell") and GetDistanceToObject("Summoning Bell") < 4.5 and IsPlayerAvailable() then
         ForceARSave()
     end
+
     UpdateOverseerDataFile(true)
     local current_time = os.time()
 
@@ -1828,8 +1946,8 @@ function RetainersWaitingToBeProcessed()
     return false
 end
 
--- Function to enable Auto retainer
-local function EnableAR()
+-- Function to enable the auto retainer collection
+function EnableAR()
     if not HasPlugin("AutoRetainer") then
         ManageCollection(ar_collection_name, true)
         repeat
@@ -1837,7 +1955,7 @@ local function EnableAR()
         until HasPlugin("AutoRetainer") and type(ARGetInventoryFreeSlotCount()) == "number"
         yield("/ays")
     end
-end 
+end
 
 -- Function to handle any tasks that need to be done before AR does it's things, like part swapping
 local function PreARTasks()
@@ -1847,27 +1965,20 @@ local function PreARTasks()
 
     for _, submersible in ipairs(overseer_char_data.submersibles) do
         if submersible.name ~= "" then
-            --[[
-            Enable all disabled character subs
-            ]]
+            -- Enable all disabled character subs 
             if not submersible.enabled then
                 EnableSubmersible(submersible.number)
                 UpdateOverseerDataFile(true)
             end
-            --[[
-            Change all needed plans
-            ]]
+
+            -- Change all needed plans
             if submersible.plan_needs_change then
-                if submersible.optimal_plan_type == 4 then
-                    ModifyAdditionalSubmersibleData(submersible.number,"SelectedPointPlan",submersible.optimal_plan)
-                else
-                    ModifyAdditionalSubmersibleData(submersible.number,"SelectedUnlockPlan",submersible.optimal_plan)
-                end
+                local planType = (submersible.optimal_plan_type == 4) and "SelectedPointPlan" or "SelectedUnlockPlan"
+                ModifyAdditionalSubmersibleData(submersible.number, planType, submersible.optimal_plan)
                 UpdateOverseerDataFile(true)
             end
-            --[[
-            Change unlock mode and behavior
-            ]]
+
+            -- Change unlock mode and behavior
             if ((submersible.vessel_behavior ~= 0 or (submersible.vessel_behavior == 0 and (not submersible.build_needs_change or (submersible.optimal_build ~= submersible.future_optimal_build and submersible.future_optimal_build ~= "")))) or ((submersible.rank == 1 and submersible.build_needs_change))) and submersible.return_time ~= 1000000000 then
                 if (submersible.optimal_unlock_mode ~= submersible.unlock_mode) and submersible.vessel_behavior ~= 4 then
                     ModifyAdditionalSubmersibleData(submersible.number,"UnlockMode", submersible.optimal_unlock_mode)
@@ -1877,20 +1988,19 @@ local function PreARTasks()
                 end
                 UpdateOverseerDataFile(true)
             end
-            --[[
-            Check and set any subs that need a build swap to finalize
-            ]]
-            if submersible.return_time <= (os.time() + 300) and
-                ((submersible.future_optimal_build ~= "" and submersible.future_optimal_build ~= submersible.build and CheckIfWeHaveRequiredParts(submersible.future_optimal_build, submersible) and submersible.rank_after_levelup >= submersible.rank_needed_for_next_swap) or
-                (submersible.build_needs_change and submersible.vessel_behavior ~= 0 and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible))) then
-                ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", 0)
+
+            -- Check and set any subs that need a build swap to finalize
+            local returns_within_five_minutes = submersible.return_time <= (os.time() + 300)
+            local needs_swap_when_it_returns = (submersible.future_optimal_build ~= "" and submersible.future_optimal_build ~= submersible.build and CheckIfWeHaveRequiredParts(submersible.future_optimal_build, submersible) and submersible.rank_after_levelup >= submersible.rank_needed_for_next_swap)
+            local needs_swap_at_current_level = submersible.build_needs_change and submersible.vessel_behavior ~= 0 and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible)
+            if returns_within_five_minutes and (needs_swap_when_it_returns or needs_swap_at_current_level) then
+                ModifyAdditionalSubmersibleData(submersible.number, "VesselBehavior", 0)
                 UpdateOverseerDataFile(true)
             end
-            --[[
-            Bring back subs if force_return_subs_that_need_swap is enabled and they need a part swap
-            ]]
+
+            -- Bring back subs if force_return_subs_that_need_swap is enabled and they need a part swap
             if submersible.build_needs_change and force_return_subs_that_need_swap and (submersible.return_time > (os.time() + 600) or not submersible.return_time ~= 0) and not submersible.return_time ~= 1000000000 and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible) then
-                ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", 0)
+                ModifyAdditionalSubmersibleData(submersible.number, "VesselBehavior", 0)
                 ModifyOfflineReturnTime(submersible.name, 1000000000)
                 UpdateOverseerDataFile(true)
             end
@@ -1901,35 +2011,41 @@ local function PreARTasks()
 end
 
 local function IfAdditionalEntranceExistsPathToIt()
-    if DoesObjectExist("Entrance to Additional Chambers") then
-        if GetDistanceToObject("Entrance to Additional Chambers") > 3.5 then
-            Target("Entrance to Additional Chambers")
+    local entrance = "Entrance to Additional Chambers"
+    if DoesObjectExist(entrance) then
+        local distance = GetDistanceToObject(entrance)
+        if distance > 3.5 then
+            Target(entrance)
             yield("/lockon")
             yield("/automove")
-            repeat
+            while distance > 3 do
                 Sleep(0.1)
-            until GetDistanceToObject("Entrance to Additional Chambers") < 3 and not IsMoving()
+                distance = GetDistanceToObject(entrance)
+            end
+            repeat Sleep(0.1) until not IsMoving()
         end
+
         repeat
-            Target("Entrance to Additional Chambers")
+            Target(entrance)
             yield("/interact")
             Sleep(0.2)
         until IsAddonReady("SelectString")
+
         repeat
             yield("/callback SelectString true 0")
             Sleep(0.1)
         until not IsAddonVisible("SelectString")
+
         ZoneTransitions()
     end
 end
 
 local function HasEnabledRetainers()
-    if not overseer_char_data.retainers then
-        return false
-    end
-    for _, retainer in pairs(overseer_char_data.retainers) do
-        if retainer.enabled and retainer.name ~= "" then
-            return true
+    if overseer_char_data.retainers then
+        for _, retainer in pairs(overseer_char_data.retainers) do
+            if retainer.enabled and retainer.name ~= "" then
+                return true
+            end
         end
     end
     return false
@@ -1952,34 +2068,35 @@ local function PostARTasks()
         end
     end
 
-
     -- Part swapping
     local in_submersible_menu = false
     local swap_done = false
     local last_callback_time = 0
+
     for _, submersible in ipairs(overseer_char_data.submersibles) do
         if submersible.vessel_behavior == 0 and submersible.name ~= "" and not overseer_char_subs_excluded then
-            if (submersible.return_time < os.time() or force_return_subs_that_need_swap) and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible) and submersible.build_needs_change then
+            local needs_swap = submersible.return_time < os.time() or force_return_subs_that_need_swap
+            if needs_swap and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible) and submersible.build_needs_change then
                 IfAdditionalEntranceExistsPathToIt()
-                if not DoesObjectExist("Voyage Control Panel") then
-                    break
-                end
+                if not DoesObjectExist("Voyage Control Panel") then break end
+
                 if not in_submersible_menu then
+
                     -- Move to the panel panel
                     if GetDistanceToObject("Voyage Control Panel") > 4.5 then
                         Target("Voyage Control Panel")
                         yield("/lockon")
                         yield("/automove")
-                        repeat
-                            Sleep(0.1)
-                        until GetDistanceToObject("Voyage Control Panel") < 4
+                        repeat Sleep(0.1) until GetDistanceToObject("Voyage Control Panel") < 4
                     end
+
                     -- Enter the panel
                     repeat
                         Target("Voyage Control Panel")
                         yield("/interact")
                         Sleep(0.2)
                     until IsAddonReady("SelectString")
+
                     -- Open Submersible Management and wait for next menu to show up
                     repeat
                         if os.time() - last_callback_time >= 4 then
@@ -1988,39 +2105,40 @@ local function PostARTasks()
                         end
                         Sleep(0.1)
                     until string.find(GetNodeText("SelectString", 3), "Vessels deployed")
+
                     last_callback_time = 0
                     in_submersible_menu = true
                 end
+
                 -- Select vessel we're changing the parts of
                 repeat
-                    -- Perform callback every 4 seconds
                     if os.time() - last_callback_time >= 4 then
-                        yield("/callback SelectString true "..(submersible.number - 1))
+                        yield("/callback SelectString true " .. (submersible.number - 1))
                         last_callback_time = os.time()
                     end
-                    local text = tostring(GetNodeText("SelectString", 3))
-                    local clean_text = text:gsub("[\128-\255]", "")
-                    clean_text = clean_text:gsub("[\0-\31]", "")
-
-                    local clean_name = submersible.name:gsub("[-]", "%%-")
                     Sleep(0.1)
-                until string.find(clean_text, clean_name)
-                last_callback_time = 0
+                until string.find(tostring(GetNodeText("SelectString", 3)):gsub("[\128-\255\0-\31]", ""), submersible.name:gsub("[-]", "%%-"))
 
+                last_callback_time = 0
                 Sleep(0.5)
+
                 local node_text = GetNodeText("SelectString",2,1,3)
                 if string.find(node_text, "Recall") and force_return_subs_that_need_swap then
+
                     repeat
                         if IsAddonReady("SelectString") then
                             yield("/callback SelectString true 0")
                             Sleep(0.1)
                         end
                     until not IsAddonVisible("SelectString")
+
                     repeat
                         Sleep(0.1)
                     until IsAddonReady("AirShipExplorationDetail")
+
                     local retry_counter = 0
                     local SelectYesno_ready = false
+
                     repeat
                         if retry_counter == 0 then
                             yield("/callback AirShipExplorationDetail true 0")
@@ -2037,59 +2155,77 @@ local function PostARTasks()
 
                         Sleep(0.1)
                     until SelectYesno_ready
+
                     repeat
                         Sleep(0.1)
                     until IsAddonReady("SelectYesno")
+
                     repeat
                         yield("/callback SelectYesno true 0")
                         Sleep(0.1)
                     until not IsAddonVisible("SelectYesno")
+
                     repeat
                         Sleep(0.1)
                     until IsAddonReady("SelectString")
+
                 elseif string.find(node_text, "Recall") and not force_return_subs_that_need_swap then
                     yield("/callback SelectString true 4")
+
                     repeat
                         Sleep(0.1)
                     until IsAddonReady("SelectString") or IsPlayerAvailable()
+
                     break
                 end
+
                 repeat
                     yield("/callback SelectString true 2")
                 until not IsAddonVisible("SelectString")
+
                 repeat
                     Sleep(0.1)
                 until IsAddonReady("CompanyCraftSupply")
+
                 local part_retries = 0
+
                 repeat
                     ChangeSubmersibleParts(submersible.optimal_build)
                     Sleep(0.1)
                     part_retries = part_retries + 1
                 until GetSubmersibleParts() == submersible.optimal_build or part_retries >= 10
+
                 repeat
                     yield("/callback CompanyCraftSupply true 5")
                     Sleep(0.1)
                 until not IsAddonVisible("CompanyCraftSupply")
+
                 repeat
                     Sleep(0.1)
                 until IsAddonReady("SelectString")
+
                 repeat
                     yield("/callback SelectString true -1 0")
                     Sleep(0.1)
                 until not IsAddonVisible("CompanyCraftSupply")
+
                 repeat
                     Sleep(0.1)
                 until IsAddonReady("SelectString")
                 swap_done = true
+
                 ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior",submersible.optimal_plan_type)
+
                 if submersible.optimal_plan_type == 4 then
                     ModifyAdditionalSubmersibleData(submersible.number,"SelectedPointPlan",submersible.optimal_plan)
                 else
                     ModifyAdditionalSubmersibleData(submersible.number,"SelectedUnlockPlan",submersible.optimal_plan)
                 end
                 UpdateOverseerDataFile(true)
+
             elseif submersible.return_time < os.time() and not CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible) then
                 ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior",submersible.optimal_plan_type)
+
                 if submersible.optimal_plan_type == 4 then
                     ModifyAdditionalSubmersibleData(submersible.number,"SelectedPointPlan",submersible.optimal_plan)
                 else
@@ -2218,18 +2354,21 @@ end
 
 -- Function to add all listed unlock plans to the autoretainer default config
 local function AddUnlockPlansToDefaultConfig()
+    UpdateOverseerDataFile(true)
 
-    local function AppendUnlockPlan(plan)
-        local ar_data, err = LoadARJson()
-        if err then
-            return nil, err
-        end
+    local ar_data = LoadARJson()
+    if not ar_data then
+        Echo("Error: AddUnlockPlansToDefaultConfig: Unable to open file")
+        return
+    end
 
-        ar_data.SubmarineUnlockPlans = ar_data.SubmarineUnlockPlans or {}
+    ar_data.SubmarineUnlockPlans = ar_data.SubmarineUnlockPlans or {}
 
+    for _, plan in ipairs(unlock_plans) do
         for _, existing_plan in ipairs(ar_data.SubmarineUnlockPlans) do
             if string.lower(existing_plan.GUID) == string.lower(plan.GUID) then
-                return nil, "AddUnlockPlansToDefaultConfig: Unlock plan with GUID " .. plan.GUID .. " already exists."
+                LogToInfo(1, "AddUnlockPlansToDefaultConfig: Unlock plan with GUID " .. plan.GUID .. " already exists.")
+                return
             end
         end
 
@@ -2241,41 +2380,36 @@ local function AddUnlockPlansToDefaultConfig()
             EnforceDSSSinglePoint = plan.EnforceDSSSinglePoint or false,
             EnforcePlan = plan.EnforcePlan or false
         }
-
         table.insert(ar_data.SubmarineUnlockPlans, new_plan)
-
-        local success, write_err = WriteToARJson(ar_data)
-        if not success then
-            return nil, "AddUnlockPlansToDefaultConfig: Error writing updated AR data: " .. write_err
-        end
-
-        return true, "AddUnlockPlansToDefaultConfig: Successfully added unlock plan: " .. plan.Name
     end
 
-    for _, plan in ipairs(unlock_plans) do
-        local success, msg = AppendUnlockPlan(plan)
-        if success then
-            Echo(msg)
-        else
-            LogToInfo(1, "AddUnlockPlansToDefaultConfig: Error adding unlock plan: " .. msg)
-        end
+    DisableAR()
+    local success, write_err = WriteToARJson(ar_data)
+    if not success then
+        Echo("Error: AddUnlockPlansToDefaultConfig: Error writing updated AR data: " .. write_err)
+        return
     end
+
+    Echo("AddUnlockPlansToDefaultConfig: Successfully updated unlock plans")
 end
 
 -- Function to add all listed point plans to the autoretainer default config
 local function AddPointPlansToDefaultConfig()
+    UpdateOverseerDataFile(true)
 
-    local function AppendPointPlan(plan)
-        local ar_data, err = LoadARJson()
-        if err then
-            return nil, err
-        end
+    local ar_data = LoadARJson()
+    if not ar_data then
+        Echo("Error: AddPointPlansToDefaultConfig: Unable to open file")
+        return
+    end
 
-        ar_data.SubmarinePointPlans = ar_data.SubmarinePointPlans or {}
+    ar_data.SubmarinePointPlans = ar_data.SubmarinePointPlans or {}
 
+    for _, plan in ipairs(point_plans) do
         for _, existing_plan in ipairs(ar_data.SubmarinePointPlans) do
             if string.lower(existing_plan.GUID) == string.lower(plan.GUID) then
-                return nil, "AddPointPlansToDefaultConfig: Point plan with GUID " .. plan.GUID .. " already exists."
+                LogToInfo(1, "AddPointPlansToDefaultConfig: Point plan with GUID " .. plan.GUID .. " already exists.")
+                return
             end
         end
 
@@ -2284,25 +2418,17 @@ local function AddPointPlansToDefaultConfig()
             Name = plan.Name,
             Points = plan.Points
         }
-
         table.insert(ar_data.SubmarinePointPlans, new_plan)
-
-        local success, write_err = WriteToARJson(ar_data)
-        if not success then
-            return nil, "AddPointPlansToDefaultConfig: Error writing updated AR data: " .. write_err
-        end
-
-        return true, "AddPointPlansToDefaultConfig: Successfully added point plan: " .. plan.Name
     end
 
-    for _, plan in ipairs(point_plans) do
-        local success, msg = AppendPointPlan(plan)
-        if success then
-            Echo(msg)
-        else
-            LogToInfo(1, "AddPointPlansToDefaultConfig: Error adding point plan: " .. msg)
-        end
+    DisableAR()
+    local success, write_err = WriteToARJson(ar_data)
+    if not success then
+        Echo("Error: AddPointPlansToDefaultConfig: Error writing updated AR data: " .. write_err)
+        return
     end
+
+    Echo("AddPointPlansToDefaultConfig: Successfully updated point plans")
 end
 
 -- Goes through all characters and checks if any of the settings are wrong, then fixes them if they are
@@ -2312,26 +2438,19 @@ local function CheckAndCorrectAllCharacters()
     CreateConfigBackup()
     local overseer_data = LoadOverseerData()
     for character_name, character_data in pairs(overseer_data.characters) do
+
         LogToInfo(1, "CheckAndCorrectAllCharacters: Checking if " .. character_name .. " needs correcting")
-        if InExclusionList(character_name) then
-            overseer_char_subs_excluded = true
-        end
+        overseer_char_subs_excluded = InExclusionList(character_name)
         overseer_char_data = character_data
         overseer_current_character = character_name
+
         if not overseer_char_subs_excluded then
             for _, submersible in ipairs(character_data.submersibles) do
                 if submersible.name ~= "" then
-                    if not submersible.enabled then
+
+                    if not submersible.enabled or (submersible.enabled and submersible.rank == 1 and submersible.return_time == 0) then
                         LogToInfo(1, "CheckAndCorrectAllCharacters: Found a disabled submersible, enabling and correcting submersible "..submersible.number)
                         EnableSubmersible(submersible.number)
-                        ModifyAdditionalSubmersibleData(submersible.number, "VesselBehavior", submersible.optimal_plan_type)
-                        ModifyAdditionalSubmersibleData(submersible.number, "SelectedUnlockPlan", submersible.optimal_plan)
-                        ModifyAdditionalSubmersibleData(submersible.number, "UnlockMode", submersible.optimal_unlock_mode)
-                        ModifyOfflineReturnTime(submersible.name, 1000000000)
-                    end
-
-                    if submersible.enabled and submersible.rank == 1 and submersible.return_time == 0 then
-                        LogToInfo(1, "CheckAndCorrectAllCharacters: Found a disabled submersible, enabling and correcting submersible "..submersible.number)
                         ModifyAdditionalSubmersibleData(submersible.number, "VesselBehavior", submersible.optimal_plan_type)
                         ModifyAdditionalSubmersibleData(submersible.number, "SelectedUnlockPlan", submersible.optimal_plan)
                         ModifyAdditionalSubmersibleData(submersible.number, "UnlockMode", submersible.optimal_unlock_mode)
@@ -2352,13 +2471,18 @@ local function CheckAndCorrectAllCharacters()
                     end
 
                     -- Force any subs that need a part swap to return and then part swap them if force_return_subs_that_need_swap is enabled
-                    if submersible.build_needs_change and CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible, overseer_current_character) and force_return_subs_that_need_swap then
-                        LogToInfo(1, "CheckAndCorrectAllCharacters: Submersible needs part swap, and force return subs is enabled, using fake ready on the sub")
-                        ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", 0)
-                        ModifyOfflineReturnTime(submersible.name, 1000000000)
+                    if submersible.build_needs_change and force_return_subs_that_need_swap then
+                        if CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible, overseer_current_character) then
+                            LogToInfo(1, "CheckAndCorrectAllCharacters: Submersible needs part swap, and force return subs is enabled, using fake ready on the sub")
+                            ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior", 0)
+                            ModifyOfflineReturnTime(submersible.name, 1000000000)
+                        else
+                            LogToInfo(1, "CheckAndCorrectAllCharacters: Submersible needs part swap and force return enabled, but required parts are missing")
+                        end
                     elseif force_return_subs_that_need_swap and not CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible, overseer_current_character) then
                         LogToInfo(1, "CheckAndCorrectAllCharacters: Force return is enabled but we do not have the correct parts")
                     end
+
                     -- if submersible is the correct build and not sent out, assume it's somehow wrongly set and fix it
                     if not submersible.build_needs_change and submersible.return_time == 0 then
                         ModifyAdditionalSubmersibleData(submersible.number, "VesselBehavior", submersible.optimal_plan_type)
@@ -2367,10 +2491,12 @@ local function CheckAndCorrectAllCharacters()
                 end
             end
         end
+
         overseer_char_data = {}
         overseer_current_character = ""
         overseer_char_subs_excluded = false
     end
+
     UpdateOverseerDataFile()
     EnableAR()
 end
@@ -2436,8 +2562,10 @@ function CheckIfWeHaveRequiredParts(abbreviation, submersible, character)
         LogToInfo(1, "CheckIfWeHaveRequiredParts: Exactly 4 parts must be identified.")
         return false
     end
+
     local character_parts_inventory = {}
     local found_character = false
+
     for character_name, parts in pairs(overseer_inventory_data) do
         if character_name == character then
             character_parts_inventory = parts
@@ -2445,6 +2573,7 @@ function CheckIfWeHaveRequiredParts(abbreviation, submersible, character)
             break
         end
     end
+
     if not found_character then
         LogToInfo(1, "CheckIfWeHaveRequiredParts: Character not found in inventory data: ".. character)
         return false
@@ -2469,18 +2598,28 @@ VoyagePanelStuckTimer = 0
 
 -- Function to handle unstucking from the voyage panel
 local function VoyagePanelUnstucker()
-    while IsAddonReady("SelectString") do
+    while IsAddonReady("SelectString") or IsAddonReady("AirShipExplorationResult") do
         Sleep(0.1)
         VoyagePanelStuckTimer = VoyagePanelStuckTimer + 0.1
 
         -- If stuck on the voyage panel for 2+ seconds
         if VoyagePanelStuckTimer >= 2 then
+            -- Recall unstuck
             local node_text = GetNodeText("SelectString",2,1,3)
             if string.find(node_text, "Recall") then
-                LogToInfo(1,"VoyagePanelUnstucker: Voyage panel unstucker triggered")
+                LogToInfo(1,"VoyagePanelUnstucker: Voyage panel unstucker triggered on recall menu")
                 if IsAddonReady("SelectString") then
                     yield("/callback SelectString true -1")
                 end
+            end
+            -- Voyage log unstuck
+            if IsAddonReady("AirShipExplorationResult") and not ARIsBusy() then
+                LogToInfo(1,"VoyagePanelUnstucker: Voyage panel unstucker triggered on AirShipExplorationResult menu")
+                yield("/callback AirShipExplorationResult true -1")
+                repeat
+                    Sleep(0.1)
+                until IsAddonReady("SelectString")
+                yield("/callback SelectString true -1")
             end
             VoyagePanelStuckTimer = 0
         end
@@ -2490,24 +2629,33 @@ local function VoyagePanelUnstucker()
     Sleep(0.1)
 end
 
+local title_screen_unstucker_timer = 0  -- Timer for stuck screen detection
+
 local function TitleScreenUnstucker()
-    while not IsAddonVisible("_TitleLogo") or IsAddonReady("TitleDCWorldMapBg") do
-        -- Check if we're stuck on the dc select screen
-        if IsAddonReady("TitleDCWorldMapBg") then
-            yield("/callback TitleDCWorldMap true 17 0")
+    if not IsAddonVisible("_TitleLogo") or IsAddonReady("TitleDCWorldMapBg") and not ARIsBusy() then
+        title_screen_unstucker_timer = title_screen_unstucker_timer + 0.1
+        if title_screen_unstucker_timer > 2 then
+            if IsAddonReady("TitleDCWorldMapBg") then
+                yield("/callback TitleDCWorldMap true 17 0")
+            end
+
+            if IsAddonReady("_CharaSelectTitle") and not IsAddonVisible("SelectOk") and not IsAddonVisible("SelectYesno") and not ARIsBusy() then
+                yield("/callback _CharaSelectReturn true 19")
+            end
+
+            if not IsAddonVisible("_TitleLogo") and not IsAddonVisible("_CharaSelectTitle") then
+                yield("/send ESCAPE")
+            end
+
+            title_screen_unstucker_timer = 0
         end
-        -- Check if we're stuck on the character select screen
-        if IsAddonReady("_CharaSelectTitle") then
-            yield("/callback _CharaSelectReturn true 19")
-        end
-        if not IsAddonVisible("_TitleLogo") and not IsAddonVisible("_CharaSelectTitle") then
-            -- yike
-            yield("/send ESCAPE")
-        end
-        Sleep(1.0)
+    else
+        title_screen_unstucker_timer = 0
     end
-    Sleep(0.1)
+
+    Sleep(0.2)
 end
+
 
 local function Main()
     ForceARSave()
@@ -2518,110 +2666,119 @@ local function Main()
     AddPointPlansToDefaultConfig()
     EnableAR()
     UpdateAndLoadInventoryFile()
+    EnforceRetainerSchedule()
+
     if correct_between_characters or correct_once_at_start_of_script then
         correct_once_at_start_of_script = false
         CheckAndCorrectAllCharacters()
     end
+
     ARSetMultiModeEnabled(true)
     Echo("Character data and global plans processing complete")
     LogToInfo(1, "All characters processed, starting main loop")
+
     local ar_finished = false
     local already_in_workshop = false
+    local retainer_schedule_counter = 0
+    local retainer_schedule_interval = 10 -- only check if the schedule should be updated every 10 loops
+
     while true do
         ar_finished = false
         already_in_workshop = false
+
         if IsPlayerAvailable() then
-            if InExclusionList(GetCharacterName(true)) then
+            retainer_schedule_counter = 0
+            local current_character = GetCharacterName(true)
+            overseer_current_character = current_character
+
+            if InExclusionList(current_character) then
                 overseer_char_subs_excluded = true
             end
-            overseer_current_character = GetCharacterName(true)
-            LogToInfo(1, "overseer_current_character: ".. overseer_current_character)
-            LogToInfo(1, "Logged into: ".. GetCharacterName(true))
+
+            LogToInfo(1, "Logged into: " .. current_character)
             UpdateAndLoadInventoryFile(true)
             yield("/at e")
-            if DoesObjectExist("Voyage Control Panel") then
-                already_in_workshop = true
-            end
+
+            already_in_workshop = DoesObjectExist("Voyage Control Panel")
+
             if not DoesObjectExist("Entrance to Additional Chambers") and not already_in_workshop then
                 ARSetMultiModeEnabled(true)
             end
-            repeat
-                Sleep(0.1)
-            until DoesObjectExist("Entrance to Additional Chambers") or already_in_workshop
+
+            repeat Sleep(0.1) until DoesObjectExist("Entrance to Additional Chambers") or already_in_workshop
+
             ARSetMultiModeEnabled(false)
             ARAbortAllTasks()
-            repeat
-                Sleep(0.1)
-            until IsPlayerAvailable()
+            repeat Sleep(0.1) until IsPlayerAvailable()
+
             if not overseer_char_subs_excluded then
                 PreARTasks()
             end
+
             if not DoesObjectExist("Summoning Bell") and not already_in_workshop then
                 IfAdditionalEntranceExistsPathToIt()
             end
+
             while not ar_finished do
                 if GetCharacterCondition(45) or GetCharacterCondition(51) then
-                    repeat
-                        Sleep(0.1)
-                    until IsPlayerAvailable()
+                    repeat Sleep(0.1) until IsPlayerAvailable()
                 end
+
                 ARSetMultiModeEnabled(true)
-                if (GetTargetName() == "Voyage Control Panel") and not overseer_char_subs_excluded then
+                local target = GetTargetName()
+
+                -- Submersible panel
+                if target == "Voyage Control Panel" and not overseer_char_subs_excluded then
                     local submersible_waiting_override = 0
-                    repeat
-                        Sleep(0.1)
-                    until not IsPlayerAvailable()
-                    local timer = 0
-                    while timer < 2 and not IsPlayerAvailable() do
-                        Sleep(0.1)
-                        timer = timer + 0.1
-                    end
-                    LogToInfo(1,"Entered voyage panel")
+                    repeat Sleep(0.1) until not IsPlayerAvailable()
+
+                    LogToInfo(1, "Entered voyage panel")
                     ARSetMultiModeEnabled(false)
-                    repeat
-                        VoyagePanelUnstucker()
-                    until IsPlayerAvailable()
+                    repeat VoyagePanelUnstucker() until IsPlayerAvailable()
+
                     repeat
                         Sleep(0.5)
                         submersible_waiting_override = submersible_waiting_override + 1
                     until not SubsWaitingToBeProcessed() or submersible_waiting_override >= 10
-                    LogToInfo(1,"Exited panel, running PostARTasks")
+
+                    LogToInfo(1, "Exited panel, running PostARTasks")
                     PostARTasks()
                 end
-                ARSetMultiModeEnabled(true)
-                if (GetTargetName() == "Summoning Bell") then
+
+                -- Retainer bell
+                if target == "Summoning Bell" then
                     overseer_char_processing_retainers = true
                     local retainer_waiting_override = 0
-                    repeat
-                        Sleep(0.1)
-                    until not IsPlayerAvailable()
+                    repeat Sleep(0.1) until not IsPlayerAvailable()
+
                     LogToInfo(1, "In retainer menus")
                     Sleep(0.5)
                     ARSetMultiModeEnabled(false)
-                    repeat
-                        Sleep(0.1)
-                    until IsPlayerAvailable()
+                    repeat Sleep(0.1) until IsPlayerAvailable()
+
                     repeat
                         Sleep(0.5)
                         retainer_waiting_override = retainer_waiting_override + 1
                     until not RetainersWaitingToBeProcessed() or retainer_waiting_override >= 10
-                    LogToInfo(1,"Done with retainers, running PostARTasks")
+
+                    LogToInfo(1, "Done with retainers, running PostARTasks")
                     PostARTasks()
                     overseer_char_processing_retainers = false
                 end
+
                 if GetCharacterCondition(53) then
                     if correct_between_characters then
                         ARAbortAllTasks()
                     end
+
                     ARSetMultiModeEnabled(false)
-                    LogToInfo(1,""..overseer_current_character.." finished and logged out")
+                    LogToInfo(1, current_character .. " finished and logged out")
                     ar_finished = true
                 else
                     Sleep(0.499)
                 end
             end
 
-            -- reset for next character
             already_in_workshop = false
             overseer_char_data = {}
             overseer_current_character = ""
@@ -2630,37 +2787,39 @@ local function Main()
             overseer_char_processing_subs = false
             overseer_char_processing_retainers = false
             overseer_char_subs_excluded = false
+
             if correct_between_characters then
                 CheckAndCorrectAllCharacters()
-                TitleScreenUnstucker()
+                repeat TitleScreenUnstucker() until IsAddonReady("_TitleLogo")
             end
-            repeat
-                Sleep(0.1)
-            until not IsPlayerAvailable()
+
+            repeat Sleep(0.01) until not IsPlayerAvailable()
             if ShutdownNeeded() then
-                -- Don't enable AR so the shutdown code further down shuts down the game properly
+                AutoShutdown()
             else
-                repeat
-                    TitleScreenUnstucker()
-                until IsAddonReady("_TitleLogo")
+                EnforceRetainerSchedule()
+                repeat TitleScreenUnstucker() until IsAddonReady("_TitleLogo")
                 ARSetMultiModeEnabled(true)
             end
         end
+
         if ShutdownNeeded() then
             AutoShutdown()
         end
-        Sleep(1.01)
+
+        if enable_retainer_schedule then
+            if retainer_schedule_counter >= retainer_schedule_interval then
+                EnforceRetainerSchedule()
+                ForceARSave()
+                retainer_schedule_counter = 0
+            else
+                retainer_schedule_counter = retainer_schedule_counter + 1
+            end
+        end
+
+        TitleScreenUnstucker()
+        Sleep(0.8)
     end
 end
-
--- local function Main()
---     overseer_current_character = "Egg White@Spriggan"
---     --local overseer_current_character = "Nomf Melon@Sagittarius"
---     UpdateAndLoadInventoryFile(true)
---     overseer_char_data = LoadOverseerData(overseer_current_character)
---     for _, submersible in ipairs(overseer_char_data.submersibles) do
---         CheckIfWeHaveRequiredParts("SSUS", submersible, overseer_current_character)
---     end
--- end
 
 Main()
