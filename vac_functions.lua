@@ -5,9 +5,10 @@ It contains the functions required to make the scripts work
 
 ####################
 ##    Version     ##
-##     1.0.5      ##
+##     1.0.6      ##
 ####################
 
+-> 1.0.6: Fixed nil bug with GcProvisioningDeliver
 -> 1.0.5: Made minor changes to BuyCeruleum
 -> 1.0.4: Fixed inconsistencies in BuyCeruleum
 -> 1.0.3: vac_lists should now load from the same directory as vac_functions no matter where you put it
@@ -1617,9 +1618,9 @@ function GcProvisioningDeliver()
         repeat
             Sleep(0.1)
         until IsAddonReady("GrandCompanySupplyList")
-        local item_name = GetNodeText("GrandCompanySupplyList", 6, i, 10)
-        local item_qty = tonumber(GetNodeText("GrandCompanySupplyList", 6, i, 6))
-        local item_requested_amount = tonumber(GetNodeText("GrandCompanySupplyList", 6, i, 9))
+        local item_name = GetNodeText("GrandCompanySupplyList", 6, i, 10) or ""
+        local item_qty = tonumber(GetNodeText("GrandCompanySupplyList", 6, i, 6)) or 0
+        local item_requested_amount = tonumber(GetNodeText("GrandCompanySupplyList", 6, i, 9)) or 0
 
         if ContainsLetters(item_name) and item_qty >= item_requested_amount then
             -- continue
