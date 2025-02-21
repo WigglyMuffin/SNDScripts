@@ -9,17 +9,23 @@
            |_|                                                                              
 ####################
 ##    Version     ##
-##     1.0.3      ##
+##     1.1.0      ##
 ####################
 
 -> 1.0.0: Initial release
 -> 1.0.1: GC Edition of Kupo Box tailored for GC Supply Script series
 -> 1.0.2: Movement distance fix for trading distance
 -> 1.0.3: Added checks to do_rankups and expert_delivery
+-> 1.1.0: 
+   - Option to do turnins only without trade added
+   - Refactored how skip characters are processed
+   - Added toggle to enable AR multi mode at end of script
 
 ####################################################
 ##                  Description                   ##
 ####################################################
+
+https://github.com/WigglyMuffin/SNDScripts
 
 This is the GC Edition of Kupo Box script and it automates a list of characters picking up items from a specified character
 It is to be used with the GC Supply Scripts series only, it is not compatible with any other script
@@ -79,9 +85,17 @@ local do_rankups = true
 -- Requires Deliveroo plugin to be installed and will run expert deliveries after GC turnins
 -- Deliveroo needs to be setup properly beforehand
 -- Will check if your character has the rank to do expert deliveries, so even if your character does not have the rank leaving it set to true is safe
+-- Expert Delivery rank check will be skipped if CBT "Enforce Expert Delivery" option is enabled
 local expert_delivery = false
 
--- Options: true = Uses the external character list in the same folder, default name being char_list.lua, false = Uses the list you put in this file
+-- Options: true = Will do GC supply turnins only and not trade, false = Will trade for items and then do GC supply turnins
+-- Useful if you have a surplus of items on your characters and do not wish to trade for items each day
+local turnins_only = false
+
+-- Options: true = Will enable AR multi mode at end of script, false = Do nothing
+local do_ays_multi = false
+
+-- Options: true = Uses the external character list (char_list.lua), false = Uses the list you put in this file (character_list)
 local use_external_character_list = true
 
 -- This is where you put your character list if you choose to not use the external one
@@ -184,20 +198,15 @@ local function DOL()
 end
 
 -- Kupo
-local function ProcessAltCharacters(character_list)
+local function ProcessAltCharacters(character_list, turnins_only)
     for i = 1, #character_list do
         -- Update alt character name
         local alt_char_name = character_list[i]
 
-        -- this is just to store the boolean for if we're skipping a char or not
-        local skip = false
-
         -- check if the character is supposed to be skipped
         if i <= skip_chars then
             LogInfo("[KupoBox] Skipping char " .. i .. ": " .. alt_char_name )
-            skip = true
-        end
-        if not skip then
+        else
             -- Switch characters if required, looks up current character and compares
             if GetCharacterName(true) ~= alt_char_name then
                 -- checks if return_location options matches 1 which returns player to Limsa
@@ -211,128 +220,129 @@ local function ProcessAltCharacters(character_list)
                 Sleep(7.5)
                 LoginCheck()
             end
+            if not turnins_only then
+                Echo("Picking up items from " .. trading_with .. " on server " .. destination_server)
+                LogInfo("[KupoBox] Picking up items from " .. trading_with .. " on server " .. destination_server)
 
-            Echo("Picking up items from " .. trading_with .. " on server " .. destination_server)
-            LogInfo("[KupoBox] Picking up items from " .. trading_with .. " on server " .. destination_server)
+                Echo("Processing " .. i .. "/" .. #character_list .. ", current character: " .. alt_char_name)
+                LogInfo("[KupoBox] Processing " .. i .. "/" .. #character_list .. ", current character: " .. alt_char_name)
 
-            Echo("Processing " .. i .. "/" .. #character_list .. ", current character: " .. alt_char_name)
-            LogInfo("[KupoBox] Processing " .. i .. "/" .. #character_list .. ", current character: " .. alt_char_name)
-
-            -- Check if alt character on correct server
-            if GetCurrentWorld() == World_ID_List[destination_server].ID then
-                -- If player is on destination_server then do nothing
-                LogInfo("[KupoBox] Already on the right server to trade: " .. destination_server)
-            else
-                -- If player is not on destination_server then go there
-                LogInfo("[KupoBox] On the wrong server, transferring to: " .. destination_server)
-                Teleporter(destination_server, "li")
-            end
-
-            repeat
-                Sleep(0.1)
-            until IsPlayerAvailable() and not LifestreamIsBusy()
-
-            -- Alt character destination type, how alt char is travelling to the main
-            -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
-            if destination_type == 0 then
-                local dest_aetheryte_id = FindZoneIDByAetheryte(destination_aetheryte)
-
-                -- If player is not at the destination then tp there
-                if GetZoneID() ~= dest_aetheryte_id then
-                    Echo("Teleporting to " .. destination_aetheryte .. " to find " .. trading_with)
-                    LogInfo("[KupoBox] Teleporting to " .. destination_aetheryte .. " to find " .. trading_with)
-                    Teleporter(destination_aetheryte, "tp")
+                -- Check if alt character on correct server
+                if GetCurrentWorld() == World_ID_List[destination_server].ID then
+                    -- If player is on destination_server then do nothing
+                    LogInfo("[KupoBox] Already on the right server to trade: " .. destination_server)
                 else
-                    Echo("Already in the right zone to meet " .. trading_with)
+                    -- If player is not on destination_server then go there
+                    LogInfo("[KupoBox] On the wrong server, transferring to: " .. destination_server)
+                    Teleporter(destination_server, "li")
                 end
-            end
-
-            -- Requires main added to friend list for access to estate list teleports
-            -- Keeping it for future stuff
-            if destination_type > 0 then
-                Echo("Teleporting to estate to find " .. trading_with)
-                LogInfo("[KupoBox] Teleporting to estate to find " .. trading_with)
-                EstateTeleport(trading_with, destination_house)
-            end
-
-            -- I really don't like the repeat of destination_type checking here, should probably be refactored into stuff above
-            -- Handle different destination types
-            -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
-            if destination_type == 0 or destination_type == 1 then
-                -- Waits until main char is present
-                LogInfo("[KupoBox] Waiting for " .. trading_with)
-                WaitUntilObjectExists(trading_with)
-                LogInfo("[KupoBox] Found " .. trading_with)
-
-                -- Paths to main char only if you have do_movement set to true
-                if do_movement then
-                    -- Path to main char
-                    LogInfo("[KupoBox] do_movement is set to true, moving towards " .. trading_with)
-                    PathToObject(trading_with, 3.0)
-                else
-                    LogInfo("[KupoBox] do_movement is set to false, not moving")
-                end
-
-                -- Invite main char to party, needs a target
-                if party_invite then
-                    PartyInvite(trading_with)
-                    LogInfo("[KupoBox] Inviting " .. trading_with .. " to party")
-                end
-
-            elseif destination_type == 2 then
-                -- If destination_type is 2, first go to the estate entrance, then to the main character
-                PathToObject("Entrance")
-                Target("Entrance")
-                Interact()
 
                 repeat
                     Sleep(0.1)
-                until IsAddonReady("SelectYesno")
-                
-                yield("/callback SelectYesno true 0")
-                
-                repeat
+                until IsPlayerAvailable() and not LifestreamIsBusy()
+
+                -- Alt character destination type, how alt char is travelling to the main
+                -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
+                if destination_type == 0 then
+                    local dest_aetheryte_id = FindZoneIDByAetheryte(destination_aetheryte)
+
+                    -- If player is not at the destination then tp there
+                    if GetZoneID() ~= dest_aetheryte_id then
+                        Echo("Teleporting to " .. destination_aetheryte .. " to find " .. trading_with)
+                        LogInfo("[KupoBox] Teleporting to " .. destination_aetheryte .. " to find " .. trading_with)
+                        Teleporter(destination_aetheryte, "tp")
+                    else
+                        Echo("Already in the right zone to meet " .. trading_with)
+                    end
+                end
+
+                -- Requires main added to friend list for access to estate list teleports
+                -- Keeping it for future stuff
+                if destination_type > 0 then
+                    Echo("Teleporting to estate to find " .. trading_with)
+                    LogInfo("[KupoBox] Teleporting to estate to find " .. trading_with)
+                    EstateTeleport(trading_with, destination_house)
+                end
+
+                -- I really don't like the repeat of destination_type checking here, should probably be refactored into stuff above
+                -- Handle different destination types
+                -- Options: 0 = Aetheryte name, 1 = Estate and meet outside, 2 = Estate and meet inside
+                if destination_type == 0 or destination_type == 1 then
+                    -- Waits until main char is present
+                    LogInfo("[KupoBox] Waiting for " .. trading_with)
+                    WaitUntilObjectExists(trading_with)
+                    LogInfo("[KupoBox] Found " .. trading_with)
+
+                    -- Paths to main char only if you have do_movement set to true
+                    if do_movement then
+                        -- Path to main char
+                        LogInfo("[KupoBox] do_movement is set to true, moving towards " .. trading_with)
+                        PathToObject(trading_with, 3.0)
+                    else
+                        LogInfo("[KupoBox] do_movement is set to false, not moving")
+                    end
+
+                    -- Invite main char to party, needs a target
+                    if party_invite then
+                        PartyInvite(trading_with)
+                        LogInfo("[KupoBox] Inviting " .. trading_with .. " to party")
+                    end
+
+                elseif destination_type == 2 then
+                    -- If destination_type is 2, first go to the estate entrance, then to the main character
+                    PathToObject("Entrance")
+                    Target("Entrance")
+                    Interact()
+
+                    repeat
+                        Sleep(0.1)
+                    until IsAddonReady("SelectYesno")
+                    
+                    yield("/callback SelectYesno true 0")
+                    
+                    repeat
+                        Sleep(0.1)
+                    until not IsAddonVisible("SelectYesno")
+
+                    -- Waits until main char is present
+                    LogInfo("[KupoBox] Waiting for " .. trading_with)
+                    WaitUntilObjectExists(trading_with)
+                    LogInfo("[KupoBox] Found " .. trading_with)
+
+                    -- Paths to main char only if you have do_movement set to true
+                    if do_movement then
+                        -- Path to main char
+                        LogInfo("[KupoBox] do_movement is set to true, moving towards " .. trading_with)
+                        PathToObject(trading_with, 3.0)
+                    else
+                        LogInfo("[KupoBox] do_movement is set to false, not moving")
+                    end
+
+                    -- Invite main char to party, needs a target
+                    if party_invite then
+                        PartyInvite(trading_with)
+                        LogInfo("[KupoBox] Inviting " .. trading_with .. " to party")
+                    end
+                end
+
+                -- Wait for the gil transfer to complete
+                WaitForGilIncrease(1)
+
+                -- Notify when all characters are finished
+                if i == #character_list then
+                    Echo("Finished all " .. #character_list .. " characters")
+                    LogInfo("Finished all " .. #character_list .. " characters")
+                end
+
+                -- Disband party once gil trigger has happened
+                if party_invite and IsInParty() then
+                    LogInfo("[KupoBox] Disbanding party")
+                    PartyDisband()
                     Sleep(0.1)
-                until not IsAddonVisible("SelectYesno")
-
-                -- Waits until main char is present
-                LogInfo("[KupoBox] Waiting for " .. trading_with)
-                WaitUntilObjectExists(trading_with)
-                LogInfo("[KupoBox] Found " .. trading_with)
-
-                -- Paths to main char only if you have do_movement set to true
-                if do_movement then
-                    -- Path to main char
-                    LogInfo("[KupoBox] do_movement is set to true, moving towards " .. trading_with)
-                    PathToObject(trading_with, 3.0)
-                else
-                    LogInfo("[KupoBox] do_movement is set to false, not moving")
-                end
-
-                -- Invite main char to party, needs a target
-                if party_invite then
-                    PartyInvite(trading_with)
-                    LogInfo("[KupoBox] Inviting " .. trading_with .. " to party")
                 end
             end
 
-            -- Wait for the gil transfer to complete
-            WaitForGilIncrease(1)
-
-            -- Notify when all characters are finished
-            if i == #character_list then
-                Echo("Finished all " .. #character_list .. " characters")
-                LogInfo("Finished all " .. #character_list .. " characters")
-            end
-
-            -- Disband party once gil trigger has happened
-            if party_invite and IsInParty() then
-                LogInfo("[KupoBox] Disbanding party")
-                PartyDisband()
-                Sleep(0.1)
-            end
-
-            -- Deliver GC Items
+            -- Deliver GC supply items
             DOL()
 
             -- Deliveroo expert delivery
@@ -375,12 +385,15 @@ local function ProcessAltCharacters(character_list)
                 end
             end
         end
-        skip = false
     end
 end
 
-ProcessAltCharacters(character_list)
+ProcessAltCharacters(character_list, turnins_only)
 LogInfo("[KupoBox] All characters complete, script finished")
+
+if do_ays_multi then
+    yield("/ays m")
+end
 
 if HasPlugin("YesAlready") then
     RestoreYesAlready()
