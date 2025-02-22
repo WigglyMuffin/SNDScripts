@@ -1,25 +1,44 @@
---[[ 
-This file needs to be dropped inside %appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\
-So it should look like this %appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\vac_functions.lua
-It contains the functions required to make the scripts work
+--[[
+                       __                  _   _                 
+ __   ____ _  ___     / _|_   _ _ __   ___| |_(_) ___  _ __  ___ 
+ \ \ / / _` |/ __|   | |_| | | | '_ \ / __| __| |/ _ \| '_ \/ __|
+  \ V / (_| | (__    |  _| |_| | | | | (__| |_| | (_) | | | \__ \
+   \_/ \__,_|\___|___|_|  \__,_|_| |_|\___|\__|_|\___/|_| |_|___/
+                |_____|                                          
 
 ####################
 ##    Version     ##
-##     1.0.7      ##
+##     1.1.0      ##
 ####################
 
--> 1.0.7: Added TeleportType() to return correct teleport type (tp or li) for teleports
--> 1.0.6: Fixed nil bug with GcProvisioningDeliver
--> 1.0.5: Made minor changes to BuyCeruleum
--> 1.0.4: Fixed inconsistencies in BuyCeruleum
--> 1.0.3: vac_lists should now load from the same directory as vac_functions no matter where you put it
--> 1.0.2: Minor adjustments to adress inconsistencies
--> 1.0.1: Updated UseFCAction()
 -> 1.0.0: Initial release
+-> 1.0.1: Updated UseFCAction()
+-> 1.0.2: Minor adjustments to adress inconsistencies
+-> 1.0.3: vac_lists should now load from the same directory as vac_functions no matter where you put it
+-> 1.0.4: Fixed inconsistencies in BuyCeruleum()
+-> 1.0.5: Made minor changes to BuyCeruleum()
+-> 1.0.6: Fixed nil bug with GcProvisioningDeliver()
+-> 1.0.7: Added TeleportType() to return correct teleport type (tp or li) for teleports
+-> 1.1.0: 
+   - Restructured the layout
+   - Added missing Lifestream options to TeleportType()
+   - Added SND, Simple Tweaks and CBT settings to be toggled accordingly when scripts are run
+   - Added CheckPluginsVersion() to be able to stop plugins if outdated
+   - Added CheckPlugins() which combines both CheckPluginsEnabled() and CheckPluginsVersion()
 
-#################
-## TO DO STUFF ##
-#################
+####################################################
+##                  Description                   ##
+####################################################
+
+https://github.com/WigglyMuffin/SNDScripts
+
+A functions file which contain various functions to assist with other scripts
+
+vac_lists is used with this file to enhance functionality
+
+####################################################
+##                    Planned                     ##
+####################################################
 
 EatFood() function
 UseItem() function
@@ -28,24 +47,26 @@ Add flight to Movement() function
 Refactor Teleporter() function
 Add fate related functions
 
-#####################################
-#####################################
-#####################################
-###################################]]
+--[[################################################
+##                 Initialisation                 ##
+################################################--]]
 
-SetSNDProperty("StopMacroIfAddonNotFound", "False")
-
+-- Check whether vac_functions has loaded
 function LoadFileCheck()
     LogInfo("[VAC] Successfully loaded the vac functions file")
 end
+
 local function GetScriptDirectory()
     local info = debug.getinfo(2, "S")
     local path = info.source:sub(2)
     return path:match("(.*[\\/])") or "./"
 end
+
 local vac_script_directory = GetScriptDirectory()
--- this part just loads all the lists into memory to use with various functions
+
+-- Load lists from vac_lists to be used with other functions
 local vac_lists = dofile(vac_script_directory .. "vac_lists.lua")
+
 DC_With_Worlds = vac_lists.DC_With_Worlds
 Item_List = vac_lists.Item_List
 Job_List = vac_lists.Job_List
@@ -60,9 +81,39 @@ Submersible_Part_List = vac_lists.Submersible_Part_List
 Submersible_Rank_List = vac_lists.Submersible_Rank_List
 Submersible_Zone_List = vac_lists.Submersible_Zone_List
 
+-- Set SND settings
+-- Required for certain functions and scripts to work properly
+SetSNDProperty("UseSNDTargeting", "true")
+SetSNDProperty("StopMacroIfActionTimeout", "false")
+SetSNDProperty("StopMacroIfItemNotFound", "false")
+SetSNDProperty("StopMacroIfCantUseItem", "false")
+SetSNDProperty("StopMacroIfTargetNotFound", "false")
+SetSNDProperty("StopMacroIfAddonNotFound", "false")
+SetSNDProperty("StopMacroIfAddonNotVisible", "false")
+
+-- Set Simple Tweaks settings
+-- Required for certain functions and scripts to work properly
+if HasPlugin("SimpleTweaksPlugin") then
+    yield("/tweaks enable FixTarget true")
+    yield("/tweaks enable DisableTitleScreenMovie true")
+    yield("/tweaks enable EquipJobCommand true")
+    yield("/tweaks enable RecommendEquipCommand true")
+end
+
+-- Set CBT settings
+-- Required for certain functions and scripts to work properly
+if HasPlugin("Automaton") then
+    --yield("/cbt disable MaxGCRank") -- Temporarily disabled until other changes are made
+    yield("/cbt enable AutoSnipeQuests")
+end
+
+--[[################################################
+##                   Functions                    ##
+################################################--]]
+
 -- Usage: EnsureFolderExists("\\path\\to\\your\\folder")
 --
--- Call this to check if a folder exists at the path you provide, if it doesn't it'll create it
+-- Checks whether specified folder exists, otherwise creates one
 function EnsureFolderExists(folder_path)
     -- Try to create a temporary file in the folder
     local temp_file_path = folder_path .. "\\.temp_file"
@@ -78,7 +129,6 @@ function EnsureFolderExists(folder_path)
         os.remove(temp_file_path)
     end
 end
-
 
 -- InteractAndWait()
 --
@@ -3060,9 +3110,15 @@ function ReturnHomeWorld()
 end
 
 -- Usage: CheckPluginsEnabled("AutoRetainer") or CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream")
--- Can take an infinite amount of plugin strings
+-- local required_plugins = { "AutoRetainer", "TeleporterPlugin", "Lifestream" }
+-- if expert_delivery then
+    -- table.insert(required_plugins, "Deliveroo")
+-- end
+-- if not CheckPluginsEnabled(unpack(required_plugins)) then
+    -- return
+-- end
 -- Will check if the player has the specified plugins installed/enabled and echoes enabled + disabled plugins
--- If statement can be used
+-- Use unpack() as individual arguments required
 function CheckPluginsEnabled(...)
     local enabled_plugins = {}
     local missing_plugins = {}
@@ -3100,6 +3156,198 @@ function CheckPluginsEnabled(...)
         LogInfo("[VAC] All plugins are enabled.")
         Echo("All plugins are enabled.")
         return true -- Returns true be used with if statements to start script
+    end
+end
+
+-- Usage: CheckPluginsVersion("AutoRetainer" = 1.2.3)
+-- local required_plugins_versions = {
+    -- AutoRetainer = "3.0.0",
+    -- TeleporterPlugin = "2.0.0",
+    -- Lifestream = "1.0.0"
+-- }
+-- if not CheckPluginsVersion(required_plugins_versions) then
+    -- return
+-- end
+-- Will check if the player has the specified plugins at the minimum version required and echoes matching and mismatching plugins
+function CheckPluginsVersion(plugins_with_versions)
+    local matching_versions = {}
+    local mismatched_versions = {}
+    
+    -- Function to clean version string by removing extra numbers
+    local function CleanVersion(version_str)
+        local version = tostring(version_str)
+        -- Remove everything after the colon if it exists
+        local clean_ver = version:match("^([^:]+)")
+        return clean_ver or version
+    end
+    
+    -- Function to split version string into numbers
+    local function SplitVersion(version)
+        local numbers = {}
+        -- Clean the version string first
+        version = CleanVersion(version)
+        for num in string.gmatch(version, "%d+") do
+            table.insert(numbers, tonumber(num))
+        end
+        return numbers
+    end
+    
+    -- Compare version numbers
+    local function CompareVersions(current, required)
+        local current_nums = SplitVersion(current)
+        local required_nums = SplitVersion(required)
+        
+        -- Compare each number in the version
+        for i = 1, math.max(#current_nums, #required_nums) do
+            local curr = current_nums[i] or 0
+            local req = required_nums[i] or 0
+            
+            if curr < req then
+                return false
+            elseif curr > req then
+                return true
+            end
+        end
+        return true -- Versions are equal
+    end
+
+    -- Check each plugin
+    for plugin_name, required_version in pairs(plugins_with_versions) do
+        local current_version = GetPluginVersion(plugin_name)
+        local clean_current = CleanVersion(current_version)
+        
+        if CompareVersions(current_version, required_version) then
+            table.insert(matching_versions, string.format("%s (v%s)", plugin_name, clean_current))
+        else
+            table.insert(mismatched_versions, string.format("%s (current: v%s, required: v%s)", 
+                plugin_name, clean_current, required_version))
+        end
+    end
+    
+    -- Sort the plugin names a-z
+    table.sort(matching_versions)
+    table.sort(mismatched_versions)
+    
+    -- Echo plugins with matching versions
+    if #matching_versions > 0 then
+        LogInfo("[VAC] Plugins with matching versions: " .. table.concat(matching_versions, ", "))
+        Echo("Plugins with matching versions: " .. table.concat(matching_versions, ", "))
+    end
+    
+    -- Echo plugins with mismatched versions
+    if #mismatched_versions > 0 then
+        LogInfo("[VAC] Plugins with outdated versions: " .. table.concat(mismatched_versions, ", "))
+        Echo("Plugins with outdated versions: " .. table.concat(mismatched_versions, ", "))
+        return false -- Returns false if any plugin versions don't match requirements
+    else
+        LogInfo("[VAC] All plugin versions match requirements.")
+        Echo("All plugin versions match requirements.")
+        return true -- Returns true if all plugin versions match requirements
+    end
+end
+
+-- Usage: CheckPlugins("AutoRetainer" = 1.2.3)
+-- local required_plugins = {
+    -- AutoRetainer = "3.0.0",
+    -- TeleporterPlugin = "2.0.0",
+    -- Lifestream = "1.0.0"
+-- }
+-- if not CheckPlugins(required_plugins) then
+    -- return
+-- end
+-- Will check if the player has the specified plugins installed/enable at the minimum version required and echoes enabled + disabled as well as matching and mismatching plugins
+function CheckPlugins(plugins_with_versions)
+    local enabled_plugins = {}
+    local missing_plugins = {}
+    local matching_versions = {}
+    local mismatched_versions = {}
+    
+    -- First check if plugins are enabled
+    for plugin_name, required_version in pairs(plugins_with_versions) do
+        if HasPlugin(plugin_name) then
+            table.insert(enabled_plugins, plugin_name)
+            
+            -- Only check version if plugin is enabled
+            local current_version = GetPluginVersion(plugin_name)
+            
+            -- Function to clean version string by removing extra numbers
+            local function CleanVersion(version_str)
+                local version = tostring(version_str)
+                local clean_ver = version:match("^([^:]+)")
+                return clean_ver or version
+            end
+            
+            -- Function to split version string into numbers
+            local function SplitVersion(version)
+                local numbers = {}
+                version = CleanVersion(version)
+                for num in string.gmatch(version, "%d+") do
+                    table.insert(numbers, tonumber(num))
+                end
+                return numbers
+            end
+            
+            -- Compare version numbers
+            local function CompareVersions(current, required)
+                local current_nums = SplitVersion(current)
+                local required_nums = SplitVersion(required)
+                
+                for i = 1, math.max(#current_nums, #required_nums) do
+                    local curr = current_nums[i] or 0
+                    local req = required_nums[i] or 0
+                    
+                    if curr < req then
+                        return false
+                    elseif curr > req then
+                        return true
+                    end
+                end
+                return true
+            end
+            
+            local clean_current = CleanVersion(current_version)
+            if CompareVersions(current_version, required_version) then
+                table.insert(matching_versions, string.format("%s (v%s)", plugin_name, clean_current))
+            else
+                table.insert(mismatched_versions, string.format("%s (current: v%s, required: v%s)", 
+                    plugin_name, clean_current, required_version))
+            end
+        else
+            table.insert(missing_plugins, plugin_name)
+        end
+    end
+    
+    -- Sort all tables
+    table.sort(enabled_plugins)
+    table.sort(missing_plugins)
+    table.sort(matching_versions)
+    table.sort(mismatched_versions)
+    
+    -- Echo results
+    if #enabled_plugins > 0 then
+        LogInfo("[VAC] Enabled plugins: " .. table.concat(enabled_plugins, ", "))
+        Echo("Enabled plugins: " .. table.concat(enabled_plugins, ", "))
+    else
+        LogInfo("[VAC] No plugins are enabled.")
+        Echo("No plugins are enabled.")
+        return false
+    end
+    
+    if #missing_plugins > 0 then
+        LogInfo("[VAC] Missing or not enabled plugins: " .. table.concat(missing_plugins, ", "))
+        Echo("Missing or not enabled plugins: " .. table.concat(missing_plugins, ", "))
+        return false
+    end
+    
+    -- Only check versions if all plugins are enabled
+    if #mismatched_versions > 0 then
+        LogInfo("[VAC] Plugins with outdated versions: " .. table.concat(mismatched_versions, ", "))
+        Echo("Plugins with outdated versions: " .. table.concat(mismatched_versions, ", "))
+        return false
+    else
+        LogInfo("[VAC] All plugins are enabled and up to date: " .. table.concat(matching_versions, ", "))
+        Echo("All plugins are enabled and up to date: " .. table.concat(matching_versions, ", "))
+        return true
     end
 end
 
@@ -4810,10 +5058,16 @@ function TeleportType(cmd)
         "^sanctuary$",                -- sanctuary
         "^mb$",                       -- mb
         "^market$",                   -- market
+        "^lb%s?.*$",                  -- lb
+        "^lavender%s?.*$",            -- lavender
+        "^lavender beds%s?.*$",       -- lavender beds
         "^the lavender beds%s?.*$",   -- the lavender beds
         "^mist%s?.*$",                -- mist
+        "^goblet%s?.*$",              -- goblet
         "^the goblet%s?.*$",          -- the goblet
+        "^shiro%s?.*$",               -- shiro
         "^shirogane%s?.*$",           -- shirogane
+        "^empy%s?.*$",                -- empy
         "^empyreum%s?.*$"             -- empyreum
     }
 
