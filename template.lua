@@ -1,10 +1,9 @@
 --[[
-
 ############################################################
 ##                         SCRIPT                         ##
 ##                          NAME                          ##
 ############################################################
-
+https://patorjk.com/software/taag/#p=display&f=Big&t= (optional to use this in place of above)
 
 ####################
 ##    Version     ##
@@ -12,26 +11,44 @@
 ####################
 
 -> 1.0.0: Initial release
+   - Changed this
+   - Changed that
+   - Not required to create sub lists but it is helpful if there have been a lot of changes, instead you can do just the version and a brief description
+-> 1.1.0: Such as this
+-> 1.2.0: Changed how this works
+-> 1.3.0: Don't forget to change the version above
 
 ####################################################
 ##                  Description                   ##
 ####################################################
 
-template of a script
+https://github.com/WigglyMuffin/SNDScripts
+
+Template of a script
+Description of what it does and everything else a user needs to know
 
 ####################################################
 ##                  Requirements                  ##
 ####################################################
 
--> a : link
--> b : link
--> c : link
+-> a_plugin : link
+-> b_plugin : link
+-> c_plugin : link
+    -> Specific settings a plugin needs or requirements
+
+Optional plugins:
+-> d_plugin : link
 
 ####################################################
 ##                    Settings                    ##
 ##################################################]]
 
--- stuff can go here
+-- Put settings and everything a user should configure here
+
+local a_setting = true                -- Options: true = Do this, false = Do that
+local b_setting = 100                 -- This is how many do this happens
+
+local conditional_plugin = true       -- Example to show optional plugin added to plugin check
 
 --[[################################################
 ##                  Script Start                  ##
@@ -44,7 +61,7 @@ LoadFunctions = loadfile(load_functions_file_location)()
 LoadFileCheck()
 
 -- Plugin checker
-local required_plugins = {"a", "b", "c"}
+local required_plugins = { "a", "b", "c" }
 
 if conditional_plugin then
     table.insert(required_plugins, "d")
@@ -58,15 +75,16 @@ if HasPlugin("YesAlready") then
     PauseYesAlready()
 end
 
---[[###########
-# MAIN SCRIPT #
-#############]]
-
-local function abc()
-    -- stuff can go here
+local function Main()
+    -- Best to do things as functions and call them as they are needed than a top to down checklist of sorts
+    -- So this could be the main function that calls other parts, check other scripts in our repo for examples of this structure
+    
+    -- Best to stay true to a specific coding style too, helps with readability and maintainability
+    -- We use PascalCase for functions and snake_case for variables etc.
+    -- Not required if you choose to change things but keep it in mind when using vac_functions and other files
 end
 
-abc()
+Main()
 
 if HasPlugin("YesAlready") then
     RestoreYesAlready()
