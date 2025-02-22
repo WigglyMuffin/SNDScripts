@@ -46,8 +46,8 @@ Recommended to not use the Enforce Expert Delivery hack inside CBT plugin.
 | Script Name | Description | Requirements |
 |-------------|-------------|--------------|
 | `Auto Gen Provisioning List.lua` | Compiles required GC provision supply items and creates a `list_to_gather.txt` file | - |
-| `Trade GC Items.lua` | Facilitates item trading between characters | Use with `Kupo Box GC Edition.lua` |
-| `Kupo Box GC Edition.lua` | Facilitates item trading between characters and automates item delivery to GC | Use with `Trade GC Items.lua` |
+| `Trade GC Items.lua` | Facilitates item trading between characters | Use with `Kupo Box GC Edition.lua` (optional) |
+| `Kupo Box GC Edition.lua` | Automates item delivery to GC, including **Expert Delivery**. Can be used **standalone for turn-ins** without requiring `Trade GC Items.lua`. | - |
 
 ### Job Unlocker
 ![Status](https://img.shields.io/badge/status-broken-red)
