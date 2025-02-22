@@ -2,11 +2,11 @@
 
 ![Status](https://img.shields.io/badge/status-working-brightgreen)
 
-These scripts are for levelling your DoL jobs on an alt account, they require two accounts and are not compatible with a single account.
+These scripts are for levelling your DoL jobs on an alt account, they require two accounts and are not compatible with a single account. 
+
+However, you can use the `Kupo Box GC Edition` script as a standalone script for turnins (provided you have another method of obtaining the required items) and/or expert delivery.
 
 They are designed to automatically tell you what GC turnins you need for your DoL jobs by giving you an items to gather list, which are then used to distribute from your main account to your alt account using the provided scripts. 40 characters will take around 2 hours for all scripts to complete, with 2 minutes of manual work buying from the market board.
-
-It is also assumed you have all 3 city states unlocked.
 
 ## Known Issues
 
@@ -18,6 +18,7 @@ It is also assumed you have all 3 city states unlocked.
 - **Automated Item List Generation**: The scripts automatically generate a list of items needed for Grand Company (GC) turn-ins, which you can gather on your main account and distribute to your alt account.
 - **Seamless Item Distribution**: The scripts facilitate the transfer of items from your main account to your alt account using the provided scripts, ensuring a smooth and efficient process.
 - **Automatic Turn-In**: Once the items are distributed, each alt character will automatically turn in the provisioning items at their respective Grand Company.
+- **Turnins Only**: You can use `Kupo Box GC Edition` as a standalone GC turnin script if you have a surplus of materials or another way to source them, this can be used alongside `expert_delivery` as a way to cycle through all characters and do your expert delivery.
 - **Optional Expert Delivery**: If you have the Deliveroo plugin installed and set `expert_delivery` to true, you can further enhance the delivery process.
 
 ## Requirements

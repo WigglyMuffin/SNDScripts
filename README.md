@@ -26,13 +26,23 @@ Please note that all our scripts disable the `Yes Already` plugin, that means if
 - All scripts require `vac_functions.lua` and `vac_lists.lua` to be placed in your SND config folder.
 - Some scripts may require specific plugins, which will be noted in their respective sections, in addition to this the script will not run until it detects you have the required plugins.
 - Certain scripts require two service accounts to function properly, this will be noted in each script.
-- Some scripts require the following settings to operate properly:
+- Some scripts require the following settings to operate properly, and these settings are handled automatically:
   - SND settings:
-    - `Use SND's targeting system.` set to true
-    - `Stop macro if target not found (only applies to SND's targeting system).` set to false
-    - `/item` dropdown settings set to false
+    - `UseSNDTargeting` set to true
+    - `StopMacroIfActionTimeout` set to false
+    - `StopMacroIfItemNotFound` set to false
+    - `StopMacroIfCantUseItem` set to false
+    - `StopMacroIfTargetNotFound` set to false
+    - `StopMacroIfAddonNotFound` set to false
+    - `StopMacroIfAddonNotVisible` set to false
   - Simple Tweaks settings:
-    - `Fix '/target' command` set to true
+    - `FixTarget` set to true
+    - `DisableTitleScreenMovie` set to true
+    - `EquipJobCommand` set to true
+    - `RecommendEquipCommand` set to true
+  - CBT settings:
+    - `MaxGCRank` set to false
+    - `AutoSnipeQuests` set to true
 
 ## Script Categories
 
