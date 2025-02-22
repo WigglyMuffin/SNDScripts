@@ -80,9 +80,8 @@ Ensure you have the following plugins installed and enabled:
 ## Getting Started
 
 1. Configure the settings in Overseer (see Configuration section) to match your preferences.
-2. Create a plugin collection which includes AutoRetainer within it, preferably named `AutoRetainer` as that is the default (configurable) naming option. This is case sensitive, so make sure the collection name matches the Overseer config name for the collection.
-3. Start the `Overseer Launcher` script, this will load and start Overseer.
-4. Let Overseer optimise your Auto Retainer experience automatically upon AutoRetainer starting.
+2. Start the `Overseer Launcher` script, this will load and start Overseer.
+3. Let Overseer optimise your Auto Retainer experience automatically upon AutoRetainer starting.
 
 ## Configuration
 
@@ -98,7 +97,6 @@ Fine-tune Overseer's behaviour by adjusting these parameters in the script's con
 | `ceruleum_buy_amount` | Amount of ceruleum fuel to be purchased when ceruleum_limit is triggered | A number between `1` and `139860` | `99999` |
 | `fc_credits_to_keep` | How many credits to always keep, this limit will be ignored when buying FC buffs for GC deliveries | A number between `1` and `999999999` | `13000` |
 | `use_fc_buff` | Will attempt to buy and use the seal sweetener buff when doing GC deliveries | `true` or `false` | `false` |
-| `ar_collection_name` | Name of the plugin collection which contains the "AutoRetainer" plugin | Any text string | `"AutoRetainer"` |
 | `force_return_subs_that_need_swap` | Will force return submarines to swap parts even if they're already sent out, if set to false it will wait until they're back | `true` or `false` | `false` |
 
 You can also customise submersible builds and retainer venture types in their respective sections.
@@ -215,6 +213,12 @@ Overseer implements a robust backup system for your Auto Retainer configuration:
 
 ## Changelog
 
+- **1.5.2**:
+- - **New feature**: Automatically disables title screen if simple tweaks is installed.
+- - **New feature**: Now automatically changes an AR setting so it waits on the main menu between retainers/submersibles.
+- - **Bug fix**: Fixed a potential crash when checking if a character should buy ceruleum
+- - **Improvement**: Switched from using a collection to disable AR to using `/xlenableplugin` and `/xldisableplugin` instead.
+- - **WIP**: Started initial work on proper retainer support and added configurations that are not functional yet.
 - **1.5.1**: Added a setting which allows you to set retainer active hours, so you can run retainers for only X hours a day if preferred. Also some potential improvements to stuck detection with minor code cleanup
 - **1.5.0**: Rewrote a couple functions to make overseer work with the updated AutoRetainer config layout
 - **1.4.7**: Fixed an issue where it would crash if character had no plot
