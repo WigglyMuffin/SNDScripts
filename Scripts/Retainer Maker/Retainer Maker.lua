@@ -16,6 +16,8 @@
 ##                  Description                   ##
 ####################################################
 
+https://github.com/WigglyMuffin/SNDScripts
+
 This script rotates between provided characters and creates retainers for them using set settings, also buys and equips their needed weapon/tool. Worth noting it makes all retainers in limsa
 Optionally also does the venture quest afterwards, or if you want you can use this script to finish venture quests on characters with retainers already
 
@@ -70,12 +72,21 @@ local chars = {
 
 snd_config_folder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
 load_functions_file_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
-LoadFunctions = loadfile(load_functions_file_location)
-LoadFunctions()
+LoadFunctions = loadfile(load_functions_file_location)()
 LoadFileCheck()
 
-if not CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "PandorasBox", "TextAdvance", "vnavmesh") then
-    return -- Stops script as plugins not available
+-- Plugin checker
+local required_plugins = {
+    AutoRetainer = "4.4.4",
+    PandorasBox = "1.6.2.5",
+    SomethingNeedDoing = "1.75",
+    TeleporterPlugin = "2.0.2.5",
+    TextAdvance = "3.2.4.4",
+    vnavmesh = "0.0.0.54"
+}
+
+if not CheckPlugins(required_plugins) then
+    return -- Stops script as plugins not available or versions don't match
 end
 
 if HasPlugin("YesAlready") then

@@ -19,6 +19,8 @@
 ##                  Description                   ##
 ####################################################
 
+https://github.com/WigglyMuffin/SNDScripts
+
 This script automates a list of characters moving to a location and picking up items from a specified character
 It's supposed to be used in pairs with the post moogle script to automate trading a large quantity of items
 Almost everything is configurable and lets you change settings on a per character basis, or you can set overrides that apply to every character no matter what the character setting is
@@ -114,12 +116,21 @@ char_list = "vac_char_list.lua"
 snd_config_folder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
 vac_config_folder = snd_config_folder .. "\\VAC\\"
 load_functions_file_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
-LoadFunctions = loadfile(load_functions_file_location)
-LoadFunctions()
+LoadFunctions = loadfile(load_functions_file_location)()
 LoadFileCheck()
 
-if not CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream", "PandorasBox", "SomethingNeedDoing", "TextAdvance", "vnavmesh") then
-    return -- Stops script as plugins not available
+-- Plugin checker
+local required_plugins = {
+    AutoRetainer = "4.4.4",
+    TeleporterPlugin = "2.0.2.5",
+    Lifestream = "2.3.2.8",
+    SomethingNeedDoing = "1.75",
+    TextAdvance = "3.2.4.4",
+    vnavmesh = "0.0.0.54"
+}
+
+if not CheckPlugins(required_plugins) then
+    return -- Stops script as plugins not available or versions don't match
 end
 
 if HasPlugin("YesAlready") then

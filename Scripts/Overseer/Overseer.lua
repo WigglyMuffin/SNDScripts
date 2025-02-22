@@ -1,9 +1,10 @@
 --[[
-     ___ 
-    / _ \__   _____ _ __ ___  ___  ___ _ __ 
-   | | | \ \ / / _ \ '__/ __|/ _ \/ _ \ '__|
-   | |_| |\ V /  __/ |  \__ \  __/  __/ |
-    \___/  \_/ \___|_|  |___/\___|\___|_|
+   ___                                    
+  / _ \__   _____ _ __ ___  ___  ___ _ __ 
+ | | | \ \ / / _ \ '__/ __|/ _ \/ _ \ '__|
+ | |_| |\ V /  __/ |  \__ \  __/  __/ |   
+  \___/  \_/ \___|_|  |___/\___|\___|_|   
+                                          
 
 ####################
 ##    Version     ##
@@ -33,8 +34,7 @@ Retainers are planned features, they are not currently supported.
 -> TextAdvance : https://github.com/NightmareXIV/MyDalamudPlugins/raw/main/pluginmaster.json
 -> vnavmesh : https://puni.sh/api/repository/veyn
 
-Not required but very recommended
-
+Optional plugins:
 -> Simple Tweaks Plugin: In the default first party dalamud repository
 
 ####################################################
@@ -180,8 +180,7 @@ local excluded_submersible_character = {
 You might want to edit these if you are running multiple accounts on the same windows user with different XIVLauncher config paths.
 
 For example if you want to swap auto_retainer_config_path you'd point it directly like so
-auto_retainer_config_path = "C:\\ff14\\XIVLauncher\\pluginConfigs\\AutoRetainer\\DefaultConfig.json"
-
+auto_retainer_config_path = "C:\\Users\\ff14lowres\\AppData\\Roaming\\XIVLauncher\\pluginConfigs\\AutoRetainer\\DefaultConfig.json"
 ]]
 
 -- Point this to DefaultConfig.json inside this accounts AutoRetainer config folder
@@ -202,9 +201,6 @@ load_functions_file_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginCon
 ARAbortAllTasks()
 ARSetMultiModeEnabled(false)
 
--- Set the correct SND setting
-SetSNDProperty("StopMacroIfAddonNotFound", "False")
-
 -- Load necessary libraries and set up paths
 backup_folder = overseer_folder .. "\\AR Config Backups\\"
 
@@ -217,10 +213,18 @@ EnsureFolderExists(backup_folder)
 local json = CreateJSONLibrary()
 
 -- Plugin checker
-local required_plugins = {"AutoRetainer", "Deliveroo", "Lifestream", "SomethingNeedDoing", "TeleporterPlugin", "TextAdvance", "vnavmesh"}
+local required_plugins = {
+    AutoRetainer = "4.4.4",
+    Deliveroo = "6.6",
+    Lifestream = "2.3.2.8",
+    SomethingNeedDoing = "1.75",
+    TeleporterPlugin = "2.0.2.5",
+    TextAdvance = "3.2.4.4",
+    vnavmesh = "0.0.0.54"
+}
 
-if not CheckPluginsEnabled(unpack(required_plugins)) then
-    return -- Stops script as plugins not available
+if not CheckPlugins(required_plugins) then
+    return -- Stops script as plugins not available or versions don't match
 end
 
 if HasPlugin("YesAlready") then
@@ -233,10 +237,6 @@ end
 
 if HasPlugin("BossMod") or HasPlugin("BossModReborn") then
     yield("/vbmai off")
-end
-
-if HasPlugin("SimpleTweaksPlugin") then
-    yield("/tweaks enable DisableTitleScreenMovie true")
 end
 
 -- To enable debug logs

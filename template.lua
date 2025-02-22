@@ -61,14 +61,19 @@ LoadFunctions = loadfile(load_functions_file_location)()
 LoadFileCheck()
 
 -- Plugin checker
-local required_plugins = { "a", "b", "c" }
+local required_plugins = {
+    a_plugin = "3.0.0",
+    b_plugin = "2.0.0",
+    c_plugin = "1.0.0"
+}
 
+-- Add conditional plugins if there are any
 if conditional_plugin then
-    table.insert(required_plugins, "d")
+    required_plugins.d_plugin = "1.0.0"
 end
 
-if not CheckPluginsEnabled(unpack(required_plugins)) then
-    return -- Stops script as plugins not available
+if not CheckPlugins(required_plugins) then
+    return -- Stops script as plugins not available or versions don't match
 end
 
 if HasPlugin("YesAlready") then

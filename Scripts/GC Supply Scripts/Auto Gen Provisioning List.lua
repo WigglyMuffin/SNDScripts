@@ -7,6 +7,7 @@
  /_/    \_\__,_|\__\___/   \_____|\___|_| |_| |_|   |_|  \___/ \_/ |_|___/_|\___/|_| |_|_|_| |_|\__, | |______|_|___/\__|
                                                                                                  __/ |                   
                                                                                                 |___/                    
+
 ####################
 ##    Version     ##
 ##     1.0.2      ##
@@ -19,6 +20,8 @@
 ####################################################
 ##                  Description                   ##
 ####################################################
+
+https://github.com/WigglyMuffin/SNDScripts
 
 This script will automatically cycle through your characters and generate a list of items needed for GC supply
 A list will be generated and output to the SND config folder saved as a file (provisioning_list.lua)
@@ -71,10 +74,17 @@ LoadFunctions = loadfile(load_functions_file_location)()
 LoadFileCheck()
 
 -- Plugin checker
-local required_plugins = {"AutoRetainer", "TeleporterPlugin", "Lifestream", "SomethingNeedDoing", "TextAdvance", "vnavmesh"}
+local required_plugins = {
+    AutoRetainer = "4.4.4",
+    TeleporterPlugin = "2.0.2.5",
+    Lifestream = "2.3.2.8",
+    SomethingNeedDoing = "1.75",
+    TextAdvance = "3.2.4.4",
+    vnavmesh = "0.0.0.54"
+}
 
-if not CheckPluginsEnabled(unpack(required_plugins)) then
-    return -- Stops script as plugins not available
+if not CheckPlugins(required_plugins) then
+    return -- Stops script as plugins not available or versions don't match
 end
 
 if HasPlugin("YesAlready") then

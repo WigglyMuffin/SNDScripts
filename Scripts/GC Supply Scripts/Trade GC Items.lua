@@ -1,12 +1,11 @@
 --[[
-  _______            _         _____  _____   _____ _                     
- |__   __|          | |       / ____|/ ____| |_   _| |                    
-    | |_ __ __ _  __| | ___  | |  __| |        | | | |_ ___ _ __ ___  ___ 
-    | | '__/ _` |/ _` |/ _ \ | | |_ | |        | | | __/ _ \ '_ ` _ \/ __|
-    | | | | (_| | (_| |  __/ | |__| | |____   _| |_| ||  __/ | | | | \__ \
-    |_|_|  \__,_|\__,_|\___|  \_____|\_____| |_____|\__\___|_| |_| |_|___/
-                                                                                                          
-                                                                                                          
+  _____              _         ____  ____   ___ _                     
+ |_   _| __ __ _  __| | ___   / ___|/ ___| |_ _| |_ ___ _ __ ___  ___ 
+   | || '__/ _` |/ _` |/ _ \ | |  _| |      | || __/ _ \ '_ ` _ \/ __|
+   | || | | (_| | (_| |  __/ | |_| | |___   | || ||  __/ | | | | \__ \
+   |_||_|  \__,_|\__,_|\___|  \____|\____| |___|\__\___|_| |_| |_|___/
+                                                                      
+
 ####################
 ##    Version     ##
 ##     1.0.2      ##
@@ -19,6 +18,8 @@
 ####################################################
 ##                  Description                   ##
 ####################################################
+
+https://github.com/WigglyMuffin/SNDScripts
 
 This script automatically trade GC items from your main character to your alt characters as they show up
 
@@ -57,10 +58,17 @@ LoadFunctions = loadfile(load_functions_file_location)()
 LoadFileCheck()
 
 -- Plugin checker
-local required_plugins = {"AutoRetainer", "TeleporterPlugin", "Lifestream", "SomethingNeedDoing", "TextAdvance", "vnavmesh"}
+local required_plugins = {
+    AutoRetainer = "4.4.4",
+    TeleporterPlugin = "2.0.2.5",
+    Lifestream = "2.3.2.8",
+    SomethingNeedDoing = "1.75",
+    TextAdvance = "3.2.4.4",
+    vnavmesh = "0.0.0.54"
+}
 
-if not CheckPluginsEnabled(unpack(required_plugins)) then
-    return -- Stops script as plugins not available
+if not CheckPlugins(required_plugins) then
+    return -- Stops script as plugins not available or versions don't match
 end
 
 if HasPlugin("YesAlready") then

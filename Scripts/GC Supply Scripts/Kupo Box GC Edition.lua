@@ -1,15 +1,14 @@
 --[[
-  _  __                   ____               _____  _____   ______    _ _ _   _             
- | |/ /                  |  _ \             / ____|/ ____| |  ____|  | (_) | (_)            
- | ' /_   _ _ __   ___   | |_) | _____  __ | |  __| |      | |__   __| |_| |_ _  ___  _ __  
- |  <| | | | '_ \ / _ \  |  _ < / _ \ \/ / | | |_ | |      |  __| / _` | | __| |/ _ \| '_ \ 
- | . \ |_| | |_) | (_) | | |_) | (_) >  <  | |__| | |____  | |___| (_| | | |_| | (_) | | | |
- |_|\_\__,_| .__/ \___/  |____/ \___/_/\_\  \_____|\_____| |______\__,_|_|\__|_|\___/|_| |_|
-           | |                                                                              
-           |_|                                                                              
+  _  __                   ____               ____  ____   _____    _ _ _   _             
+ | |/ /   _ _ __   ___   | __ )  _____  __  / ___|/ ___| | ____|__| (_) |_(_) ___  _ __  
+ | ' / | | | '_ \ / _ \  |  _ \ / _ \ \/ / | |  _| |     |  _| / _` | | __| |/ _ \| '_ \ 
+ | . \ |_| | |_) | (_) | | |_) | (_) >  <  | |_| | |___  | |__| (_| | | |_| | (_) | | | |
+ |_|\_\__,_| .__/ \___/  |____/ \___/_/\_\  \____|\____| |_____\__,_|_|\__|_|\___/|_| |_|
+           |_|                                                                           
+
 ####################
 ##    Version     ##
-##     1.2.0      ##
+##     1.2.1      ##
 ####################
 
 -> 1.0.0: Initial release
@@ -21,6 +20,7 @@
    - Refactored how skip characters are processed
    - Added toggle to enable AR multi mode at end of script
 -> 1.2.0: Refactored return_location, will now accept aetheryte locations as well as Lifestream options
+-> 1.2.1: Refactored destination_type and destination_house
 
 ####################################################
 ##                  Description                   ##
@@ -126,14 +126,21 @@ if use_external_character_list then
 end
 
 -- Plugin checker
-local required_plugins = {"AutoRetainer", "TeleporterPlugin", "Lifestream", "SomethingNeedDoing", "TextAdvance", "vnavmesh"}
+local required_plugins = {
+    AutoRetainer = "4.4.4",
+    TeleporterPlugin = "2.0.2.5",
+    Lifestream = "2.3.2.8",
+    SomethingNeedDoing = "1.75",
+    TextAdvance = "3.2.4.4",
+    vnavmesh = "0.0.0.54"
+}
 
 if expert_delivery then
-    table.insert(required_plugins, "Deliveroo")
+    required_plugins.Deliveroo = "6.6"
 end
 
-if not CheckPluginsEnabled(unpack(required_plugins)) then
-    return -- Stops script as plugins not available
+if not CheckPlugins(required_plugins) then
+    return -- Stops script as plugins not available or versions don't match
 end
 
 -- CBT plugin check for "Enforce Expert Delivery" option

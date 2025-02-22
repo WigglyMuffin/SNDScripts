@@ -14,10 +14,11 @@ It's features changed a lot from what it was initially meant to be and some thin
 
 -> 1.0.0: Initial release
 
-
 ####################################################
 ##                  Description                   ##
 ####################################################
+
+https://github.com/WigglyMuffin/SNDScripts
 
 To use this script correctly, you will need different stages of MSQ completed up to certain point which are listed below, either using Questionable plugin or equivalent
 While there are no minimum MSQ needing to be completed, it is recommended having a GC so you can access most of these options
@@ -196,12 +197,25 @@ char_list = "vac_char_list.lua"
 snd_config_folder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
 vac_config_folder = snd_config_folder .. "\\VAC\\"
 load_functions_file_location = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\vac_functions.lua"
-LoadFunctions = loadfile(load_functions_file_location)
-LoadFunctions()
+LoadFunctions = loadfile(load_functions_file_location)()
 LoadFileCheck()
 
-if not CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream", "AutoDuty", "BossModReborn", "PandorasBox", "Questionable", "RotationSolver", "SomethingNeedDoing", "TextAdvance", "vnavmesh") and (CheckPluginsEnabled("BossMod") or CheckPluginsEnabled("BossModReborn")) then
-    return -- Stops script as plugins not available
+-- Plugin checker
+local required_plugins = {
+    AutoDuty = "0.0.0.118",
+    AutoRetainer = "4.4.4",
+    BossMod = "0.0.0.292",
+    Lifestream = "2.3.2.8",
+    PandorasBox = "1.6.2.5",
+    Questionable = "4.19",
+    SomethingNeedDoing = "1.75",
+    TeleporterPlugin = "2.0.2.5",
+    TextAdvance = "3.2.4.4",
+    vnavmesh = "0.0.0.54"
+}
+
+if not CheckPlugins(required_plugins) then
+    return -- Stops script as plugins not available or versions don't match
 end
 
 if HasPlugin("YesAlready") then

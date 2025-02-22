@@ -37,6 +37,8 @@
 ##                  Description                   ##
 ####################################################
 
+https://github.com/WigglyMuffin/SNDScripts
+
 Just a simple script you can run alongside questionable to have it automatically queue and finish dungeons, it will enter and try to do instances but not every instance is doable.
 Also has a stuck checker that reloads vnav, and if stuck for long enough, rebuilds the zone entirely.
  
@@ -69,7 +71,8 @@ local bossmod_ai_outside_of_instances = true
 local enable_bossmod_ai_hp_treshold = 50
 
 -- This setting will enforce recommended settings for both Bossmod and RSR once the script starts
-local enforce_settings = true
+-- Keep it commented out and wait for update to this script
+-- local enforce_settings = true
 
 -- leave this empty if you don't want the chars to stop at any specific quest, but this will cause it to never try to rotate to another char
 local quest_name_to_stop_at = ""
@@ -94,22 +97,30 @@ local qst_reloader_enabled = true
 local qst_reloader_threshold = 15 -- this is how many loops quest reloader will wait before it triggers a reload if it finds you being stuck, set this higher if you end up having issues with follow quests and similar
 local qst_reloader_echo = true -- set this to false if you want to disable quest reloader outputting timer info into the chat
 
-
 --[[################################################
 ##                  Script Start                  ##
 ##################################################]]
 SNDConfigFolder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
 LoadFunctionsFileLocation = SNDConfigFolder.."vac_functions.lua"
-LoadFunctions = loadfile(LoadFunctionsFileLocation)
-LoadFunctions()
+LoadFunctions = loadfile(LoadFunctionsFileLocation)()
 LoadFileCheck()
 
-if not CheckPluginsEnabled("BossMod") and not CheckPluginsEnabled("BossModReborn") then
-    return
-end
+-- Plugin checker
+local required_plugins = {
+    AutoDuty = "0.0.0.118",
+    AutoRetainer = "4.4.4",
+    BossMod = "0.0.0.292",
+    Lifestream = "2.3.2.8",
+    PandorasBox = "1.6.2.5",
+    Questionable = "4.19",
+    SomethingNeedDoing = "1.75",
+    TeleporterPlugin = "2.0.2.5",
+    TextAdvance = "3.2.4.4",
+    vnavmesh = "0.0.0.54"
+}
 
-if not CheckPluginsEnabled("AutoDuty", "AutoRetainer", "Lifestream", "PandorasBox", "Questionable", "RotationSolver", "SomethingNeedDoing", "TeleporterPlugin", "TextAdvance", "vnavmesh") then
-    return -- Stops script as plugins not available
+if not CheckPlugins(required_plugins) then
+    return -- Stops script as plugins not available or versions don't match
 end
 
 if HasPlugin("YesAlready") then
