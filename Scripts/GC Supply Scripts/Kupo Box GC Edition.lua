@@ -9,7 +9,7 @@
            |_|                                                                              
 ####################
 ##    Version     ##
-##     1.1.0      ##
+##     1.2.0      ##
 ####################
 
 -> 1.0.0: Initial release
@@ -20,6 +20,7 @@
    - Option to do turnins only without trade added
    - Refactored how skip characters are processed
    - Added toggle to enable AR multi mode at end of script
+-> 1.2.0: Refactored return_location, will now accept aetheryte locations as well as Lifestream options
 
 ####################################################
 ##                  Description                   ##
@@ -67,7 +68,8 @@ local destination_aetheryte = "Aleport"     -- Aetheryte that characters need to
 local destination_house = 0                 -- Options: 0 = FC, 1 = Personal, 2 = Apartment
 local do_movement = true                    -- Options: true = Paths to chosen character, false = Does nothing and waits for chosen character to come to you
 local return_home = true                    -- Options: true = Returns home from destination, false = Does nothing and logs out
-local return_location = 0                   -- Options: 0 = Do nothing, 1 = Limsa, 2 = Limsa bell, 3 = Nearby bell, 4 = FC
+local return_location = ""                  -- Set the return location for each character after tasks are complete, leave empty for no return location (will log out instead)
+                                            -- Compatible with most Lifestream options too, such as "auto", "gc", "island" etc.
 
 -- Options: true = invites character you are trading with to party for trading, false = uses distance based proximity check for trading
 -- Setting this to false will result in faster trades (marginally) but is less safe, recommended to set to true
@@ -154,6 +156,7 @@ LogInfo("[KupoBox] ##############################")
 local function DOL()
     local home_world = GetCurrentWorld() == GetHomeWorld()
 
+    -- Return to home for seals from turnins
     if not home_world then
         Teleporter(FindWorldByID(GetHomeWorld()), "li")
         Sleep(1.0)
@@ -209,17 +212,12 @@ local function ProcessAltCharacters(character_list, turnins_only)
         else
             -- Switch characters if required, looks up current character and compares
             if GetCharacterName(true) ~= alt_char_name then
-                -- checks if return_location options matches 1 which returns player to Limsa
-                if return_location == 1 then
-                    if not (ZoneCheck("Limsa Lominsa Lower") or ZoneCheck("Limsa Lominsa Upper")) then
-                        Teleporter("Limsa", "tp")
-                    end
-                end
-
                 RelogCharacter(alt_char_name)
                 Sleep(7.5)
                 LoginCheck()
             end
+
+            -- Skips trading if turnins_only set to true
             if not turnins_only then
                 Echo("Picking up items from " .. trading_with .. " on server " .. destination_server)
                 LogInfo("[KupoBox] Picking up items from " .. trading_with .. " on server " .. destination_server)
@@ -351,37 +349,15 @@ local function ProcessAltCharacters(character_list, turnins_only)
             end
 
             -- Alt character handling to go home
-            -- [2] return_home options: 0 = no, 1 = yes
-            -- [3] return_location options: 0 = do nothing, 1 = limsa, 2 = limsa bell, 3 = nearby bell, 4 = fc
             if return_home then
                 LogInfo("[KupoBox] Returning home")
                 ReturnHomeWorld()
 
-                -- Limsa stuff
-                if return_location == 1 then
-                    if not (ZoneCheck("Limsa Lominsa Lower") or ZoneCheck("Limsa Lominsa Upper")) then
-                        LogInfo("[KupoBox] Attempting to go to Limsa")
-                        Teleporter("Limsa", "tp")
-                    end
-                end
-
-                -- Limsa Retainer Bell Stuff
-                if return_location == 2 then
-                    LogInfo("[KupoBox] Attempting to go to Limsa retainer bell")
-                    PathToLimsaBell()
-                end
-
-                -- Nearby Retainer Bell Stuff
-                if return_location == 3 then
-                    LogInfo("[KupoBox] Attempting to go to nearest retainer bell")
-                    PathToObject("Summoning Bell")
-                end
-
-                -- FC Entrance stuff
-                if return_location == 4 then
-                    LogInfo("[KupoBox] Attempting to go to FC Entrance")
-                    Teleporter("Estate Hall (Free Company)", "tp")
-                    PathToObject("Entrance")
+                if return_location and return_location ~= "" then
+                    LogInfo(string.format("[KupoBox] Attempting to go to %s", return_location))
+                    -- Use "li" for lifestream stuff, otherwise use "tp"
+                    local teleport_type = should_use_li(return_location) and "li" or "tp"
+                    Teleporter(return_location, teleport_type)
                 end
             end
         end
