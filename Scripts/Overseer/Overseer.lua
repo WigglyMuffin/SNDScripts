@@ -7,7 +7,7 @@
 
 ####################
 ##    Version     ##
-##     1.5.1      ##
+##     1.5.2      ##
 ####################
 
 ####################################################
@@ -33,10 +33,9 @@ Retainers are planned features, they are not currently supported.
 -> TextAdvance : https://github.com/NightmareXIV/MyDalamudPlugins/raw/main/pluginmaster.json
 -> vnavmesh : https://puni.sh/api/repository/veyn
 
-Not required but recommended
+Not required but very recommended
 
--> Simple tweaks : In the default first party dalamud repository
-    -> With the tweak "Disable Title Screen Movie" enabled
+-> Simple Tweaks Plugin: In the default first party dalamud repository
 
 ####################################################
 ##                    Settings                    ##
@@ -50,7 +49,6 @@ local ceruleum_limit = 1000                      -- Minimum value of ceruleum fu
 local ceruleum_buy_amount = 99999                -- Amount of ceruleum fuel to be purchased when ceruleum_limit is triggered, will buy up to configured amount when the buy is triggered
 local fc_credits_to_keep = 13000                 -- How many credits to always keep, this limit will be ignored when buying FC buffs for GC deliveries
 local use_fc_buff = true                        -- Will attempt to buy and use the seal sweetener buff when doing GC deliveries
-local ar_collection_name = "AutoRetainer"        -- Name of the plugin collection which contains the "AutoRetainer" plugin
 local force_return_subs_that_need_swap = false   -- Will force return submarines to swap parts even if they're already sent out, if set to false it will wait until they're back
 
 -- You can use this setting to have the script automatically shut down the game after X minutes, good if you want to reset the token every day for example
@@ -65,6 +63,36 @@ local retainer_active_hours = {
     end_time = {hour = 2, minute = 05}     -- 2:05 AM
 }
 
+-- Configuration for retainer levels and venture types
+-- min_level = minimum level value, starts at 0
+-- max_level = maximum level value
+-- jobs = Any normal job abbreviation, like BTN, MIN and FSH. Can also use ALL to apply that plan to all jobs 
+-- plan_to_use = The name of the plan you want to use, case sensitive. This will check against plans already saved in autoretainer first, so you can create them there and just have overseer use those.
+-- !! This configuration is not supported currently !!
+-- !! WIP !!
+local retainer_level_config = {
+    { min_level = 0, max_level = 9, jobs = {"MIN"}, mode = 0, plan_to_use = "Overseer Miner 1-10" },
+    { min_level = 0, max_level = 9, jobs = {"BTN"}, mode = 0, plan_to_use = "Overseer Botanist 1-10" },
+    { min_level = 10, max_level = 100, jobs = {"BTN", "MIN", "FSH"}, mode = 1, plan_to_use = "Overseer Quick Venture Spam" },
+}
+
+-- Overseer default venture plan, inserted and used by the default retainer plan
+-- PlanCompleteBehavior:
+-- 0:
+-- 1:
+-- 2:
+-- !! This configuration is not supported currently !!
+-- !! WIP !!
+local retainer_venture_plans = {
+    {
+        Name = "Overseer Quick Venture Spam",
+        List = {
+            { ID = 395, Num = 9999 }
+        },
+        PlanCompleteBehavior = 1
+    }
+}
+
 -- This option makes overseer attempt corrections on all characters every time it goes to the main menu
 -- This means that if overseer finds a sub that isn't sent out it will attempt to send it out again
 -- Or for example if a sub has the wrong parts and force return is enabled, it will go to that sub, bring it back, swap the part and send it out again
@@ -75,17 +103,6 @@ local correct_between_characters = false
 -- This is the recommended way to use correction since it will not cause any slowdowns later, and will still correct all your characters if you have a lot of submersibles that need changes
 -- Only problem with this is that if something somehow goes wrong overseer will not be able to detect it
 local correct_once_at_start_of_script = false
-
--- Configuration for retainer levels and venture types
--- min_level = minimum level value, starts at 0
--- max_level = maximum level value
--- venture_type = venture type the retainers should use. Options: "exploration" = Targeted Exploration, "quick" = Quick Exploration
--- saved_plan = GUID corresponding to the saved_plan below
--- !! Retainers not supported currently !!
-local retainer_level_config = {
-    { min_level = 0, max_level = 10, venture_type = "exploration", saved_plan = "00000000-0000-0000-0000-000000000000" },
-    { min_level = 11, max_level = 100, venture_type = "quick", saved_plan = "00000000-0000-0000-0000-000000000000" },
-}
 
 -- Configuration of submersible builds
 -- min_rank = minimum rank value, starts at 1
@@ -216,6 +233,10 @@ end
 
 if HasPlugin("BossMod") or HasPlugin("BossModReborn") then
     yield("/vbmai off")
+end
+
+if HasPlugin("SimpleTweaksPlugin") then
+    yield("/tweaks enable DisableTitleScreenMovie true")
 end
 
 -- To enable debug logs
@@ -1482,7 +1503,7 @@ end
 local function DisableAR()
     if HasPlugin("AutoRetainer") then
         ForceARSave()
-        ManageCollection(ar_collection_name, false)
+        yield("/xldisableplugin AutoRetainer")
 
         repeat
             Sleep(0.1)
@@ -1679,7 +1700,7 @@ local function WriteToARJson(data)
         LogToInfo(1, "WriteToARJson: Failed to encode data. Error: " .. err)
         return false
     end
-
+    DisableAR()
     local ar_file, open_err = io.open(auto_retainer_config_path, "w")
     if not ar_file then
         LogToInfo(1, "WriteToARJson: Failed to open file for writing. Error: " .. open_err)
@@ -1687,7 +1708,6 @@ local function WriteToARJson(data)
     end
 
     -- ar_file:write(string.char(0xEF, 0xBB, 0xBF))
-
     ar_file:write(encoded_data)
     ar_file:flush()
     ar_file:close()
@@ -1739,7 +1759,6 @@ local function EnableSubmersible(submersible_number)
         end
     end
 
-    DisableAR()
     table.insert(character.EnabledSubs, submersible_name)
     WriteToARJson(ar_data)
     LogToInfo("EnableSubmersible: Successfully enabled "..submersible_name)
@@ -1773,7 +1792,6 @@ local function ModifyAdditionalSubmersibleData(submersible_number, config, confi
         if tonumber(character.CID) == tonumber(char_cid) and character.AdditionalSubmarineData and character.AdditionalSubmarineData[submersible_name] then
             local sub_data = character.AdditionalSubmarineData[submersible_name]
             if sub_data[config] then
-                DisableAR()
                 sub_data[config] = config_option
                 WriteToARJson(ar_data)
                 Echo("ModifyAdditionalSubmersibleData: Successfully updated " .. submersible_name .. "." .. config)
@@ -1814,7 +1832,6 @@ local function ModifyOfflineReturnTime(submersible_name, return_time)
         if tonumber(character.CID) == tonumber(char_cid) then
             for _, sub in ipairs(character.OfflineSubmarineData) do
                 if sub.Name == submersible_name then
-                    DisableAR()
                     sub.ReturnTime = return_time
                     WriteToARJson(ar_data)
                     Echo("ModifyOfflineReturnTime: Successfully updated ReturnTime for " .. submersible_name)
@@ -1864,7 +1881,6 @@ local function ModifyOfflineData(setting, value, CID)
     end
 
     if ar_json_modified then
-        DisableAR()
         WriteToARJson(ar_data)
         if not CID then
             LogToInfo(1, "ModifyOfflineData: Successfully updated '" .. setting .. "' to " .. tostring(value) .. " for all characters")
@@ -1876,6 +1892,26 @@ local function ModifyOfflineData(setting, value, CID)
         LogToInfo(1, "ModifyOfflineData: No changes were made.")
         return false
     end
+end
+
+-- Function to modify base AR settings in the config
+local function ModifyARConfig(setting, value)
+    CreateConfigBackup()
+    local ar_data = LoadARJson()
+    if not ar_data then
+        LogToInfo(1, "ModifyARConfig: Invalid setting")
+        return false
+    end
+
+    if ar_data[setting] == value then
+        LogToInfo(1, "ModifyARConfig: No change needed for '" .. setting .. "'")
+        return false
+    end
+
+    ar_data[setting] = value
+    WriteToARJson(ar_data)
+    LogToInfo(1, "ModifyARConfig: Updated '" .. setting .. "' to " .. tostring(value))
+    return true
 end
 
 -- Function to check if retainers are currently within active hours
@@ -1949,7 +1985,7 @@ end
 -- Function to enable the auto retainer collection
 function EnableAR()
     if not HasPlugin("AutoRetainer") then
-        ManageCollection(ar_collection_name, true)
+        yield("/xlenableplugin AutoRetainer")
         repeat
             Sleep(0.5)
         until HasPlugin("AutoRetainer") and type(ARGetInventoryFreeSlotCount()) == "number"
@@ -2318,16 +2354,19 @@ local function PostARTasks()
         until IsPlayerAvailable()
     end
 
-    if overseer_char_data.ceruleum <= ceruleum_limit and overseer_char_data.submersibles[1].name ~= "" and buy_ceruleum and not overseer_char_bought_ceruleum then
+    if overseer_char_data.ceruleum and overseer_char_data.ceruleum <= ceruleum_limit and type(overseer_char_data.submersibles) == "table" and overseer_char_data.submersibles[1] and overseer_char_data.submersibles[1].name ~= "" and buy_ceruleum and not overseer_char_bought_ceruleum then
         overseer_char_bought_ceruleum = true
         local function CalculateCeruleumPurchase()
             local ceruleum_price = 100
+            if not (overseer_char_data.free_company and overseer_char_data.free_company.credits) then
+                return 0
+            end
 
-            local available_credits = overseer_char_data.free_company.credits - fc_credits_to_keep
+            local available_credits = overseer_char_data.free_company.credits - (fc_credits_to_keep or 0)
             local max_ceruleum_to_buy = math.floor(available_credits / ceruleum_price)
-            local amount_to_buy = math.min(ceruleum_buy_amount, max_ceruleum_to_buy)
+            local amount_to_buy = math.min(ceruleum_buy_amount or 0, max_ceruleum_to_buy)
 
-            return amount_to_buy
+            return math.max(amount_to_buy, 0)
         end
 
         local amount_to_buy = CalculateCeruleumPurchase()
@@ -2383,7 +2422,6 @@ local function AddUnlockPlansToDefaultConfig()
         table.insert(ar_data.SubmarineUnlockPlans, new_plan)
     end
 
-    DisableAR()
     local success, write_err = WriteToARJson(ar_data)
     if not success then
         Echo("Error: AddUnlockPlansToDefaultConfig: Error writing updated AR data: " .. write_err)
@@ -2421,7 +2459,6 @@ local function AddPointPlansToDefaultConfig()
         table.insert(ar_data.SubmarinePointPlans, new_plan)
     end
 
-    DisableAR()
     local success, write_err = WriteToARJson(ar_data)
     if not success then
         Echo("Error: AddPointPlansToDefaultConfig: Error writing updated AR data: " .. write_err)
@@ -2664,17 +2701,17 @@ local function Main()
     CreateConfigBackup()
     AddUnlockPlansToDefaultConfig()
     AddPointPlansToDefaultConfig()
-    EnableAR()
     UpdateAndLoadInventoryFile()
     EnforceRetainerSchedule()
-
+    ModifyARConfig("MultiWaitOnLoginScreen", true)
+    EnableAR()
     if correct_between_characters or correct_once_at_start_of_script then
         correct_once_at_start_of_script = false
         CheckAndCorrectAllCharacters()
     end
 
     ARSetMultiModeEnabled(true)
-    Echo("Character data and global plans processing complete")
+    LogToInfo(1, "Character data and global plans processing complete")
     LogToInfo(1, "All characters processed, starting main loop")
 
     local ar_finished = false
