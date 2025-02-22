@@ -5,9 +5,10 @@ It contains the functions required to make the scripts work
 
 ####################
 ##    Version     ##
-##     1.0.6      ##
+##     1.0.7      ##
 ####################
 
+-> 1.0.7: Added TeleportType() to return correct teleport type (tp or li) for teleports
 -> 1.0.6: Fixed nil bug with GcProvisioningDeliver
 -> 1.0.5: Made minor changes to BuyCeruleum
 -> 1.0.4: Fixed inconsistencies in BuyCeruleum
@@ -680,7 +681,7 @@ end
 -- Will teleport player to specified location
 function Teleporter(location, tp_kind) -- Teleporter handler
     tp_kind = string.lower(tp_kind)
-    local cast_time_buffer = 5         -- Just in case a buffer is required, teleports are 5 seconds long. Slidecasting, ping and fps can affect casts
+    local cast_time_buffer = 5.5         -- Just in case a buffer is required, teleports are 5 seconds long. Slidecasting, ping and fps can affect casts
     local max_retries = 10             -- Teleporter retry amount, will not tp after number has been reached for safety
     local retries = 0
 
@@ -855,7 +856,7 @@ end
 function LogOut()
     yield("/logout")
 
-    local select_option
+    local select_option = 0
     -- If the player is not in a sanctuary, they need to wait 20 seconds
     if not InSanctuary() then
         select_option = 4
@@ -4778,4 +4779,54 @@ function unpack(t, i, n)
     if i <= n then
         return t[i], unpack(t, i + 1, n)
     end
+end
+
+-- Usage: TeleportType(cmd)
+-- Check if a teleport command should use "li" instead of "tp"
+-- Condense into refactored Teleporter() at some point...
+function TeleportType(cmd)
+    local li_commands = {
+        "^gc%s?.*$",                  -- gc or gc <company name>
+        "^hc%s?.*$",                  -- hc or hc <company name>
+        "^gcc%s?.*$",                 -- gcc or gcc <company name>
+        "^hcc%s?.*$",                 -- hcc or hcc <company name>
+        "^fcgc$",                     -- fcgc
+        "^gcfc$",                     -- gcfc
+        "^auto$",                     -- auto
+        "^home$",                     -- home
+        "^house$",                    -- house
+        "^private$",                  -- private
+        "^fc$",                       -- fc
+        "^free$",                     -- free
+        "^company$",                  -- company
+        "^free%s?company$",           -- free company
+        "^apartment$",                -- apartment
+        "^apt$",                      -- apt
+        "^shared$",                   -- shared
+        "^inn$",                      -- inn
+        "^hinn$",                     -- hinn
+        "^island$",                   -- island
+        "^is$",                       -- is
+        "^sanctuary$",                -- sanctuary
+        "^mb$",                       -- mb
+        "^market$",                   -- market
+        "^the lavender beds%s?.*$",   -- the lavender beds
+        "^mist%s?.*$",                -- mist
+        "^the goblet%s?.*$",          -- the goblet
+        "^shirogane%s?.*$",           -- shirogane
+        "^empyreum%s?.*$"             -- empyreum
+    }
+
+    if not cmd then 
+        return false
+    end
+
+    cmd = cmd:lower() -- Convert to lowercase for matching
+
+    for _, pattern in ipairs(li_commands) do
+        if cmd:match(pattern) then
+            return true
+        end
+    end
+    return false
 end
