@@ -214,11 +214,11 @@ Overseer implements a robust backup system for your Auto Retainer configuration:
 ## Changelog
 
 - **1.5.2**:
-- - **New feature**: Automatically disables title screen if simple tweaks is installed.
-- - **New feature**: Now automatically changes an AR setting so it waits on the main menu between retainers/submersibles.
-- - **Bug fix**: Fixed a potential crash when checking if a character should buy ceruleum
-- - **Improvement**: Switched from using a collection to disable AR to using `/xlenableplugin` and `/xldisableplugin` instead.
-- - **WIP**: Started initial work on proper retainer support and added configurations that are not functional yet.
+  - **New feature**: Automatically disables title screen if simple tweaks is installed.
+  - **New feature**: Now automatically changes an AR setting so it waits on the main menu between retainers/submersibles.
+  - **Bug fix**: Fixed a potential crash when checking if a character should buy ceruleum
+  - **Improvement**: Switched from using a collection to disable AR to using `/xlenableplugin` and `/xldisableplugin` instead.
+  - **WIP**: Started initial work on proper retainer support and added configurations that are not functional yet.
 - **1.5.1**: Added a setting which allows you to set retainer active hours, so you can run retainers for only X hours a day if preferred. Also some potential improvements to stuck detection with minor code cleanup
 - **1.5.0**: Rewrote a couple functions to make overseer work with the updated AutoRetainer config layout
 - **1.4.7**: Fixed an issue where it would crash if character had no plot
