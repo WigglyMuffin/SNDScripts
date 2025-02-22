@@ -3,7 +3,7 @@
 ##                         SCRIPT                         ##
 ##                          NAME                          ##
 ############################################################
-https://patorjk.com/software/taag/#p=display&f=Big&t= (optional to use this in place of above)
+https://patorjk.com/software/taag/#p=display&f=Standard&t= (optional to use this in place of above)
 
 ####################
 ##    Version     ##
