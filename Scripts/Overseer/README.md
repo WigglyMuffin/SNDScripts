@@ -213,6 +213,7 @@ Overseer implements a robust backup system for your Auto Retainer configuration:
 
 ## Changelog
 
+- **1.5.3**: Fixed inefficiencies for use_fc_buff option to not teleport more than needed
 - **1.5.2**:
   - **New feature**: Automatically disables title screen if simple tweaks is installed.
   - **New feature**: Now automatically changes an AR setting so it waits on the main menu between retainers/submersibles.

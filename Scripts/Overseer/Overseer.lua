@@ -8,7 +8,7 @@
 
 ####################
 ##    Version     ##
-##     1.5.2      ##
+##     1.5.3      ##
 ####################
 
 ####################################################
@@ -1545,21 +1545,57 @@ local function UseFCBuff()
         return true
     end
 
-    local fc_gc_id = overseer_char_data.free_company.gc_id
+    local fc_gc_id = GetFCGCID()
+    -- Coords have 1 for the stopping distance, not part of the xyz pos
     local gc_coords = {
-        [1] = {command = "/li gc 1", coords = {93.46, 40.28, 71.52}}, -- Maelstrom
-        [2] = {command = "/li gc 2", coords = {-70.24, -0.50, -7.09}}, -- Twin Adder
-        [3] = {command = "/li gc 3", coords = {-143.86, 4.11, -104.04}} -- Immortal Flames
+        [1] = { 
+            command = "gc maelstrom", 
+            coords = { 93.46, 40.28, 71.52, 1 }, 
+            location = "Limsa Lominsa Upper Decks",
+            teleport_location = "Limsa Lominsa Lower Decks"
+        }, -- Maelstrom
+        [2] = { 
+            command = "gc twin", 
+            coords = { -70.24, -0.50, -7.09, 1 }, 
+            location = "New Gridania"
+        }, -- Twin Adder
+        [3] = { 
+            command = "gc immortal", 
+            coords = { -143.86, 4.11, -104.04, 1 }, 
+            location = "Ul'dah - Steps of Nald" 
+        } -- Immortal Flames
     }
 
     local gc_info = gc_coords[fc_gc_id]
+
     if gc_info then
-        yield(gc_info.command)
-        Sleep(5)
-        repeat
-            Sleep(1)
-        until not LifestreamIsBusy()
-        Movement(table.unpack(gc_info.coords))
+        local current_zone_id = GetZoneID()
+        local dest_zone_id = FindZoneIDByAetheryte(gc_info.location)
+        
+        if fc_gc_id == 1 then
+            local upper_decks_id = FindZoneID("Limsa Lominsa Upper Decks") -- Upper Decks does not have an aetheryte id so have to use FindZoneID()
+            
+            -- Movement only if in Upper Decks
+            if current_zone_id == upper_decks_id then
+                Movement(table.unpack(gc_info.coords))
+                return
+            end
+            
+            -- Teleport if not in Upper Decks
+            local teleport_type = TeleportType(gc_info.command) and "li" or "tp"
+            Teleporter(gc_info.command, teleport_type)
+            Movement(table.unpack(gc_info.coords))
+        else
+            -- Normal handling for other GCs
+            local teleport_type = TeleportType(gc_info.command) and "li" or "tp"
+            
+            if current_zone_id ~= dest_zone_id then
+                Teleporter(gc_info.command, teleport_type)
+                Movement(table.unpack(gc_info.coords))
+            else
+                Movement(table.unpack(gc_info.coords))
+            end
+        end
     end
 
     -- Try buying and using "Seal Sweetener II"
