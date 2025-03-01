@@ -8,7 +8,7 @@
 
 ####################
 ##    Version     ##
-##     1.2.1      ##
+##     1.2.2      ##
 ####################
 
 -> 1.0.0: Initial release
@@ -21,6 +21,7 @@
    - Added toggle to enable AR multi mode at end of script
 -> 1.2.0: Refactored return_location, will now accept aetheryte locations as well as Lifestream options
 -> 1.2.1: Refactored destination_type and destination_house
+-> 1.2.2: Fixed incorrect name used for TeleportType()
 
 ####################################################
 ##                  Description                   ##
@@ -363,7 +364,7 @@ local function ProcessAltCharacters(character_list, turnins_only)
                 if return_location and return_location ~= "" then
                     LogInfo(string.format("[KupoBox] Attempting to go to %s", return_location))
                     -- Use "li" for lifestream stuff, otherwise use "tp"
-                    local teleport_type = should_use_li(return_location) and "li" or "tp"
+                    local teleport_type = TeleportType(return_location) and "li" or "tp"
                     Teleporter(return_location, teleport_type)
                 end
             end
