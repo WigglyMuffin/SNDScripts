@@ -7,7 +7,7 @@
                            |_|    
 ####################
 ##    Version     ##
-##     1.0.1      ##
+##     1.0.2      ##
 ####################
 
 -> 1.0.0: Initial release
@@ -16,11 +16,18 @@
    - Fixed disabling Text Advance
    - Potentially fixed exiting out of the "LetterList" addon if stuck
 
+-> 1.0.2:
+    - Added checks to every repeat to prevent getting stuck
+    - Increased Sleep() times to help with stability
+    - Disabled RequestLetter() function as it tends to get stuck (for me at least)
+    - Added re-enabling Text Advance
+
 ####################################################
 ##                  Description                   ##
 ####################################################
 
 https://github.com/WigglyMuffin/SNDScripts
+Tweaked by Friendly <3
 
 This script automatically opens all of your characters mail
 It will also request additional mail if the setting is enabled
@@ -54,10 +61,13 @@ end
 function Target(target)
     if DoesObjectExist(target) then
         local target_command = "/target \"" .. target .. "\""
+        attempts = 0
+        maxattempts = 10
         repeat
             yield(target_command)
-            Sleep(0.1)
-        until string.lower(GetTargetName()) == string.lower(target)
+            attempts = attempts + 1
+            Sleep(0.2)
+        until string.lower(GetTargetName()) == string.lower(target) or attempts >= maxattempts
         return true
     else
         return false
@@ -69,31 +79,42 @@ function Sleep(time)
 end
 
 function Interact()
+    attempts = 0
+    maxattempts = 10
     repeat
-        Sleep(0.1)
-    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not IsMoving() or GetCharacterCondition(32)
-
+        attempts = attempts + 1
+        Sleep(0.21)
+    until (IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not IsMoving()) or GetCharacterCondition(32) or attempts >= maxattempts
+    
     Dismount()
     Sleep(0.5)
     yield("/interact")
-
+    Sleep(1)
+    attempts = 0
+    maxattempts = 10
     repeat
-        Sleep(0.1)
-    until not IsPlayerCasting()
+        Sleep(0.211)
+        attempts = attempts + 1
+    until not IsPlayerCasting() or attempts >= maxattempts
 end
 
 function Dismount()
     if TerritorySupportsMounting() then
         if GetCharacterCondition(4) then
+            attempts = 0
+            maxattempts = 10
             repeat
                 yield("/mount")
-                Sleep(0.1)
-            until not GetCharacterCondition(4)
+                Sleep(0.212)
+            until not GetCharacterCondition(4) or attempts >= maxattempts
         end
 
+        attempts = 0
+        maxattempts = 10
         repeat
-            Sleep(0.1)
-        until IsPlayerAvailable() and not IsPlayerCasting()
+            Sleep(0.213)
+            attempts = attempts + 1
+        until IsPlayerAvailable() and not IsPlayerCasting() or attempts >= maxattempts
     else
         -- do nothing
     end
@@ -115,23 +136,32 @@ local function OpenLetterMenu()
 
         Interact()
 
+        attempts = 0
+        maxattempts = 10
         repeat
-            Sleep(0.1)
-        until IsAddonReady("Talk")
+            attempts = attempts + 1
+            Sleep(0.214)
+        until IsAddonReady("Talk") or attempts >= maxattempts
         
+        attempts = 0
+        maxattempts = 10
         repeat
             yield("/callback Talk true 0")
-            Sleep(0.1)
-        until not IsAddonVisible("Talk")
+            attempts = attempts + 1
+            Sleep(0.215)
+        until not IsAddonVisible("Talk") or attempts >= maxattempts
 
+        attempts = 0
+        maxattempts = 10
         repeat
-            Sleep(0.1)
-        until IsAddonReady("LetterList")
+            attempts = attempts + 1
+            Sleep(0.216)
+        until IsAddonReady("LetterList") or attempts >= maxattempts
 
         -- Handle the "SelectOk" window with a check to prevent getting stuck
+
         local max_attempts = 10
         local attempts = 0
-
         repeat
             if IsAddonReady("SelectOk") and string.match(GetNodeText("SelectOk", 3), "You cannot carry any more campaign") then
                 yield("/callback SelectOk true 0")
@@ -142,98 +172,136 @@ local function OpenLetterMenu()
             if attempts >= max_attempts then
                 break
             end
-
-            Sleep(0.1)
-        until IsAddonVisible("SelectOk") and IsAddonVisible("LetterList")
-
+            Sleep(0.217)
+        until IsAddonVisible("SelectOk") and IsAddonVisible("LetterList") or attempts >= maxattempts
+        attempts = 0
+        maxattempts = 10
         repeat
-            Sleep(0.1)
-        until IsAddonReady("LetterList") and string.match(GetNodeText("LetterList", 14, 13, 2), "Purchases & Rewards")
+            Sleep(0.218)
+            attempts = attempts + 1
+        until IsAddonReady("LetterList") and string.match(GetNodeText("LetterList", 14, 13, 2), "Purchases & Rewards") or attempts >= maxattempts
     end
 end
 
 local function SelectLetter()
     -- Check if "LetterList" addon is ready
+    attempts = 0
+    maxattempts = 10
     repeat
-        Sleep(0.1)
-    until IsAddonReady("LetterList")
+        Sleep(0.219)
+        attempts = attempts + 1
+    until IsAddonReady("LetterList") or attempts >= maxattempts
 
     -- Selects the first letter in the letter list
+    attempts = 0
+    maxattempts = 10
     repeat
         yield("/callback LetterList true 0 0")
-        Sleep(0.1)
-    until IsAddonVisible("LetterViewer")
+        Sleep(0.22)
+        attempts = attempts + 1
+    until IsAddonVisible("LetterViewer") or attempts >= maxattempts
 
     -- If "LetterList" breaks, timeout to recover opening remaining letters
+
     local max_attempts = 10
     local attempts = 0
-
     repeat
         yield("/callback LetterList true 0 0")
-        Sleep(0.1)
+        Sleep(0.221)
         attempts = attempts + 1
 
         if attempts >= max_attempts then
+            attempts = 0
+            maxattempts = 10
             repeat
                 yield("/callback LetterList true -1")
-            until not IsAddonVisible("LetterList")
+                attempts = attempts + 1
+            until not IsAddonVisible("LetterList") or attempts >= maxattempts
             OpenLetterMenu()
+            return
         end
 
-        Sleep(0.1)
-    until IsAddonVisible("LetterViewer")
+        Sleep(0.222)
+    until IsAddonVisible("LetterViewer") or attempts >= maxattempts
 end
 
 local function TakeLetterContents()
+
     -- Check if "LetterViewer" addon is ready
+    attempts = 0
+    maxattempts = 10
     repeat
-        Sleep(0.1)
-    until IsAddonReady("LetterViewer")
+        Sleep(0.223)
+        attempts = attempts + 1
+    until IsAddonReady("LetterViewer") or attempts >= maxattempts
 
     -- If letter contains "Enclosed" then take items
     -- This also needs visibility check if it gets added here
-    if string.match(GetNodeText("LetterViewer", 28), "Enclosed") and IsNodeVisible("LetterViewer", 1, 2, 5) then
+    --if string.match(GetNodeText("LetterViewer", 28), "Enclosed") and IsNodeVisible("LetterViewer", 1, 2, 5) then
         yield("/callback LetterViewer true 1")
-    end
+        yield("/callback LetterViewer true 1")
+        yield("/callback LetterViewer true 1")
+    --end
+    Sleep(1)
 end
 
 local function DeleteLetter()
+
     -- Check if "LetterViewer" addon is ready
+    attempts = 0
+    maxattempts = 10
     repeat
-        Sleep(0.1)
-    until IsAddonReady("LetterViewer")
+        Sleep(0.224)
+        attempts = attempts + 1
+    until IsAddonReady("LetterViewer") or attempts >= maxattempts
 
     -- Track whether letter has been deleted
     local deleted_letter = false
 
     -- Check whether letter has text and node visibility, then delete the letter
+    attempts = 0
+    maxattempts = 10
     repeat
         if IsAddonReady("LetterViewer") and string.match(GetNodeText("LetterViewer", 28), ".+") then
+            attempts = 0
+            maxattempts = 10
             repeat
                 yield("/callback LetterViewer true 2")
-                Sleep(0.1)
-            until IsAddonReady("SelectYesno") and string.match(GetNodeText("SelectYesno", 15), "Delete this letter?")
+                Sleep(0.225)
+                attempts = attempts + 1
+            until IsAddonReady("SelectYesno") and string.match(GetNodeText("SelectYesno", 15), "Delete this letter?") or attempts >= maxattempts
             yield("/callback SelectYesno true 0")
         end
-        Sleep(0.1)
-    until not IsAddonVisible("LetterViewer") and IsAddonVisible("LetterList")
+        Sleep(0.226)
+        attempts = attempts + 1
+    until (not IsAddonVisible("LetterViewer") and IsAddonVisible("LetterList")) or attempts >= maxattempts
 end
 
 local function RequestLetter()
-    -- Check if "LetterList" addon is ready
-    repeat
-        Sleep(0.1)
-    until IsAddonReady("LetterList")
 
+    -- Check if "LetterList" addon is ready
+    attempts = 0
+    maxattempts = 10
+    repeat
+        Sleep(0.227)
+        attempts = attempts + 1
+    until IsAddonReady("LetterList") or attempts >= maxattempts
+
+    attempts = 0
+    maxattempts = 10
     repeat
         yield("/callback LetterList true 3")
-        Sleep(0.1)
-    until IsAddonReady("SelectYesno") and string.match(GetNodeText("SelectYesno", 15), "Send a request to have recently acquired special")
+        Sleep(0.228)
+        attempts = attempts + 1
+    until IsAddonReady("SelectYesno") and string.match(GetNodeText("SelectYesno", 15), "Send a request to have recently acquired special") or attempts >= maxattempts
 
+    attempts = 0
+    maxattempts = 10
     repeat
+        attempts = attempts + 1
         yield("/callback SelectYesno true 0")
-        Sleep(0.1)
-    until not IsAddonVisible("SelectYesno") and IsAddonVisible("LetterList")
+        Sleep(0.229)
+    until not IsAddonVisible("SelectYesno") and IsAddonVisible("LetterList") or attempts >= maxattempts
 end
 
 -- Flag whether wait for request has been triggered
@@ -246,6 +314,7 @@ function Main()
 
     for i = 1, letter_quantity do
         SelectLetter()
+        Sleep(1)
         TakeLetterContents()
         if IsAddonVisible("LetterViewer") then
             if IsNodeVisible("LetterViewer", 1, 14, 20) or IsNodeVisible("LetterViewer", 1, 2, 5) then
@@ -255,19 +324,32 @@ function Main()
         DeleteLetter()
     end
 
-    RequestLetter()
+--    RequestLetter()
 
     -- Improve this if GetMailQuantity gets added
     if wait_for_request and not wait_for_request_triggered then
         yield("/callback LetterList true -1")
         wait_for_request_triggered = true
-        Sleep(10.0)
+        Sleep(1.0)
         Main()
     end
 end
 
 Main()
+Sleep(1)
+if IsAddonVisible("LetterList") then
+    attempts = 0
+    maxattempts = 10
+    repeat
+        attempts = attempts + 1
+        yield("/callback LetterList true -1")
+    until not IsAddonVisible("LetterList") or attempts >= maxattempts
+end    
 
 if HasPlugin("YesAlready") then
     RestoreYesAlready()
+end
+
+if HasPlugin("TextAdvance") then
+    yield("/at")
 end
