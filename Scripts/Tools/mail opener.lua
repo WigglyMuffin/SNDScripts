@@ -351,5 +351,5 @@ if HasPlugin("YesAlready") then
 end
 
 if HasPlugin("TextAdvance") then
-    yield("/at")
+    yield("/at y")
 end
