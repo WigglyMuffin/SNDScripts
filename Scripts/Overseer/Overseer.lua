@@ -8,7 +8,7 @@
 
 ####################
 ##    Version     ##
-##     1.5.5      ##
+##     1.5.6      ##
 ####################
 
 ####################################################
@@ -2086,11 +2086,11 @@ local function IfAdditionalEntranceExistsPathToIt()
     local entrance = "Entrance to Additional Chambers"
     if DoesObjectExist(entrance) then
         local distance = GetDistanceToObject(entrance)
-        if distance > 3 then
+        if distance > 4.5 then
             Target(entrance)
             yield("/lockon")
             yield("/automove")
-            while distance > 2.5 do
+            while distance > 4 do
                 Sleep(0.1)
                 distance = GetDistanceToObject(entrance)
             end
