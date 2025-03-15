@@ -213,6 +213,7 @@ Overseer implements a robust backup system for your Auto Retainer configuration:
 
 ## Changelog
 
+- **1.5.4**: Updated distance thresholds for object interactions and fixed logging for submersible enabling
 - **1.5.3**: Fixed inefficiencies for use_fc_buff option to not teleport more than needed
 - **1.5.2**:
   - **New feature**: Automatically disables title screen if simple tweaks is installed.

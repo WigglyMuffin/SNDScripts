@@ -8,7 +8,7 @@
 
 ####################
 ##    Version     ##
-##     1.5.3      ##
+##     1.5.4      ##
 ####################
 
 ####################################################
@@ -41,14 +41,14 @@ Optional plugins:
 ##                    Settings                    ##
 ##################################################]]
 
-local disable_gc_delivery = false                -- Disables attempting any kind of gc delivery on falling under either venture or inventory slot limits
+local disable_gc_delivery = true                 -- Disables attempting any kind of gc delivery on falling under either venture or inventory slot limits
 local venture_limit = 100                        -- Minimum value of ventures to trigger buying more ventures, requires Deliveroo to be correctly configured by doing GC deliveries
 local inventory_slot_limit = 30                  -- Amount of inventory slots remaining before attempting a GC delivery to free up slots
 local buy_ceruleum = false                       -- Will attempt to buy ceruleum fuel based on the settings below, if set to false the characters will never attempt to refuel (buy ceruleum fuel off players)
 local ceruleum_limit = 1000                      -- Minimum value of ceruleum fuel to trigger buying ceruleum fuel
 local ceruleum_buy_amount = 99999                -- Amount of ceruleum fuel to be purchased when ceruleum_limit is triggered, will buy up to configured amount when the buy is triggered
 local fc_credits_to_keep = 13000                 -- How many credits to always keep, this limit will be ignored when buying FC buffs for GC deliveries
-local use_fc_buff = true                        -- Will attempt to buy and use the seal sweetener buff when doing GC deliveries
+local use_fc_buff = false                        -- Will attempt to buy and use the seal sweetener buff when doing GC deliveries
 local force_return_subs_that_need_swap = false   -- Will force return submarines to swap parts even if they're already sent out, if set to false it will wait until they're back
 
 -- You can use this setting to have the script automatically shut down the game after X minutes, good if you want to reset the token every day for example
@@ -1657,13 +1657,13 @@ local function RegisterSubmersible()
         return
     end
 
-    if GetDistanceToObject("Voyage Control Panel") > 4.5 then
+    if GetDistanceToObject("Voyage Control Panel") > 3 then
         Target("Voyage Control Panel")
         yield("/lockon")
         yield("/automove")
         repeat
             Sleep(0.1)
-        until GetDistanceToObject("Voyage Control Panel") < 4
+        until GetDistanceToObject("Voyage Control Panel") < 2.5
     end
 
     repeat
@@ -1797,8 +1797,8 @@ local function EnableSubmersible(submersible_number)
 
     table.insert(character.EnabledSubs, submersible_name)
     WriteToARJson(ar_data)
-    LogToInfo("EnableSubmersible: Successfully enabled "..submersible_name)
-    Echo("EnableSubmersible: Successfully enabled "..submersible_name)
+    LogToInfo(1, "EnableSubmersible: Successfully enabled " .. tostring(submersible_name))
+    Echo("EnableSubmersible: Successfully enabled " .. tostring(submersible_name))
 end
 
 -- Function to edit the additional submersible data in ar
@@ -1986,7 +1986,7 @@ end
 
 -- our own version of ARSubsWaitingToBeProcessed
 function SubsWaitingToBeProcessed()
-    if DoesObjectExist("Voyage Control Panel") and GetDistanceToObject("Voyage Control Panel") < 4.5 and IsPlayerAvailable() then
+    if DoesObjectExist("Voyage Control Panel") and GetDistanceToObject("Voyage Control Panel") < 3 and IsPlayerAvailable() then
         ForceARSave()
     end
 
@@ -2003,7 +2003,7 @@ end
 
 -- our own version of ARRetainersWaitingToBeProcessed
 function RetainersWaitingToBeProcessed()
-    if DoesObjectExist("Summoning Bell") and GetDistanceToObject("Summoning Bell") < 4.5 and IsPlayerAvailable() then
+    if DoesObjectExist("Summoning Bell") and GetDistanceToObject("Summoning Bell") < 3 and IsPlayerAvailable() then
         ForceARSave()
     end
 
@@ -2086,11 +2086,11 @@ local function IfAdditionalEntranceExistsPathToIt()
     local entrance = "Entrance to Additional Chambers"
     if DoesObjectExist(entrance) then
         local distance = GetDistanceToObject(entrance)
-        if distance > 3.5 then
+        if distance > 3 then
             Target(entrance)
             yield("/lockon")
             yield("/automove")
-            while distance > 3 do
+            while distance > 2.5 do
                 Sleep(0.1)
                 distance = GetDistanceToObject(entrance)
             end
@@ -2155,11 +2155,11 @@ local function PostARTasks()
                 if not in_submersible_menu then
 
                     -- Move to the panel panel
-                    if GetDistanceToObject("Voyage Control Panel") > 4.5 then
+                    if GetDistanceToObject("Voyage Control Panel") > 3 then
                         Target("Voyage Control Panel")
                         yield("/lockon")
                         yield("/automove")
-                        repeat Sleep(0.1) until GetDistanceToObject("Voyage Control Panel") < 4
+                        repeat Sleep(0.1) until GetDistanceToObject("Voyage Control Panel") < 2.5
                     end
 
                     -- Enter the panel
