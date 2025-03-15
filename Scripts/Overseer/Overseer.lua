@@ -8,7 +8,7 @@
 
 ####################
 ##    Version     ##
-##     1.5.4      ##
+##     1.5.5      ##
 ####################
 
 ####################################################
@@ -1657,13 +1657,13 @@ local function RegisterSubmersible()
         return
     end
 
-    if GetDistanceToObject("Voyage Control Panel") > 3 then
+    if GetDistanceToObject("Voyage Control Panel") > 4.5 then
         Target("Voyage Control Panel")
         yield("/lockon")
         yield("/automove")
         repeat
             Sleep(0.1)
-        until GetDistanceToObject("Voyage Control Panel") < 2.5
+        until GetDistanceToObject("Voyage Control Panel") < 4
     end
 
     repeat
@@ -1986,7 +1986,7 @@ end
 
 -- our own version of ARSubsWaitingToBeProcessed
 function SubsWaitingToBeProcessed()
-    if DoesObjectExist("Voyage Control Panel") and GetDistanceToObject("Voyage Control Panel") < 3 and IsPlayerAvailable() then
+    if DoesObjectExist("Voyage Control Panel") and GetDistanceToObject("Voyage Control Panel") < 4.5 and IsPlayerAvailable() then
         ForceARSave()
     end
 
@@ -2003,7 +2003,7 @@ end
 
 -- our own version of ARRetainersWaitingToBeProcessed
 function RetainersWaitingToBeProcessed()
-    if DoesObjectExist("Summoning Bell") and GetDistanceToObject("Summoning Bell") < 3 and IsPlayerAvailable() then
+    if DoesObjectExist("Summoning Bell") and GetDistanceToObject("Summoning Bell") < 4.5 and IsPlayerAvailable() then
         ForceARSave()
     end
 
@@ -2155,11 +2155,11 @@ local function PostARTasks()
                 if not in_submersible_menu then
 
                     -- Move to the panel panel
-                    if GetDistanceToObject("Voyage Control Panel") > 3 then
+                    if GetDistanceToObject("Voyage Control Panel") > 4.5 then
                         Target("Voyage Control Panel")
                         yield("/lockon")
                         yield("/automove")
-                        repeat Sleep(0.1) until GetDistanceToObject("Voyage Control Panel") < 2.5
+                        repeat Sleep(0.1) until GetDistanceToObject("Voyage Control Panel") < 4
                     end
 
                     -- Enter the panel
