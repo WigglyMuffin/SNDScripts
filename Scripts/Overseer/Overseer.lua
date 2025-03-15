@@ -8,7 +8,7 @@
 
 ####################
 ##    Version     ##
-##     1.5.6      ##
+##     1.5.7      ##
 ####################
 
 ####################################################
@@ -29,13 +29,11 @@ Retainers are planned features, they are not currently supported.
 -> AutoRetainer : https://love.puni.sh/ment.json
 -> Deliveroo : https://plugins.carvel.li/
 -> Lifestream : https://github.com/NightmareXIV/MyDalamudPlugins/raw/main/pluginmaster.json
+-> Simple Tweaks Plugin : In the default first party dalamud repository
 -> Something Need Doing (Expanded Edition) : https://puni.sh/api/repository/croizat
 -> Teleporter : In the default first party dalamud repository
 -> TextAdvance : https://github.com/NightmareXIV/MyDalamudPlugins/raw/main/pluginmaster.json
 -> vnavmesh : https://puni.sh/api/repository/veyn
-
-Optional plugins:
--> Simple Tweaks Plugin: In the default first party dalamud repository
 
 ####################################################
 ##                    Settings                    ##
@@ -117,14 +115,15 @@ local submersible_build_config = {
     {min_rank = 90, max_rank = 120, build = "SSUC", plan_type = 4, unlock_plan = "31d90475-c6a1-4174-9f66-5ec2e1d01074", point_plan = "6e38ab7a-05c2-40b7-84a1-06f087704371"},
 }
 
--- Unlock Plans Configuration   
+-- Unlock Plans Configuration
 -- Input your unlock plan here located in "Open Voyage Unlockable Planner"
 -- You cannot directly copy paste so you will need to manually copy paste each section so it meets the format required
+-- If you already have submersibles, you should use your current plan otherwise you will waste a lot of time unlocking previous zones
 local unlock_plans = {
     {   -- Pinned plan, good enough to unlock OJ but not optimal
         GUID = "579ba94d-4b73-4afe-9be1-999225e24af2",
         Name = "Overseer OJ Unlocker",
-        ExcludedRoutes = { 101,100,99,98,97,96,95,93,92,91,90,89,88,80,81,82,83,84,86,85,87,79,78,77,76,75,74,72,71,70,69,68,67,66,65,64,63,62,61,60,59,58,57,56,55,54,29,24,23,22,21,18,17,16,13,12,11,9,8,7,6,4,3,102,103,104,105,48,36,51,50,46,45,44,41,40,35,53 },
+        ExcludedRoutes = { 101,100,99,98,97,96,95,93,92,91,90,89,88,80,81,82,83,84,86,85,87,79,78,77,76,75,74,72,71,70,69,68,67,66,65,64,63,62,61,60,59,58,57,56,55,54,29,24,23,22,21,17,16,11,9,6,3,102,103,104,105,48,36,51,50,46,45,44,41,40,35,53,107,108,106,109,110,111,112,113,114 },
         UnlockSubs = true
     },
     {   -- Overseer optimal, unlocks all salvage routes whilst being optimal (recommended)
@@ -217,6 +216,7 @@ local required_plugins = {
     AutoRetainer = "4.4.4",
     Deliveroo = "6.6",
     Lifestream = "2.3.2.8",
+    SimpleTweaksPlugin = "1.10.8.0",
     SomethingNeedDoing = "1.75",
     TeleporterPlugin = "2.0.2.5",
     TextAdvance = "3.2.4.4",
@@ -328,7 +328,7 @@ local function ForceARSave()
     if HasPlugin("AutoRetainer") then
         yield("/ays")
         yield("/ays")
-        Sleep(0.2)
+        Sleep(0.211)
     end
 end
 
@@ -1670,7 +1670,7 @@ local function RegisterSubmersible()
         Target("Voyage Control Panel")
         Sleep(0.1)
         yield("/interact")
-        Sleep(0.2)
+        Sleep(0.212)
     until IsAddonReady("SelectString")
 
     repeat
@@ -2090,17 +2090,20 @@ local function IfAdditionalEntranceExistsPathToIt()
             Target(entrance)
             yield("/lockon")
             yield("/automove")
+            Sleep(1.2)
             while distance > 4 do
                 Sleep(0.1)
                 distance = GetDistanceToObject(entrance)
             end
+            yield("/automove")
+            yield("/lockon")
             repeat Sleep(0.1) until not IsMoving()
         end
 
         repeat
             Target(entrance)
             yield("/interact")
-            Sleep(0.2)
+            Sleep(0.213)
         until IsAddonReady("SelectString")
 
         repeat
@@ -2166,7 +2169,7 @@ local function PostARTasks()
                     repeat
                         Target("Voyage Control Panel")
                         yield("/interact")
-                        Sleep(0.2)
+                        Sleep(0.214)
                     until IsAddonReady("SelectString")
 
                     -- Open Submersible Management and wait for next menu to show up
@@ -2704,30 +2707,50 @@ end
 
 local title_screen_unstucker_timer = 0  -- Timer for stuck screen detection
 
+-- Function to handle unstucking from the title screen
+-- This is a workaround for the issue where the title screen gets stuck since AR is too fast
 local function TitleScreenUnstucker()
-    if not IsAddonVisible("_TitleLogo") or IsAddonReady("TitleDCWorldMapBg") and not ARIsBusy() then
+    if not IsAddonReady("_CharaSelectTitle") and not IsAddonVisible("SelectOk") and not IsAddonVisible("SelectYesno") and not ARIsBusy() then
         title_screen_unstucker_timer = title_screen_unstucker_timer + 0.1
         if title_screen_unstucker_timer > 2 then
             if IsAddonReady("TitleDCWorldMapBg") then
                 yield("/callback TitleDCWorldMap true 17 0")
             end
 
-            if IsAddonReady("_CharaSelectTitle") and not IsAddonVisible("SelectOk") and not IsAddonVisible("SelectYesno") and not ARIsBusy() then
-                yield("/callback _CharaSelectReturn true 19")
-            end
-
-            if not IsAddonVisible("_TitleLogo") and not IsAddonVisible("_CharaSelectTitle") then
-                yield("/send ESCAPE")
-            end
-
+            yield("/callback _CharaSelectReturn true 19")
             title_screen_unstucker_timer = 0
         end
     else
         title_screen_unstucker_timer = 0
     end
 
-    Sleep(0.2)
+    Sleep(0.215)
 end
+
+-- local function TitleScreenUnstucker()
+--     if not IsAddonVisible("_TitleLogo") or IsAddonReady("TitleDCWorldMapBg") and not ARIsBusy() then
+--         title_screen_unstucker_timer = title_screen_unstucker_timer + 0.1
+--         if title_screen_unstucker_timer > 2 then
+--             if IsAddonReady("TitleDCWorldMapBg") then
+--                 yield("/callback TitleDCWorldMap true 17 0")
+--             end
+
+--             if IsAddonReady("_CharaSelectTitle") and not IsAddonVisible("SelectOk") and not IsAddonVisible("SelectYesno") and not ARIsBusy() then
+--                 yield("/callback _CharaSelectReturn true 19")
+--             end
+
+--             if not IsAddonVisible("_TitleLogo") and not IsAddonVisible("_CharaSelectTitle") then
+--                 yield("/send ESCAPE")
+--             end
+
+--             title_screen_unstucker_timer = 0
+--         end
+--     else
+--         title_screen_unstucker_timer = 0
+--     end
+
+--     Sleep(0.2)
+-- end
 
 
 local function Main()
@@ -2863,7 +2886,7 @@ local function Main()
 
             if correct_between_characters then
                 CheckAndCorrectAllCharacters()
-                repeat TitleScreenUnstucker() until IsAddonReady("_TitleLogo")
+                repeat TitleScreenUnstucker() until IsAddonReady("_TitleMenu") -- Compatible with Title Edit
             end
 
             repeat Sleep(0.01) until not IsPlayerAvailable()
@@ -2871,7 +2894,7 @@ local function Main()
                 AutoShutdown()
             else
                 EnforceRetainerSchedule()
-                repeat TitleScreenUnstucker() until IsAddonReady("_TitleLogo")
+                repeat TitleScreenUnstucker() until IsAddonReady("_TitleMenu") -- Compatible with Title Edit
                 ARSetMultiModeEnabled(true)
             end
         end

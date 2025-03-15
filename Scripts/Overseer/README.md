@@ -61,6 +61,7 @@ Ensure you have the following plugins installed and enabled:
 - AutoRetainer
 - Deliveroo
 - Lifestream
+- Simple Tweaks
 - Something Need Doing (Expanded Edition)
 - Teleporter
 - TextAdvance
@@ -72,16 +73,17 @@ Ensure you have the following plugins installed and enabled:
 2. Download the latest `vac_function.lua` and `vac_list.lua` files from [SNDScripts](https://github.com/WigglyMuffin/SNDScripts).
 3. Place the `vac_function.lua` and `vac_list.lua` files in your SND config folder (`%appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing`). You can place them elsewhere but you will need to adjust the `load_functions_file_location` line of Overseer to point to the correct path.
 4. Download the latest Overseer script files (both Overseer and Overseer Launcher) from the [Overseer folder](https://github.com/WigglyMuffin/SNDScripts/tree/main/Scripts/Overseer).
-5. Edit Overseer ***OUTSIDE*** of the SND environment to configure the settings, and use the import button to import the script.
+5. Edit Overseer to configure the settings, this can be in an editor of your choice or inside the SND environment, and use the import button to import the script.
 6. Import Overseer and Overseer Launcher into your SND environment (`/snd` and import the scripts using the `Import macro from clipboard` button). Make sure you name the imported scripts in SND to match the file name, and ensure the scripts are listed as `Lua`.
 7. Optionally though recommended to set Overseer Launcher as the script to run on AutoRetainer CharacterPostProcess, located in SND settings (the `?` icon towards the top middle section of the UI).
 8. Make sure you have "Wait on login screen" enabled in your Auto Retainer settings.
 
 ## Getting Started
 
-1. Configure the settings in Overseer (see Configuration section) to match your preferences.
-2. Start the `Overseer Launcher` script, this will load and start Overseer.
-3. Let Overseer optimise your Auto Retainer experience automatically upon AutoRetainer starting.
+1. If this is your first time using Overseer (including first time with a different user account/environment), you need to use `/ays` to open AutoRetainer, go onto the `Statistics` tab and click between the three `Ventures`, `Gil` and `FC Data` tabs, closing AutoRetainer and repeating this a second time, this is to load your character and FC data correctly.
+2. Configure the settings in Overseer (see Configuration section) to match your preferences if you have not done so already.
+3. Start the `Overseer Launcher` script, this will load and start Overseer.
+4. Let Overseer optimise your Auto Retainer experience automatically upon AutoRetainer starting.
 
 ## Configuration
 
@@ -203,6 +205,8 @@ For levelling, all submersibles will follow the `unlock_plan` defined in the con
 - The second, third, and fourth submersibles will use "Unlock + Pick max amount of destinations".
 - Once each individual submersible reaches the configured rank value for farming, they will automatically switch to the `point_plan` you have set, while the remaining submersibles continue to level.
 
+If you already have submersibles and are not starting out, it is advised that you remain on your current `unlock_plan`, otherwise your submersibles will attempt to unlock previous zones and this will slow down your progress, if you used the pinned OJ Unlocker then you only need to swap to that, otherwise if you use a custom plan you will have to manually add it to the `Unlock Plans Configuration` section inside Overseer.
+
 ## Backup System
 
 Overseer implements a robust backup system for your Auto Retainer configuration:
@@ -213,6 +217,7 @@ Overseer implements a robust backup system for your Auto Retainer configuration:
 
 ## Changelog
 
+- **1.5.7**: Fixed movement when inside a house and added compatibility with Title Edit plugin
 - **1.5.6**: Increased distance thresholds for additional entrance interaction
 - **1.5.5**: Reverted distance thresholds for "Voyage Control Panel" and "Summoning Bell" interactions
 - **1.5.4**: Updated distance thresholds for object interactions and fixed logging for submersible enabling
