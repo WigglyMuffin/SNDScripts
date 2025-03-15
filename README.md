@@ -24,9 +24,10 @@ Please note that all our scripts disable the `Yes Already` plugin, that means if
 
 ## Prerequisites
 - All scripts require `vac_functions.lua` and `vac_lists.lua` to be placed in your SND config folder.
-- Some scripts may require specific plugins, which will be noted in their respective sections, in addition to this the script will not run until it detects you have the required plugins.
+- Some scripts may require specific plugins and a minimum plugin version, which will be noted in their respective sections. In addition to this the script will not run until it detects you have the required plugins enabled and at the required version, which will be shown in your chat log.
 - Certain scripts require two service accounts to function properly, this will be noted in each script.
-- Some scripts require the following settings to operate properly, and these settings are handled automatically:
+- Script functionality will break if you have any "auto actions" enabled in plugins such as auto peloton, please ensure you do not have any conflicting settings.
+- Some scripts require the following settings to operate properly, and are handled automatically:
   - SND settings:
     - `UseSNDTargeting` set to true
     - `StopMacroIfActionTimeout` set to false
