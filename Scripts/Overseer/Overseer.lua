@@ -8,7 +8,7 @@
 
 ####################
 ##    Version     ##
-##     1.5.7      ##
+##     1.5.8      ##
 ####################
 
 ####################################################
@@ -2783,6 +2783,11 @@ local function Main()
         already_in_workshop = false
 
         if IsPlayerAvailable() then
+            -- Pause YesAlready since logged in
+            if HasPlugin("YesAlready") then
+                PauseYesAlready()
+            end
+
             retainer_schedule_counter = 0
             local current_character = GetCharacterName(true)
             overseer_current_character = current_character
@@ -2912,7 +2917,10 @@ local function Main()
                 retainer_schedule_counter = retainer_schedule_counter + 1
             end
         end
-
+        -- Restore YesAlready since logged out
+        if HasPlugin("YesAlready") then
+            RestoreYesAlready()
+        end
         TitleScreenUnstucker()
         Sleep(0.8)
     end
