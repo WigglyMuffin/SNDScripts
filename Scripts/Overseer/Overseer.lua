@@ -8,7 +8,7 @@
 
 ####################
 ##    Version     ##
-##     1.5.9      ##
+##     1.6.0      ##
 ####################
 
 ####################################################
@@ -2152,6 +2152,7 @@ end
 -- Function to handle any tasks that need to be done after subs are finished
 local function PostARTasks()
     CreateConfigBackup()
+    ForceARSave() -- Initial save
     UpdateOverseerDataFile(true)
 
     for _, submersible in ipairs(overseer_char_data.submersibles) do
@@ -2312,15 +2313,24 @@ local function PostARTasks()
                 until IsAddonReady("SelectString")
                 swap_done = true
 
+                -- After successful part swap
+                ForceARSave() 
+                Sleep(2) -- Add delay to ensure save completes
+                UpdateOverseerDataFile(true)
+
                 ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior",submersible.optimal_plan_type)
+                ForceARSave()
+                Sleep(1)
 
                 if submersible.optimal_plan_type == 4 then
                     ModifyAdditionalSubmersibleData(submersible.number,"SelectedPointPlan",submersible.optimal_plan)
                 else
                     ModifyAdditionalSubmersibleData(submersible.number,"SelectedUnlockPlan",submersible.optimal_plan)
                 end
+                
+                ForceARSave()
+                Sleep(2)
                 UpdateOverseerDataFile(true)
-
             elseif submersible.return_time < os.time() and not CheckIfWeHaveRequiredParts(submersible.optimal_build, submersible) then
                 ModifyAdditionalSubmersibleData(submersible.number,"VesselBehavior",submersible.optimal_plan_type)
 
@@ -2334,6 +2344,8 @@ local function PostARTasks()
         end
     end
     if swap_done then
+        ForceARSave()
+        Sleep(3) -- Delay after swaps
         UpdateOverseerDataFile(true)
         repeat
             yield("/callback SelectString true -1 0")
@@ -2406,11 +2418,15 @@ local function PostARTasks()
 
     EnableAR()
     if swap_done or registered_sub then
+        ForceARSave()
+        Sleep(2)
         ARSetMultiModeEnabled(true)
         repeat
             Sleep(0.1)
         until not IsPlayerAvailable()
         ARSetMultiModeEnabled(false)
+        ForceARSave()
+        Sleep(2)
         repeat
             Sleep(0.1)
         until IsPlayerAvailable()
