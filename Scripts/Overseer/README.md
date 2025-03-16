@@ -217,6 +217,7 @@ Overseer implements a robust backup system for your Auto Retainer configuration:
 
 ## Changelog
 
+- **1.5.9**: Added rank validation and improved logging in GetOptimalBuildForRank function
 - **1.5.8**: Added pause and restore for YesAlready plugin after player login and logout
 - **1.5.7**: Fixed movement when inside a house and added compatibility with Title Edit plugin
 - **1.5.6**: Increased distance thresholds for additional entrance interaction

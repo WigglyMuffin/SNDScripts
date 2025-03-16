@@ -8,7 +8,7 @@
 
 ####################
 ##    Version     ##
-##     1.5.8      ##
+##     1.5.9      ##
 ####################
 
 ####################################################
@@ -478,12 +478,35 @@ end
 
 -- Helper function to get optimal build for submersible rank
 local function GetOptimalBuildForRank(rank)
+    -- Validate rank input
+    if not rank or type(rank) ~= "number" then
+        LogToInfo(1, "GetOptimalBuildForRank: Invalid rank provided")
+        return "", 0, "00000000-0000-0000-0000-000000000000", "00000000-0000-0000-0000-000000000000", 0, 0
+    end
+
+    -- Sort configurations by min_rank in descending order
+    local sorted_configs = {}
     for _, config in ipairs(submersible_build_config) do
+        table.insert(sorted_configs, config)
+    end
+    table.sort(sorted_configs, function(a, b) return a.min_rank > b.min_rank end)
+
+    -- Single log before search
+    LogToInfo(2, string.format("GetOptimalBuildForRank: Searching optimal build for rank %d", rank))
+
+    -- Find the first matching configuration
+    for _, config in ipairs(sorted_configs) do
         if rank >= config.min_rank and rank <= config.max_rank then
+            -- Log only when match is found
+            LogToInfo(2, string.format("GetOptimalBuildForRank: Found config - min: %d, max: %d, build: %s", 
+                config.min_rank, config.max_rank, config.build))
             return config.build, config.plan_type, config.unlock_plan, config.point_plan, config.min_rank, config.max_rank
         end
     end
-        return "", 0, "00000000-0000-0000-0000-000000000000", "00000000-0000-0000-0000-000000000000", 0, 0  -- Return default values for all values if no matching range found
+
+    -- Single log if no match found
+    LogToInfo(1, "GetOptimalBuildForRank: No matching configuration found")
+    return "", 0, "00000000-0000-0000-0000-000000000000", "00000000-0000-0000-0000-000000000000", 0, 0
 end
 
 -- Helper function to get unlock plan by GUID
