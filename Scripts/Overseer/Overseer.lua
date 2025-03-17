@@ -8,7 +8,7 @@
 
 ####################
 ##    Version     ##
-##     1.6.0      ##
+##     1.6.1      ##
 ####################
 
 ####################################################
@@ -476,78 +476,153 @@ local function GenerateBuildString(part1, part2, part3, part4)
     return build_string
 end
 
--- Helper function to get optimal build for submersible rank
-local function GetOptimalBuildForRank(rank)
-    -- Validate rank input
-    if not rank or type(rank) ~= "number" then
-        LogToInfo(1, "GetOptimalBuildForRank: Invalid rank provided")
-        return "", 0, "00000000-0000-0000-0000-000000000000", "00000000-0000-0000-0000-000000000000", 0, 0
-    end
-
-    -- Sort configurations by min_rank in descending order
-    local sorted_configs = {}
-    for _, config in ipairs(submersible_build_config) do
-        table.insert(sorted_configs, config)
-    end
-    table.sort(sorted_configs, function(a, b) return a.min_rank > b.min_rank end)
-
-    -- Single log before search
-    LogToInfo(2, string.format("GetOptimalBuildForRank: Searching optimal build for rank %d", rank))
-
-    -- Find the first matching configuration
-    for _, config in ipairs(sorted_configs) do
-        if rank >= config.min_rank and rank <= config.max_rank then
-            -- Log only when match is found
-            LogToInfo(2, string.format("GetOptimalBuildForRank: Found config - min: %d, max: %d, build: %s", 
-                config.min_rank, config.max_rank, config.build))
-            return config.build, config.plan_type, config.unlock_plan, config.point_plan, config.min_rank, config.max_rank
-        end
-    end
-
-    -- Single log if no match found
-    LogToInfo(1, "GetOptimalBuildForRank: No matching configuration found")
-    return "", 0, "00000000-0000-0000-0000-000000000000", "00000000-0000-0000-0000-000000000000", 0, 0
+-- Helper function to validate configuration
+local function IsValidConfiguration(config)
+    return config.min_rank and config.max_rank and config.build and 
+           config.plan_type and config.unlock_plan and config.point_plan
 end
 
 -- Helper function to get unlock plan by GUID
 local function GetUnlockPlanByGUID(guid)
-    if guid == nil then
-        LogToInfo(1, "[Oveseer] GetUnlockPlanByGUID: Unlock plan is nil, returning default")
-        return "00000000-0000-0000-0000-000000000000"
+    if not guid then
+        LogToInfo(1, "GetUnlockPlanByGUID: No GUID provided")
+        return nil
+    end
+
+    -- Ensure unlock_plans exists and is a table
+    if not unlock_plans or type(unlock_plans) ~= "table" then
+        LogToInfo(1, "GetUnlockPlanByGUID: unlock_plans is not properly initialized")
+        return nil
     end
 
     for _, plan in ipairs(unlock_plans) do
-        if plan and plan.GUID == guid then
+        if plan.GUID == guid then
+            LogToInfo(2, string.format("GetUnlockPlanByGUID: Found plan '%s' for GUID %s", plan.Name, guid))
             return plan
         end
     end
 
-    LogToInfo(1, "[Oveseer] GetUnlockPlanByGUID: No unlock plan found for the provided GUID.")
+    LogToInfo(1, string.format("GetUnlockPlanByGUID: No plan found for GUID %s", guid))
     return nil
 end
 
 -- Helper function to get point plan by GUID
 local function GetPointPlanByGUID(guid)
-    if guid == nil then
-        LogToInfo(1, "[Oveseer] GetPointPlanByGUID: Point plan is nil, returning default")
-        return "00000000-0000-0000-0000-000000000000"
+    if not guid then
+        LogToInfo(1, "GetPointPlanByGUID: No GUID provided")
+        return nil
+    end
+
+    -- Ensure point_plans exists and is a table
+    if not point_plans or type(point_plans) ~= "table" then
+        LogToInfo(1, "GetPointPlanByGUID: point_plans is not properly initialized")
+        return nil
     end
 
     for _, plan in ipairs(point_plans) do
         if plan.GUID == guid then
+            LogToInfo(2, string.format("GetPointPlanByGUID: Found plan '%s' for GUID %s", plan.Name, guid))
             return plan
         end
     end
-    LogToInfo(1, "[Oveseer] GetPointPlanByGUID: No point plan found for the provided GUID.")
+
+    LogToInfo(1, string.format("GetPointPlanByGUID: No plan found for GUID %s", guid))
     return nil
 end
 
-local function InExclusionList(char_name)
-    for _, name in ipairs(excluded_submersible_character) do
-        if string.lower(name) == string.lower(char_name) then
+-- Helper function to verify plans exist
+local function VerifyPlans(config)
+    local unlock_plan = GetUnlockPlanByGUID(config.unlock_plan)
+    local point_plan = GetPointPlanByGUID(config.point_plan)
+    return unlock_plan and point_plan
+end
+
+-- Helper function to validate build string format
+local function IsValidBuildString(build)
+    return build:match("^[SUWCY+]+$") ~= nil
+end
+
+-- Helper function to process configuration for rank
+local function ProcessConfigurationForRank(config, rank)
+    if not IsValidConfiguration(config) then
+        LogToInfo(1, "Invalid configuration found - missing required fields")
+        return nil
+    end
+
+    if not VerifyPlans(config) then
+        LogToInfo(1, "Invalid configuration - missing referenced plans")
+        return nil
+    end
+
+    if not IsValidBuildString(config.build) then
+        LogToInfo(1, string.format("Invalid build string format: %s", config.build))
+        return nil
+    end
+
+    LogToInfo(2, string.format("Found matching config - min: %d, max: %d, build: %s", 
+        config.min_rank, config.max_rank, config.build))
+
+    return config
+end
+
+-- Helper function to get optimal build for submersible rank
+local function GetOptimalBuildForRank(rank)
+    -- Input validation
+    if not rank or type(rank) ~= "number" then
+        LogToInfo(1, "GetOptimalBuildForRank: Invalid rank provided")
+        return "", 0, "00000000-0000-0000-0000-000000000000", "00000000-0000-0000-0000-000000000000", 0, 0
+    end
+
+    LogToInfo(2, string.format("GetOptimalBuildForRank: Finding optimal build for rank %d", rank))
+
+    -- Find all valid configurations for this rank
+    local valid_configs = {}
+    for _, config in ipairs(submersible_build_config) do
+        if rank >= config.min_rank and rank <= config.max_rank then
+            table.insert(valid_configs, config)
+        end
+    end
+
+    -- Sort valid configs by min_rank in descending order
+    -- This ensures we pick the most appropriate config for higher ranks
+    table.sort(valid_configs, function(a, b)
+        return a.min_rank > b.min_rank
+    end)
+
+    -- Take the first (highest min_rank) config that matches
+    if #valid_configs > 0 then
+        local best_config = valid_configs[1]
+        local processed_config = ProcessConfigurationForRank(best_config, rank)
+        if processed_config then
+            LogToInfo(2, string.format("GetOptimalBuildForRank: Selected config - min_rank: %d, max_rank: %d, build: %s", 
+                best_config.min_rank, best_config.max_rank, best_config.build))
+            return processed_config.build, 
+                   processed_config.plan_type, 
+                   processed_config.unlock_plan, 
+                   processed_config.point_plan, 
+                   processed_config.min_rank, 
+                   processed_config.max_rank
+        end
+    end
+
+    LogToInfo(1, "GetOptimalBuildForRank: No valid configuration found")
+    return "", 0, "00000000-0000-0000-0000-000000000000", "00000000-0000-0000-0000-000000000000", 0, 0
+end
+
+-- Helper function to check if a character is in the exclusion list
+local function InExclusionList(character_name)
+    if not character_name then
+        return false
+    end
+    
+    for _, excluded_character in ipairs(excluded_submersible_character) do
+        if string.lower(excluded_character) == string.lower(character_name) then
+            LogToInfo(2, string.format("InExclusionList: Character %s is in exclusion list", character_name))
             return true
         end
     end
+    
+    LogToInfo(2, string.format("InExclusionList: Character %s is not in exclusion list", character_name))
     return false
 end
 
