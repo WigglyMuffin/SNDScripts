@@ -217,6 +217,7 @@ Overseer implements a robust backup system for your Auto Retainer configuration:
 
 ## Changelog
 
+- **1.6.2**: Added functionality to refresh AutoRetainer data for submersibles
 - **1.6.1**: Improved validation and logging for optimal build configuration retrieval
 - **1.6.0**: Better save functionality and added delays to ensure data consistency during post AR tasks
 - **1.5.9**: Added rank validation and improved logging in GetOptimalBuildForRank function

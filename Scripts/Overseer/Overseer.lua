@@ -2542,6 +2542,21 @@ local function PostARTasks()
             PerformGCDelivery()
         end
     end
+
+    -- Tap the Voyage Control Panel to refresh AutoRetainer data for submersibles
+    if DoesObjectExist"Voyage Control Panel" then
+        repeat
+            Target("Voyage Control Panel")
+            Sleep(0.1)
+            yield("/interact")
+            Sleep(0.212111)
+        until IsAddonReady("SelectString")
+    
+        repeat
+            yield("/callback SelectString true -1 0")
+            Sleep(0.1)
+        until not IsAddonVisible("SelectString")
+    end
 end
 
 -- Function to add all listed unlock plans to the autoretainer default config
