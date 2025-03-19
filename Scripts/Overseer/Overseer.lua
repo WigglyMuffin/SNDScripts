@@ -8,7 +8,7 @@
 
 ####################
 ##    Version     ##
-##     1.6.1      ##
+##     1.6.3      ##
 ####################
 
 ####################################################
@@ -210,6 +210,15 @@ EnsureFolderExists(backup_folder)
 
 -- Load JSON library from vac_functions
 local json = CreateJSONLibrary()
+
+-- Enable AutoRetainer just in case it's not enabled
+if not HasPlugin("AutoRetainer") then
+    yield("/xlenableplugin AutoRetainer")
+    repeat
+        Sleep(0.5)
+    until HasPlugin("AutoRetainer") and type(ARGetInventoryFreeSlotCount()) == "number"
+    yield("/ays")
+end
 
 -- Plugin checker
 local required_plugins = {
