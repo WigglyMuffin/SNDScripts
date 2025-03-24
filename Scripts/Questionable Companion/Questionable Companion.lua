@@ -570,10 +570,10 @@ for _, char in ipairs(chars) do
 
         -- Death handler !!needs to check if not in duty (maybe)
         if GetHP() == 0 then
-            yield("/vbmai off")
-            yield("/vbmai followtarget off")
-            yield("/vbmai followcombat off")
-            yield("/vbmai followoutofcombat off")
+            yield("/vbm ai off")
+            yield("/vbm ai followtarget off")
+            yield("/vbm ai followcombat off")
+            yield("/vbm ai followoutofcombat off")
             yield("/echo [QST Companion] You have died. Returning to home aetheryte.")
             local xpos = GetPlayerRawXPos()
             local ypos = GetPlayerRawYPos()
