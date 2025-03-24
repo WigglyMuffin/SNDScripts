@@ -482,6 +482,10 @@ for _, char in ipairs(chars) do
                     Sleep(1)
                     LogInfo("[QSTC] Stuck checker: Starting questionable again")
                     yield("/qst start")
+                    repeat
+                        Sleep(0.1)
+                    until PathIsRunning()
+                    DoGeneralAction("Jump")
                 else
                     retry_timer = 0
                 end
