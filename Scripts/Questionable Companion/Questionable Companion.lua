@@ -616,8 +616,10 @@ for _, char in ipairs(chars) do
                 end
             end
             LoginCheck()
-            Teleporter(firstAetheryte, "tp")
-            Movement(xpos, ypos, zpos)
+            if firstAetheryte then
+                Teleporter(firstAetheryte, "tp")
+                Movement(xpos, ypos, zpos)
+            end
         end
         LogInfo("[QSTC] Waiting for 1 second...")
         Sleep(1)
