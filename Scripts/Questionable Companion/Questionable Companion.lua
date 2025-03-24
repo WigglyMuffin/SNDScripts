@@ -6,9 +6,10 @@
 
 ####################
 ##    Version     ##
-##     0.2.3      ##
+##     0.2.4      ##
 ####################
 
+-> 0.2.4: Added death handler; will respawn, tp to zone and move to place where you died
 -> 0.2.3: Added an option to remove the entrance restriction placed to stop erroneous duty queueing 
 -> 0.2.2: Added a few more bossmod settings
 -> 0.2.1: Updated the settings companion sets when starting to more optimal ones
@@ -565,6 +566,54 @@ for _, char in ipairs(chars) do
                 WaitforInstanceFinishAndStartQst()
                 LogInfo("[QSTC] Instance helper no longer active")
             end
+        end
+
+        -- Death handler !!needs to check if not in duty (maybe)
+        if GetHP() == 0 then
+            yield("/bmrai off")
+            yield("/bmrai followtarget off")
+            yield("/bmrai followcombat off")
+            yield("/bmrai followoutofcombat off")
+            yield("/echo [QST Companion] You have died. Returning to home aetheryte.")
+            local xpos = GetPlayerRawXPos()
+            local ypos = GetPlayerRawYPos()
+            local zpos = GetPlayerRawZPos()
+            local selectedZoneId = tostring(GetZoneID()) -- Convert Zone ID to string to match Zone_List keys
+            yield("/echo [QST Companion] Selected Zone ID: " .. selectedZoneId)
+            local selectedZone = Zone_List[selectedZoneId] -- Look up the zone in Zone_List
+            local firstAetheryte = nil -- Aetheryte to return to after respawn    
+            if selectedZone then
+                yield("/echo [QST Companion] Found Zone: " .. selectedZone["Zone"])
+                    -- Check if there are Aetherytes available in the zone
+                if #selectedZone["Aetherytes"] > 0 then
+                    -- Iterate through all Aetherytes and find the first unlocked one
+                    for _, aetheryte in ipairs(selectedZone["Aetherytes"]) do
+                        if IsAetheryteAttuned(aetheryte["Name"]) then
+                            firstAetheryte = aetheryte["Name"]
+                            break
+                        end
+                    end
+                    if firstAetheryte then
+                        yield("/echo [QST Companion] Teleporting to: " .. firstAetheryte)
+                    else
+                        yield("/echo [QST Companion] No unlocked aetherytes available in the current zone.")
+                    end 
+                else
+                    yield("/echo [QST Companion] No aetherytes available in the current zone.")
+                end
+            else
+                yield("/echo [QST Companion] Zone not found in Zone_List.") --!!should add handling to this
+            end
+            for i=1, 100 do
+                Sleep(0.1)
+                if IsAddonVisible("SelectYesno") then
+                    yield("/callback SelectYesno true 0")
+                    Sleep(0.1)
+                end
+            end
+            LoginCheck()
+            Teleporter(firstAetheryte, "tp")
+            Movement(xpos, ypos, zpos)
         end
         LogInfo("[QSTC] Waiting for 1 second...")
         Sleep(1)
