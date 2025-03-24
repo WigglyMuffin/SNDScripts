@@ -9,7 +9,7 @@
 ##     0.2.4      ##
 ####################
 
--> 0.2.4: Added death handler; will respawn, tp to zone and move to place where you died
+-> 0.2.4: Added death handler; will respawn, tp to zone and move to place where you died. Added jumping to stuck checker
 -> 0.2.3: Added an option to remove the entrance restriction placed to stop erroneous duty queueing 
 -> 0.2.2: Added a few more bossmod settings
 -> 0.2.1: Updated the settings companion sets when starting to more optimal ones
