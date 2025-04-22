@@ -214,6 +214,7 @@ for index_name, item in pairs(provisioning_list) do
         while not gil_trade_succeeded do
             RefreshInv(item_list)
             -- Set gil amount to 1
+            Sleep(0.1)
             DropboxSetItemQuantity(1, false, 1)
             
             Sleep(0.1)
