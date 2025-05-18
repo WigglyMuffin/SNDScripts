@@ -652,7 +652,7 @@ end
 -- Usage: HuntLogCheck("Amalj'aa Hunter", 9, 0)
 -- Valid classes: 0 = GLA, 1 = PGL, 2 = MRD, 3 = LNC, 4 = ARC, 5 = ROG, 6 = CNJ, 7 = THM, 8 = ACN, 9 = GC
 -- Valid ranks/pages: 0-4 for jobs, 0-2 for GC
--- Opens and checks current progress and returns a true if finished or a false if not
+-- Opens and checks current progress and returns a false if finished or a true if not
 function HuntLogCheck(target_name, class, rank)
     OpenHuntLog(class, rank, 2)
     local node_text = ""
@@ -838,7 +838,7 @@ end
 local mount_message = false
 function Mount(mount_name)
     local max_retries = 10     -- Maximum number of retries
-    local retry_interval = 1.0 -- Time interval between retries in seconds
+    local retry_interval = 1.5 -- Time interval between retries in seconds
     local retries = 0          -- Counter for the number of retries
 
     -- Check if the player has unlocked mounts by checking the quest completion
@@ -865,7 +865,7 @@ function Mount(mount_name)
         -- Retry loop for mounting with a max retry limit (set above)
         while retries < max_retries do
             -- Attempt to mount using the chosen mount or Mount Roulette if none
-            if mount_name == nil then
+            if mount_name == nil or mount_name == "" then
                 yield('/mount "Company Chocobo"')
             else
                 yield('/mount "' .. mount_name .. '"')
@@ -894,6 +894,9 @@ function Mount(mount_name)
         -- Check player is available and mounted
         repeat
             Sleep(0.1)
+            if GetCharacterCondition(26) then
+                break
+            end
         until IsPlayerAvailable() and GetCharacterCondition(4)
     else
         Echo("Not possible to mount here")
@@ -1269,10 +1272,10 @@ function Target(target)
     end
 end
 
--- Usage: DoGcRankUp()
+-- Usage: DoGCRankUp()
 --
 -- Checks if you can rank up in your current gc, then it'll attempt to rank you up
-function DoGcRankUp()
+function DoGCRankUp()
     -- check in case it's called when you can't rank up
     local can_rankup = CanGCRankUp()
     if not can_rankup then
@@ -2316,9 +2319,12 @@ function PartyDisband()
 
         yield("/partycmd disband")
 
-        repeat
+        for i=1, 50 do
             Sleep(0.1)
-        until IsAddonReady("SelectYesno")
+            if IsAddonVisible("SelectYesno") then
+                break
+            end
+        end
         repeat
             if IsAddonReady("SelectYesno") then
                 yield("/callback SelectYesno true 0")
@@ -2819,6 +2825,14 @@ function AutoDutyRun(duty)
     duty = tostring(duty)
     local duty_id = FindDutyID(duty)
     yield("/autoduty run support " .. duty_id .. " 1")
+end
+
+function AutoDutyUnsyncRun(duty)
+    yield("/ad cfg Unsynced true")
+    Sleep(0.1)
+    duty = tostring(duty)
+    local duty_id = FindDutyID(duty)
+    yield("/autoduty run Regular " .. duty_id .. " 1")
 end
 
 -- NEEDS some kind of translation so you can just do "Sastasha" than needing to do 1
@@ -5084,3 +5098,91 @@ function TeleportType(cmd)
     end
     return false
 end
+
+------------------------------------------------------------------------------------------------------
+-- these are Friendly
+function NameChocobo()
+    if IsAddonVisible("InputString") then --for naming chocobo
+        local chocobo_named = false
+        while not chocobo_named do
+            local chocobo_name = "Roach"
+            Echo("Attempting to name chocobo " .. chocobo_name)
+            yield("/pcall InputString true 0 "..chocobo_name.." ")
+            repeat
+                Sleep(0.1)
+            until IsAddonReady("SelectYesno")
+            yield("/pcall SelectYesno true 0")
+            repeat
+                Sleep(0.1)
+            until IsAddonReady("InputString") or IsPlayerAvailable()
+            if IsPlayerAvailable() then
+                chocobo_named = true
+                Echo("Successfully named chocobo " .. chocobo_name)
+            else
+                chocobo_named = false
+                Echo("Failed to name chocobo " .. chocobo_name .. ", trying another name")
+            end
+        end
+    end
+end
+
+function GoToInn()
+    if (GetZoneID() ~= 177 and GetZoneID() ~= 178 and GetZoneID() ~= 179) then -- inn zoneIDs
+        Teleporter("inn", "li") --!!where return location goes
+        Sleep(3)
+        if LifestreamIsBusy() then
+            repeat
+                Sleep(1)
+            until not LifestreamIsBusy() and IsPlayerAvailable()
+        end
+    end
+end
+
+function DoGCQuestRequirements() --!!needs testing
+    local highest_GC_rank = GetFlamesGCRank()
+    if GetMaelstromGCRank() then
+        if highest_GC_rank < GetMaelstromGCRank() then
+            highest_GC_rank = GetMaelstromGCRank()
+        end
+    elseif GetTwinAddersGCRank() then
+        if highest_GC_rank < GetTwinAddersGCRank() then
+            highest_GC_rank = GetTwinAddersGCRank()
+        end
+    end
+    if highest_GC_rank < 9 then --!! need to this quest lookup method
+        local gc_quest_ids = { "700", "701", "702", "697", "921" }
+        local chocobo_quests = { ["700"] = true, ["701"] = true, ["702"] = true }
+        --"700" My Lil Chocobo Twin Adder
+        --"701" MLC Mael
+        --"702" MLC Imm Flames
+        --"697" Hallo Halatali
+        --"921" Dishonor Before Death
+        local gc_quest_id_lookup = {}
+        for _, id in ipairs(gc_quest_ids) do
+            gc_quest_id_lookup[id] = true
+        end
+
+        -- Add priorities
+        for _, id in ipairs(gc_quest_ids) do
+            QuestionableAddQuestPriority(id)
+        end
+
+        yield("/qst start")
+
+        if gc_quest_id_lookup[QuestionableGetCurrentQuestId()] then
+            for i = 1, 450 do
+                if chocobo_quests[QuestionableGetCurrentQuestId()] then
+                    Sleep(1)
+                    NameChocobo()
+                else
+                    yield("/echo Breaking chocobo-quest loop")
+                    yield("/qst stop")
+                    break
+                end
+            end
+        else
+            yield("/qst stop")
+        end
+    end
+end
+
