@@ -3,12 +3,37 @@
 *******************
 
     Version Notes:
+    0.1.1.2  ->    Death handle tweak
     0.1.1.1  ->    Made things more reliable: stop if close enough to flag, prevent getting stuck while attempting to mount. 
     0.1.1.0  ->    Added Flames GC dungeon support, with or without helper toon. See Settings.
     0.1.0.0  ->    Friendly's makeover. Turbocharged for reliability: checks to see if it gets stuck in many places, mount selector, added fate support, etc.
     0.0.1.0  ->    The official versioning of this script begins now. I spent time getting the actual coordinates for the GC log mobs, but the class log mobs still use publicly available coordinates, which are highly inaccurate. pot0to cleaned up a bunch of things, especially a bug that was causing errors with the job to class conversion. I streamlined the pathing process. Originally it used node pathing from Mootykins.
 
 ]]
+--[[**********
+*  Settings  *
+**************
+]]
+
+-- Choose either "class" to do your class log or "GC" to do your Grand Company Log
+local route = "class"
+-- Choose what rank to start 1, 2, 3, 4 or 5
+local rankToDo = 1
+-- Walk or Fly?
+local mount = true -- have you unlocked mounts yet?
+local mount_name = "SDS Fenrir" -- eg. Company Chocobo/SDS Fenrir
+local move_type = "walk"
+-- These variables help with pathing and are used for unstucking
+local interval_rate = 0.3 -- if you set this lower and it creates a bug, set it higher
+local timeout_threshold = 3
+local ping_radius = 20
+local killtimeout_threshold = 30
+
+--GC specific
+local do_dungeons = true -- true/false
+local party_member = "" --Firstname Lastname or leave empty ("") for solo
+local server = "Bismarck" --write the server name to meet the helper
+
     --[[***********
     * Description *
     ***************
@@ -54,31 +79,8 @@
 
     Author(s): CacahuetesManu | pot0to | Friendly
     Functions borrowed from: McVaxius, Umbra, LeafFriend, plottingCreeper, Mootykins and WigglyMuffin
-
---[[**********
-*  Settings  *
-**************
-]]
-
--- Choose either "class" to do your class log or "GC" to do your Grand Company Log
-local route = "GC"
--- Choose what rank to start 1, 2, 3, 4 or 5
-local rankToDo = 1
--- Walk or Fly?
-local mount = true -- have you unlocked mounts yet?
-local mount_name = "SDS Fenrir" -- eg. Company Chocobo/SDS Fenrir
-local move_type = "walk"
--- These variables help with pathing and are used for unstucking
-local interval_rate = 0.3 -- if you set this lower and it creates a bug, set it higher
-local timeout_threshold = 3
-local ping_radius = 20
-local killtimeout_threshold = 30
-
---GC specific
-local do_dungeons = true -- true/false
-local party_member = "" --Firstname Lastname or leave empty ("") for solo
-local server = "Server" --write the server name to meet the helper
---[[****************************
+]] --[[
+********************************
 *  Helper Functions and Files  *
 ********************************
 ]] -- JSON handler is from https://github.com/Egor-Skriptunoff/json4lua/blob/master/json.lua
@@ -684,9 +686,7 @@ for i = 1, #CurrentLog do
                     repeat
                         yield("/tpm " .. ZoneName)
                         Sleep(interval_rate*3+0.0625)
-                        if GetCharacterCondition(2) then
-                            DeathHandler()
-                        end
+                        DeathHandler()
                     until IsPlayerCasting()
                     ZoneTransitions()
                 else
@@ -694,6 +694,7 @@ for i = 1, #CurrentLog do
                         yield("/ctp " .. mobX .. " " .. mobY .. " :" .. ZoneName)
                         repeat
                             Sleep(interval_rate+0.0631)
+                            DeathHandler()
                         until IsPlayerAvailable() and not IsPlayerCasting()
                         while GetCharacterCondition(26) do
                             yield("/battletarget") -- if other mobs are attacking you
