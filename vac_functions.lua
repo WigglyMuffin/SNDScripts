@@ -25,6 +25,7 @@
    - Added SND, Simple Tweaks and CBT settings to be toggled accordingly when scripts are run
    - Added CheckPluginsVersion() to be able to stop plugins if outdated
    - Added CheckPlugins() which combines both CheckPluginsEnabled() and CheckPluginsVersion()
+-> 1.1.1: A few tweaks and functions at the end from Friendly
 
 ####################################################
 ##                  Description                   ##
