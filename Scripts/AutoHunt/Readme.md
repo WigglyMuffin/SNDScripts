@@ -1,4 +1,5 @@
-AutoHunt (formerly Hunt Log Doer)
+## AutoHunt (formerly Hunt Log Doer)
+
 Original by CacahuetesManu https://github.com/CacahuetesManu/SND/tree/main/Hunt%20Log%20Doer
 
 Does one hunt log of your choice a lot more reliably.
