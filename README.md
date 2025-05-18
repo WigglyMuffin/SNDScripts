@@ -12,6 +12,7 @@
    - [Retainer Maker](#retainer-maker)
    - [Tools](#tools)
    - [Trading Scripts](#trading-scripts)
+   - [Character Cycler](#character-cycler)
    - [Retired Scripts](#retired-scripts)
 4. [Planned Changes](#planned-changes)
 5. [Installation](#installation)
@@ -128,6 +129,11 @@ Facilitates item trading between multiple characters. Requires two service accou
 | Post Moogle | Sends items from configured locations |
 
 Both include a CharListGen for easy configuration.
+
+### Character Cycler
+![Status](https://img.shields.io/badge/status-working-brightgreen)
+
+Cycles toons and runs a script on each. Meant to be used with alts, like doing the hunt log and some such.
 
 ### Retired Scripts
 ![Status](https://img.shields.io/badge/status-retired-lightgrey)
