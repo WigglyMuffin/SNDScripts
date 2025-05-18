@@ -6,6 +6,7 @@
 3. [Script Categories](#script-categories)
    - [GC Supply Scripts](#gc-supply-scripts)
    - [Job Unlocker](#job-unlocker)
+   - [AutoHunt](#autohunt)
    - [Overseer](#overseer)
    - [Questionable Companion](#questionable-companion)
    - [Retainer Maker](#retainer-maker)
@@ -64,6 +65,13 @@ Recommended to not use the Enforce Expert Delivery hack inside CBT plugin.
 ![Status](https://img.shields.io/badge/status-broken-red)
 
 Automates GC-related tasks including hunt logs, quest unlocks, and FC-related actions. This will be remade at some point, and is not as complete as the other scripts.
+
+### AutoHunt
+![Status](https://img.shields.io/badge/status-needs_testing-blue)
+![Status](https://img.shields.io/badge/working%3F-probably-aquamarine)
+
+Does one hunt log, might merge with Job unlocker later.
+
 
 ### Overseer
 ![Status](https://img.shields.io/badge/status-needs_testing-blue)
