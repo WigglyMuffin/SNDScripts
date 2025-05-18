@@ -3,7 +3,8 @@
 *******************
 
     Version Notes:
-    0.1.1.2  ->    Death handle tweak
+    0.1.1.3  ->    Added support for all GC dungeons.
+    0.1.1.2  ->    DeathHandler added in a few places
     0.1.1.1  ->    Made things more reliable: stop if close enough to flag, prevent getting stuck while attempting to mount. 
     0.1.1.0  ->    Added Flames GC dungeon support, with or without helper toon. See Settings.
     0.1.0.0  ->    Friendly's makeover. Turbocharged for reliability: checks to see if it gets stuck in many places, mount selector, added fate support, etc.
@@ -16,7 +17,7 @@
 ]]
 
 -- Choose either "class" to do your class log or "GC" to do your Grand Company Log
-local route = "class"
+local route = "GC"
 -- Choose what rank to start 1, 2, 3, 4 or 5
 local rankToDo = 1
 -- Walk or Fly?
@@ -186,7 +187,7 @@ function CheckNavmeshReady()
     was_ready = NavIsReady()
     while not NavIsReady() do
         yield("/echo Building navmesh, currently at " .. Truncate1Dp(NavBuildProgress() * 100) .. "%")
-        Sleep(interval_rate * 10 + 0.0192)
+        Sleep(interval_rate * 10 + 0.0188)
     end
 end
 
@@ -195,7 +196,7 @@ function MountFly()
         while not GetCharacterCondition(4) do
             yield("/mount " .. mount_name)
             repeat
-                Sleep(interval_rate*3 + 0.00201)
+                Sleep(interval_rate*3 + 0.00197)
             until not IsPlayerCasting() and not GetCharacterCondition(57)
         end
         if not GetCharacterCondition(81) and GetCharacterCondition(4) and not GetCharacterCondition(77) and
@@ -203,7 +204,7 @@ function MountFly()
             repeat
                 yield("/echo Jumping to mount")
                 yield("/gaction jump")
-                Sleep(interval_rate*3 + 0.00209)
+                Sleep(interval_rate*3 + 0.00205)
             until GetCharacterCondition(77) and not GetCharacterCondition(48)
         end
     end
@@ -212,13 +213,13 @@ end
 function StopMoveFly()
     PathStop()
     while PathIsRunning() do
-        Sleep(interval_rate + 0.00218)
+        Sleep(interval_rate + 0.00214)
     end
 end
 
 function NodeMoveFly()
     repeat
-        Sleep(interval_rate + 0.00225)
+        Sleep(interval_rate + 0.00220)
     until IsPlayerAvailable()
     CheckNavmeshReady()
     if mount == true and move_type == "fly" then
@@ -258,7 +259,7 @@ function unstuckflag()
             if not (success1 and success2 and success3) then
                 goto continue
             end
-            Sleep(1.60261) --purposeful wait amount, but you can adjust it
+            Sleep(1.60260) --purposeful wait amount, but you can adjust it
             local success4, x2 = pcall(GetPlayerRawXPos)
             local success5, y2 = pcall(GetPlayerRawYPos)
             local success6, z2 = pcall(GetPlayerRawZPos)
@@ -282,7 +283,7 @@ function unstuckflag()
                 elseif retry_timer > 2 then
                     for i = 1, 3 do
                         yield("/gaction jump")
-                        Sleep(0.80282) --purposeful wait amount, but you can adjust it
+                        Sleep(0.80284) --purposeful wait amount, but you can adjust it
                     end
                     yield("/vnav reload")
                     NodeMoveFly()
@@ -308,7 +309,7 @@ function unstucktarget()
             if not (success1 and success2 and success3) then
                 goto continue
             end
-            Sleep(1.30308) --purposeful wait amount, but you can adjust it
+            Sleep(1.30310) --purposeful wait amount, but you can adjust it
             local success4, x2 = pcall(GetPlayerRawXPos)
             local success5, y2 = pcall(GetPlayerRawYPos)
             local success6, z2 = pcall(GetPlayerRawZPos)
@@ -328,7 +329,7 @@ function unstucktarget()
                     TargetMoveFly()
                 elseif retry_timer > 2 then
                     yield("/gaction jump")
-                    Sleep(0.80328) --purposeful wait amount, but you can adjust it
+                    Sleep(0.80330) --purposeful wait amount, but you can adjust it
                     yield("/vnav reload")
                     TargetMoveFly()
                 else
@@ -369,7 +370,7 @@ function MountandMovetoFlag()
         if HasFlightUnlocked(GetZoneID()) and not (IsInZone(146) or IsInZone(180)) then -- vnavmesh has problems in Outer La Noscea and Southern Thanalan
             yield("/gaction jump")
         end
-        Sleep(0.20349)
+        Sleep(0.20371)
         MountFly()
         local rng_offset = 0
         ::APPROXPATH_START::
@@ -378,7 +379,7 @@ function MountandMovetoFlag()
         local node = string.format("NAMENOTGIVEN,%1.f,%1.f,%1.f", rawX, rawY, rawZ)
 
         NodeMoveFly()
-        Sleep(interval_rate * 3 + 0.00358)
+        Sleep(interval_rate * 3 + 0.00380)
         unstuckflag()
         StopMoveFly()
         Dismount()
@@ -409,7 +410,7 @@ end
 function loadupHuntlog()
     ClassID = GetClassJobId()
     rank = rankToDo - 1
-    Sleep(0.20389)
+    Sleep(0.20411)
     if ClassID == 1 or ClassID == 19 then
         pcallClassID = 0 -- Gladiator
     elseif ClassID == 2 or ClassID == 20 then
@@ -432,13 +433,13 @@ function loadupHuntlog()
 
     if route == "GC" then
         yield("/callback MonsterNote true 3 9 " .. GCID) -- this is not really needed, but it's to make sure it's always working
-        Sleep(interval_rate + 0.0412)
+        Sleep(interval_rate + 0.0434)
     elseif route == "class" then
         yield("/callback MonsterNote true 0 " .. pcallClassID) -- this will swap tabs
-        Sleep(interval_rate + 0.0415)
+        Sleep(interval_rate + 0.0437)
     end
     yield("/callback MonsterNote true 1 " .. rank) -- this will swap rank pages
-    Sleep(interval_rate + 0.0418)
+    Sleep(interval_rate + 0.0440)
     yield("/callback MonsterNote false 2 2") -- this will change it to show incomplete
 end
 
@@ -468,7 +469,7 @@ function IncompleteTargets()
         end
     end
 
-    Sleep(interval_rate + 0.0444)
+    Sleep(interval_rate + 0.0470)
     return NextIncompleteTarget
 end
 
@@ -476,7 +477,7 @@ function OpenHuntlog()
     if not IsNodeVisible("MonsterNote", 1) then
         yield("/hlog")
     end
-    Sleep(interval_rate + 0.0452)
+    Sleep(interval_rate + 0.0478)
 end
 
 function hlogRefresh()
@@ -484,13 +485,13 @@ function hlogRefresh()
         killtimeout_start = os.clock()
         yield("/hlog")
         for i=1, 20 do
-            Sleep(0.10460)
+            Sleep(0.10486)
             if IsAddonVisible("MonsterNote") then
                 break
             end
         end
         for i=1, 20 do
-            Sleep(0.10466)
+            Sleep(0.10492)
             if IsAddonVisible("MonsterNote") then
                 break
             end
@@ -504,25 +505,35 @@ function DeathHandler()
         PauseYesAlready()
     end
     if GetCharacterCondition(2) then -- !! something fucky
-        repeat
-            Sleep(0.10478)
-            if IsAddonVisible("SelectYesno") then
+        for i = 1, 200 do
+            Sleep(0.10507)
+            if IsAddonReady("SelectYesno") then
                 yield("/callback SelectYesno true 0")
-                Sleep(0.10481)
+                Sleep(0.10510)
+                break
             end
-        until not GetCharacterCondition(2)
-        ZoneTransitions() --!! probs here if yesalready accepts the res before the script does
-        Sleep(2.0485)
-        yield("/tpm " .. ZoneName)
+        end
+        ZoneTransitions()
+        Sleep(2.0515)
         repeat
-            Sleep(interval_rate*3+0.10488)
+            yield("/tpm " .. ZoneName)
+            Sleep(interval_rate*3+0.10518)
         until IsPlayerCasting()
         ZoneTransitions()
+        RotationStart()
         MountandMovetoFlag()
     end
     if HasPlugin("YesAlready") then
         RestoreYesAlready()
     end
+end
+
+function RotationStart()
+    yield("/rotation manual")
+    yield("/vbmai on")
+    yield("/vbmai followtarget on")
+    yield("/vbmai followoutofcombat on")
+    yield("/vbmai followcombat on")
 end
 
 function DoDungeon()
@@ -548,7 +559,7 @@ function DoDungeon()
     if IsAddonVisible("RetainerList") then
         yield('/callback RetainerList true -1')
     end
-    Sleep(0.50516)
+    Sleep(0.50560)
     if not solo then
         Teleporter(server, "li")
         Teleporter("ul", "tp")
@@ -560,58 +571,149 @@ function DoDungeon()
     end
     while not GetCharacterCondition(34) and not GetCharacterCondition(56) and not GetCharacterCondition(45) and not GetCharacterCondition(51) do
         AutoDutyUnsyncRun(duty)
-        Sleep(3.0525)
+        Sleep(3.0572)
     end
     for i = 1, 5 do
-        Sleep(3.0528)
+        Sleep(3.0575)
     end
     if not solo then
         --yield("/p autofollow") --for autofollow, but it's not great
     end
     local mobs_done = false
     repeat --target mobs for the log as needed, and then dip if solo
-        if not solo then
-            if duty == "Halatali" then
-                if not mobs_done then
+        if duty == "Halatali" then
+            if not mobs_done then
+                if GetPlayerGC() == 1 then --Maelstrom
+                    FindAndKillTarget("Heckler Imp", 20)
+                    Sleep(interval_rate*5+0.0586)
                     FindAndKillTarget("Doctore", 20)
-                    Sleep(interval_rate*5+0.0538)
+                    Sleep(interval_rate*5+0.0588)
+                    if not GetCharacterCondition(26) then --checking the hunt log for mobs repeatedly in combat gave crashes
+                        if not HuntLogCheck("Heckler Imp", 9, 0) and not HuntLogCheck("Doctore", 9, 0) then
+                            mobs_done = true
+                            yield("/echo Non-boss mobs done")
+                        end
+                    end
+                elseif GetPlayerGC() == 2 then --Twin Adders
+                    FindAndKillTarget("Heckler Imp", 20)
+                    Sleep(interval_rate*5+0.0597)
+                    FindAndKillTarget("Scythe Mantis", 20)
+                    Sleep(interval_rate*5+0.0599)
+                    FindAndKillTarget("Coliseum Python", 20)
+                    Sleep(interval_rate*5+0.0601)
+                    if not GetCharacterCondition(26) then --checking the hunt log for mobs repeatedly in combat gave crashes
+                        if not HuntLogCheck("Heckler Imp", 9, 0) and not HuntLogCheck("Scythe Mantis", 9, 0) and not HuntLogCheck("Coliseum Python", 9, 0) then --!!need to check this
+                            mobs_done = true
+                            yield("/echo Non-boss mobs done")
+                        end
+                    end
+                elseif GetPlayerGC() == 3 then --Immortal Flames
+                    FindAndKillTarget("Doctore", 20)
+                    Sleep(interval_rate*5+0.0610)
                     if not GetCharacterCondition(26) then --checking the hunt log for mobs repeatedly in combat gave crashes
                         if not HuntLogCheck("Doctore", 9, 0) then
                             mobs_done = true
                             yield("/echo Non-boss mobs done")
                         end
                     end
-                elseif IsHuntLogComplete(9, 0) then
-                    if solo then
-                        repeat
-                            Sleep(0.50547)
-                        until IsPlayerAvailable()
-                        yield("/leaveduty")
-                    end
                 end
-            elseif duty == "Cutter's Cry" then
-                if not mobs_done then
-                    FindAndKillTarget("Sand Bat", 20)
-                    Sleep(interval_rate*5+0.0552)
-                    FindAndKillTarget("Sabotender Desertor", 20)
-                    Sleep(interval_rate+0.0554)
+            elseif IsHuntLogComplete(9, 0) and solo then
+                repeat
+                    Sleep(0.50620)
+                until IsPlayerAvailable()
+                yield("/leaveduty")
+            end
+        elseif duty == "The Sunken Temple of Qarn" then
+            if not mobs_done then
+                if GetPlayerGC() == 1 then
+                    FindAndKillTarget("Temple Bat", 20)
+                    Sleep(interval_rate*5+0.0628)
+                    FindAndKillTarget("The Condemned", 20)
+                    Sleep(interval_rate*5+0.0630)
                     if not GetCharacterCondition(26) then --checking the hunt log for mobs repeatedly in combat gave crashes
-                        if not HuntLogCheck("Sand Bat", 9, 1) and not HuntLogCheck("Sabotender Desertor", 9, 1) then
+                        if not HuntLogCheck("Temple Bat", 9, 1) and not HuntLogCheck("The Condemned", 9, 1) then
                             mobs_done = true
                             yield("/echo Non-boss mobs done")
                         end
                     end
-                elseif IsHuntLogComplete(9, 1) then 
-                    if solo then
-                        repeat
-                            Sleep(0.50566)
-                        until IsPlayerAvailable()
-                        yield("/leaveduty")
+                elseif GetPlayerGC() == 2 then
+                    FindAndKillTarget("Temple Bee", 20)
+                    Sleep(interval_rate*5+0.0639)
+                    if not GetCharacterCondition(26) then --checking the hunt log for mobs repeatedly in combat gave crashes
+                        if not HuntLogCheck("Temple Bee", 9, 1) then
+                            mobs_done = true
+                            yield("/echo Non-boss mobs done")
+                        end
                     end
                 end
+            elseif IsHuntLogComplete(9, 1) and solo then 
+                repeat
+                    Sleep(0.50649)
+                until IsPlayerAvailable()
+                yield("/leaveduty")
             end
+        elseif duty == "Cutter's Cry" then
+            if not mobs_done then
+                FindAndKillTarget("Sand Bat", 20)
+                Sleep(interval_rate*5+0.0656)
+                FindAndKillTarget("Sabotender Desertor", 20)
+                Sleep(interval_rate+0.0658)
+                if not GetCharacterCondition(26) then --checking the hunt log for mobs repeatedly in combat gave crashes
+                    if not HuntLogCheck("Sand Bat", 9, 1) and not HuntLogCheck("Sabotender Desertor", 9, 1) then
+                        mobs_done = true
+                        yield("/echo Non-boss mobs done")
+                    end
+                end
+            elseif IsHuntLogComplete(9, 1) and solo then 
+                repeat
+                    Sleep(0.50667)
+                until IsPlayerAvailable()
+                yield("/leaveduty")
+            end
+        elseif duty == "The Wanderer's Palace" then
+            if not mobs_done then
+                if GetPlayerGC() == 1 then
+                    FindAndKillTarget("Tonberry", 20)
+                    Sleep(interval_rate*5+0.0675)
+                    if not GetCharacterCondition(26) then --checking the hunt log
+                        if not HuntLogCheck("Tonberry", 9, 2) then
+                            mobs_done = true
+                            yield("/echo Non-boss mobs done")
+                        end
+                    end
+                elseif GetPlayerGC() == 2 then
+                    FindAndKillTarget("Tonberry", 20)
+                    Sleep(interval_rate*5+0.0684)
+                    FindAndKillTarget("Bronze Beetle", 20)
+                    Sleep(interval_rate*5+0.0686)
+                    if not GetCharacterCondition(26) then --checking the hunt log
+                        if not HuntLogCheck("Tonberry", 9, 2) and not HuntLogCheck("Bronze Beetle", 9, 2) then
+                            mobs_done = true
+                            yield("/echo Non-boss mobs done")
+                        end
+                    end
+                elseif GetPlayerGC() == 3 then
+                    FindAndKillTarget("Tonberry", 20)
+                    Sleep(interval_rate*5+0.0695)
+                    FindAndKillTarget("Corrupted Nymian", 20)
+                    Sleep(interval_rate*5+0.0697)
+                    FindAndKillTarget("Soldier of Nym", 20)
+                    Sleep(interval_rate*5+0.0699)
+                    if not GetCharacterCondition(26) then --checking the hunt log
+                        if not HuntLogCheck("Tonberry", 9, 2) and not HuntLogCheck("Corrupted Nymian", 9, 2) and not HuntLogCheck("Soldier of Nym", 9, 2) then
+                            mobs_done = true
+                            yield("/echo Non-boss mobs done")
+                        end
+                    end
+                end
+            elseif IsHuntLogComplete(9, 2) and solo then 
+                repeat
+                    Sleep(0.50709)
+                until IsPlayerAvailable()
+                yield("/leaveduty")
+            end        
         end
-        Sleep(3.0552)
+        Sleep(3.0714)
         LogInfo("[AutoHunt] Waiting for instance to finish...")
     until not GetCharacterCondition(34) and not GetCharacterCondition(56) and not GetCharacterCondition(45) and not GetCharacterCondition(51)
     if not solo then
@@ -663,11 +765,7 @@ for i = 1, #CurrentLog do
 
             yield("/echo " .. mobName .. " in " .. ZoneName .. " is next! We need " .. KillsNeeded)
 
-            yield("/rotation manual")
-            yield("/vbmai on")
-            yield("/vbmai followtarget on")
-            yield("/vbmai followoutofcombat on")
-            yield("/vbmai followcombat on")
+            RotationStart()
 
             if IsInZone(tonumber(mobZone)) then -- If you are in the same zone, no need to teleport
                 -- Here we use a plugin called ChatCoordinates to make a flag and teleport to the zone if needed
@@ -676,16 +774,16 @@ for i = 1, #CurrentLog do
                     yield("/echo Using better coordinates.") -- the ones with height data
                 else
                     yield("/coord " .. mobX .. " " .. mobY .. " :" .. ZoneName)
-                    Sleep(interval_rate + 0.0616)
+                    Sleep(interval_rate + 0.0775)
                 end
             else
                 if mobZ then
                     SetMapFlag(mobZone, mobX, mobY, mobZ)
-                    Sleep(interval_rate*2 + 0.0621)
+                    Sleep(interval_rate*2 + 0.0780)
                     yield("/echo Using better coordinates.")
                     repeat
                         yield("/tpm " .. ZoneName)
-                        Sleep(interval_rate*3+0.0625)
+                        Sleep(interval_rate*3+0.0784)
                         DeathHandler()
                     until IsPlayerCasting()
                     ZoneTransitions()
@@ -693,19 +791,19 @@ for i = 1, #CurrentLog do
                     while not IsInZone(tonumber(mobZone)) do -- addresses getting attacked during tp
                         yield("/ctp " .. mobX .. " " .. mobY .. " :" .. ZoneName)
                         repeat
-                            Sleep(interval_rate+0.0631)
+                            Sleep(interval_rate+0.0792)
                             DeathHandler()
                         until IsPlayerAvailable() and not IsPlayerCasting()
                         while GetCharacterCondition(26) do
                             yield("/battletarget") -- if other mobs are attacking you
-                            Sleep(0.10635)
+                            Sleep(0.10797)
                             TargetMoveFly()
                             if PathIsRunning() or PathfindInProgress() then
                                 yield("/echo Attacking " .. mobName .. " moving closer.")
                                 if GetDistanceToTarget() > 15 then
                                     unstucktarget()
                                 elseif GetDistanceToTarget() > 3.9 then
-                                    Sleep(1.0642)
+                                    Sleep(1.0804)
                                 end
                             end
                         end
@@ -740,11 +838,11 @@ for i = 1, #CurrentLog do
 
             while IsMoving() or PathIsRunning() or PathfindInProgress() do
                 yield("/echo Moving to next area...")
-                Sleep(1.0676)
+                Sleep(1.0839)
             end
 
             if not IsMoving() then
-                Sleep(0.10680)
+                Sleep(0.10843)
                 Dismount()
             end
 
@@ -758,45 +856,45 @@ for i = 1, #CurrentLog do
                 if not GetCharacterCondition(26) then
                     DeathHandler()
                     yield("/target \"" .. mobName .. "\"")
-                    Sleep(0.10693)
+                    Sleep(0.10857)
                     TargetMoveFly()
-                    Sleep(0.20695)
+                    Sleep(0.20859)
                     if PathIsRunning() or PathfindInProgress() then
                         yield("/echo Found " .. mobName .. " moving closer.")
                         if GetDistanceToTarget() > 15 then
                             unstucktarget()
                         elseif GetDistanceToTarget() > 3.9 then
-                            Sleep(1.0701)
+                            Sleep(1.0865)
                         end
                     end
                     if IsInFate() and not IsLevelSynced() then
                         yield("/lsync")
                     end
-                    Sleep(0.10707)                
+                    Sleep(0.10871)                
                     Dismount()
                     yield('/action "Auto-attack"')
-                    Sleep(0.10710)
+                    Sleep(0.10874)
                 else
                     yield("/echo In combat against " .. GetTargetName())
-                    Sleep(0.10713)
+                    Sleep(0.10877)
                     if IsInFate() and not IsLevelSynced() then
                         yield("/lsync")
                     end
                     yield('/action "Auto-attack"')
                     if not HasTarget() then
                         yield("/battletarget") -- if other mobs are attacking you
-                        Sleep(0.10719)
+                        Sleep(0.10884)
                         TargetMoveFly()
                         if GetDistanceToTarget() > 15 then
                             unstucktarget()
                         elseif GetDistanceToTarget() > 3.9 then
-                            Sleep(1.0724)
+                            Sleep(1.0889)
                         end
                     end
                 end
                 yield("/vnav stop")
                 hlogRefresh()
-                Sleep(3.0764)
+                Sleep(3.0895)
             end
         end
     end
@@ -806,7 +904,7 @@ LogInfo("[AutoHunt]Finished overworld hunt log for Rank " .. rankToDo .. "!")
 
 if do_dungeons then
     DoDungeon()
-    Sleep(1.0739)
+    Sleep(1.0905)
     yield("/echo Finished dungeon hunt log for Rank " .. rankToDo .. "!")
 end
 
