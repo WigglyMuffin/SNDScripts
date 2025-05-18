@@ -70,7 +70,7 @@ Automates GC-related tasks including hunt logs, quest unlocks, and FC-related ac
 ![Status](https://img.shields.io/badge/status-needs_testing-blue)
 ![Status](https://img.shields.io/badge/working%3F-probably-aquamarine)
 
-Does one hunt log, might merge with Job unlocker later.
+Does one hunt log of your choice, including dungeon mobs. Currently only tested with Flames 1-2 and Marauder 1.
 
 
 ### Overseer
