@@ -129,8 +129,6 @@ local function OpenLetterMenu()
         for _, target_name in ipairs(targets) do
             if Target(target_name) then
                 break  -- Exit the loop once a target is found
-            else
-                return  -- Exit if no target is found
             end
         end
 
