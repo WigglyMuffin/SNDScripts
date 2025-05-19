@@ -22,6 +22,9 @@
     - Disabled RequestLetter() function as it tends to get stuck (for me at least)
     - Added re-enabling Text Advance
 
+-> 1.0.3:
+    - Small tweak to enable all letterboxes
+
 ####################################################
 ##                  Description                   ##
 ####################################################
