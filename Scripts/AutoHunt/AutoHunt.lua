@@ -951,8 +951,10 @@ if rank_up then
     elseif CanGCRankUp() then
         Teleporter("gc", "li")
     end
-    DoGCRankUp()
     yield("/cbt disable MaxGCRank")
+    repeat
+	DoGCRankUp()
+    until not CanGCRankUp()
 end
 
 
