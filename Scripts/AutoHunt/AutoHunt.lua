@@ -102,7 +102,7 @@ LoadFunctionsFileLocation = SNDConfigFolder .. "vac_functions.lua"
 LoadFunctions = loadfile(LoadFunctionsFileLocation)()
 LoadFileCheck()
 
-************************
+--[[********************
 *  Required Functions  *
 ************************
 ]]
