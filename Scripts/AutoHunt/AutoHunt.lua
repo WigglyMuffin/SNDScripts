@@ -1,8 +1,8 @@
 --[[***************
 *     AutoHunt    *
 *******************
-
     Version Notes:
+    0.1.1.4  ->    GC rank-up option added, does turnin for seals if needed for rank up.
     0.1.1.3  ->    Added support for all GC dungeons.
     0.1.1.2  ->    DeathHandler added in a few places
     0.1.1.1  ->    Made things more reliable: stop if close enough to flag, prevent getting stuck while attempting to mount. 
@@ -10,55 +10,56 @@
     0.1.0.0  ->    Friendly's makeover. Turbocharged for reliability: checks to see if it gets stuck in many places, mount selector, added fate support, etc.
     0.0.1.0  ->    The official versioning of this script begins now. I spent time getting the actual coordinates for the GC log mobs, but the class log mobs still use publicly available coordinates, which are highly inaccurate. pot0to cleaned up a bunch of things, especially a bug that was causing errors with the job to class conversion. I streamlined the pathing process. Originally it used node pathing from Mootykins.
 
-]]
---[[**********
-*  Settings  *
-**************
-]]
-
--- Choose either "class" to do your class log or "GC" to do your Grand Company Log
-local route = "GC"
--- Choose what rank to start 1, 2, 3, 4 or 5
-local rankToDo = 1
--- Walk or Fly?
-local mount = true -- have you unlocked mounts yet?
-local mount_name = "SDS Fenrir" -- eg. Company Chocobo/SDS Fenrir
-local move_type = "walk"
--- These variables help with pathing and are used for unstucking
-local interval_rate = 0.3 -- if you set this lower and it creates a bug, set it higher
-local timeout_threshold = 3
-local ping_radius = 20
-local killtimeout_threshold = 30
-
---GC specific
-local do_dungeons = true -- true/false
-local party_member = "" --Firstname Lastname or leave empty ("") for solo
-local server = "Bismarck" --write the server name to meet the helper
-
-    --[[***********
+    ***************
     * Description *
     ***************
-
     A SND Lua script that allows you to loop through all the incomplete mobs in your hunt log for a given class/GC and rank.
-    Includes dungeon mobs.
+    Does dungeon mobs for GC logs, leaves duty after completing log if there's no party member.
+    Does GC rankups, will try to exchange seals if that's preventing you from ranking up.
+    Goes back to inn after.
+
+    **************
+    *  Settings  *
+    ************]]
+-- Choose either "class" to do your class log or "GC" to do your Grand Company Log
+local route = "GC"
+-- Choose what rank to finish: 1, 2, 3, 4 or 5
+local rankToDo = 1
+
+-- Movement
+local mount = true -- have you unlocked mounts yet?
+local mount_name = "SDS Fenrir" -- "Company Chocobo" or "SDS Fenrir" or any other mount name
+local move_type = "walk" -- "walk" or "fly"
+
+-- These variables help with pathing and are used for unstucking
+local interval_rate = 0.3 -- sets many waiting times, if you set this lower and it creates a bug, set it higher
+local ping_radius = 20 -- distance to flag before we stop moving
+local killtimeout_threshold = 30 -- lower limit for refreshing the hunt log
+
+--GC specific
+local do_dungeons = true -- true/false, do GC dungeon mobs, leaves after log is done
+local rank_up = true -- true/false, attempt to rank up after finishing the log, does turnin for seals.
+local party_member = "" --Firstname Lastname or leave empty ("") for solo
+local server = "" --write the server name to meet the helper eg. "Lich"
  
-    ****************
+    --[[************
     *    Agenda    *
     ****************
     If possible, look for any uncompleted mobs in the hunt log while travelling.
-    Skip dungeon mobs in other GC logs to IncompleteTargets function.
     Test all the mobs.
+    (If needed) Sort out issues arising from partly cleared dungeon mobs.
     
     *********************
     *    Requirements   *
     *********************
     -> Chat Coordinates: Dalamud
-    -> Pandora Box: https://love.puni.sh/ment.json
+    -> Pandora's Box: https://love.puni.sh/ment.json
     -> vnavmesh: https://puni.sh/api/repository/veyn
     -> RSR: https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
     -> vbm : https://puni.sh/api/repository/veyn
     -> SomethingNeedDoing (Expanded Edition) [Make sure to press the lua button when you import this] -> https://puni.sh/api/repository/croizat
     -> Teleporter: Dalamud
+    -> CBT: for Expert Delivery before unlocking it https://puni.sh/api/repository/croizat
     -> monsters.json: needs to be in %appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\ . Has the mob coords.
     -> VAC functions and lists - https://github.com/WigglyMuffin/SNDScripts/tree/main
 
@@ -72,15 +73,14 @@ local server = "Bismarck" --write the server name to meet the helper
                 2. Make sure to set up your paths. Use the Lua path setting in the SND help config.
     -> RSR:
                 1. Change RSR to attack ALL enemies when solo, or previously engaged.
-                2. Disable "Treat 1hp target as invincible"
+                2. Disable "Treat 1hp target as invincible" --rarely you may get stuck otherwise
 
     ***********
     * Credits *
     ***********
-
     Author(s): CacahuetesManu | pot0to | Friendly
     Functions borrowed from: McVaxius, Umbra, LeafFriend, plottingCreeper, Mootykins and WigglyMuffin
-]] --[[
+
 ********************************
 *  Helper Functions and Files  *
 ********************************
@@ -102,14 +102,12 @@ LoadFunctionsFileLocation = SNDConfigFolder .. "vac_functions.lua"
 LoadFunctions = loadfile(LoadFunctionsFileLocation)()
 LoadFileCheck()
 
---[[
 ************************
 *  Required Functions  *
 ************************
 ]]
 
 -- Call user provided input to figure out if we should work on Class Log or Hunt Log
-
 if route == "class" then
     if GetClassJobId() > 18 and GetClassJobId() < 25 then
         ClassID = GetClassJobId() - 18
@@ -127,7 +125,6 @@ elseif route == "GC" then
 end
 
 -- This Function is used within json.traverse to figure out where in the JSON we want to extract data.
-
 local function my_callback(path, json_type, value)
     if #path == 4 and path[#path - 2] == LogFinder and path[#path - 1] == rankToDo then
         CurrentLog = value
@@ -907,6 +904,57 @@ if do_dungeons then
     Sleep(1.0905)
     yield("/echo Finished dungeon hunt log for Rank " .. rankToDo .. "!")
 end
+
+if rank_up then
+    if GetPlayerGC() == 1 then -- checks if gc is maelstrom and adds seal amount to current_seals
+        current_seals = GetItemCount(20)
+        gc_rank = GetMaelstromGCRank()
+    elseif GetPlayerGC() == 2 then -- checks if gc is twin adder and adds seal amount to current_seals
+        current_seals = GetItemCount(21)
+        gc_rank = GetAddersGCRank()
+    elseif GetPlayerGC() == 3 then -- checks if gc is immortal flames and adds seal amount to current_seals
+        current_seals = GetItemCount(22)
+        gc_rank = GetFlamesGCRank()
+    end
+    if not CanGCRankUp() and gc_rank < 10 and current_seals < 10000 then --checks if low seals is preventing rankup and exclude high ranks that are out of scope
+        Teleporter("gc", "li")
+	    if not CanExpertDelivery() then
+            yield("/cbt enable MaxGCRank")
+        end
+        yield("/deliveroo e")
+        for i=1, 20 do
+            Sleep(0.955)
+            if IsAddonVisible("GrandCompanySupplyList") then
+                break
+            end
+        end
+        repeat
+            Sleep(0.10922)
+        until not IsAddonVisible("GrandCompanySupplyList") or IsAddonVisible("SelectYesno") or IsPlayerAvailable()
+        yield("/deliveroo d")
+        repeat
+            Sleep(1.10930)
+            if IsAddonVisible("GrandCompanySupplyList") then
+                yield("/callback GrandCompanySupplyList true -1")
+                Sleep(0.10933)
+            elseif IsAddonVisible("SelectYesno") then
+                yield("/callback SelectYesno true 1")
+                Sleep(0.10936)
+            elseif IsAddonVisible("SelectString") then
+                yield("/callback SelectString true 4")
+                Sleep(0.10939)
+            elseif IsAddonVisible("GrandCompanyExchange") then
+                yield("/callback GrandCompanyExchange true -1")
+                Sleep(0.10942)
+            end
+        until not IsAddonVisible("GrandCompanySupplyList") and not IsAddonVisible("SelectString") and not IsAddonVisible("GrandCompanyExchange") and not IsAddonVisible("GrandCompanySupplyList") and IsPlayerAvailable()
+    elseif CanGCRankUp() then
+        Teleporter("gc", "li")
+    end
+    DoGCRankUp()
+    yield("/cbt disable MaxGCRank")
+end
+
 
 if (GetZoneID() ~= 177 and GetZoneID() ~= 178 and GetZoneID() ~= 179) then
     Teleporter("inn", "li")
