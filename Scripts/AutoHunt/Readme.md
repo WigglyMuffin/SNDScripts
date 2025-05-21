@@ -25,5 +25,6 @@ If you find a bug in the script and it's not in the list below, before you repor
     Skip dungeon mobs in other GC logs to IncompleteTargets function.
     Test all the mobs.
 You can help with this. If the script gets stuck, manually go the position you should go for this mob (try to have as many within range as possible).
-    Get coordinates from eg. Questionable plugin (see pic) and either make a PR here or send me the mob and coords on discord (Friendly on Punish). ![image](https://github.com/user-attachments/assets/ee348812-3d1f-4581-b731-07ec9093c954)
+Get coordinates from eg. Questionable plugin (see pic) and either make a PR here or send me the mob and coords on discord (Friendly on Punish). 
+![image](https://github.com/user-attachments/assets/ee348812-3d1f-4581-b731-07ec9093c954)
 
