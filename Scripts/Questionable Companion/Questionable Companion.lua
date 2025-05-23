@@ -5,8 +5,9 @@
 
 ####################
 ##    Version     ##
-##     0.3.0      ##
+##     0.3.1      ##
 ####################
+-> 0.3.1: Removed old vbm command (unsure if it needs to be replaced) and fixed a bug with Death handler
 -> 0.3.0: Reorganised and added misc fixes to the end, now turns off autoretainer in case you start it as a post-process script
 -> 0.2.9: Changed RSR commands to use auto; added return path in case you get stuck on the east half of Easter La Noscea.
 -> 0.2.8: Starts a full loop from current character instead of always #1 on char_list.
@@ -702,18 +703,16 @@ for i = 0, #character_list - 1 do
         -- Death handler
         if GetCharacterCondition(2) and not GetCharacterCondition(34) then        
                 yield("/vbm ai off")
-                yield("/vbm ai followtarget off")
-                yield("/vbm ai followcombat off")
-                yield("/echo [QST Companion] You have died. Returning to home aetheryte.")
+                yield("/echo [QST Companion] You have died. Returning to home aetheryte and attempting to get back to where you died.")
                 local xpos = GetPlayerRawXPos()
                 local ypos = GetPlayerRawYPos()
                 local zpos = GetPlayerRawZPos()
                 local selectedZoneId = tostring(GetZoneID()) -- Convert Zone ID to string to match Zone_List keys
-                yield("/echo [QST Companion] Selected Zone ID: " .. selectedZoneId)
+                LogInfo("[QST Companion] Selected Zone ID: " .. selectedZoneId)
                 local selectedZone = Zone_List[selectedZoneId] -- Look up the zone in Zone_List
                 local firstAetheryte = nil -- Aetheryte to return to after respawn    
                 if selectedZone then
-                    yield("/echo [QST Companion] Found Zone: " .. selectedZone["Zone"])
+                    LogInfo("[QST Companion] Found Zone: " .. selectedZone["Zone"])
                         -- Check if there are Aetherytes available in the zone
                     if #selectedZone["Aetherytes"] > 0 then
                         -- Iterate through all Aetherytes and find the first unlocked one
@@ -740,12 +739,13 @@ for i = 0, #character_list - 1 do
                         yield("/callback SelectYesno true 0")
                         Sleep(0.1)
                     end
-                until not GetCharacterCondition(2)
+                until not GetCharacterCondition(2) or GetCharacterCondition(45) or GetCharacterCondition(51)
                 ZoneTransitions()
-                Sleep(2)
                 if firstAetheryte then
                     Teleporter(firstAetheryte, "tp")
                     Movement(xpos, ypos, zpos)
+                else
+                    Echo("Can't resume due to no aetheryte unlocked in target region. Script will go next toon soon.")
                 end
         end
         --Misc fixes
