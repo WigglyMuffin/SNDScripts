@@ -3181,7 +3181,7 @@ function IsHuntLogComplete(class, rank)
     end
 end
 
--- Usage: IsHuntLogComplete(9, 0) or IsHuntLogComplete(0, 1)
+-- Usage: GetNextIncompleteHuntLog(9) // IsHuntLogComplete()
 -- Checks what is the next incomplete hunt log, returns nil if there are none.
 -- Valid jobs: 0 = GLA, 1 = PGL, 2 = MRD, 3 = LNC, 4 = ARC, 5 = ROG, 6 = CNJ, 7 = THM, 8 = ACN, 9 = GC
 function GetNextIncompleteHuntLog(class)
@@ -5292,3 +5292,4 @@ function DoGCQuestRequirements() --!! needs proper implementation
         yield("/qst stop")
     end
 end
+
