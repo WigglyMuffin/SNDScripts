@@ -61,7 +61,7 @@ local server = "" --write the server name to meet the helper eg. "Lich"
     -> Teleporter: Dalamud
     -> CBT: for Expert Delivery before unlocking it https://puni.sh/api/repository/croizat
     -> monsters.json: needs to be in %appdata%\XIVLauncher\pluginConfigs\SomethingNeedDoing\ . Has the mob coords.
-    -> VAC functions and lists - https://github.com/WigglyMuffin/SNDScripts/tree/main
+    -> vac_functions and vac_lists - https://github.com/WigglyMuffin/SNDScripts/tree/main
 
     *****************************
     *  Required Plugin Settings *
@@ -96,7 +96,6 @@ local stringmonsters = monsters:read "*a"
 monsters:close()
 
 -- VAC stuff
-char_list = "vac_char_list.lua"
 SNDConfigFolder = os.getenv("appdata") .. "\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing\\"
 LoadFunctionsFileLocation = SNDConfigFolder .. "vac_functions.lua"
 LoadFunctions = loadfile(LoadFunctionsFileLocation)()
