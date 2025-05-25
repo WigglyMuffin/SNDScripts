@@ -5,9 +5,10 @@
 
 ####################
 ##    Version     ##
-##     0.3.1      ##
+##     0.3.2      ##
 ####################
--> 0.3.1: Removed old vbm command (unsure if it needs to be replaced) and fixed a bug with Death handler
+-> 0.3.2: Death handler now also handles The Dravanian Hinterlands
+-> 0.3.1: Removed old vbm command and fixed a bug with Death handler
 -> 0.3.0: Reorganised and added misc fixes to the end, now turns off autoretainer in case you start it as a post-process script
 -> 0.2.9: Changed RSR commands to use auto; added return path in case you get stuck on the east half of Easter La Noscea.
 -> 0.2.8: Starts a full loop from current character instead of always #1 on char_list.
@@ -610,15 +611,16 @@ for i = 0, #character_list - 1 do
         end
 
         -- Stuck checker for duties
+        --AD now has a built-in stuck checker, this is for when that doesn't work
         if GetLevel() < 50 then --only tested till 50
-            while GetCharacterCondition(34) and not GetCharacterCondition(26) do
+            while GetCharacterCondition(34) and not GetCharacterCondition(26) and PathIsRunning() do
                 local success1, x1 = pcall(GetPlayerRawXPos)
                 local success2, y1 = pcall(GetPlayerRawYPos)
                 local success3, z1 = pcall(GetPlayerRawZPos)
                 if not (success1 and success2 and success3) then
                     break
                 end
-                for i=1, 30 do --this is so long because otherwise it may get stuck in a loop. keep in mind the path may start from the beginning if you die; being on a path step to fight an already killed boss+picking up an item that's been already been picked up can take a while, all without moving. Reduce carefully.
+                for i=1, 30 do --this is so long because otherwise it may get stuck in a loop. Reduce only with caution.
                     Sleep(1)
                 end
                 local success4, x2 = pcall(GetPlayerRawXPos)
@@ -703,7 +705,7 @@ for i = 0, #character_list - 1 do
         -- Death handler
         if GetCharacterCondition(2) and not GetCharacterCondition(34) then        
                 yield("/vbm ai off")
-                yield("/echo [QST Companion] You have died. Returning to home aetheryte and attempting to get back to where you died.")
+                Echo("[QST Companion] Toon died. Returning to home aetheryte and attempting to get back.")
                 local xpos = GetPlayerRawXPos()
                 local ypos = GetPlayerRawYPos()
                 local zpos = GetPlayerRawZPos()
@@ -723,15 +725,17 @@ for i = 0, #character_list - 1 do
                             end
                         end
                         if firstAetheryte then
-                            yield("/echo [QST Companion] Teleporting to: " .. firstAetheryte)
+                            LogInfo("[QST Companion] Teleporting to: " .. firstAetheryte)
                         else
-                            yield("/echo [QST Companion] No unlocked aetherytes available in the current zone.")
+                            Echo("[QST Companion] No unlocked aetherytes available in the current zone.")
                         end 
+                    elseif selectedZone == "The Dravanian Hinterlands" then
+                        firstAetheryte = "Idyllshire"
                     else
-                        yield("/echo [QST Companion] No aetherytes available in the current zone.")
+                        Echo("[QST Companion] No aetherytes available in the current zone.")
                     end
                 else
-                    yield("/echo [QST Companion] Zone not found in Zone_List.") --!!should add handling to this
+                    Echo("[QST Companion] Zone not found in Zone_List. Speak to an author about adding it.")
                 end
                 repeat
                     Sleep(0.1)
@@ -743,6 +747,14 @@ for i = 0, #character_list - 1 do
                 ZoneTransitions()
                 if firstAetheryte then
                     Teleporter(firstAetheryte, "tp")
+                    if selectedZone == "The Dravanian Hinterlands" then
+                        PathToObject("Aetheryte", 2)
+                        if zpos > xpos*3+588 then --this draws a dividing line between the east and west parts
+                            Teleporter("prologue gate", "li")
+                        else
+                            Teleporter("epilogue gate", "li")
+                        end
+                    end
                     Movement(xpos, ypos, zpos)
                 else
                     Echo("Can't resume due to no aetheryte unlocked in target region. Script will go next toon soon.")
