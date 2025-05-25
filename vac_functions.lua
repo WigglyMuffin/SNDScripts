@@ -26,6 +26,7 @@
    - Added CheckPluginsVersion() to be able to stop plugins if outdated
    - Added CheckPlugins() which combines both CheckPluginsEnabled() and CheckPluginsVersion()
 -> 1.1.1: A few tweaks and functions at the end from Friendly
+-> 1.1.2: Nodescanner Sleep(0.0001) added to prevent crashes and a few new functions for AutoHunt
 
 ####################################################
 ##                  Description                   ##
@@ -259,6 +260,7 @@ end
 
 -- Usage: ZoneTransitions()
 -- Zone transition checker, used if you need to path between two zones and waits until player is available
+-- Don't use this in places where you may get attacked or otherwise fail to change zones
 function ZoneTransitions()
     -- Wait for a zone transition to complete
     repeat
@@ -575,7 +577,7 @@ function NodeScanner(get_node_text_type, get_node_text_match)
     end
     for location = 0, node_type_count do
         for sub_node = 0, 60 do
-            --Sleep(0.0001)
+            Sleep(0.0001)
             local node_check = GetNodeText(get_node_text_type, location, sub_node)
             local clean_node_text = extractTask(node_check)
             if clean_node_text == nil then
@@ -591,7 +593,7 @@ function NodeScanner(get_node_text_type, get_node_text_match)
     for location = 0, node_type_count do
         for sub_node = 0, 60 do
             for sub_node2 = 0, 20 do
-                --Sleep(0.0001)
+                Sleep(0.0001)
                 local node_check = GetNodeText(get_node_text_type, location, sub_node, sub_node2)
                 local clean_node_text = extractTask(node_check)
                 if clean_node_text == nil then
@@ -653,7 +655,7 @@ end
 -- Usage: HuntLogCheck("Amalj'aa Hunter", 9, 0)
 -- Valid classes: 0 = GLA, 1 = PGL, 2 = MRD, 3 = LNC, 4 = ARC, 5 = ROG, 6 = CNJ, 7 = THM, 8 = ACN, 9 = GC
 -- Valid ranks/pages: 0-4 for jobs, 0-2 for GC
--- Opens and checks current progress and returns a false if finished or a true if not
+-- Opens and checks current progress and returns a true if finished or a false if not
 function HuntLogCheck(target_name, class, rank)
     OpenHuntLog(class, rank, 2)
     local node_text = ""
@@ -671,7 +673,7 @@ function HuntLogCheck(target_name, class, rank)
 
     local function FindTargetNode()
         for sub_node = 5, 60 do
-            --Sleep(0.001)
+            Sleep(0.0001)
             node_text = tostring(GetNodeText("MonsterNote", 2, sub_node, 4))
             if node_text == target_name then
                 return sub_node
@@ -690,10 +692,10 @@ function HuntLogCheck(target_name, class, rank)
 
         if target_amount_needed == 0 then
             CloseHuntLog()
-            return false, target_amount_needed
+            return true, target_amount_needed
         else
             CloseHuntLog()
-            return true, target_amount_needed
+            return false, target_amount_needed
         end
     end
 end
@@ -861,7 +863,7 @@ function Mount(mount_name)
         -- Initial check to ensure the player can mount
         repeat
             Sleep(0.1)
-        until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
+        until IsPlayerAvailable() and not IsPlayerCasting() -- and not GetCharacterCondition(26) was taken out as can loop forever. it also has a check for combat later.
 
         -- Retry loop for mounting with a max retry limit (set above)
         while retries < max_retries do
@@ -878,7 +880,7 @@ function Mount(mount_name)
             -- Exit loop if the player mounted
             if GetCharacterCondition(4) then
                 local attempt_word = (retries == 1) and "retry" or "retries"
-                Echo("Successfully mounted after " .. retries .. " " .. attempt_word .. ".")
+                LogInfo("Successfully mounted after " .. retries .. " " .. attempt_word .. ".")
                 break
             end
 
@@ -1397,10 +1399,100 @@ function CanGCRankUp()
                 Echo('You need to finish the quest "Gilding The Bilious" to rank up more')
             end
         end
+    elseif next_rank >= 10 then
+        -- Rank 10 and above are not handled in this script
+        Echo("Rank 10 and above are not handled in this script")
+        return false, next_rank
     else
         can_rankup = true
     end
+    
+    if current_seals > gc_ranks[next_rank] and next_rank <= 9 and can_rankup then -- excludes rank 10 and above as we don't handle that atm
+        return true, next_rank
+    else
+        return false, next_rank
+    end
+end
 
+-- Usage: can_rankup, next_rank = CanGCRankUp()
+-- same as CanGCRankUp except it assumes you have enough seals (you can use these 2 to figure out if turnin will make it possible to rank up)
+-- returns true and the next rank if you can rank up, returns false if you can't except it assumes you have enough seals
+function CanGCRankUpWithSeals()
+    local gc_rank_9_mission_complete = false
+    local gc_rank_8_mission_complete = false
+    local can_rankup = false
+    local gc_rank = 0
+    local gc_id = GetPlayerGC()
+    local current_seals = 90000
+    local gc_ranks = {
+        [1] = 0,
+        [2] = 2000,
+        [3] = 3000,
+        [4] = 4000,
+        [5] = 5000,
+        [6] = 6000,
+        [7] = 7000,
+        [8] = 8000,
+        [9] = 9000,
+        [10] = 10000
+    }
+
+    if gc_id == 1 then -- checks if gc is maelstrom and checks if the quests are done
+        gc_rank_8_mission_complete = IsQuestComplete(66664)
+        gc_rank_9_mission_complete = IsQuestComplete(66667)
+    elseif gc_id == 2 then -- checks if gc is twin adder and checks if the quests are done
+        gc_rank_8_mission_complete = IsQuestComplete(66665)
+        gc_rank_9_mission_complete = IsQuestComplete(66668)
+    elseif gc_id == 3 then -- checks if gc is immortal flames and checks if the quests are done
+        gc_rank_8_mission_complete = IsQuestComplete(66666)
+        gc_rank_9_mission_complete = IsQuestComplete(66669)
+    end
+
+    if gc_id == 1 then -- checks if gc is maelstrom and adds seal amount to current_seals
+        current_seals = 90000
+        gc_rank = GetMaelstromGCRank()
+    elseif gc_id == 2 then -- checks if gc is twin adder and adds seal amount to current_seals
+        current_seals = 90000
+        gc_rank = GetAddersGCRank()
+    elseif gc_id == 3 then -- checks if gc is immortal flames and adds seal amount to current_seals
+        current_seals = 90000
+        gc_rank = GetFlamesGCRank()
+    end
+
+    local next_rank = gc_rank + 1 -- adds one so we know which gc rank we're attempting to rank up total
+    if next_rank == 5 then
+        local log_rank_1_complete = IsHuntLogComplete(9, 0)
+        if log_rank_1_complete then
+            can_rankup = true
+        else
+            Echo("You need to finish GC hunting log 1 to rank up more")
+        end
+    elseif next_rank == 8 then
+        if not gc_rank_8_mission_complete then
+            Echo('You need to finish the quest "Shadows Uncast" to rank up more')
+        else
+            can_rankup = true
+        end
+    elseif next_rank == 9 then
+        local log_rank_2_complete = IsHuntLogComplete(9, 1)
+        if log_rank_2_complete and gc_rank_9_mission_complete then
+            can_rankup = true
+        else
+            if not log_rank_2_complete then
+                Echo("You need to finish GC hunting log 2 to rank up more")
+            end
+            if not gc_rank_9_mission_complete then
+                Echo('You need to finish the quest "Gilding The Bilious" to rank up more')
+            end
+        end
+    elseif next_rank >= 10 then
+        -- Rank 10 and above are not handled in this script
+        Echo("Rank 10 and above are not handled in this script")
+        return false, next_rank
+    else
+        can_rankup = true
+    end
+    
     if current_seals > gc_ranks[next_rank] and next_rank <= 9 and can_rankup then -- excludes rank 10 and above as we don't handle that atm
         return true, next_rank
     else
@@ -1450,7 +1542,7 @@ function UseFCAction(action_name)
             yield("/callback FreeCompany true -1")
             return true, "Action already active" -- send back a true because the buff is already active, so no action is needed
         end
-        --Sleep(0.0001)
+        Sleep(0.0001)
     end
 
     -- Find the requested buff and use it if it is found
@@ -1469,7 +1561,7 @@ function UseFCAction(action_name)
             yield("/callback FreeCompany true -1")
             return true, "Action successfully activated"
         end
-        --Sleep(0.0001)
+        Sleep(0.0001)
     end
     if IsAddonReady("FreeCompany") then
         yield("/callback FreeCompany true -1")
@@ -3087,6 +3179,24 @@ function IsHuntLogComplete(class, rank)
         CloseHuntLog()
         return false
     end
+end
+
+-- Usage: IsHuntLogComplete(9, 0) or IsHuntLogComplete(0, 1)
+-- Checks what is the next incomplete hunt log, returns nil if there are none.
+-- Valid jobs: 0 = GLA, 1 = PGL, 2 = MRD, 3 = LNC, 4 = ARC, 5 = ROG, 6 = CNJ, 7 = THM, 8 = ACN, 9 = GC
+function GetNextIncompleteHuntLog(class)
+    local maxrank = 3
+    class = class or 9
+    if class ~= 9 then
+        maxrank = 5
+    end
+    for i=1, maxrank do
+        if not IsHuntLogComplete(class, i) then
+            return i
+        end
+    end
+    Echo("No incomplete hunt logs for this class.")
+    return nil
 end
 
 -- Usage: GetPlayerJobLevel() // GetPlayerJobLevel("WAR") // GetPlayerJobLevel(11)
@@ -5100,8 +5210,6 @@ function TeleportType(cmd)
     return false
 end
 
-------------------------------------------------------------------------------------------------------
--- these are Friendly
 function NameChocobo()
     if IsAddonVisible("InputString") then --for naming chocobo
         local chocobo_named = false
@@ -5139,7 +5247,7 @@ function GoToInn()
     end
 end
 
-function DoGCQuestRequirements() --!!needs testing
+function DoGCQuestRequirements() --!! needs proper implementation
     local highest_GC_rank = GetFlamesGCRank()
     if GetMaelstromGCRank() then
         if highest_GC_rank < GetMaelstromGCRank() then
@@ -5168,22 +5276,19 @@ function DoGCQuestRequirements() --!!needs testing
             QuestionableAddQuestPriority(id)
         end
 
-        yield("/qst start")
-
         if gc_quest_id_lookup[QuestionableGetCurrentQuestId()] then
-            for i = 1, 450 do
-                if chocobo_quests[QuestionableGetCurrentQuestId()] then
+            yield("/qst start")
+            if chocobo_quests[QuestionableGetCurrentQuestId()] then
+                for i = 1, 450 do
                     Sleep(1)
                     NameChocobo()
-                else
-                    yield("/echo Breaking chocobo-quest loop")
-                    yield("/qst stop")
-                    break
+                    if not chocobo_quests[QuestionableGetCurrentQuestId()] then
+                        Echo("Breaking chocobo-quest loop")
+                        break
+                    end
                 end
             end
-        else
-            yield("/qst stop")
         end
+        yield("/qst stop")
     end
 end
-
