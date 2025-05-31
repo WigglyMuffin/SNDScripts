@@ -97,12 +97,15 @@ Manages AutoRetainer tasks, including:
 - **Menu Bailouts**: Additional menu bailouts for when a menu gets stuck.
 
 ### Questionable Companion
-![Status](https://img.shields.io/badge/status-under_development-yellow)
+
+![Status](https://img.shields.io/badge/status-working-brightgreen)
+![Status](https://img.shields.io/badge/bugs%3F-maybe-yellow)
 
 Enhances the Questionable plugin with features like:
 - Automatic duty support dungeon queueing
 - Solo instance automation
-- vnavmesh stuck checking
+- Vnavmesh stuck checking
+- Death handling
 
 ### Retainer Maker
 ![Status](https://img.shields.io/badge/status-needs_testing-blue)
