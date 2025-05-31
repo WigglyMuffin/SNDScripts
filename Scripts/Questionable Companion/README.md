@@ -1,7 +1,6 @@
 # Questionable Companion
 
 ![Status](https://img.shields.io/badge/status-working-brightgreen)
-![Status](https://img.shields.io/badge/status-needs_testing-blue)
 ![Status](https://img.shields.io/badge/bugs%3F-maybe-yellow)
 
 ## This script is mostly working.
