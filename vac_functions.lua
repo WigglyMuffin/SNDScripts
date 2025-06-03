@@ -49,7 +49,7 @@ Add flight to Movement() function
 Refactor Teleporter() function
 Add fate related functions
 
---[[################################################
+####################################################
 ##                 Initialisation                 ##
 ################################################--]]
 
