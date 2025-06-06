@@ -8,7 +8,7 @@
 
 ####################
 ##    Version     ##
-##     1.1.2      ##
+##     1.1.3      ##
 ####################
 
 -> 1.0.0: Initial release
@@ -27,7 +27,13 @@
    - Added CheckPlugins() which combines both CheckPluginsEnabled() and CheckPluginsVersion()
 -> 1.1.1: A few tweaks and functions at the end from Friendly
 -> 1.1.2: Nodescanner Sleep(0.0001) added to prevent crashes and a few new functions for AutoHunt
-
+-> 1.1.3: 
+    - TargetNearestEnemy enhanced to TargetNearestObject
+    - NodeScanner replaced w/ NodeScanner2 w/ backward compatibility
+    - OpenHuntLog made faster
+    - IsQuestDone now handles quest ['ID'] too
+    - DoGCQuestRequirements properly implemented
+    - Some new functions at the end
 ####################################################
 ##                  Description                   ##
 ####################################################
@@ -68,6 +74,10 @@ local vac_script_directory = GetScriptDirectory()
 
 -- Load lists from vac_lists to be used with other functions
 local vac_lists = dofile(vac_script_directory .. "vac_lists.lua")
+
+if not vac_lists then
+    Echo([[[vac_functions] Error: You don't have vac_lists added to the config folder. Check the script requirements or Github!]])
+end
 
 DC_With_Worlds = vac_lists.DC_With_Worlds
 Item_List = vac_lists.Item_List
@@ -350,20 +360,31 @@ function FindNearestObject(object_name)
     end
 end
 
--- Usage: TargetNearestEnemy("Heckler Imp", 20)
---
--- Targets the nearest enemy of the name you supply, within the radius
-function TargetNearestEnemy(target_name, radius)
-    local smallest_distance = 10000000000000.0
+-- Usage: TargetNearestObject("Heckler Imp", 2, 20) or TargetNearestObject("Example Toon", 1)
+-- Targets the nearest object, optionally with the provided name, of the objectKind and withing the radius.
+-- Defaults: target_name = nil, objectKind = 0, radius = 0
+-- Use nil for defaults if you wanna set the 2nd/3rd arg only e.g. (nil, 2) for all BattleNPCs.
+-- You should probably include objectKind if you can and not include a crazy amount of them.
+-- objectKind: 0 = All, 1 = Player, 2 = BattleNpc, 3 = EventNpc, 4 = Treasure, 5 = Aetheryte,
+-- 6 = GatheringPoint, 7 = EventObj, 8 = MountType, 9 = Companion (Minion), 10 = Retainer, 
+-- 11 = Area, 12 = Housing, 13 = Cutscene, 14 = CardStand, 15 = Ornament (Fashion Accessories)
+function TargetNearestObject(target_name, objectKind, radius)
+    local smallest_distance = math.huge
     local closest_target
-    local objectKind = 0                                                                             -- Set objectkind to 0 so GetNearbyObjectNames pulls everything nearby
+    local objectKind = objectKind or 0                                                               -- Set objectkind to 0 so GetNearbyObjectNames pulls everything nearby
     local radius = radius or 0
     local nearby_objects = GetNearbyObjectNames(radius ^ 2, objectKind)                              -- Pull all nearby objects/enemies into a list
     if nearby_objects.Count > 0 then                                                                 -- Starts a loop if there's more than 0 nearby objects
-        for i = 0, nearby_objects.Count - 1 do                                                       -- loops until no more objects
+        for i = 0, nearby_objects.Count - 1 do
+            if nearby_objects.Count > 20 then                                                        --This is to prevent crashes, may want to comment it if it works anyway
+                Sleep(0.0001)
+            end                                                                                      -- Loops until no more objects
             yield("/target " .. nearby_objects[i])
             if not GetTargetName() or nearby_objects[i] ~= GetTargetName() then                      -- If target name is nil, skip it
-            elseif GetDistanceToTarget() < smallest_distance and GetTargetName() == target_name then -- if object matches the target_name and the distance to target is smaller than the current smallest_distance, proceed
+            elseif GetDistanceToTarget() < smallest_distance and GetTargetName() == target_name then -- If object matches the target_name and the distance to target is smaller than the current smallest_distance, proceed
+                smallest_distance = GetDistanceToTarget()
+                closest_target = GetTargetName()
+            elseif not target_name and GetDistanceToTarget() < smallest_distance then                                                              -- If there is no target specified, return closest anything
                 smallest_distance = GetDistanceToTarget()
                 closest_target = GetTargetName()
             end
@@ -438,12 +459,14 @@ end
 
 -- Usage: FindAndKillTarget("Heckler Imp", 20)
 --
--- Uses TargetNearestEnemy() to find and kill the provided target within the specified target_radius
+-- Uses TargetNearestObject() to find and kill the provided target within the specified target_radius
 function FindAndKillTarget(target_name, target_radius)
-    local target_radius = target_radius or 100
+    local target_radius = target_radius or 101 --the limit for GetObjectRawXPos() from FindNearestObject()
     local auto_attack_triggered = false
-    local target_x_pos, target_y_pos, target_z_pos = FindNearestObject(target_name)
     
+    local target_name = TargetNearestObject(target_name, 2, 0) --this targets the closest mob (with the name if specified) and returns its name 
+    local target_x_pos, target_y_pos, target_z_pos = FindNearestObject(target_name)
+
     if target_x_pos == nil then
         return
     end
@@ -453,6 +476,10 @@ function FindAndKillTarget(target_name, target_radius)
         return
     end
     
+    while GetCharacterCondition(26) and HasTarget() do --this is to help avoid overpulling in dungeons
+        Sleep(1.0479)
+    end
+
     -- Determine the attack range based on the current job
     local current_job = GetPlayerJob()
     local attack_range = 3.5
@@ -461,7 +488,7 @@ function FindAndKillTarget(target_name, target_radius)
     end
     
     Movement(target_x_pos, target_y_pos, target_z_pos, attack_range)
-    TargetNearestEnemy(target_name, target_radius)
+    TargetNearestObject(target_name, 2, target_radius)
     local dist_to_target = GetDistanceToTarget()
     
     while GetTargetHP() > 0 and dist_to_target <= target_radius do
@@ -495,7 +522,7 @@ function FindAndKillTarget(target_name, target_radius)
             end
             
             Sleep(0.05)
-        until GetTargetHP() <= 0
+        until GetTargetHP() <= 0 or GetCharacterCondition(2)
         
         yield("/vnavmesh stop")
     end
@@ -564,99 +591,418 @@ function QuestChecker(target_name, target_distance, get_node_text_type, get_node
     end
 end
 
--- Usage: NodeScanner("_ToDoList", "Slay wild dodos.")
---
--- scans provided node type for node that has provided text and returns minimum 2 but up to 3 variables with the location which you can use with GetNodeText()
---
--- this will fail if the node is too nested and scanning deeper than i am currently is just not a good idea i think
-function NodeScanner(get_node_text_type, get_node_text_match)
-    node_type_count = tonumber(GetNodeListCount(get_node_text_type))
-    local function extractTask(text)
-        local task = string.match(text, "^(.-)%s*%d*/%d*$")
-        return task or text
+-- Modified NodeScanner2 with benchmarking for extractTask on live nodes
+function NodeScanner2_BenchmarkExtract(addon, options)
+    
+    if not addon then
+        Echo("[NodeScanner2_BenchmarkExtract] Error: addon is required")
+        return nil
     end
-    for location = 0, node_type_count do
-        for sub_node = 0, 60 do
-            Sleep(0.0001)
-            local node_check = GetNodeText(get_node_text_type, location, sub_node)
-            local clean_node_text = extractTask(node_check)
-            if clean_node_text == nil then
+
+    options = options or {}
+    local start_location = options.start_location or 0
+    local start_subnode = options.start_subnode or 0
+    local max_depth = options.max_depth or 5
+    local enable_logging = options.logging or false
+    local sleep = options.sleep ~= false
+    local sleep_duration = options.sleep_duration or 0.0001
+    local max_subnodes = options.max_subnodes or 60
+
+    local node_count = tonumber(GetNodeListCount(addon))
+    if not node_count or node_count <= 0 then
+        Echo("[NodeScanner2_BenchmarkExtract] No nodes found for type: " .. tostring(addon))
+        return nil
+    end
+
+    local function extractTask(text, coords)
+        if not text or text == "" then return nil end
+        local num = tonumber(text)
+        if num and coords and num == coords[#coords] then return nil end
+        if not string.find(text, "/") then return text end
+        local prefix = string.match(text, "^(.-)%s*%d+/%d+%s*$")
+        return prefix == "" and text or (prefix or text)
+    end
+
+    local operationCounts = {
+        nilCheck = 0,
+        tonumberCall = 0,
+        coordCheck = 0,
+        stringFind = 0,
+        stringMatch = 0
+    }
+    local operationTimes = {
+        nilCheck = 0,
+        tonumberCall = 0,
+        coordCheck = 0,
+        stringFind = 0,
+        stringMatch = 0
+    }
+
+    local function benchmarkExtractTaskOnText(text, coords)
+        local opStart, opEnd
+
+        opStart = os.clock()
+        local isNilOrEmpty = (not text or text == "")
+        opEnd = os.clock()
+        operationTimes.nilCheck = operationTimes.nilCheck + (opEnd - opStart)
+        operationCounts.nilCheck = operationCounts.nilCheck + 1
+        if isNilOrEmpty then return end
+
+        opStart = os.clock()
+        local num = tonumber(text)
+        opEnd = os.clock()
+        operationTimes.tonumberCall = operationTimes.tonumberCall + (opEnd - opStart)
+        operationCounts.tonumberCall = operationCounts.tonumberCall + 1
+
+        if num and coords then
+            opStart = os.clock()
+            local shouldFilter = (num == coords[#coords])
+            opEnd = os.clock()
+            operationTimes.coordCheck = operationTimes.coordCheck + (opEnd - opStart)
+            operationCounts.coordCheck = operationCounts.coordCheck + 1
+            if shouldFilter then return end
+        end
+
+        opStart = os.clock()
+        local hasSlash = string.find(text, "/")
+        opEnd = os.clock()
+        operationTimes.stringFind = operationTimes.stringFind + (opEnd - opStart)
+        operationCounts.stringFind = operationCounts.stringFind + 1
+        if not hasSlash then return end
+
+        opStart = os.clock()
+        local prefix = string.match(text, "^(.-)%s*%d+/%d+%s*$")
+        local result = prefix == "" and text or (prefix or text)
+        opEnd = os.clock()
+        operationTimes.stringMatch = operationTimes.stringMatch + (opEnd - opStart)
+        operationCounts.stringMatch = operationCounts.stringMatch + 1
+    end
+
+    local function scanAtDepth(config)
+        local max_indices = config.max_indices
+        local fixed_coords = config.fixed_coords or {}
+
+        local function generateCoords(level, current_coords)
+            if level > #max_indices then
+                if sleep then Sleep(sleep_duration) end
+                local text = GetNodeText(addon, unpack(current_coords))
+                benchmarkExtractTaskOnText(text, current_coords)
+                return nil
             else
-                --LogInfo([VAC] tostring(clean_node_text))
-            end
-            if clean_node_text == get_node_text_match then
-                return location, sub_node
-            end
-        end
-    end
-    -- deeper scan
-    for location = 0, node_type_count do
-        for sub_node = 0, 60 do
-            for sub_node2 = 0, 20 do
-                Sleep(0.0001)
-                local node_check = GetNodeText(get_node_text_type, location, sub_node, sub_node2)
-                local clean_node_text = extractTask(node_check)
-                if clean_node_text == nil then
+                if fixed_coords[level] then
+                    local new_coords = {table.unpack(current_coords)}
+                    new_coords[#new_coords + 1] = fixed_coords[level]
+                    return generateCoords(level + 1, new_coords)
                 else
-                    --LogInfo([VAC] tostring(clean_node_text))
-                end
-                if clean_node_text == get_node_text_match then
-                    return location, sub_node, sub_node2
+                    local start_val = (level == 1 and not fixed_coords[1]) and start_location or 0
+                    for j = start_val, max_indices[level] do
+                        local new_coords = {table.unpack(current_coords)}
+                        new_coords[#new_coords + 1] = j
+                        local result = generateCoords(level + 1, new_coords)
+                        if result then return result end
+                    end
                 end
             end
+            return nil
         end
+
+        return generateCoords(1, {})
+    end
+
+    local scan_configs = {
+        {max_indices = {node_count}},
+        {max_indices = {node_count, max_subnodes}},
+        {max_indices = {node_count, max_subnodes, 20}},
+        {max_indices = {start_location, max_subnodes, 20, 20}, fixed_coords = {[1] = start_location}},
+        {max_indices = {start_location, start_subnode, 20, 20, 20}, fixed_coords = {[1] = start_location, [2] = start_subnode}}
+    }
+
+    local startTime = os.clock()
+    for depth = 1, math.min(max_depth, #scan_configs) do
+        if enable_logging then
+            Echo("[NodeScanner2_BenchmarkExtract] Scanning at depth " .. depth)
+        end
+        local config = scan_configs[depth]
+        scanAtDepth(config)
+    end
+    local endTime = os.clock()
+    local totalTime = endTime - startTime
+
+    Echo("[NodeScanner2_BenchmarkExtract] === BENCHMARK RESULTS ===")
+    Echo(string.format("Total scan time: %.6f seconds", totalTime))
+    local operations = {
+        {"Nil Check", "nilCheck"},
+        {"tonumber() Call", "tonumberCall"},
+        {"Coordinate Check", "coordCheck"},
+        {"string.find() Call", "stringFind"},
+        {"string.match() Call", "stringMatch"}
+    }
+
+    for _, op in ipairs(operations) do
+        local name, key = op[1], op[2]
+        local count = operationCounts[key]
+        local timeSpent = operationTimes[key]
+        local avg = count > 0 and (timeSpent / count) or 0
+        local percent = totalTime > 0 and ((timeSpent / totalTime) * 100) or 0
+        Echo(string.format("%-20s: %8d calls, %12.6f total sec, %12.9f avg sec, %6.2f%%", name, count, timeSpent, avg, percent))
     end
 end
 
--- Usage: OpenHuntLog(9, 0), Defaults to rank 0 if empty
--- Valid classes: 0 = GLA, 1 = PGL, 2 = MRD, 3 = LNC, 4 = ARC, 5 = ROG, 6 = CNJ, 7 = THM, 8 = ACN, 9 = GC
--- Valid ranks/pages: 0-4 for jobs, 0-2 for GC
--- Valid show: 0 = show all, 1 = show complete, 2 = show incomplete
--- The first variable is the class to open, the second is the rank to open
+
+-- Usage: NodeScanner("FreeCompanyAction", "There are no active actions.", {max_depth = 2, logging = true})
+-- options(defaults): start_location(0), start_subnode(0), max_depth(5), logging(false), sleep(false), sleep_duration(0.0001), max_subnodes(60)
+--
+-- Scans provided addon for node that has provided text and returns location coordinates which you can use with GetNodeText()
+--
+-- extractTask will remove progress indicators so "Slay wild dodos 5/8" becomes "Slay wild dodos"
+-- Do not include any number/number in the text or it'll fail to match
+--
+-- It scans only the first 3 undefined layers. That's the 3 numbers you get by default, location, subnode and subnode2 (e.g. 2 18 4 for first hunt log target)
+-- If you want more layers, find and set the start_location for layer 4 or start_location and start_subnode for layer 5. idk if layer 6 exists
+--
+-- For node documentation: https://github.com/Jaksuhn/SomethingNeedDoing/wiki/How-to-read-UI-Nodes
+function NodeScanner2(addon, target_text, options)
+    -- Input validation
+    if not addon or not target_text then
+        Echo("[NodeScanner2] Error: addon and target_text are required")
+        return nil
+    end
+    
+    -- Default options
+    options = options or {}
+    local start_location = options.start_location or 0
+    local start_subnode = options.start_subnode or 0
+    local max_depth = (options.max_depth or 5)
+    local enable_logging = options.logging or false
+    local sleep = options.sleep or true
+    local sleep_duration = options.sleep_duration or 0.0001
+    local max_subnodes = options.max_subnodes or 60
+    
+    local node_count = tonumber(GetNodeListCount(addon))
+    if not node_count or node_count <= 0 then
+        Echo("[NodeScanner2] No nodes found for type: " .. tostring(addon))
+        return nil
+    end
+    
+    -- Extract task name by removing progress indicators like "5/8"
+    -- Also filters out node indices that match node coordinate values
+    local function extractTask(text, coords)
+        if not text or text == "" then
+            return nil
+        end
+        
+        -- Filter out node indices first (most common case)
+        local num = tonumber(text)
+        if num and coords and num == coords[#coords] then
+            return nil
+        end
+        
+        -- Quick check: if no "/" exists, return as-is
+        if not string.find(text, "/") then
+            return text
+        end
+        
+        -- Only do expensive regex if "/" found - single pattern handles everything
+        local task = string.match(text, "^(.-)%s*%d+/%d+%s*$")
+        return task == "" and text or (task or text)
+    end
+    
+    -- Generic scanning function that works for any depth
+    local function scanAtDepth(config)
+        local max_indices = config.max_indices
+        local fixed_coords = config.fixed_coords or {}
+        
+        -- Generate all coordinate combinations for current depth
+        local function generateCoords(level, current_coords)
+            if level > #max_indices then
+                -- Try to get node text at these coordinates
+                if sleep then
+                    Sleep(sleep_duration)
+                end
+                local node_text = GetNodeText(addon, unpack(current_coords))
+                local clean_text = extractTask(node_text, current_coords)
+               
+                if clean_text and clean_text ~= "" then
+                    if enable_logging then
+                        local coord_str = table.concat(current_coords, ", ")
+                        LogInfo("[NodeScanner2] Found text: '" .. clean_text .. "' at [" .. coord_str .. "]")
+                    end
+                    
+                    if clean_text == target_text then
+                        if enable_logging then
+                            local coord_str = table.concat(current_coords, ", ")
+                            Echo("[NodeScanner2] Match found at [" .. coord_str .. "]")
+                        end
+                        return current_coords
+                    end
+                end
+                return nil
+            else
+                -- Check if this coordinate position is fixed (once nodetree can be read this is obsolete)
+                if fixed_coords[level] then
+                    -- Use fixed coordinate
+                    local new_coords = {}
+                    for k = 1, #current_coords do
+                        new_coords[k] = current_coords[k]
+                    end
+                    new_coords[#new_coords + 1] = fixed_coords[level]
+                    
+                    local result = generateCoords(level + 1, new_coords)
+                    if result then
+                        return result
+                    end
+                else
+                    -- Generate coordinates for current level
+                    local start_val = (level == 1 and not fixed_coords[1]) and start_location or 0
+                    for j = start_val, max_indices[level] do
+                        local new_coords = {}
+                        for k = 1, #current_coords do
+                            new_coords[k] = current_coords[k]
+                        end
+                        new_coords[#new_coords + 1] = j
+                        
+                        local result = generateCoords(level + 1, new_coords)
+                        if result then
+                            return result
+                        end
+                    end
+                end
+            end
+            return nil
+        end
+        
+        local result = generateCoords(1, {})
+        return result
+    end
+    
+    -- Progressive depth scanning
+    local scan_configs = {
+        -- Depth 1: Just location
+        {max_indices = {node_count}, fixed_coords = {}},
+        -- Depth 2: location, sub_node
+        {max_indices = {node_count, max_subnodes}, fixed_coords = {}},
+        -- Depth 3: location, sub_node, sub_node2  
+        {max_indices = {node_count, max_subnodes, 20}, fixed_coords = {}},
+        -- Depth 4: Fixed start_location, iterate sub_node, sub_node2, sub_node3
+        {max_indices = {start_location, max_subnodes, 20, 20}, fixed_coords = {[1] = start_location}},
+        -- Depth 5: Fixed start_location and start_subnode, iterate sub_node2, sub_node3, sub_node4
+        {max_indices = {start_location, start_subnode, 20, 20, 20}, fixed_coords = {[1] = start_location, [2] = start_subnode}}
+    }
+    
+    for depth = 1, math.min(max_depth, #scan_configs) do
+        if enable_logging then
+            Echo("[NodeScanner2] Scanning at depth " .. depth)
+        end
+        
+        local config = scan_configs[depth]
+        local result = scanAtDepth(config)
+        
+        if result then
+            return unpack(result)
+        end
+    end
+    
+    Echo("[NodeScanner2] No matching node found for '" .. target_text .. "'. Check for typos or enable logging for details.")
+    return nil
+end
+
+-- The main NodeScanner2 function now handles legacy calls automatically
+-- If called with individual parameters instead of options table, it converts them
+function NodeScanner(addon, target_text, loc_or_options, node1, logging)
+    -- Check if third parameter is options table or legacy parameter
+    if type(loc_or_options) == "table" then
+        -- New format: NodeScanner(addon, target_text, options)
+        return NodeScanner2(addon, target_text, loc_or_options)
+    else
+        -- Legacy format: NodeScanner(addon, target_text, loc, node1, logging)
+        local options = {
+            start_location = loc_or_options,
+            start_subnode = node1,
+            logging = logging
+        }
+        return NodeScanner2(addon, target_text, options)
+    end
+end
+
 function OpenHuntLog(class, rank, show)
     local defaultshow = 2
     local defaultrank = 0  --
     local defaultclass = 9 -- this is the gc log
+    local counter = 0
     rank = rank or defaultrank
     class = class or defaultclass
     show = show or defaultshow
     -- 1 Maelstrom
     -- 2 Twin adders
     -- 3 Immortal flames
-
-    repeat
+    ::START:: --the goto sequances are here because sometimes the huntlog glitches out and doesn't show any highlight that we look for after the 1st callback
+    while not IsAddonReady("MonsterNote") do
         yield("/huntinglog")
         Sleep(0.5)
-    until IsAddonReady("MonsterNote")
-
-    local gc_id = GetPlayerGC()
-
-    if class == 9 then
-        yield("/callback MonsterNote false 3 9 " .. tostring(gc_id))
-    else
-        yield("/callback MonsterNote false 0 " .. tostring(class))
     end
 
-    Sleep(0.3)
-    yield("/callback MonsterNote false 1 " .. rank)
-    Sleep(0.3)
-    yield("/callback MonsterNote false 2 " .. show)
+    local gc_id = GetPlayerGC()
+    if not IsNodeVisible("MonsterNote", 1, 2, class+4, 2) then
+        counter = 0
+        repeat
+            if class == 9 then
+                yield("/callback MonsterNote false 3 9 " .. tostring(gc_id))
+            else
+                yield("/callback MonsterNote false 0 " .. tostring(class))
+            end
+            Sleep(0.05)
+            counter = counter+1
+            if counter == 20 then            
+                yield("/huntinglog")
+                goto START
+            end
+        until IsNodeVisible("MonsterNote", 1, 2, class+4, 2)
+    end
+
+    local rank_subnode = (rank == 0 and 2) or 21000 + rank
+
+    if GetNodeText("MonsterNote", 20) ~= "Difficulty "..rank+1 then
+        counter = 0
+        repeat
+            yield("/callback MonsterNote true 1 " .. rank)
+            Sleep(0.05)
+            counter = counter+1
+            if counter == 20 then            
+                yield("/huntinglog")
+                goto START
+            end
+        until GetNodeText("MonsterNote", 20) == "Difficulty "..rank+1
+    end
+    if GetNodeText("MonsterNote", 10, 1, 2) ~= "Show Incomplete" then
+        counter = 0
+        repeat
+            yield("/callback MonsterNote true 2 " .. show)
+            Sleep(0.05)
+            counter = counter+1
+            if counter == 20 then
+                yield("/huntinglog")
+                goto START
+            end
+        until GetNodeText("MonsterNote", 10, 1, 2) == "Show Incomplete"
+    end
 end
 
 -- Usage: CloseHuntLog()
 -- Closes the Hunting Log if open
 function CloseHuntLog()
-    repeat
-        yield("/huntinglog")
-        Sleep(0.5)
-    until not IsAddonVisible("MonsterNote")
+    while IsAddonVisible("MonsterNote") do
+        yield("/callback MonsterNote true -1")
+        Sleep(0.05)
+    end
 end
 
 -- Usage: HuntLogCheck("Amalj'aa Hunter", 9, 0)
+-- As in, check to see if that mob needs doing
 -- Valid classes: 0 = GLA, 1 = PGL, 2 = MRD, 3 = LNC, 4 = ARC, 5 = ROG, 6 = CNJ, 7 = THM, 8 = ACN, 9 = GC
 -- Valid ranks/pages: 0-4 for jobs, 0-2 for GC
--- Opens and checks current progress and returns a true if finished or a false if not
-function HuntLogCheck(target_name, class, rank)
+-- Opens and checks current progress and returns a false if finished or a true if not
+function HuntLogCheck(target_name, class, rank, close)
+    local close = close or true 
     OpenHuntLog(class, rank, 2)
     local node_text = ""
     local function CheckTargetAmountNeeded(sub_node)
@@ -672,7 +1018,7 @@ function HuntLogCheck(target_name, class, rank)
     end
 
     local function FindTargetNode()
-        for sub_node = 5, 60 do
+        for sub_node = 18, 33 do --this should be 10-16 starting from 18
             Sleep(0.0001)
             node_text = tostring(GetNodeText("MonsterNote", 2, sub_node, 4))
             if node_text == target_name then
@@ -691,11 +1037,11 @@ function HuntLogCheck(target_name, class, rank)
         local target_amount_needed = CheckTargetAmountNeeded(target_amount_needed_node)
 
         if target_amount_needed == 0 then
-            CloseHuntLog()
-            return true, target_amount_needed
-        else
-            CloseHuntLog()
+            if close then CloseHuntLog() end
             return false, target_amount_needed
+        else
+            if close then CloseHuntLog() end
+            return true, target_amount_needed
         end
     end
 end
@@ -863,6 +1209,9 @@ function Mount(mount_name)
         -- Initial check to ensure the player can mount
         repeat
             Sleep(0.1)
+            if GetCharacterCondition(26) then
+                break
+            end
         until IsPlayerAvailable() and not IsPlayerCasting() -- and not GetCharacterCondition(26) was taken out as can loop forever. it also has a check for combat later.
 
         -- Retry loop for mounting with a max retry limit (set above)
@@ -941,18 +1290,19 @@ end
 -- Usage: Movement(674.92, 19.37, 436.02) // Movement(674.92, 19.37, 436.02, 15)
 -- Moves player to specified x y z coordinates with optional distance value to stop movement when player is within specified distance
 -- Will automatically mount, unstuck the player if player is stuck and stop within 2.5 distance of the destination
-function Movement(x_position, y_position, z_position, range)
+function Movement(x_position, y_position, z_position, range, mount_name)
     -- Wait until player doesn't have 45 or 51 conditions for zone changing
     repeat
         Sleep(0.1)
     until not (GetCharacterCondition(45) and GetCharacterCondition(51))
 
+    mount_name = mount_name or "Company Chocobo"
     range = range or 3.5                 -- Default stopping range if not provided
     local max_retries = 10               -- Max number of retries to start moving
     local stuck_check_interval = 0.50    -- Interval in seconds to check if stuck
     local stuck_threshold_seconds = 4.0  -- Time before considering the player stuck
     local min_progress_distance = 0.1    -- Minimum distance considered progress
-    local min_distance_for_mounting = 15 -- Distance threshold for deciding to mount
+    local min_distance_for_mounting = 20 -- Distance threshold for deciding to mount
 
     -- Function to calculate the squared distance to the target
     local function GetSquaredDistanceToTarget(xpos, ypos, zpos)
@@ -970,10 +1320,10 @@ function Movement(x_position, y_position, z_position, range)
 
     -- Initiate movement towards the destination using vnavmesh
     local function NavToDestination()
-        NavReload() -- Reload vnavmesh to ensure it's ready
-
+        
         -- Wait until vnavmesh is ready
         if not NavIsReady() then
+            NavReload() -- Reload vnavmesh to ensure it's ready
             repeat
                 Sleep(0.05)
             until NavIsReady()
@@ -994,7 +1344,7 @@ function Movement(x_position, y_position, z_position, range)
             if squared_distance_to_target > min_distance_for_mounting * min_distance_for_mounting and TerritorySupportsMounting() and (IsQuestComplete(66236) or IsQuestComplete(66237) or IsQuestComplete(66238)) then
                 -- Attempt to mount until successful
                 repeat
-                    Mount()
+                    Mount(mount_name)
                     Sleep(0.1)
                 until GetCharacterCondition(4) and IsPlayerAvailable()
             end
@@ -1002,7 +1352,7 @@ function Movement(x_position, y_position, z_position, range)
             -- Start moving towards the destination
             yield("/vnav moveto " .. x_position .. " " .. y_position .. " " .. z_position)
             retries = retries + 1
-            Sleep(0.05)
+            Sleep(0.1)
         until PathIsRunning() or retries >= max_retries -- Stop if path is running or max retries reached
 
         Sleep(0.05)
@@ -2648,19 +2998,23 @@ function DoTargetLockon(target_lockon_name)
     yield("/lockon")
 end
 
--- Usage: IsQuestDone("Hello Halatali")
+-- Usage: IsQuestDone("Hello Halatali") or IsQuestDone("697")
 -- Checks if you have completed the specified quest
-function IsQuestDone(quest_done_name)
-    if not quest_done_name or quest_done_name == "" then
+function IsQuestDone(quest_done_name_or_ID)
+    if not quest_done_name_or_ID or quest_done_name_or_ID == "" then
         return nil -- Return nil if the quest_done_name is nil or an empty string
     end
 
+    local ID
+    if tonumber(quest_done_name_or_ID) then
+        ID = tonumber(quest_done_name_or_ID)
+    end
     -- Initialize a variable to store the quest_key
     local quest_key = nil
 
     -- Search for the quest in Quest_List by name
     for key, quest in pairs(Quest_List) do
-        if string.lower(quest['Name']) == string.lower(quest_done_name) then
+        if string.lower(quest['Name']) == string.lower(quest_done_name_or_ID) or tonumber(quest['ID']) == ID then
             quest_key = tonumber(key)
             break
         end
@@ -3083,19 +3437,15 @@ end
 -- Usage: Dismount()
 -- Checks if player is mounted, dismounts if true
 function Dismount()
-    if TerritorySupportsMounting() then
-        if GetCharacterCondition(4) then
-            repeat
-                yield("/mount")
-                Sleep(0.1)
-            until not GetCharacterCondition(4)
-        end
+    if TerritorySupportsMounting() and GetCharacterCondition(4) then --afaik there's no reason these checks should be separate
+        repeat
+            yield("/mount")
+            Sleep(0.1)
+        until not GetCharacterCondition(4)
 
         repeat
             Sleep(0.1)
         until IsPlayerAvailable() and not IsPlayerCasting()
-    else
-        -- do nothing
     end
 end
 
@@ -3181,17 +3531,18 @@ function IsHuntLogComplete(class, rank)
     end
 end
 
--- Usage: GetNextIncompleteHuntLog(9) // IsHuntLogComplete()
+-- Usage: GetNextIncompleteHuntLog(9) // GetNextIncompleteHuntLog() // GetNextIncompleteHuntLog(2)
 -- Checks what is the next incomplete hunt log, returns nil if there are none.
 -- Valid jobs: 0 = GLA, 1 = PGL, 2 = MRD, 3 = LNC, 4 = ARC, 5 = ROG, 6 = CNJ, 7 = THM, 8 = ACN, 9 = GC
 function GetNextIncompleteHuntLog(class)
     local maxrank = 3
-    class = class or 9
+    local class = class or 9
     if class ~= 9 then
         maxrank = 5
     end
     for i=1, maxrank do
-        if not IsHuntLogComplete(class, i) then
+        if not IsHuntLogComplete(class, i-1) then
+            LogInfo("[VAC] Next incomplete log for class "..class.." is "..i)
             return i
         end
     end
@@ -5210,26 +5561,33 @@ function TeleportType(cmd)
     return false
 end
 
-function NameChocobo()
-    if IsAddonVisible("InputString") then --for naming chocobo
-        local chocobo_named = false
-        while not chocobo_named do
-            local chocobo_name = "Roach"
-            Echo("Attempting to name chocobo " .. chocobo_name)
-            yield("/pcall InputString true 0 "..chocobo_name.." ")
-            repeat
-                Sleep(0.1)
-            until IsAddonReady("SelectYesno")
-            yield("/pcall SelectYesno true 0")
-            repeat
-                Sleep(0.1)
-            until IsAddonReady("InputString") or IsPlayerAvailable()
-            if IsPlayerAvailable() then
-                chocobo_named = true
-                Echo("Successfully named chocobo " .. chocobo_name)
-            else
-                chocobo_named = false
-                Echo("Failed to name chocobo " .. chocobo_name .. ", trying another name")
+function DoChocoboQuest() --needs proper rework, buy chocobo issuance too.
+    if not (IsQuestComplete(66236) or IsQuestComplete(66237) or IsQuestComplete(66238)) then
+        QuestionableAddQuestPriority(700)
+        QuestionableAddQuestPriority(701)
+        QuestionableAddQuestPriority(702)
+        yield("/qst start")
+        while not (IsQuestComplete(66236) or IsQuestComplete(66237) or IsQuestComplete(66238)) do
+            if IsAddonVisible("InputString") then --(!!and check _ToDoList) for naming chocobo
+                local chocobo_named = false
+                while not chocobo_named do
+                    local chocobo_name = "Roach"
+                    yield("/callback InputString true 0 "..chocobo_name.." ")
+                    repeat
+                        Sleep(0.1)
+                    until IsAddonReady("SelectYesno")
+                    yield("/callback SelectYesno true 0")
+                    repeat
+                        Sleep(0.1)
+                    until IsAddonReady("InputString") or IsPlayerAvailable()
+                    if IsPlayerAvailable() then
+                        chocobo_named = true
+                        Echo("Successfully named chocobo " .. chocobo_name)
+                    else
+                        chocobo_named = false
+                        Echo("Failed to name chocobo " .. chocobo_name .. ", trying another name")
+                    end
+                end
             end
         end
     end
@@ -5247,49 +5605,128 @@ function GoToInn()
     end
 end
 
-function DoGCQuestRequirements() --!! needs proper implementation
-    local highest_GC_rank = GetFlamesGCRank()
-    if GetMaelstromGCRank() then
-        if highest_GC_rank < GetMaelstromGCRank() then
-            highest_GC_rank = GetMaelstromGCRank()
-        end
-    elseif GetTwinAddersGCRank() then
-        if highest_GC_rank < GetTwinAddersGCRank() then
-            highest_GC_rank = GetTwinAddersGCRank()
+--Usage: DoGCQuestRequirements() or DoGCQuestRequirements(true) for skipping Dzemael Darkhold and Aurum Vale
+function DoGCQuestRequirements(only_huntlog) --!!needs proper implementation
+    if only_huntlog ~= true or not only_huntlog then 
+        only_huntlog = false
+    end
+    local gc_id = GetPlayerGC()
+    local gc_quest_ids = {}
+    local highest_GC_rank = GetMaelstromGCRank()
+    local done = true
+    local ready_for_dungeon = false
+    if gc_id == 1 then
+       gc_quest_ids = {"697", "764", "1128", "1131" }
+    elseif gc_id == 2 then
+        highest_GC_rank = GetTwinAddersGCRank()
+        gc_quest_ids = {"697", "764", "1129", "1132" }
+    else
+        highest_GC_rank = GetFlamesGCRank()
+        gc_quest_ids = {"697", "921", "1130", "1133" }
+    end
+    for _, id in ipairs(gc_quest_ids) do --check if there's any quest that needs to be done
+        if not IsQuestDone(id) then
+            if only_huntlog and tonumber(id) > 1127 then
+                --nothing, we can disregard those quests
+            else
+                done = false
+                break
+            end
         end
     end
-    if highest_GC_rank < 9 then --!! need to this quest lookup method
-        local gc_quest_ids = { "700", "701", "702", "697", "921" }
-        local chocobo_quests = { ["700"] = true, ["701"] = true, ["702"] = true }
-        --"700" My Lil Chocobo Twin Adder
-        --"701" MLC Mael
-        --"702" MLC Imm Flames
-        --"697" Hallo Halatali
-        --"921" Dishonor Before Death
-        local gc_quest_id_lookup = {}
-        for _, id in ipairs(gc_quest_ids) do
-            gc_quest_id_lookup[id] = true
-        end
-
-        -- Add priorities
-        for _, id in ipairs(gc_quest_ids) do
-            QuestionableAddQuestPriority(id)
-        end
-
-        if gc_quest_id_lookup[QuestionableGetCurrentQuestId()] then
-            yield("/qst start")
-            if chocobo_quests[QuestionableGetCurrentQuestId()] then
-                for i = 1, 450 do
-                    Sleep(1)
-                    NameChocobo()
-                    if not chocobo_quests[QuestionableGetCurrentQuestId()] then
-                        Echo("Breaking chocobo-quest loop")
+    if done == false then
+        for _, id in ipairs(gc_quest_ids) do --check if there's any quest that needs to be done
+            if only_huntlog and tonumber(id) > 1127 then
+                --nothing, we can disregard those quests
+            else
+                QuestionableAddQuestPriority(id)
+                Sleep(0.5)
+                yield("/qst start")
+            end
+            local _ToDoList_nodes = {14, 15, 16, 17, 18, 19, 20, 21, 22} --starting point for quest step changes from 14 to 18 with 1-5 quests in the list and which one it is +0 to +4
+            while QuestionableGetCurrentQuestId() == id and not ready_for_dungeon do
+                Sleep(3.05612)
+                for _, node in ipairs(_ToDoList_nodes) do
+                    local text = GetNodeText("_ToDoList", node, 3)
+                    if text == "Enter Dzemael Darkhold." or text == "Enter The Aurum Vale." then
+                        ready_for_dungeon = true
+                        QuestionableClearQuestPriority()
                         break
                     end
                 end
             end
+            yield("/qst stop")
+            while IsPlayerCasting() do
+                yield("/send ESCAPE") --i know this /send isn't good, idk a better solution
+                Sleep(1)
+            end
+            repeat --this is the fallback option if cancelling tp with /send ESCAPE doesn't work
+                Sleep(1)
+            until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(51) and not GetCharacterCondition(45)
         end
-        yield("/qst stop")
     end
 end
 
+--Usage: GetDutyInfoText(1) or GetDutyInfoText(5)
+--Gets the objective's text in the given position from the Duty Info list (e.g. Clear the Sunken Antechamber: 0/1)
+function GetDutyInfoText(pos)
+    local function GetDutyInfoStartingNode()
+        for i=8, 12 do --i hope this is enough, if you have more than 5 quests open at a time somehow, this'll probably fail
+            if IsNodeVisible("_ToDoList", 1, (70013-i)) then --quest names go 70001-5, we want the highest, IsNodeVisible uses NodeIDs (#) and not node list
+                LogInfo("[VAC] Starting duty node is "..tostring(39-2*i)) --this is the formula to get 13-23 from i with 1-5 quests
+                return (39-2*i)
+            end
+        end
+        return 13 --for 0 quests
+    end
+    local starting_node = GetDutyInfoStartingNode()
+    if not pos then
+        LogInfo("[VAC] GetDutyInfoText(pos): No position given for text in the objective list. Function will now stop. For reference, position 1 says "..GetNodeText("_ToDoList", (starting_node), 3))
+        return
+    end
+    local text = GetNodeText("_ToDoList", (starting_node+pos-1), 3)
+    return text
+end
+
+--Usage: GetDutyTimer() or GetDutyTimer(true)
+--Reads DutyTimerTextNode and returns it in seconds (601) or text (10:01)
+--Example usage: if GetDutyTimer() < 3600 then LeaveDuty() end -- to give up if you've not cleared the dungeon in 30 min.
+--you could save os.clock() at the start and check against that instead but this works in case you relog into a dungeon.
+function GetDutyTimer(as_text)
+    as_text = as_text or false
+    if not GetCharacterCondition(34) and not GetCharacterCondition(56) then
+        LogInfo("[VAC] GetDutyTimer(): You're not in a duty. Function will now stop.")
+        return
+    end
+    local function GetDutyTimerTextNode()
+        for i=8, 12 do --i hope this is enough, if you have more than 5 quests open at a time somehow, this'll fail
+            if IsNodeVisible("_ToDoList", 1, (70013-i)) then --same as above, but the node we're looking for is 10 + no. of quests visible
+                LogInfo("[VAC] DutyTimerTextNode is "..tostring(23-i)) --same, if you plug in the numbers you get this
+                return (23-i)
+            end
+        end
+        return 10 --for 0 quests
+    end
+    local duty_timer_node = GetDutyTimerTextNode()
+    local duty_timer_text = GetNodeText("_ToDoList", duty_timer_node, 8)
+    if as_text then
+        return duty_timer_text
+    end
+    local minutes, seconds = duty_timer_text:match("^(%d+):(%d+)$")
+    local duty_timer_seconds = tonumber(minutes) * 60 + tonumber(seconds)
+    return duty_timer_seconds
+end
+
+--Leaves current duty. Repeats until you're not in duty.
+function LeaveDuty()
+    while GetCharacterCondition(34) do
+        if IsAddonReady("SelectYesno") then
+            yield("/callback SelectYesno true 0")
+        elseif IsAddonVisible("ContentsFinderMenu") then
+            yield("/callback ContentsFinderMenu true 0")
+        else
+            yield("/dutyfinder")
+        end
+        Sleep(0.1)
+    end
+end
