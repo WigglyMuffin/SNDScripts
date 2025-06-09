@@ -1,5 +1,9 @@
 ## AutoHunt (formerly Hunt Log Doer)
 
+###IF YOU HAVE AN ISSUE, MAKE SURE YOU ARE ON SND TESTING v12.0.0.0!
+I, "Friendly (ping me) <AutoParty>", will try to help with bugs but that will be my first question so don't be a dum-dum and do that first.
+Don't ping Wiggly for this script.
+
 Original by CacahuetesManu https://github.com/CacahuetesManu/SND/tree/main/Hunt%20Log%20Doer
 
 Does one hunt log of your choice a lot more reliably.
