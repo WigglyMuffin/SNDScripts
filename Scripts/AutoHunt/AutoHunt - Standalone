@@ -18997,7 +18997,7 @@ function MountandMovetoFlag()
     LogInfo("[AutoHunt] MountAndMovetoFlag() finished.")
 end
 
-local CallbackID
+local CallbackID = 9
 local ClassID
 local LogFinder
 local GCID
