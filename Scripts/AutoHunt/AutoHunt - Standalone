@@ -18997,10 +18997,7 @@ function MountandMovetoFlag()
     LogInfo("[AutoHunt] MountAndMovetoFlag() finished.")
 end
 
-local CallbackID = 9
-local ClassID
-local LogFinder
-local GCID
+CallbackID = 10
 function GetCallbackID()
     local jobId = GetClassJobId()
 
@@ -19586,7 +19583,11 @@ if route == "GC" then
     end
 end
     --Choose which hunt log
-CallbackID = GetCallbackID() 
+CallbackID = GetCallbackID()
+
+if not CallbackID or CallbackID == 10 then
+    Echo("[AutoHunt] Error: Unable to find which set of hunt logs to look for (CallbackID). This should only happen if you're trying to do a class log for a class that doesn't have one.")
+end
 local next_log = GetNextIncompleteHuntLog(CallbackID)
 local rank_to_do = log_to_do or next_log --I don't know why, I don't want to know why, I shouldn't have to wonder why, but for whatever reason this stupid var isn't seen by DoGCDungeon
 if stop_at_rank_two and route == "GC" and rank_to_do == 3 then
