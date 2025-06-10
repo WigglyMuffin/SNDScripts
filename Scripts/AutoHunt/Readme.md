@@ -7,7 +7,9 @@ Original by CacahuetesManu https://github.com/CacahuetesManu/SND/tree/main/Hunt%
 Does one hunt log of your choice a lot more reliably.
 It'll go to the inn after it's finished.
 
-This script requires all files in this folder. MAKE SURE TO TELL SND WHERE THEY ARE (SND HELP --> OPTIONS --> LUA)
+The standalone version should work without any other file.
+
+The basic version requires all files in this folder. MAKE SURE TO TELL SND WHERE THEY ARE (SND HELP --> OPTIONS --> LUA)
 Make sure to set up your paths. Use the Lua path setting in the SND help config.
 
     C:\\Users\\Username\\AppData\\Roaming\\XIVLauncher\\pluginConfigs\\SomethingNeedDoing
