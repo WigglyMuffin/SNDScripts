@@ -1,6 +1,6 @@
---[[***************
-*     AutoHunt    *
-*******************
+--[[***************   		 ***********
+*     AutoHunt    *   		 * Credits *    Author: Friendly	 Original script by CacahuetesManu and pot0to
+*******************   		 ***********    Functions borrowed from: McVaxius, Umbra, LeafFriend, plottingCreeper, Mootykins and WigglyMuffin
     Version Notes:
     0.1.1.6  ->    Almost feature complete, fixed turnin shenanigans and handling the dungeon queuing, qst stuff.
                    Follows the helper in dungeons and stays on magitek terminals in Dzemael Darkhold.
@@ -36,7 +36,7 @@ local log_to_do = nil
 
 -- Movement
 local mount = true -- have you unlocked mounts yet? (you should btw, saves a bunch of time)
-local mount_name = "SDS Fenrir" -- "Company Chocobo" or "SDS Fenrir" or any other mount name
+local mount_name = "Company Chocobo" -- "Company Chocobo" or "SDS Fenrir" or any other mount name
 local move_type = "walk" --"walk" of "fly". If you choose fly, it will only kill mobs once arrived to flag
 local goto_inn = true --true/false, after finishing, do we go to inn or just /li auto
 
@@ -61,14 +61,7 @@ local meetup_loc = "limsa" --write the destination to meet helper, you don't hav
 local interval_rate = 0.3 -- sets many waiting times, if you set this lower and it creates a bug, set it higher
 local ping_radius = 30 -- what's considered close enough to flag and skipping mounting
 
-    --[[**************
-    *  Improvements  *
-    ******************
-    Class hunt logs aren't all tested.
-    It spams "You need to finish the quest [insert quest name] to rank up more".
-    If you wanna contribute, feel free, but I need to move on with my life.
-
-    *********************
+    --[[*****************
     *    Requirements   *
     *********************
     -> Chat Coordinates: Dalamud
@@ -85,19 +78,20 @@ local ping_radius = 30 -- what's considered close enough to flag and skipping mo
     *  Required Plugin Settings *
     *****************************
     -> Pandora:
-                1. Make sure to enable Auto teleport to map coords with pandora (white list the echo channel
+                1. Make sure to enable Auto teleport to map coords with pandora (white list the echo channel)
     -> SomethingNeedDoing (Expanded Edition):
                 1. Make sure to press the lua button when you import this
-                2. Make sure to set up your paths. Use the Lua path setting in the SND help config.
     -> RSR:
                 1. Change RSR to attack ALL enemies when solo, or previously engaged.
                 2. Disable "Treat 1hp target as invincible" --rarely you may get stuck otherwise
 
-    ***********
-    * Credits *
-    ***********
-    Author(s): CacahuetesManu | pot0to | Friendly
-    Functions borrowed from: McVaxius, Umbra, LeafFriend, plottingCreeper, Mootykins and WigglyMuffin
+    ******************
+    *  Improvements  *
+    ******************
+    Class hunt logs aren't all tested.
+    It spams "You need to finish the quest [insert quest name] to rank up more".
+    If you wanna contribute, feel free, but I need to move on with my life.
+    Dzemael Darkhold I will still make more reliable tho.
 
 ********************************
 *  Helper Functions and Files  *
