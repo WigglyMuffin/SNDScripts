@@ -30,14 +30,14 @@
     *  Settings  *
     ************]]
 -- Choose either "class" to do your class log or "GC" to do your Grand Company Log
-local route = "class"
+local route = "GC"
 -- Choose what log to finish: nil to do next one available or 1, 2, 3, 4, 5
 local log_to_do = nil
 
 -- Movement
 local mount = true -- have you unlocked mounts yet? (you should btw, saves a bunch of time)
 local mount_name = "SDS Fenrir" -- "Company Chocobo" or "SDS Fenrir" or any other mount name
-local move_type = "fly" --"walk" of "fly". If you choose fly, it will only kill mobs once arrived to flag
+local move_type = "walk" --"walk" of "fly". If you choose fly, it will only kill mobs once arrived to flag
 local goto_inn = true --true/false, after finishing, do we go to inn or just /li auto
 
 --GC specific (lvl 50 recommended)
@@ -51,11 +51,11 @@ local swap_to_SAM = false --unlock and swap to Samurai. This won't work if your 
 local do_extra_dungeons = true --(lvl 70 recommended) do the non huntlog dungeons (Dzemael Darkhold, The Aurum Vale).
 
 --for multi-account
-local party_member = "Holymoly Names'r'hard" --Firstname Lastname or leave empty ("") for solo
-local server = "Zurvan" --write the server name to meet the helper eg. "Lich", this MUST MATCH EXACTLY
+local party_member = "" --Firstname Lastname or leave empty ("") for solo
+local server = "" --write the server name to meet the helper eg. "Lich", this MUST MATCH EXACTLY
 --the below 2 lines will use the command /tp_kind meetup_loc so whatever works that way can be used here.
 local tp_kind = "tp" --"li" for Lifestream, "tp" for Teleporter
-local meetup_loc = "ul'dah" --write the destination to meet helper, you don't have to be exact as long as it works with /li or /tp
+local meetup_loc = "limsa" --write the destination to meet helper, you don't have to be exact as long as it works with /li or /tp
 
 -- These variables help with pathing and are used for unstucking
 local interval_rate = 0.3 -- sets many waiting times, if you set this lower and it creates a bug, set it higher
