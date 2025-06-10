@@ -2,7 +2,7 @@
 *     AutoHunt    *
 *******************
     Version Notes:
-    0.1.1.6  ->    Feature complete, fixed turnin shenanigans and handling the dungeon queuing, qst stuff.
+    0.1.1.6  ->    Almost feature complete, fixed turnin shenanigans and handling the dungeon queuing, qst stuff.
                    Follows the helper in dungeons and stays on magitek terminals in Dzemael Darkhold.
     0.1.1.5  ->    Will now move back to flag after each mob + bugfixes + clean up/rewrite code.
                    It's faster and more reliable to notice if the log/entry has been completed.
