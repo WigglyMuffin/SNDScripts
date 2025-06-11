@@ -18913,7 +18913,8 @@ end
 CallbackID = GetCallbackID()
 
 if not CallbackID or CallbackID == 10 then
-    Echo("[AutoHunt] Error: Unable to find which set of hunt logs to look for (CallbackID). This should only happen if you're trying to do a class log for a job that doesn't have one.")
+    Echo("[AutoHunt] Error: Unable to find which set of hunt logs to look for (CallbackID). This should only happen if you're trying to do a class log for a job that doesn't have one. Check your settings.")
+    return
 end
 local next_log = GetNextIncompleteHuntLog(CallbackID)
 local rank_to_do = log_to_do or next_log --I don't know why, I don't want to know why, I shouldn't have to wonder why, but for whatever reason this stupid var isn't seen by DoGCDungeon
