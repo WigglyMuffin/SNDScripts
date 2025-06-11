@@ -51,8 +51,8 @@ local swap_to_SAM = false --unlock and swap to Samurai. This won't work if your 
 local do_extra_dungeons = true --(lvl 70 recommended) do the non huntlog dungeons (Dzemael Darkhold, The Aurum Vale).
 
 --for multi-account
-local party_member = "" --Firstname Lastname or leave empty ("") for solo
-local server = "" --write the server name to meet the helper eg. "Lich", this MUST MATCH EXACTLY
+local party_member = "Holymoly Names'r'hard" --Firstname Lastname or leave empty ("") for solo
+local server = "Zurvan" --write the server name to meet the helper eg. "Lich", this MUST MATCH EXACTLY
 --the below 2 lines will use the command /tp_kind meetup_loc so whatever works that way can be used here.
 local tp_kind = "tp" --"li" for Lifestream, "tp" for Teleporter
 local meetup_loc = "ul'dah" --write the destination to meet helper, you don't have to be exact as long as it works with /li or /tp
@@ -18458,7 +18458,8 @@ function DoGCDungeon()
         end
     end
     if not solo then
-        --yield("/autofollow" ..party_member) --for autofollow, but it's not great !!check frenrider for a better way
+        local party_member = GetNearbyObjectNames(30, 1)[1]
+        yield("/vnav moveto "..GetPlayerRawXPos(party_member).." "..GetPlayerRawYPos(party_member).." "..GetPlayerRawZPos(party_member))
     end
 
     local mobs_done = false
@@ -18728,7 +18729,8 @@ function DoExtraGCDungeon() -- works with DoGCQuestRequirements to run both dung
         end
     end
     if not solo then
-        --yield("/autofollow" ..party_member) --for autofollow, but it's not great !!check frenrider for a better way
+        local party_member = GetNearbyObjectNames(30, 1)[1]
+        yield("/vnav moveto "..GetPlayerRawXPos(party_member).." "..GetPlayerRawYPos(party_member).." "..GetPlayerRawZPos(party_member))    
     end
 
     while not IsPlayerAvailable() do
@@ -18756,7 +18758,7 @@ function DoExtraGCDungeon() -- works with DoGCQuestRequirements to run both dung
                     Interact()
                     Sleep(0.5)
                     while IsAddonReady("SelectYesno") do
-                        yield("/callback SelectYesno true 0") --!!need to check this
+                        yield("/callback SelectYesno true 0")
                         Sleep(0.0956)
                     end
                     yield("/ad resume")
@@ -18921,8 +18923,8 @@ local rank_to_do = log_to_do or next_log --I don't know why, I don't want to kno
 if stop_at_rank_two and route == "GC" and rank_to_do == 3 then
     rank_to_do = 2
 end
-    --Is toon done?
-local dont_start = false --!!below part should determine if the toon is done based on settings 
+    --Is toon already done?
+local dont_start = false --below part should determine if the toon is done based on settings 
 if do_extra_dungeons and route == "GC" then
     if (GetPlayerGC()==1 and IsQuestDone("1131")) or (GetPlayerGC()==2 and GetIsQuestDone("1132")) or (GetPlayerGC()==3 and IsQuestDone("1133")) then
         dont_start = true
