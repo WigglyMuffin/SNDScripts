@@ -2,6 +2,7 @@
 *     AutoHunt    *   		 * Credits *    Author: Friendly	 Original script by CacahuetesManu and pot0to
 *******************   		 ***********    Functions borrowed from: McVaxius, Umbra, LeafFriend, plottingCreeper, Mootykins and WigglyMuffin
     Version Notes:
+    0.9.9.9  ->    Dzemael Darkhold should work now, script is feature complete, only bugfixing from here as needed.
     0.1.1.6  ->    Almost feature complete, fixed turnin shenanigans and handling the dungeon queuing, qst stuff.
                    Follows the helper in dungeons and stays on magitek terminals in Dzemael Darkhold.
     0.1.1.5  ->    Will now move back to flag after each mob + bugfixes + clean up/rewrite code.
@@ -17895,7 +17896,6 @@ function DoGCQuestRequirements(only_huntlog)
             end
             local _ToDoList_nodes = {14, 15, 16, 17, 18, 19, 20, 21, 22} --starting point for quest step changes from 14 to 18 with 1-5 quests in the list and which one it is +0 to +4
             while QuestionableGetCurrentQuestId() == id and not stop_looping and not ready_to_rank_up do
-                Sleep(3.05612)
                 for _, node in ipairs(_ToDoList_nodes) do
                     local text = GetNodeText("_ToDoList", node, 3)
                     if text == "Enter Dzemael Darkhold." or text == "Enter the Aurum Vale." then
@@ -17911,6 +17911,7 @@ function DoGCQuestRequirements(only_huntlog)
                         end
                     end
                 end
+                Sleep(1.5612)
             end
             yield("/qst stop")
             while IsAddonReady("JournalAccept") do
@@ -18737,7 +18738,7 @@ function DoExtraGCDungeon() -- works with DoGCQuestRequirements to run both dung
                 TargetNearestObject("Magitek Transporter", 7, 20)
                 if GetTargetName() == "Magitek Transporter" then
                     yield("/ad pause")
-                    yield("/vnav movetarget")
+                    yield("/vnav moveto " .. GetTargetRawXPos() .. " " .. GetTargetRawYPos() .. " " .. GetTargetRawZPos())
                     repeat
                         Sleep(0.1)
                     until GetDistanceToTarget() < 2
@@ -18765,7 +18766,7 @@ function DoExtraGCDungeon() -- works with DoGCQuestRequirements to run both dung
                 },
                 [4] = {
                     ["Name"] = "VIII",
-                    ["Coords"] = "-16.02 -17.3 -177.35"
+                    ["Coords"] = "-16.32 -17.3 -177.65"
                 }
             }
             for i=1, #Terminal_List do
@@ -18804,8 +18805,11 @@ function DoExtraGCDungeon() -- works with DoGCQuestRequirements to run both dung
                 for i=1, #Crystal_Coords do  --just taking the boss to the crystals
                     repeat
                         yield("/vnav moveto "..Crystal_Coords[i]["Coords"])
-                        Sleep(3.0824)
-                    until GetToastNodeText(2, 3) == "The power of the crystal begins to dim." or not DoesObjectExist("All-seeing Eye")
+                        Sleep(1.0824)
+                        if HasStatus("Crystal Veil") then
+                            break
+                        end
+                    until not HasStatus("Crystal Veil") or not DoesObjectExist("All-seeing Eye")
                 end
             elseif duty_timer and duty_timer < 5190 and GetDutyInfoText(1) == "Open the grand hall gate: 0/1" and GetToastNodeText(2, 3) == "Magitek terminal "..Terminal_List[1]["Name"].."'s countdown completes." then
                 yield("/vnav moveto "..Terminal_List[2]["Coords"])
