@@ -18801,14 +18801,11 @@ function DoExtraGCDungeon() -- works with DoGCQuestRequirements to run both dung
                         ["Coords"] = "15.3 -9.5 46.7"
                     }
                 }
-                for i=1, #Crystal_Coords do  --aggro from helper will mess this up but the helper script does its thing
-                    for i=1, 50 do
+                for i=1, #Crystal_Coords do  --just taking the boss to the crystals
+                    repeat
                         yield("/vnav moveto "..Crystal_Coords[i]["Coords"])
-                        Sleep(0.20819)
-                        repeat
-                            Sleep(0.20824)
-                        until GetToastNodeText(2, 3) == "The power of the crystal begins to dim." or not DoesObjectExist("All-seeing Eye")
-                    end
+                        Sleep(3.0824)
+                    until GetToastNodeText(2, 3) == "The power of the crystal begins to dim." or not DoesObjectExist("All-seeing Eye")
                 end
             elseif duty_timer and duty_timer < 5190 and GetDutyInfoText(1) == "Open the grand hall gate: 0/1" and GetToastNodeText(2, 3) == "Magitek terminal "..Terminal_List[1]["Name"].."'s countdown completes." then
                 yield("/vnav moveto "..Terminal_List[2]["Coords"])
