@@ -18786,7 +18786,7 @@ function DoExtraGCDungeon() -- works with DoGCQuestRequirements to run both dung
                 yield("/vnav moveto "..Terminal_List[4]["Coords"])
             elseif duty_timer and duty_timer < 5010 and GetDutyInfoText(2) == "Clear the feasting hall: 1/1" then
                 yield("/vnav moveto "..Terminal_List[3]["Coords"])
-            elseif duty_timer and duty_timer < 5160 and GetDutyInfoText(2) == "Clear the feasting hall: 0/1" and GetTargetName() == "All-seeing Eye" then
+            elseif GetDutyInfoText(2) == "Clear the feasting hall: 0/1" and GetTargetName() == "All-seeing Eye" then
                 local Crystal_Coords = {
                     [1] = {
                         ["Coords"] = "17.4 -13.8 86.7"
@@ -18801,13 +18801,10 @@ function DoExtraGCDungeon() -- works with DoGCQuestRequirements to run both dung
                         ["Coords"] = "15.3 -9.5 46.7"
                     }
                 }
-                for i=1, #Crystal_Coords do
-                    yield("/vnav moveto "..Crystal_Coords[i]["Coords"]) --aggro from helper will mess this up tbh
+                for i=1, #Crystal_Coords do  --aggro from helper will mess this up but the helper script does its thing
                     for i=1, 50 do
+                        yield("/vnav moveto "..Crystal_Coords[i]["Coords"])
                         Sleep(0.20819)
-                        if not PathIsRunning then
-                            break
-                        end
                         repeat
                             Sleep(0.20824)
                         until GetToastNodeText(2, 3) == "The power of the crystal begins to dim." or not DoesObjectExist("All-seeing Eye")
