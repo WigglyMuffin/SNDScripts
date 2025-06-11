@@ -57,9 +57,30 @@ function GetDutyTimer()
 end
 
 repeat
-    if GetTargetName() == "All-seeing Eye" and GetDutyInfoText(2) == "Clear the feasting hall: 0/1" then
-        local party_member = GetNearbyObjectNames(30, 1)[1]
-        yield("/vnav moveto "..GetPlayerRawXPos(party_member).." "..GetPlayerRawYPos(party_member).." "..GetPlayerRawZPos(party_member))
+    if GetDutyInfoText(2) == "Clear the feasting hall: 0/1" and GetTargetName() == "All-seeing Eye" then
+        local Crystal_Coords = {
+            [1] = {
+                ["Coords"] = "17.4 -13.8 86.7"
+            },
+            [2] = {
+                ["Coords"] = "74.6 -13.4 83.0"
+            },
+            [3] = {
+                ["Coords"] = "48.8 -11.6 116"
+            },
+            [4] = {
+                ["Coords"] = "15.3 -9.5 46.7"
+            }
+        }
+        for i=1, #Crystal_Coords do  --just taking the boss to the crystals
+            for i=1, 50 do
+                yield("/vnav moveto "..Crystal_Coords[i]["Coords"])
+                Sleep(2.00819)
+                repeat
+                    Sleep(0.20824)
+                until GetToastNodeText(2, 3) == "The power of the crystal begins to dim." or not DoesObjectExist("All-seeing Eye")
+            end
+        end
     end
     local duty_timer = GetDutyTimer()
     if duty_timer and duty_timer < 4200 then
