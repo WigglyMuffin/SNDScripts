@@ -52,11 +52,11 @@ local swap_to_SAM = false --unlock and swap to Samurai. This won't work if your 
 local do_extra_dungeons = true --(lvl 70 recommended) do the non huntlog dungeons (Dzemael Darkhold, The Aurum Vale).
 
 --for multi-account
-local party_member = "Holymoly Names'r'hard" --Firstname Lastname or leave empty ("") for solo
-local server = "Zurvan" --write the server name to meet the helper eg. "Lich", this MUST MATCH EXACTLY
+local party_member = "" --Firstname Lastname or leave empty ("") for solo
+local server = "" --write the server name to meet the helper eg. "Lich", this MUST MATCH EXACTLY
 --the below 2 lines will use the command /tp_kind meetup_loc so whatever works that way can be used here.
 local tp_kind = "tp" --"li" for Lifestream, "tp" for Teleporter
-local meetup_loc = "ul'dah" --write the destination to meet helper, you don't have to be exact as long as it works with /li or /tp
+local meetup_loc = "limsa" --write the destination to meet helper, you don't have to be exact as long as it works with /li or /tp
 
 -- These variables help with pathing and are used for unstucking
 local interval_rate = 0.3 -- sets many waiting times, if you set this lower and it creates a bug, set it higher
@@ -70,10 +70,9 @@ local ping_radius = 30 -- what's considered close enough to flag and skipping mo
     -> vnavmesh: https://puni.sh/api/repository/veyn
     -> RSR: https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
     -> vbm : https://puni.sh/api/repository/veyn
-    -> SomethingNeedDoing (Expanded Edition) [Make sure to press the lua button when you import this] -> https://puni.sh/api/repository/croizat
+    -> SomethingNeedDoing (Expanded Edition) v12.0.0.0 testing [Make sure to press the lua button when you import this] -> https://puni.sh/api/repository/croizat
     -> Teleporter: Dalamud
     -> CBT: for Expert Delivery before unlocking it https://puni.sh/api/repository/croizat
-    -> VAC functions and lists - https://github.com/WigglyMuffin/SNDScripts/tree/main
 
     *****************************
     *  Required Plugin Settings *
