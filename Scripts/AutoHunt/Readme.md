@@ -22,7 +22,7 @@ If you find a bug in the script and it's not in the list below, feel free to rep
 You can help with mob positions without knowing how to code. If the script gets stuck, manually go the position you should go for this mob (try to have as many within range as possible).
 Get coordinates from eg. Questionable plugin (see pic) and either make a PR here or send me the mob and coords on discord (Friendly (ping me) &lt;AutoParty&gt; on Punish).
     
-    ![image](https://github.com/user-attachments/assets/ee348812-3d1f-4581-b731-07ec9093c954)
+![image](https://github.com/user-attachments/assets/ee348812-3d1f-4581-b731-07ec9093c954)
 
 # Misc
 The old version requires all files in that folder. MAKE SURE TO TELL SND WHERE THEY ARE (SND HELP --> OPTIONS --> LUA)
