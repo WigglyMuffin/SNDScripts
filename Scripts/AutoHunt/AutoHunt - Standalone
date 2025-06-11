@@ -91,7 +91,6 @@ local ping_radius = 30 -- what's considered close enough to flag and skipping mo
     Class hunt logs aren't all tested.
     It spams "You need to finish the quest [insert quest name] to rank up more".
     If you wanna contribute, feel free, but I need to move on with my life.
-    Dzemael Darkhold I will still make more reliable tho.
 
 ********************************
 *  Helper Functions and Files  *
@@ -18457,10 +18456,6 @@ function DoGCDungeon()
             Sleep(1.0674)
         end
     end
-    if not solo then
-        local party_member = GetNearbyObjectNames(30, 1)[1]
-        yield("/vnav moveto "..GetPlayerRawXPos(party_member).." "..GetPlayerRawYPos(party_member).." "..GetPlayerRawZPos(party_member))
-    end
 
     local mobs_done = false
     local enemy_list = {11, 10, 9, 8, 7, 6, 5, 4}
@@ -18637,11 +18632,6 @@ function DoGCDungeon()
         end
         LogInfo("[AutoHunt] Waiting for instance to finish...")
     until not GetCharacterCondition(34) and not GetCharacterCondition(56) and not GetCharacterCondition(45) and not GetCharacterCondition(51)
-    --[[if not solo then --this was originally here to get you back but it'd do this after every dungeon so now it's only at the end of the script
-        --PartyDisband()
-        --Teleporter(" ", "li") --back to home world 
-        --Teleporter("inn", "li")
-    end]]
 end
 
 function DoExtraGCDungeon() -- works with DoGCQuestRequirements to run both dungeons, only runs the dungeon.
@@ -18727,10 +18717,6 @@ function DoExtraGCDungeon() -- works with DoGCQuestRequirements to run both dung
         while GetCharacterCondition(45) or GetCharacterCondition(51) do
             Sleep(1.0674)
         end
-    end
-    if not solo then
-        local party_member = GetNearbyObjectNames(30, 1)[1]
-        yield("/vnav moveto "..GetPlayerRawXPos(party_member).." "..GetPlayerRawYPos(party_member).." "..GetPlayerRawZPos(party_member))    
     end
 
     while not IsPlayerAvailable() do
@@ -18847,11 +18833,6 @@ function DoExtraGCDungeon() -- works with DoGCQuestRequirements to run both dung
         end
         LogInfo("[AutoHunt] Waiting for instance to finish...")
     until not GetCharacterCondition(34) and not GetCharacterCondition(56) and not GetCharacterCondition(45) and not GetCharacterCondition(51)
-    --[[if not solo then --this was originally here to get you back but it'd do this after every dungeon so now it's only at the end of the script
-        --PartyDisband()
-        --Teleporter(" ", "li") --back to home world 
-        --Teleporter("inn", "li")
-    end]]
 end
 
 local function UnlockAetheryte(zone_name) --waiting for smartnav plugin until someone needs more zones badly
