@@ -18877,6 +18877,33 @@ local function UnlockAetheryte(zone_name) --waiting for smartnav plugin until so
             Movement(-113.44, 64.59, -216.03, 3.5, mount_name)
             AttuneAetheryte()
         end
+    elseif zone_name == "East Shroud" then
+        while not IsAetheryteAttuned("The Hawthorne Hut") do
+            if not ZoneCheck("The Hawthorne Hut") then
+                if not ZoneCheck("New Gridania") then
+                    Teleporter("New Gridania", "tp")
+                end
+                Teleporter("Lancers' Guild", "li")
+                Movement(180.6, -2.3, -241.3)
+                repeat
+                    if IsAddonReady("SelectYesno") then
+                        yield("/callback SelectYesno true 0")
+                    elseif IsAddonReady("SelectIconString") then
+                        yield("/callback SelectIconString true 0")
+                    elseif GetTargetName() == "Romarique" and not IsAddonReady("SelectIconString") then
+                        yield("/interact")
+                        while not IsAddonReady("SelectIconString") and not IsAddonReady("SelectYesno") do
+                            Sleep(0.1)
+                        end
+                    elseif GetTargetName() ~= "Romarique" then
+                        yield("/target Romarique")
+                    end
+                    Sleep(0.0896)
+                until GetZoneID() == 152
+            end
+            Movement(-191.1, 4.4, 297.6, 3.5, mount_name)
+            AttuneAetheryte()
+        end
     end
 end
 
