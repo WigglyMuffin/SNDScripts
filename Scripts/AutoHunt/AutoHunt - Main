@@ -2,7 +2,7 @@
 *     AutoHunt    *   		 * Credits *    Author: Friendly	 Original script by CacahuetesManu and pot0to
 *******************   		 ***********    Functions borrowed from: McVaxius, Umbra, LeafFriend, plottingCreeper, Mootykins and WigglyMuffin
     Version Notes:
-    0.9.9.9  ->    Dzemael Darkhold should work now, script is feature complete, only bugfixing from here as needed.
+    0.9.9.9  ->    Dzemael Darkhold should work now, script is feature complete.
     0.1.1.6  ->    Almost feature complete, fixed turnin shenanigans and handling the dungeon queuing, qst stuff.
                    Follows the helper in dungeons and stays on magitek terminals in Dzemael Darkhold.
     0.1.1.5  ->    Will now move back to flag after each mob + bugfixes + clean up/rewrite code.
@@ -52,11 +52,11 @@ local swap_to_SAM = false --unlock and swap to Samurai. This won't work if your 
 local do_extra_dungeons = true --(lvl 70 recommended) do the non huntlog dungeons (Dzemael Darkhold, The Aurum Vale).
 
 --for multi-account
-local party_member = "" --Firstname Lastname or leave empty ("") for solo
-local server = "" --write the server name to meet the helper eg. "Lich", this MUST MATCH EXACTLY
+local party_member = "Holymoly Names'r'hard" --Firstname Lastname or leave empty ("") for solo
+local server = "Zurvan" --write the server name to meet the helper eg. "Lich", this MUST MATCH EXACTLY
 --the below 2 lines will use the command /tp_kind meetup_loc so whatever works that way can be used here.
 local tp_kind = "tp" --"li" for Lifestream, "tp" for Teleporter
-local meetup_loc = "limsa" --write the destination to meet helper, you don't have to be exact as long as it works with /li or /tp
+local meetup_loc = "ul'dah" --write the destination to meet helper, you don't have to be exact as long as it works with /li or /tp
 
 -- These variables help with pathing and are used for unstucking
 local interval_rate = 0.3 -- sets many waiting times, if you set this lower and it creates a bug, set it higher
@@ -70,9 +70,10 @@ local ping_radius = 30 -- what's considered close enough to flag and skipping mo
     -> vnavmesh: https://puni.sh/api/repository/veyn
     -> RSR: https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
     -> vbm : https://puni.sh/api/repository/veyn
-    -> SomethingNeedDoing (Expanded Edition) v12.0.0.0 testing [Make sure to press the lua button when you import this] -> https://puni.sh/api/repository/croizat
+    -> SomethingNeedDoing (Expanded Edition) [Make sure to press the lua button when you import this] -> https://puni.sh/api/repository/croizat
     -> Teleporter: Dalamud
     -> CBT: for Expert Delivery before unlocking it https://puni.sh/api/repository/croizat
+    -> VAC functions and lists - https://github.com/WigglyMuffin/SNDScripts/tree/main
 
     *****************************
     *  Required Plugin Settings *
@@ -18784,35 +18785,54 @@ function DoExtraGCDungeon() -- works with DoGCQuestRequirements to run both dung
             --this is a failsafe for never triggering toasts and 1st boss
             if duty_timer and duty_timer < 4950 and GetDutyInfoText(2) == "Clear the feasting hall: 1/1" and GetToastNodeText(2, 3) == "Magitek terminal "..Terminal_List[3]["Name"].."'s countdown completes." then
                 yield("/vnav moveto "..Terminal_List[4]["Coords"])
-            elseif duty_timer and duty_timer < 5010 and GetDutyInfoText(2) == "Clear the feasting hall: 1/1" then
+            elseif duty_timer and duty_timer < 5010 and GetDutyInfoText(2) == "Clear the feasting hall: 1/1" and not GetDutyInfoText(4) == "Defeat Batraal: 0/1" then
                 yield("/vnav moveto "..Terminal_List[3]["Coords"])
             elseif GetDutyInfoText(2) == "Clear the feasting hall: 0/1" and GetTargetName() == "All-seeing Eye" then
                 local Crystal_Coords = {
                     [1] = {
-                        ["Coords"] = "17.4 -13.8 86.7"
+                        ["x"] = 74.6,
+                        ["y"] = -13.4,
+                        ["z"] = 83.0
                     },
                     [2] = {
-                        ["Coords"] = "74.6 -13.4 83.0"
+                        ["x"] = 21.6,
+                        ["y"] = -14.2,
+                        ["z"] = 90.9
                     },
                     [3] = {
-                        ["Coords"] = "48.8 -11.6 116"
+                        ["x"] = 48.8,
+                        ["y"] = -11.6,
+                        ["z"] = 116.0
                     },
                     [4] = {
-                        ["Coords"] = "15.3 -9.5 46.7"
+                        ["x"] = 15.3,
+                        ["y"] = -9.5,
+                        ["z"] = 46.7
                     }
                 }
-                for i=1, #Crystal_Coords do  --just taking the boss to the crystals
-                    repeat
-                        yield("/vnav moveto "..Crystal_Coords[i]["Coords"])
-                        Sleep(1.0824)
-                        if HasStatus("Crystal Veil") then
-                            break
+                yield("/ad pause")
+                local crystal = 1
+                while DoesObjectExist("All-seeing Eye") do
+                    local current_x = GetPlayerRawXPos()
+                    local current_z = GetPlayerRawZPos()
+                    yield("/vnav moveto "..Crystal_Coords[crystal]["x"].." "..Crystal_Coords[crystal]["y"].." "..Crystal_Coords[crystal]["z"])
+                    if current_x^2 + current_z^2 < 1 and not HasStatus("Crystal Veil") then
+                        crystal=crystal+1
+                        if crystal == 5 then
+                            crystal = 1
                         end
-                    until not HasStatus("Crystal Veil") or not DoesObjectExist("All-seeing Eye")
+                    else
+                        while TargetHasStatus(325)==true and HasStatus("Crystal Veil") do
+                            yield("/vnav moveto "..Crystal_Coords[crystal]["x"].." "..Crystal_Coords[crystal]["y"].." "..Crystal_Coords[crystal]["z"])
+                            Sleep(1.34)
+                        end
+                    end
+                    Sleep(1.37)
                 end
-            elseif duty_timer and duty_timer < 5190 and GetDutyInfoText(1) == "Open the grand hall gate: 0/1" and GetToastNodeText(2, 3) == "Magitek terminal "..Terminal_List[1]["Name"].."'s countdown completes." then
+                yield("/ad resume")
+            elseif GetDutyInfoText(1) == "Open the grand hall gate: 0/1" and (GetToastNodeText(2, 3) == "Magitek terminal "..Terminal_List[1]["Name"].."'s countdown completes." or (duty_timer and duty_timer < 5220)) then
                 yield("/vnav moveto "..Terminal_List[2]["Coords"])
-            elseif duty_timer and duty_timer < 5250 and GetDutyInfoText(1) == "Open the grand hall gate: 0/1" then
+            elseif duty_timer and duty_timer < 5280 and GetDutyInfoText(1) == "Open the grand hall gate: 0/1" then
                 yield("/vnav moveto "..Terminal_List[1]["Coords"])
             end
         else
