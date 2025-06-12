@@ -89,7 +89,7 @@ repeat
     end
             if DoesObjectExist("Magitek Transporter") then --try to move if AD path is running ahead
                 TargetNearestObject("Magitek Transporter", 7, 10)
-                if GetTargetName() == "Magitek Transporter" then
+                if GetTargetName() == "Magitek Transporter" and current_x == GetPlayerRawXPos() and current_z == GetPlayerRawZPos() then
                     yield("/ad pause")
                     yield("/vnav moveto " .. GetTargetRawXPos() .. " " .. GetTargetRawYPos() .. " " .. GetTargetRawZPos())
                     repeat
@@ -164,8 +164,6 @@ repeat
         yield("/ad pause")
         local crystal = 1
         while DoesObjectExist("All-seeing Eye") do
-            local current_x = GetPlayerRawXPos()
-            local current_z = GetPlayerRawZPos()
             yield("/vnav moveto "..Crystal_Coords[crystal]["x"].." "..Crystal_Coords[crystal]["y"].." "..Crystal_Coords[crystal]["z"])
             if current_x^2 + current_z^2 < 1 and not HasStatus("Crystal Veil") then
                 crystal=crystal+1
@@ -190,5 +188,7 @@ repeat
         yield("/ad stop")
         LeaveDuty()
     end
+    current_x = GetPlayerRawXPos()
+    current_z = GetPlayerRawZPos()
     Sleep(2)
 until forever
