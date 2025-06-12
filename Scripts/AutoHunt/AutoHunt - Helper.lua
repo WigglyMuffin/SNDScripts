@@ -5,6 +5,33 @@ function Sleep(time)
     yield("/wait " .. tostring(time))
 end
 
+function TargetNearestObject(target_name, objectKind, radius)
+    local smallest_distance = math.huge
+    local closest_target
+    local objectKind = objectKind or 0                                                               -- Set objectkind to 0 so GetNearbyObjectNames pulls everything nearby
+    local radius = radius or 0
+    local nearby_objects = GetNearbyObjectNames(radius ^ 2, objectKind)                              -- Pull all nearby objects/enemies into a list
+    if nearby_objects.Count > 0 then                                                                 -- Starts a loop if there's more than 0 nearby objects
+        for i = 0, nearby_objects.Count - 1 do
+            if nearby_objects.Count > 20 then                                                        --This is to prevent crashes, may want to comment it if it works anyway
+                Sleep(0.0001)
+            end                                                                                      -- Loops until no more objects
+            yield("/target " .. nearby_objects[i])
+            if not GetTargetName() or nearby_objects[i] ~= GetTargetName() then                      -- If target name is nil, skip it
+            elseif GetDistanceToTarget() < smallest_distance and GetTargetName() == target_name then -- If object matches the target_name and the distance to target is smaller than the current smallest_distance, proceed
+                smallest_distance = GetDistanceToTarget()
+                closest_target = GetTargetName()
+            elseif not target_name and GetDistanceToTarget() < smallest_distance then                                                              -- If there is no target specified, return closest anything
+                smallest_distance = GetDistanceToTarget()
+                closest_target = GetTargetName()
+            end
+        end
+        ClearTarget()
+        if closest_target then yield("/target " .. closest_target) end -- after the loop ends it targets the closest enemy
+    end
+    return closest_target
+end
+
 function GetDutyInfoText(pos)
     local function GetDutyInfoStartingNode()
         for i=8, 12 do
@@ -60,6 +87,24 @@ repeat
     while not IsPlayerAvailable() do
         Sleep(1.0534)
     end
+            if DoesObjectExist("Magitek Transporter") then --try to move if AD path is running ahead
+                TargetNearestObject("Magitek Transporter", 7, 10)
+                if GetTargetName() == "Magitek Transporter" then
+                    yield("/ad pause")
+                    yield("/vnav moveto " .. GetTargetRawXPos() .. " " .. GetTargetRawYPos() .. " " .. GetTargetRawZPos())
+                    repeat
+                        Sleep(0.1)
+                    until GetDistanceToTarget() < 2
+                    yield("/interact")
+                    Sleep(0.5)
+                    while IsAddonReady("SelectYesno") do
+                        yield("/callback SelectYesno true 0")
+                        Sleep(0.0956)
+                    end
+                    yield("/ad resume")
+                end
+            end
+    local duty_timer = GetDutyTimer()
                 local Terminal_List = {
                 [1] = {
                     ["Name"] = "III",
@@ -75,7 +120,7 @@ repeat
                 },
                 [4] = {
                     ["Name"] = "VIII",
-                    ["Coords"] = "-16.32 -17.3 -177.65"
+                    ["Coords"] = "-16.22 -17.3 -177.55"
                 }
             }
             for i=1, #Terminal_List do
@@ -91,38 +136,56 @@ repeat
             end
     if duty_timer and duty_timer < 4950 and GetDutyInfoText(2) == "Clear the feasting hall: 1/1" and GetToastNodeText(2, 3) == "Magitek terminal "..Terminal_List[3]["Name"].."'s countdown completes." then
         yield("/vnav moveto "..Terminal_List[4]["Coords"])
-    elseif duty_timer and duty_timer < 5010 and GetDutyInfoText(2) == "Clear the feasting hall: 1/1" then
+    elseif duty_timer and duty_timer < 5010 and GetDutyInfoText(2) == "Clear the feasting hall: 1/1" and not GetDutyInfoText(4) == "Defeat Batraal: 0/1" then
         yield("/vnav moveto "..Terminal_List[3]["Coords"])
     elseif GetDutyInfoText(2) == "Clear the feasting hall: 0/1" and GetTargetName() == "All-seeing Eye" then
         local Crystal_Coords = {
             [1] = {
-                ["Coords"] = "17.4 -13.8 86.7"
+                ["x"] = 74.6,
+                ["y"] = -13.4,
+                ["z"] = 83.0
             },
             [2] = {
-                ["Coords"] = "74.6 -13.4 83.0"
+                ["x"] = 21.6,
+                ["y"] = -14.2,
+                ["z"] = 90.9
             },
             [3] = {
-                ["Coords"] = "48.8 -11.6 116"
+                ["x"] = 48.8,
+                ["y"] = -11.6,
+                ["z"] = 116.0
             },
             [4] = {
-                ["Coords"] = "15.3 -9.5 46.7"
+                ["x"] = 15.3,
+                ["y"] = -9.5,
+                ["z"] = 46.7
             }
         }
-        for i=1, #Crystal_Coords do  --just taking the boss to the crystals
-            repeat
-                yield("/vnav moveto "..Crystal_Coords[i]["Coords"])
-                Sleep(1.0824)
-                if HasStatus("Crystal Veil") then
-                    break
+        yield("/ad pause")
+        local crystal = 1
+        while DoesObjectExist("All-seeing Eye") do
+            local current_x = GetPlayerRawXPos()
+            local current_z = GetPlayerRawZPos()
+            yield("/vnav moveto "..Crystal_Coords[crystal]["x"].." "..Crystal_Coords[crystal]["y"].." "..Crystal_Coords[crystal]["z"])
+            if current_x^2 + current_z^2 < 1 and not HasStatus("Crystal Veil") then
+                crystal=crystal+1
+                if crystal == 5 then
+                    crystal = 1
                 end
-            until not HasStatus("Crystal Veil") or not DoesObjectExist("All-seeing Eye")
+            else
+                while TargetHasStatus(325)==true and HasStatus("Crystal Veil") do
+                    yield("/vnav moveto "..Crystal_Coords[crystal]["x"].." "..Crystal_Coords[crystal]["y"].." "..Crystal_Coords[crystal]["z"])
+                    Sleep(1.34)
+                end
+            end
+            Sleep(1.37)
         end
-    elseif duty_timer and duty_timer < 5190 and GetDutyInfoText(1) == "Open the grand hall gate: 0/1" and GetToastNodeText(2, 3) == "Magitek terminal "..Terminal_List[1]["Name"].."'s countdown completes." then
+        yield("/ad resume")
+    elseif GetDutyInfoText(1) == "Open the grand hall gate: 0/1" and (GetToastNodeText(2, 3) == "Magitek terminal "..Terminal_List[1]["Name"].."'s countdown completes." or (duty_timer and duty_timer < 5220)) then
         yield("/vnav moveto "..Terminal_List[2]["Coords"])
-    elseif duty_timer and duty_timer < 5250 and GetDutyInfoText(1) == "Open the grand hall gate: 0/1" then
+    elseif duty_timer and duty_timer < 5280 and GetDutyInfoText(1) == "Open the grand hall gate: 0/1" then
         yield("/vnav moveto "..Terminal_List[1]["Coords"])
     end
-    local duty_timer = GetDutyTimer()
     if duty_timer and duty_timer < 4200 then
         yield("/ad stop")
         LeaveDuty()
