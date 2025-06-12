@@ -1,6 +1,6 @@
---[[***************   		 ***********
-*     AutoHunt    *   		 * Credits *    Author: Friendly	 Original script by CacahuetesManu and pot0to
-*******************   		 ***********    Functions borrowed from: McVaxius, Umbra, LeafFriend, plottingCreeper, Mootykins and WigglyMuffin
+--[[***************    ***********
+*     AutoHunt    *    * Credits *    Author: Friendly Original script by CacahuetesManu and pot0to
+*******************    ***********    Functions borrowed from: McVaxius, Umbra, LeafFriend, plottingCreeper, Mootykins and WigglyMuffin
     Version Notes:
     0.9.9.9  ->    Dzemael Darkhold should work now, script is feature complete.
     0.1.1.6  ->    Almost feature complete, fixed turnin shenanigans and handling the dungeon queuing, qst stuff.
@@ -52,11 +52,11 @@ local swap_to_SAM = false --unlock and swap to Samurai. This won't work if your 
 local do_extra_dungeons = true --(lvl 70 recommended) do the non huntlog dungeons (Dzemael Darkhold, The Aurum Vale).
 
 --for multi-account
-local party_member = "Holymoly Names'r'hard" --Firstname Lastname or leave empty ("") for solo
-local server = "Zurvan" --write the server name to meet the helper eg. "Lich", this MUST MATCH EXACTLY
+local party_member = "" --Firstname Lastname or leave empty ("") for solo
+local server = "" --write the server name to meet the helper eg. "Lich", this MUST MATCH EXACTLY
 --the below 2 lines will use the command /tp_kind meetup_loc so whatever works that way can be used here.
 local tp_kind = "tp" --"li" for Lifestream, "tp" for Teleporter
-local meetup_loc = "ul'dah" --write the destination to meet helper, you don't have to be exact as long as it works with /li or /tp
+local meetup_loc = "limsa" --write the destination to meet helper, you don't have to be exact as long as it works with /li or /tp
 
 -- These variables help with pathing and are used for unstucking
 local interval_rate = 0.3 -- sets many waiting times, if you set this lower and it creates a bug, set it higher
@@ -72,8 +72,7 @@ local ping_radius = 30 -- what's considered close enough to flag and skipping mo
     -> vbm : https://puni.sh/api/repository/veyn
     -> SomethingNeedDoing (Expanded Edition) [Make sure to press the lua button when you import this] -> https://puni.sh/api/repository/croizat
     -> Teleporter: Dalamud
-    -> CBT: for Expert Delivery before unlocking it https://puni.sh/api/repository/croizat
-    -> VAC functions and lists - https://github.com/WigglyMuffin/SNDScripts/tree/main
+    -> CBT: if you want Expert Delivery before unlocking it https://puni.sh/api/repository/croizat
 
     *****************************
     *  Required Plugin Settings *
@@ -14565,7 +14564,7 @@ function DoGCRankUp()
         else
             Teleporter("gc", "li")
         end
-	    if not CanExpertDelivery() then
+    if not CanExpertDelivery() then
             yield("/cbt enable MaxGCRank")
         end
         ClearTarget()
@@ -19158,7 +19157,7 @@ if do_dungeons and route == "GC" then
 end
 
 if rank_up then
-	DoGCRankUp()
+DoGCRankUp()
 end
 
 
