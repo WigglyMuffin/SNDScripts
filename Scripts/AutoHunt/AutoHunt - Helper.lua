@@ -165,7 +165,7 @@ repeat
         local crystal = 1
         while DoesObjectExist("All-seeing Eye") do
             yield("/vnav moveto "..Crystal_Coords[crystal]["x"].." "..Crystal_Coords[crystal]["y"].." "..Crystal_Coords[crystal]["z"])
-            if current_x^2 + current_z^2 < 1 and not HasStatus("Crystal Veil") then
+            if not HasStatus("Crystal Veil") and current_x and current_z and current_x^2 + current_z^2 < 1 then
                 crystal=crystal+1
                 if crystal == 5 then
                     crystal = 1
