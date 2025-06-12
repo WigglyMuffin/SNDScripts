@@ -1,5 +1,5 @@
 --[[***************    ***********
-*     AutoHunt    *    * Credits *    Author: Friendly Original script by CacahuetesManu and pot0to
+*    AutoHuntLog  *    * Credits *    Author: Friendly Original script by CacahuetesManu and pot0to
 *******************    ***********    Functions borrowed from: McVaxius, Umbra, LeafFriend, plottingCreeper, Mootykins and WigglyMuffin
     Version Notes:
     0.9.9.9  ->    Dzemael Darkhold should work now, script is feature complete.
@@ -23,6 +23,7 @@
     * Description *
     ***************
     An SND script to automate the hunt log for a given class/GC and rank. Goes to home/inn after.
+    It goes in order but also scans for the closest of ANY mob in the current log while moving. Sometimes this fails but it'll get to them later.
     If doing GC log, it's recommended that you're lvl 50. It will unlock SAM for you if you want.
     Does dungeon mobs for GC logs, with an option to invite a helper and leave duty after completing log.
     Does GC rankups, will try to exchange seals if that's preventing you from ranking up and complete all dungeons needed for rank 9.
@@ -52,11 +53,11 @@ local swap_to_SAM = false --unlock and swap to Samurai. This won't work if your 
 local do_extra_dungeons = true --(lvl 70 recommended) do the non huntlog dungeons (Dzemael Darkhold, The Aurum Vale).
 
 --for multi-account
-local party_member = "" --Firstname Lastname or leave empty ("") for solo
-local server = "" --write the server name to meet the helper eg. "Lich", this MUST MATCH EXACTLY
+local party_member = "Holymoly Names'r'hard" --Firstname Lastname or leave empty ("") for solo
+local server = "Zurvan" --write the server name to meet the helper eg. "Lich", this MUST MATCH EXACTLY
 --the below 2 lines will use the command /tp_kind meetup_loc so whatever works that way can be used here.
 local tp_kind = "tp" --"li" for Lifestream, "tp" for Teleporter
-local meetup_loc = "limsa" --write the destination to meet helper, you don't have to be exact as long as it works with /li or /tp
+local meetup_loc = "ul'dah" --write the destination to meet helper, you don't have to be exact as long as it works with /li or /tp
 
 -- These variables help with pathing and are used for unstucking
 local interval_rate = 0.3 -- sets many waiting times, if you set this lower and it creates a bug, set it higher
@@ -72,7 +73,7 @@ local ping_radius = 30 -- what's considered close enough to flag and skipping mo
     -> vbm : https://puni.sh/api/repository/veyn
     -> SomethingNeedDoing (Expanded Edition) [Make sure to press the lua button when you import this] -> https://puni.sh/api/repository/croizat
     -> Teleporter: Dalamud
-    -> CBT: if you want Expert Delivery before unlocking it https://puni.sh/api/repository/croizat
+    -> CBT: for Expert Delivery before unlocking it https://puni.sh/api/repository/croizat
 
     *****************************
     *  Required Plugin Settings *
@@ -89,6 +90,7 @@ local ping_radius = 30 -- what's considered close enough to flag and skipping mo
     *  Improvements  *
     ******************
     Class hunt logs aren't all tested.
+    Sometimes it doesn't kill 
     It spams "You need to finish the quest [insert quest name] to rank up more".
     If you wanna contribute, feel free, but I need to move on with my life.
 
@@ -18038,13 +18040,13 @@ function IsCloseToFlag()
     y1 = GetPlayerRawYPos()
     z1 = GetPlayerRawZPos()
     if mobZ then
-        LogInfo("[AutoHunt] x1: " .. x1 .. ", y1: " .. y1 .. ", z1: " .. z1.. ", rawX: " .. rawX .. ", rawY: " .. rawY .. ", rawZ: " .. rawZ)
+        LogInfo("[AutoHuntLog] x1: " .. x1 .. ", y1: " .. y1 .. ", z1: " .. z1.. ", rawX: " .. rawX .. ", rawY: " .. rawY .. ", rawZ: " .. rawZ)
         distance_to_flag = SquaredDistance(x1, y1, z1, rawX, rawY, rawZ)
-        LogInfo("AutoHunt] Distance to flag: " .. distance_to_flag)
+        LogInfo("AutoHuntLog] Distance to flag: " .. distance_to_flag)
     else
-        LogInfo("AutoHunt] x1: " .. x1 .. ", y1: " .. y1 .. ", z1: " .. z1.. ", rawX: " .. rawX .. ", y1: " .. y1 .. ", rawZ: " .. rawZ)
+        LogInfo("AutoHuntLog] x1: " .. x1 .. ", y1: " .. y1 .. ", z1: " .. z1.. ", rawX: " .. rawX .. ", y1: " .. y1 .. ", rawZ: " .. rawZ)
         distance_to_flag = SquaredDistance(x1, y1, z1, rawX, y1, rawZ)
-        LogInfo("AutoHunt] Distance to flag: " .. distance_to_flag)
+        LogInfo("AutoHuntLog] Distance to flag: " .. distance_to_flag)
     end
     if distance_to_flag <= ping_radius then
         return true
@@ -18097,7 +18099,7 @@ function StopMoveFly()
     while PathIsRunning() do
         Sleep(interval_rate + 0.0257)
     end
-    LogInfo("[AutoHunt] StopMoveFly() finished.")
+    LogInfo("[AutoHuntLog] StopMoveFly() finished.")
 end
 
 function NodeMoveFly()
@@ -18119,7 +18121,7 @@ function NodeMoveFly()
         Sleep(interval_rate + 0.00244)
     end
     FindAndKillEveryTarget() --Mob_List targets
-    LogInfo("[AutoHunt] NodeMoveFly() finished.")
+    LogInfo("[AutoHuntLog] NodeMoveFly() finished.")
 end
 
 function TargetMoveFly()
@@ -18137,7 +18139,7 @@ function TargetMoveFly()
             yield("/vnav moveto " .. target_x .. " " .. target_y .. " " .. target_z)
         end
     end
-    LogInfo("[AutoHunt] TargetMoveFly() finished.")
+    LogInfo("[AutoHuntLog] TargetMoveFly() finished.")
 end
 
 function FindAndKillEveryTarget()
@@ -18210,7 +18212,7 @@ function UnstuckCheckMobFlag()
             ::continue::
         end
     end
-    LogInfo("[AutoHunt] UnstuckCheckMobFlag() finished.")
+    LogInfo("[AutoHuntLog] UnstuckCheckMobFlag() finished.")
 end
 
 function UnstuckTarget()
@@ -18258,7 +18260,7 @@ function UnstuckTarget()
             ::continue::
         end
     end
-    LogInfo("[AutoHunt] UnstuckTarget() finished.")
+    LogInfo("[AutoHuntLog] UnstuckTarget() finished.")
 end
 
 function FightTarget()
@@ -18281,7 +18283,7 @@ end
 
 function MountandMovetoFlag()
     if IsInZone(GetFlagZone()) then
-        LogInfo("[AutoHunt] Position acquired X= " .. rawX .. ", Y= " .. rawY .. ", Z= " .. rawZ)
+        LogInfo("[AutoHuntLog] Position acquired X= " .. rawX .. ", Y= " .. rawY .. ", Z= " .. rawZ)
         if HasFlightUnlocked(GetZoneID()) and not (IsInZone(146) or IsInZone(180)) then -- vnavmesh has problems in Outer La Noscea and Southern Thanalan
             yield("/gaction jump")
         end
@@ -18291,7 +18293,7 @@ function MountandMovetoFlag()
         UnstuckCheckMobFlag()
         StopMoveFly()
     end
-    LogInfo("[AutoHunt] MountAndMovetoFlag() finished.")
+    LogInfo("[AutoHuntLog] MountAndMovetoFlag() finished.")
 end
 
 CallbackID = 10
@@ -18328,7 +18330,7 @@ function GetCallbackID()
     }
 
     CallbackID = (route == "GC" and 9 or CallbackID_Map[ClassID])
-    LogInfo("[AutoHunt] GetCallbackID() done. Result:"..CallbackID)
+    LogInfo("[AutoHuntLog] GetCallbackID() done. Result:"..CallbackID)
     return CallbackID
 end
 
@@ -18356,7 +18358,7 @@ function DeathHandler()
             RestoreYesAlready()
         end
     end
-    LogInfo("[AutoHunt] DeathHandler() finished.")
+    LogInfo("[AutoHuntLog] DeathHandler() finished.")
 end
 
 function DoGCDungeon()
@@ -18375,7 +18377,7 @@ function DoGCDungeon()
         
         -- Handle nil positions (player not loaded, in transition, etc.)
         if type(current_z) ~= "number" or tonumber(current_z) == nil or type(current_x) ~= "number" or tonumber(current_x) == nil then
-            LogInfo("[AutoHunt] StuckChecker(): Position data unavailable, skipping check")
+            LogInfo("[AutoHuntLog] StuckChecker(): Position data unavailable, skipping check")
             return false
         end
         
@@ -18398,11 +18400,11 @@ function DoGCDungeon()
         
         -- Consider stuck if haven't moved more than threshold distance
         if distance_squared <= stuck_threshold^2 then
-            LogInfo("[AutoHunt] StuckChecker(): Player appears stuck! Distance moved in 5 cycles: " .. string.format("%.2f", math.sqrt(distance_squared)))
+            LogInfo("[AutoHuntLog] StuckChecker(): Player appears stuck! Distance moved in 5 cycles: " .. string.format("%.2f", math.sqrt(distance_squared)))
             return true
         end
 
-        LogInfo("[AutoHunt] StuckChecker(): All good, not stuck.")
+        LogInfo("[AutoHuntLog] StuckChecker(): All good, not stuck.")
         return false
     end
 
@@ -18624,13 +18626,13 @@ function DoGCDungeon()
         Sleep(1.0814)
         if GetHP() == GetMaxHP() then --preliminary stuck check
             if StuckInDuty() then --this should not trigger with wait times up to 10 seconds. even if it does, it might skip the wait which is hopefully ok. idk if there's any dungeon where you don't move for 10 seconds while full hp
-                LogInfo("[AutoHunt] StuckChecker(): StuckInDuty() came back true, soft reset AD.")
+                LogInfo("[AutoHuntLog] StuckChecker(): StuckInDuty() came back true, soft reset AD.")
                 yield("/ad pause")
                 Sleep(1.0783)
                 yield("/ad resume")
             end
         end
-        LogInfo("[AutoHunt] Waiting for instance to finish...")
+        LogInfo("[AutoHuntLog] Waiting for instance to finish...")
     until not GetCharacterCondition(34) and not GetCharacterCondition(56) and not GetCharacterCondition(45) and not GetCharacterCondition(51)
 end
 
@@ -18641,7 +18643,7 @@ function DoExtraGCDungeon() -- works with DoGCQuestRequirements to run both dung
         duty = "The Aurum Vale"
     end
     if (GetPlayerGC()==1 and IsQuestDone("1131")) or (GetPlayerGC()==2 and IsQuestDone("1132")) or (GetPlayerGC()==3 and IsQuestDone("1133")) then
-        Echo("[AutoHunt] Both extra dungeons are done.")
+        Echo("[AutoHuntLog] Both extra dungeons are done.")
         return
     end
     
@@ -18653,7 +18655,7 @@ function DoExtraGCDungeon() -- works with DoGCQuestRequirements to run both dung
         
         -- Handle nil positions (player not loaded, in transition, etc.)
         if type(current_z) ~= "number" or tonumber(current_z) == nil or type(current_x) ~= "number" or tonumber(current_x) == nil then
-            LogInfo("[AutoHunt] StuckChecker(): Position data unavailable, skipping check")
+            LogInfo("[AutoHuntLog] StuckChecker(): Position data unavailable, skipping check")
             return false
         end
         -- Add current position to history
@@ -18675,11 +18677,11 @@ function DoExtraGCDungeon() -- works with DoGCQuestRequirements to run both dung
         
         -- Consider stuck if haven't moved more than threshold distance
         if distance_squared <= stuck_threshold^2 then
-            LogInfo("[AutoHunt] StuckChecker(): Player appears stuck! Distance moved in 5 cycles: " .. string.format("%.2f", math.sqrt(distance_squared)))
+            LogInfo("[AutoHuntLog] StuckChecker(): Player appears stuck! Distance moved in 5 cycles: " .. string.format("%.2f", math.sqrt(distance_squared)))
             return true
         end
 
-        LogInfo("[AutoHunt] StuckChecker(): All good, not stuck.")
+        LogInfo("[AutoHuntLog] StuckChecker(): All good, not stuck.")
         return false
     end
 
@@ -18841,13 +18843,13 @@ function DoExtraGCDungeon() -- works with DoGCQuestRequirements to run both dung
         Sleep(1.0814)
         if GetHP() == GetMaxHP() then --preliminary stuck check
             if StuckInDuty() then --this should not trigger with wait times up to 20 seconds. even if it does, it might skip the wait which is hopefully ok. idk if there's any dungeon where you don't move for 10 seconds while full hp
-                LogInfo("[AutoHunt] StuckChecker(): StuckInDuty() came back true, soft reset AD.")
+                LogInfo("[AutoHuntLog] StuckChecker(): StuckInDuty() came back true, soft reset AD.")
                 yield("/ad pause")
                 Sleep(1.0783)
                 yield("/ad resume")
             end
         end
-        LogInfo("[AutoHunt] Waiting for instance to finish...")
+        LogInfo("[AutoHuntLog] Waiting for instance to finish...")
     until not GetCharacterCondition(34) and not GetCharacterCondition(56) and not GetCharacterCondition(45) and not GetCharacterCondition(51)
 end
 
@@ -18912,7 +18914,7 @@ end
 CallbackID = GetCallbackID()
 
 if not CallbackID or CallbackID == 10 then
-    Echo("[AutoHunt] Error: Unable to find which set of hunt logs to look for (CallbackID). This should only happen if you're trying to do a class log for a job that doesn't have one. Check your settings.")
+    Echo("[AutoHuntLog] Error: Unable to find which set of hunt logs to look for (CallbackID). This should only happen if you're trying to do a class log for a job that doesn't have one. Check your settings.")
     return
 end
 local next_log = GetNextIncompleteHuntLog(CallbackID)
@@ -18935,7 +18937,7 @@ if dont_start then
 end
 local rankID = rank_to_do-1
 
-Echo("[AutoHunt] Starting things.")
+Echo("[AutoHuntLog] Starting things.")
 yield("/at e")
 
 if swap_to_SAM and route == "GC" and GetClassJobId() ~= 34 and GetLevel() >= 50 and not IsQuestDone("2559") then
@@ -18980,20 +18982,20 @@ if rankID and not IsHuntLogComplete(CallbackID, rankID) then --do any actual hun
         for j = 1, #CurrentLog[i].Monsters do -- which mob in the hunt log entry (most are a single exact mob, just more of them)
             local mob_name = CurrentLog[i].Monsters[j].Name
             table.insert(Mob_Table, mob_name)
-            LogInfo("[AutoHunt] Inserted "..mob_name.." into Mob_Table.")
+            LogInfo("[AutoHuntLog] Inserted "..mob_name.." into Mob_Table.")
         end
     end
 
     -- Now we loop through the table and extract each mob, territory, location and kills needed
     for i = 1, #CurrentLog do -- which entry
-        LogInfo("[AutoHunt] Debug: Log Entry #"..i)
+        LogInfo("[AutoHuntLog] Debug: Log Entry #"..i)
         for j = 1, #CurrentLog[i].Monsters do -- which mob in the hunt log entry (most are a single exact mob, just more of them)
             local mob_name = CurrentLog[i].Monsters[j].Name
             local mob_is_unfinished = HuntLogCheck(mob_name, CallbackID, rankID, false)
-            LogInfo("[AutoHunt] Debug: Mob #"..j)
-            LogInfo("[AutoHunt] Debug: Looking at "..mob_name)
+            LogInfo("[AutoHuntLog] Debug: Mob #"..j)
+            LogInfo("[AutoHuntLog] Debug: Looking at "..mob_name)
             if mob_is_unfinished then
-                LogInfo("[AutoHunt] Debug: Running target #"..j)
+                LogInfo("[AutoHuntLog] Debug: Running target #"..j)
                 local kills_needed = CurrentLog[i].Monsters[j].Count
                 local mob_zone = CurrentLog[i].Monsters[j].Locations[1].Terri
                 local mobX = CurrentLog[i].Monsters[j].Locations[1].xCoord
@@ -19011,7 +19013,7 @@ if rankID and not IsHuntLogComplete(CallbackID, rankID) then --do any actual hun
                     -- Here we use a plugin called Chat Coordinates to make a flag and teleport to the zone if needed
                     if mobZ then
                         SetMapFlag(mob_zone, mobX, mobY, mobZ)
-                        LogInfo("[AutoHunt] Using better coordinates.") -- the ones with 3D coordinates and not just a map x;y
+                        LogInfo("[AutoHuntLog] Using better coordinates.") -- the ones with 3D coordinates and not just a map x;y
                     else
                         yield("/coord " .. mobX .. " " .. mobY .. " :" .. zone_name)
                         Sleep(interval_rate + 0.0975)
@@ -19020,10 +19022,10 @@ if rankID and not IsHuntLogComplete(CallbackID, rankID) then --do any actual hun
                     if mobZ then
                         SetMapFlag(mob_zone, mobX, mobY, mobZ)
                         Sleep(interval_rate + 0.0980)
-                        LogInfo("[AutoHunt] Using better coordinates.")
+                        LogInfo("[AutoHuntLog] Using better coordinates.")
                         while not IsInZone(tonumber(mob_zone)) do
                             if GetCharacterCondition(26) then
-                                LogInfo("[AutoHunt] Combat is preventing teleport.")
+                                LogInfo("[AutoHuntLog] Combat is preventing teleport.")
                                 yield("/battletarget")
                                 Sleep(0.101010)
                                 FightTarget()
@@ -19038,7 +19040,7 @@ if rankID and not IsHuntLogComplete(CallbackID, rankID) then --do any actual hun
                     else
                         while not IsInZone(tonumber(mob_zone)) do
                             if GetCharacterCondition(26) then
-                                LogInfo("[AutoHunt] Combat is preventing teleport.")
+                                LogInfo("[AutoHuntLog] Combat is preventing teleport.")
                                 yield("/battletarget")
                                 Sleep(0.101027)
                                 FightTarget()
@@ -19079,7 +19081,7 @@ if rankID and not IsHuntLogComplete(CallbackID, rankID) then --do any actual hun
                 MountandMovetoFlag() --this has unstuck function and a bunch of nice things built in
 
                 while mob_is_unfinished do
-                    LogInfo("[AutoHunt] Killing " .. mob_name .. " in progress...")
+                    LogInfo("[AutoHuntLog] Killing " .. mob_name .. " in progress...")
                     if not GetCharacterCondition(26) then --not in combat
                         yield("/target \"" .. mob_name .. "\"") --/target looks for an object within 50 yalms
                         for i=1, 10 do
@@ -19116,7 +19118,7 @@ if rankID and not IsHuntLogComplete(CallbackID, rankID) then --do any actual hun
                         for pos, finished_mob in ipairs(Mob_Table) do
                             if finished_mob == mob_name then
                                 table.remove(Mob_Table, pos)
-                                LogInfo("[AutoHunt] Removed "..mob_name.." from Mob_Table.")
+                                LogInfo("[AutoHuntLog] Removed "..mob_name.." from Mob_Table.")
                                 break
                             end
                         end                
@@ -19132,8 +19134,8 @@ if rankID and not IsHuntLogComplete(CallbackID, rankID) then --do any actual hun
             end
         end
     end
-    Echo("[AutoHunt] Finished overworld hunt log for Rank " .. rank_to_do .. "!")
-    LogInfo("[AutoHunt] Finished overworld hunt log for Rank " .. rank_to_do .. "!")
+    Echo("[AutoHuntLog] Finished overworld hunt log for Rank " .. rank_to_do .. "!")
+    LogInfo("[AutoHuntLog] Finished overworld hunt log for Rank " .. rank_to_do .. "!")
 
     if not GetCharacterCondition(34) and not InSanctuary() then --skip this is you're in dungeon
         if GetPlayerGC() == 1 then --go to sancuary while mobs are dead
