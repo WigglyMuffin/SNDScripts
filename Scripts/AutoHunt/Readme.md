@@ -4,11 +4,15 @@
 
 Original by CacahuetesManu https://github.com/CacahuetesManu/SND/tree/main/Hunt%20Log%20Doer
 
+    ******************
+    *  Description  *
+    ******************
     An SND script to automate the hunt log for a given class/GC and rank. Goes to home/inn after.
     If doing GC log, it's recommended that you're lvl 50. There's an option to unlock SAM for iLvl 110 gear.
     Does dungeon mobs for GC logs, with an option to invite a helper character and leave duty after completing log.
-    Does GC rankups, will try to exchange seals if that's preventing you from ranking up and complete all dungeons needed for rank 9 (for duck bones, oilcloth, etc.).
-    No extra files needed, just check the configs/requirements in the script.
+    Does GC rankups, will try to exchange seals if that's preventing you from ranking up.
+    Ranks you up to rank 9 (for duck bones, oilcloth, etc.).
+    You only need the helper script for the 2nd acc and check the configs/requirements.
     
 If you find a bug in the script and it's not in the list below, feel free to report it.
 
@@ -16,6 +20,7 @@ If you find a bug in the script and it's not in the list below, feel free to rep
     *  Improvements  *
     ******************
     Class hunt logs aren't all tested.
+    It may miss later targets that are in the same area, but it'll get them later.
     It spams "You need to finish the quest [insert quest name] to rank up more".
     If you wanna contribute, feel free, but I need to move on with my life.
     
