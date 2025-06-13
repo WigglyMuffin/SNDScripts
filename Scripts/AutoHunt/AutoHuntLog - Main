@@ -43,25 +43,25 @@ local move_type = "walk" --"walk" of "fly". If you choose fly, it will only kill
 local goto_inn = true --true/false, after finishing, do we go to inn or just /li auto
 
 --GC specific (lvl 50 recommended)
-local stop_at_rank_two = true --for GC rankup you only need log 1 and 2. Stop there?
-local do_dungeons = true -- true/false, should it do GC dungeon mobs
-local duty_timer_limit = 20 --(minutes), leave dungeon if it hasn't finished in this time, indicating a problem
-local complete_duty = false --true/false, after hunt log is complete, should you finish the duty
---!!!IMPORTANT!!!: if you enabled rank-up, you should set deliveroo to leave 20k seals in Settings/Configuration -> Additional settings.
-local rank_up = true -- true/false, attempt to rank up after finishing the log, does turnin for seals.
-local swap_to_SAM = false --unlock and swap to Samurai. This won't work if your armory is full.
-local do_extra_dungeons = true --(lvl 70 recommended) do the non huntlog dungeons (Dzemael Darkhold, The Aurum Vale).
+    local stop_at_rank_two = true --for GC rankup you only need log 1 and 2. Stop there?
+    local do_dungeons = true -- true/false, should it do GC dungeon mobs
+    local duty_timer_limit = 20 --(minutes), leave dungeon if it hasn't finished in this time, indicating a problem
+    local complete_duty = false --true/false, after hunt log is complete, should you finish the duty
+    --!!!IMPORTANT!!!: if you enabled rank-up, you should set deliveroo to leave 20k seals in Settings/Configuration -> Additional settings.
+    local rank_up = true -- true/false, attempt to rank up after finishing the log, does turnin for seals.
+    local swap_to_SAM = false --unlock and swap to Samurai. This won't work if your armory is full.
+    local do_extra_dungeons = true --(lvl 70 recommended) do the non huntlog dungeons (Dzemael Darkhold, The Aurum Vale).
 
---for multi-account
-local party_member = "Holymoly Names'r'hard" --Firstname Lastname or leave empty ("") for solo
-local server = "Zurvan" --write the server name to meet the helper eg. "Lich", this MUST MATCH EXACTLY
---the below 2 lines will use the command /tp_kind meetup_loc so whatever works that way can be used here.
-local tp_kind = "tp" --"li" for Lifestream, "tp" for Teleporter
-local meetup_loc = "ul'dah" --write the destination to meet helper, you don't have to be exact as long as it works with /li or /tp
+    --for multi-account
+        local party_member = "" --Firstname Lastname or leave empty ("") for solo
+        local server = "" --write the server name to meet the helper eg. "Lich", this MUST MATCH EXACTLY
+    --the below 2 lines will use the command /tp_kind meetup_loc so whatever works that way can be used here.
+        local tp_kind = "tp" --"li" for Lifestream, "tp" for Teleporter
+        local meetup_loc = "ul'dah" --write the destination to meet helper, you don't have to be exact as long as it works with /li or /tp
 
 -- These variables help with pathing and are used for unstucking
-local interval_rate = 0.3 -- sets many waiting times, if you set this lower and it creates a bug, set it higher
-local ping_radius = 30 -- what's considered close enough to flag and skipping mounting
+    local interval_rate = 0.3 -- sets many waiting times, if you set this lower and it creates a bug, set it higher
+    local ping_radius = 30 -- what's considered close enough to flag, and to not mount
 
     --[[*****************
     *    Requirements   *
@@ -14551,7 +14551,7 @@ function DoGCRankUp()
     if not can_rankup and not can_rankup_with_seals then
         return
     elseif not can_rankup and can_rankup_with_seals then --checks if more seals would enable rankup and do a turnin if so
-        Target(gc_target)
+        TargetNearestObject(gc_target)
         Sleep(0.1544)
         if HasTarget() then
             if GetDistanceToTarget() < 7 then --7 is the interaction limit
@@ -14600,7 +14600,7 @@ function DoGCRankUp()
         until not IsAddonVisible("GrandCompanySupplyList") and not IsAddonVisible("SelectString") and not IsAddonVisible("GrandCompanyExchange") and not IsAddonVisible("GrandCompanySupplyList") and IsPlayerAvailable()
         yield("/cbt disable MaxGCRank")
     elseif can_rankup then
-        Target(gc_target)
+        TargetNearestObject(gc_target)
         Sleep(0.1591)
         if HasTarget() then
             if GetDistanceToTarget() < 7 then --7 is the interaction limit
@@ -16494,8 +16494,21 @@ function GetNextIncompleteHuntLog(class)
     if class ~= 9 then
         maxrank = 5
     end
+    local gc_rank = 0
+    local gc_id = GetPlayerGC()
+    if gc_id == 1 then -- checks if gc is maelstrom and adds seal amount to current_seals
+        gc_rank = GetMaelstromGCRank()
+    elseif gc_id == 2 then -- checks if gc is twin adder and adds seal amount to current_seals
+        gc_rank = GetAddersGCRank()
+    elseif gc_id == 3 then -- checks if gc is immortal flames and adds seal amount to current_seals
+        gc_rank = GetFlamesGCRank()
+    end
     for i=1, maxrank do
         if not IsHuntLogComplete(class, i-1) then
+            if (class==9 and gc_rank < 5 and i==2) or (class==9 and gc_rank<9 and i==3) then
+                LogInfo("[VAC] Next incomplete GC log is "..i.." but you need to rank up to access it.")
+                return nil
+            end
             LogInfo("[VAC] Next incomplete log for class "..class.." is "..i)
             return i
         end
@@ -18083,7 +18096,6 @@ function MountFly()
         if not GetCharacterCondition(81) and GetCharacterCondition(4) and not GetCharacterCondition(77) and
             not (IsInZone(146) or IsInZone(180)) then -- vnavmesh has problems flying around Outer La Noscea, Southern Thanalan, and Central Coerthas Highlands
             for i=1, 10 do
-                Echo("Jumping to mount")
                 yield("/gaction jump")
                 Sleep(interval_rate*3 + 0.0245)
                 if GetCharacterCondition(77) and not GetCharacterCondition(48) then
@@ -19186,7 +19198,7 @@ if do_dungeons and route == "GC" then
 end
 
 if rank_up then
-DoGCRankUp()
+    DoGCRankUp()
 end
 
 
