@@ -13,6 +13,7 @@ Original by CacahuetesManu https://github.com/CacahuetesManu/SND/tree/main/Hunt%
     Does GC rankups, will try to exchange seals if that's preventing you from ranking up.
     Ranks you up to rank 9 (for duck bones, oilcloth, etc.).
     Make sure to check the requirements and set the configs you need.
+    The Helper script needs to run on the 2nd account.
     
 If you find a bug in the script and it's not in the list below, feel free to report it.
 
