@@ -53,8 +53,8 @@ local goto_inn = true --true/false, after finishing, do we go to inn or just /li
     local do_extra_dungeons = true --(lvl 70 recommended) do the non huntlog dungeons (Dzemael Darkhold, The Aurum Vale).
 
     --for multi-account
-        local party_member = "" --Firstname Lastname or leave empty ("") for solo
-        local server = "" --write the server name to meet the helper eg. "Lich", this MUST MATCH EXACTLY
+        local party_member = "Holymoly Names'r'hard" --Firstname Lastname or leave empty ("") for solo
+        local server = "Zurvan" --write the server name to meet the helper eg. "Lich", this MUST MATCH EXACTLY
     --the below 2 lines will use the command /tp_kind meetup_loc so whatever works that way can be used here.
         local tp_kind = "tp" --"li" for Lifestream, "tp" for Teleporter
         local meetup_loc = "ul'dah" --write the destination to meet helper, you don't have to be exact as long as it works with /li or /tp
@@ -18851,7 +18851,9 @@ function DoExtraGCDungeon() -- works with DoGCQuestRequirements to run both dung
         else
             --whatever aurum needs, seemingly nothing
         end
-        yield("/vnav moveto "..GetPlayerRawXPos(party_member).." "..GetPlayerRawYPos(party_member).." "..GetPlayerRawZPos(party_member))
+        if not solo then
+            yield("/vnav moveto "..GetPlayerRawXPos(party_member).." "..GetPlayerRawYPos(party_member).." "..GetPlayerRawZPos(party_member))
+        end
         Sleep(1.0814)
         if GetHP() == GetMaxHP() then --preliminary stuck check
             if StuckInDuty() then --this should not trigger with wait times up to 20 seconds. even if it does, it might skip the wait which is hopefully ok. idk if there's any dungeon where you don't move for 10 seconds while full hp
