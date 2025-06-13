@@ -58,7 +58,7 @@ local goto_inn = true --true/false, after finishing, do we go to inn or just /li
         local server = "" --write the server name to meet the helper eg. "Lich", this MUST MATCH EXACTLY
     --the below 2 lines will use the command /tp_kind meetup_loc so whatever works that way can be used here.
         local tp_kind = "tp" --"li" for Lifestream, "tp" for Teleporter
-        local meetup_loc = "ul'dah" --write the destination to meet helper, you don't have to be exact as long as it works with /li or /tp
+        local meetup_loc = "limsa" --write the destination to meet helper, you don't have to be exact as long as it works with /li or /tp
 
 -- These variables help with pathing and are used for unstucking
     local interval_rate = 0.3 -- sets many waiting times, if you set this lower and it creates a bug, set it higher
@@ -18760,7 +18760,7 @@ function DoExtraGCDungeon() -- works with DoGCQuestRequirements to run both dung
         if duty == "Dzemael Darkhold" then
             if DoesObjectExist("Magitek Transporter") then --follow the helper more intelligently, pls&ty
                 TargetNearestObject("Magitek Transporter", 7, 20)
-                if GetTargetName() == "Magitek Transporter" then
+                if GetTargetName() == "Magitek Transporter" and StuckInDuty() then
                     yield("/ad pause")
                     yield("/vnav moveto " .. GetTargetRawXPos() .. " " .. GetTargetRawYPos() .. " " .. GetTargetRawZPos())
                     repeat
