@@ -1,4 +1,4 @@
---This needs to go on the party_member that helps you do the dungeons (one single account)
+--This needs to go on the party_member that helps you do the dungeons
 --Needs to be manually stopped when you're done
 
 -- Plugins needed: Autoduty and its dependencies https://docs.google.com/spreadsheets/d/151RlpqRcCpiD_VbQn6Duf-u-S71EP7d0mx3j1PDNoNA/edit?pli=1#gid=0
