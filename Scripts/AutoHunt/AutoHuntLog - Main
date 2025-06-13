@@ -18964,12 +18964,13 @@ if stop_at_rank_two and route == "GC" and rank_to_do == 3 then
     rank_to_do = 2
 end
     --Is toon already done?
-local dont_start = false --below part should determine if the toon is done based on settings 
+local dont_start = false --below part should determine if the toon is done based on settings
 if do_extra_dungeons and route == "GC" then
     if (GetPlayerGC()==1 and IsQuestDone("1131")) or (GetPlayerGC()==2 and GetIsQuestDone("1132")) or (GetPlayerGC()==3 and IsQuestDone("1133")) then
         dont_start = true
     end
-elseif not rank_to_do or IsHuntLogComplete(CallbackID, (rank_to_do-1)) then    
+end
+if not rank_to_do or IsHuntLogComplete(CallbackID, (rank_to_do-1)) then    
     dont_start = true
 end
 if dont_start then
