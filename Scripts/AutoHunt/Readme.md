@@ -12,7 +12,7 @@ Original by CacahuetesManu https://github.com/CacahuetesManu/SND/tree/main/Hunt%
     Does dungeon mobs for GC logs, with an option to invite a helper character and leave duty after completing log.
     Does GC rankups, will try to exchange seals if that's preventing you from ranking up.
     Ranks you up to rank 9 (for duck bones, oilcloth, etc.).
-    You only need the helper script for the 2nd acc and check the configs/requirements.
+    Make sure to check the requirements and set the configs you need.
     
 If you find a bug in the script and it's not in the list below, feel free to report it.
 
