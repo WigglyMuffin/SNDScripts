@@ -2,6 +2,7 @@
 *    AutoHuntLog  *    * Credits *    Author: Friendly Original script by CacahuetesManu and pot0to
 *******************    ***********    Functions borrowed from: McVaxius, Umbra, LeafFriend, plottingCreeper, Mootykins and WigglyMuffin
     Version Notes:
+    0.9.9.10 ->    Improved documentation and some small tweaks
     0.9.9.9  ->    Dzemael Darkhold should work now, script is feature complete.
     0.1.1.6  ->    Almost feature complete, fixed turnin shenanigans and handling the dungeon queuing, qst stuff.
                    Follows the helper in dungeons and stays on magitek terminals in Dzemael Darkhold.
@@ -53,8 +54,8 @@ local goto_inn = true --true/false, after finishing, do we go to inn or just /li
     local do_extra_dungeons = true --(lvl 70 recommended) do the non huntlog dungeons (Dzemael Darkhold, The Aurum Vale).
 
     --for multi-account
-        local party_member = "Holymoly Names'r'hard" --Firstname Lastname or leave empty ("") for solo
-        local server = "Zurvan" --write the server name to meet the helper eg. "Lich", this MUST MATCH EXACTLY
+        local party_member = "" --Firstname Lastname or leave empty ("") for solo
+        local server = "" --write the server name to meet the helper eg. "Lich", this MUST MATCH EXACTLY
     --the below 2 lines will use the command /tp_kind meetup_loc so whatever works that way can be used here.
         local tp_kind = "tp" --"li" for Lifestream, "tp" for Teleporter
         local meetup_loc = "ul'dah" --write the destination to meet helper, you don't have to be exact as long as it works with /li or /tp
@@ -66,14 +67,24 @@ local goto_inn = true --true/false, after finishing, do we go to inn or just /li
     --[[*****************
     *    Requirements   *
     *********************
+
+    -> Boss Mod : https://puni.sh/api/repository/veyn
     -> Chat Coordinates: Dalamud
+    -> Lifestream: https://github.com/NightmareXIV/MyDalamudPlugins/raw/main/pluginmaster.json
     -> Pandora's Box: https://love.puni.sh/ment.json
-    -> vnavmesh: https://puni.sh/api/repository/veyn
     -> RSR: https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
-    -> vbm : https://puni.sh/api/repository/veyn
     -> SomethingNeedDoing (Expanded Edition) [Make sure to press the lua button when you import this] -> https://puni.sh/api/repository/croizat
     -> Teleporter: Dalamud
-    -> CBT: for Expert Delivery before unlocking it https://puni.sh/api/repository/croizat
+    -> TextAdvance: https://github.com/NightmareXIV/MyDalamudPlugins/raw/main/pluginmaster.json
+    -> vnavmesh: https://puni.sh/api/repository/veyn
+
+    GC log also uses
+
+    -> AutoDuty: https://puni.sh/api/repository/herc
+    -> Deliveroo: https://plugins.carvel.li
+    -> Questionable: https://plugins.carvel.li
+    -> (Optionally) CBT: to get seals before unlocking Expert Delivery https://puni.sh/api/repository/croizat
+
 
     *****************************
     *  Required Plugin Settings *
@@ -90,7 +101,7 @@ local goto_inn = true --true/false, after finishing, do we go to inn or just /li
     *  Improvements  *
     ******************
     Class hunt logs aren't all tested.
-    Sometimes it doesn't kill 
+    Sometimes it doesn't kill later targets until it reaches them in the list.
     It spams "You need to finish the quest [insert quest name] to rank up more".
     If you wanna contribute, feel free, but I need to move on with my life.
 
@@ -18927,17 +18938,36 @@ end
 *******************
 ]]
 local required_plugins = {
-    AutoDuty = "0.0.0.118",
-    AutoRetainer = "4.4.4",
-    BossMod = "0.0.0.292",
-    Lifestream = "2.3.2.8",
-    PandorasBox = "1.6.2.5",
-    Questionable = "4.19",
-    SomethingNeedDoing = "1.75",
-    TeleporterPlugin = "2.0.2.5",
-    TextAdvance = "3.2.4.4",
-    vnavmesh = "0.0.0.54"
+    BossMod = "0.2.9.8",
+    ChatCoordinates = "2.1.2.7",
+    Lifestream = "2.5.1.1",
+    PandorasBox = "1.6.3.8",
+    RotationSolver = "7.1.1.1",
+    SomethingNeedDoing = "12.0.0.0",
+    TeleporterPlugin = "2.0.2.7",
+    TextAdvance = "3.2.4.6",
+    vnavmesh = "0.2.2.5"
 }
+if route == "GC" then
+    required_plugins = {
+        AutoDuty = "0.0.0.220",
+        BossMod = "0.2.9.8",
+        ChatCoordinates = "2.1.2.7",
+        Deliveroo = "7.3",
+        Lifestream = "2.5.1.1",
+        PandorasBox = "1.6.3.8",
+        Questionable = "5.16",
+        RotationSolver = "7.1.1.1",
+        SomethingNeedDoing = "12.0.0.0",
+        TeleporterPlugin = "2.0.2.7",
+        TextAdvance = "3.2.4.6",
+        vnavmesh = "0.2.2.5"
+    }
+end
+
+if not CheckPlugins(required_plugins) then
+    return -- Stops script as plugins not available or versions don't match
+end
 --Get some data
     --GC rank
 local gc_rank = 0
@@ -18962,6 +18992,12 @@ local next_log = GetNextIncompleteHuntLog(CallbackID)
 local rank_to_do = log_to_do or next_log --I don't know why, I don't want to know why, I shouldn't have to wonder why, but for whatever reason this stupid var isn't seen by DoGCDungeon
 if stop_at_rank_two and route == "GC" and rank_to_do == 3 then
     rank_to_do = 2
+elseif stop_at_rank_two and route == "GC" and next_log == nil then
+    if IsHuntLogComplete(9, 1) then
+        rank_to_do = 2
+    else 
+        rank_to_do = 1
+    end
 end
     --Is toon already done?
 local dont_start = false --below part should determine if the toon is done based on settings
@@ -18969,8 +19005,7 @@ if do_extra_dungeons and route == "GC" then
     if (GetPlayerGC()==1 and IsQuestDone("1131")) or (GetPlayerGC()==2 and GetIsQuestDone("1132")) or (GetPlayerGC()==3 and IsQuestDone("1133")) then
         dont_start = true
     end
-end
-if not rank_to_do or IsHuntLogComplete(CallbackID, (rank_to_do-1)) then    
+elseif not rank_to_do or IsHuntLogComplete(CallbackID, (rank_to_do-1)) then    
     dont_start = true
 end
 if dont_start then
