@@ -2,23 +2,28 @@
 *    AutoHuntLog  *    * Credits *    Author: Friendly Original script by CacahuetesManu and pot0to
 *******************    ***********    Functions borrowed from: McVaxius, Umbra, LeafFriend, plottingCreeper, Mootykins and WigglyMuffin
     Version Notes:
-    0.9.9.10 ->    Improved documentation and some small tweaks
-    0.9.9.9  ->    Dzemael Darkhold should work now, script is feature complete.
-    0.1.1.6  ->    Almost feature complete, fixed turnin shenanigans and handling the dungeon queuing, qst stuff.
-                   Follows the helper in dungeons and stays on magitek terminals in Dzemael Darkhold.
-    0.1.1.5  ->    Will now move back to flag after each mob + bugfixes + clean up/rewrite code.
-                   It's faster and more reliable to notice if the log/entry has been completed.
-                   Movement looks less like a bot.
-                   Cutter's Cry should work reliably now.
-                   Unlocks SAM for easy gear and DPS.
-                   Does Dzemael Darkhold and Aurum Vale.
-    0.1.1.4  ->    GC rank-up option added, does turnin for seals if needed for rank up.
-    0.1.1.3  ->    Added basic support for all GC dungeons.
-    0.1.1.2  ->    DeathHandler added in a few places.
-    0.1.1.1  ->    Made things more reliable: stop if close enough to flag, prevent getting stuck while attempting to mount. 
-    0.1.1.0  ->    Added Flames GC dungeon support, with or without helper toon. See Settings.
-    0.1.0.0  ->    Friendly's makeover. Turbocharged for reliability: checks to see if it gets stuck in many places, mount selector, added fate support, etc.
-    0.0.1.0  ->    The official versioning of this script begins now. I spent time getting the actual coordinates for the GC log mobs, but the class log mobs still use publicly available coordinates, which are highly inaccurate. pot0to cleaned up a bunch of things, especially a bug that was causing errors with the job to class conversion. I streamlined the pathing process. Originally it used node pathing from Mootykins.
+    0.9.9.11 ->     Fixed typo preventing Twin Adders from working.
+                    Getting to additional targets while flying fixed.
+                    Fixed a bug where Movement()'s stuck check got stuck.
+                    Added condition to teleport to Wineport instead of Costa del Sol.
+                    Removed some unused functions.
+    0.9.9.10 ->     Improved documentation and some small tweaks
+    0.9.9.9  ->     Dzemael Darkhold should work now, script is feature complete.
+    0.1.1.6  ->     Almost feature complete, fixed turnin shenanigans and handling the dungeon queuing, qst stuff.
+                    Follows the helper in dungeons and stays on magitek terminals in Dzemael Darkhold.
+    0.1.1.5  ->     Will now move back to flag after each mob + bugfixes + clean up/rewrite code.
+                    It's faster and more reliable to notice if the log/entry has been completed.
+                    Movement looks less like a bot.
+                    Cutter's Cry should work reliably now.
+                    Unlocks SAM for easy gear and DPS.
+                    Does Dzemael Darkhold and Aurum Vale.
+    0.1.1.4  ->     GC rank-up option added, does turnin for seals if needed for rank up.
+    0.1.1.3  ->     Added basic support for all GC dungeons.
+    0.1.1.2  ->     DeathHandler added in a few places.
+    0.1.1.1  ->     Made things more reliable: stop if close enough to flag, prevent getting stuck while attempting to mount. 
+    0.1.1.0  ->     Added Flames GC dungeon support, with or without helper toon. See Settings.
+    0.1.0.0  ->     Friendly's makeover. Turbocharged for reliability: checks to see if it gets stuck in many places, mount selector, added fate support, etc.
+    0.0.1.0  ->     The official versioning of this script begins now. I spent time getting the actual coordinates for the GC log mobs, but the class log mobs still use publicly available coordinates, which are highly inaccurate. pot0to cleaned up a bunch of things, especially a bug that was causing errors with the job to class conversion. I streamlined the pathing process. Originally it used node pathing from Mootykins.
 
     ***************
     * Description *
@@ -33,13 +38,13 @@
     *  Settings  *
     ************]]
 -- Choose either "class" to do your class log or "GC" to do your Grand Company Log
-local route = "GC"
+local route = "class"
 -- Choose what log to finish: nil to do next one available or 1, 2, 3, 4, 5
 local log_to_do = nil
 
 -- Movement
 local mount = true -- have you unlocked mounts yet? (you should btw, saves a bunch of time)
-local mount_name = "Company Chocobo" -- "Company Chocobo" or "SDS Fenrir" or any other mount name
+local mount_name = "SDS Fenrir" -- "Company Chocobo" or "SDS Fenrir" or any other mount name
 local move_type = "walk" --"walk" of "fly". If you choose fly, it will only kill mobs once arrived to flag
 local goto_inn = true --true/false, after finishing, do we go to inn or just /li auto
 
@@ -54,11 +59,11 @@ local goto_inn = true --true/false, after finishing, do we go to inn or just /li
     local do_extra_dungeons = true --(lvl 70 recommended) do the non huntlog dungeons (Dzemael Darkhold, The Aurum Vale).
 
     --for multi-account
-        local party_member = "" --Firstname Lastname or leave empty ("") for solo
-        local server = "" --write the server name to meet the helper eg. "Lich", this MUST MATCH EXACTLY
+        local party_member = "Holymoly Names'r'hard" --Firstname Lastname or leave empty ("") for solo
+        local server = "Zurvan" --write the server name to meet the helper eg. "Lich", this MUST MATCH EXACTLY
     --the below 2 lines will use the command /tp_kind meetup_loc so whatever works that way can be used here.
         local tp_kind = "tp" --"li" for Lifestream, "tp" for Teleporter
-        local meetup_loc = "limsa" --write the destination to meet helper, you don't have to be exact as long as it works with /li or /tp
+        local meetup_loc = "ul'dah" --write the destination to meet helper, you don't have to be exact as long as it works with /li or /tp
 
 -- These variables help with pathing and are used for unstucking
     local interval_rate = 0.3 -- sets many waiting times, if you set this lower and it creates a bug, set it higher
@@ -101,7 +106,7 @@ local goto_inn = true --true/false, after finishing, do we go to inn or just /li
     *  Improvements  *
     ******************
     Class hunt logs aren't all tested.
-    Sometimes it doesn't kill later targets until it reaches them in the list.
+    It may miss later targets that are in the same area, but it'll get them later.
     It spams "You need to finish the quest [insert quest name] to rank up more".
     If you wanna contribute, feel free, but I need to move on with my life.
 
@@ -907,8 +912,8 @@ local function MobData()
                                             Map = 4,
                                             Terri = 148,
                                             Zone = 0,
-                                            xCoord = 17.7,
-                                            yCoord = 22.2
+                                            xCoord = 16.7,
+                                            yCoord = 22.5
                                         }
                                     },
                                     Name = "Deathgaze"
@@ -13104,18 +13109,6 @@ local Quest_List={
       ['PlaceName'] = "Ul'dah",
     }
 }
-function LoadFileCheck()
-    LogInfo("[VAC] Successfully loaded the vac functions file")
-end
-
-local function GetScriptDirectory()
-    local info = debug.getinfo(2, "S")
-    local path = info.source:sub(2)
-    return path:match("(.*[\\/])") or "./"
-end
-
-local vac_script_directory = GetScriptDirectory()
-
 
 -- Set SND settings
 -- Required for certain functions and scripts to work properly
@@ -13146,25 +13139,6 @@ end
 --[[################################################
 ##                   Functions                    ##
 ################################################--]]
-
--- Usage: EnsureFolderExists("\\path\\to\\your\\folder")
---
--- Checks whether specified folder exists, otherwise creates one
-function EnsureFolderExists(folder_path)
-    -- Try to create a temporary file in the folder
-    local temp_file_path = folder_path .. "\\.temp_file"
-    local file = io.open(temp_file_path, "w")
-
-    -- If the file couldn't be opened, the folder doesn't exist
-    if not file then
-        -- Folder doesn't exist, create it silently
-        io.popen('mkdir "' .. folder_path .. '"'):close()
-    else
-        -- Folder exists, close and remove the temporary file
-        file:close()
-        os.remove(temp_file_path)
-    end
-end
 
 -- InteractAndWait()
 --
@@ -13488,10 +13462,10 @@ function FindAndKillTarget(target_name, target_radius)
     local target_radius = target_radius or 101 --the limit for GetObjectRawXPos() from FindNearestObject()
     local auto_attack_triggered = false
     
-    local target_name = TargetNearestObject(target_name, 2, 0) --this targets the closest mob (with the name if specified) and returns its name 
+    --local target_name = TargetNearestObject(target_name, 2, 0) --this targets the closest mob (with the name if specified) and returns its name 
     local target_x_pos, target_y_pos, target_z_pos = FindNearestObject(target_name)
 
-    if target_x_pos == nil then
+    if target_x_pos == nil or target_x_pos == 0 and target_y_pos == 0 and target_z_pos == 0 then
         return
     end
     
@@ -13511,7 +13485,7 @@ function FindAndKillTarget(target_name, target_radius)
         attack_range = 10
     end
     
-    Movement(target_x_pos, target_y_pos, target_z_pos, attack_range)
+    PathToObject(target_name, attack_range)
     TargetNearestObject(target_name, 2, target_radius)
     local dist_to_target = GetDistanceToTarget()
     
@@ -13522,38 +13496,38 @@ function FindAndKillTarget(target_name, target_radius)
                 Sleep(0.1)
             until not GetCharacterCondition(4)
         end
-        
-        yield("/rotation manual")
+
+        StartRotation()
         
         repeat
-            if (GetDistanceToTarget() <= attack_range) and PathIsRunning() then
-                yield("/vnav stop")
-            end
-            
-            if not (GetDistanceToTarget() <= attack_range) and not PathIsRunning() then
+            if (GetDistanceToTarget() <= attack_range) then
+                if PathIsRunning() then
+                    yield("/vnav stop")
+                end
                 if not auto_attack_triggered then
-                    yield("/vnavmesh movetarget")
+                    DoAction("Auto-attack")
+                    Sleep(0.1)
+                    if IsTargetInCombat() and GetCharacterCondition(26) then
+                        auto_attack_triggered = true
+                    end
+                end
+            else
+                if not PathIsRunning() and not auto_attack_triggered then
+                    PathToObject(target_name, attack_range)
                     Sleep(0.1)
                 end
             end
-            
-            if GetDistanceToTarget() <= attack_range and not auto_attack_triggered then
-                DoAction("Auto-attack")
-                Sleep(0.1)
-                if IsTargetInCombat() and GetCharacterCondition(26) then
-                    auto_attack_triggered = true
-                end
-            end
-            
             Sleep(0.05)
-        until GetTargetHP() <= 0 or GetCharacterCondition(2)
-        
+        until IsTargetInCombat()
         yield("/vnavmesh stop")
     end
     
     Sleep(0.5)
     
     if GetCharacterCondition(26) then
+        if GetCharacterCondition(80) then --get out of water
+            PathToObject(target_name, 0.1)
+        end
         yield("/rotation auto")
         repeat
             Sleep(0.1)
@@ -14159,7 +14133,7 @@ end
 function Movement(x_position, y_position, z_position, range, mount_name)
     -- Wait until player doesn't have 45 or 51 conditions for zone changing
     repeat
-        Sleep(0.1)
+        Sleep(0.101)
     until not (GetCharacterCondition(45) and GetCharacterCondition(51))
 
     mount_name = mount_name or "Company Chocobo"
@@ -14216,9 +14190,13 @@ function Movement(x_position, y_position, z_position, range, mount_name)
             end
 
             -- Start moving towards the destination
-            yield("/vnav moveto " .. x_position .. " " .. y_position .. " " .. z_position)
+            if GetCharacterCondition(77) then
+                yield("/vnav flyto " .. x_position .. " " .. y_position .. " " .. z_position)
+            else
+                yield("/vnav moveto " .. x_position .. " " .. y_position .. " " .. z_position)
+            end
             retries = retries + 1
-            Sleep(0.1)
+            Sleep(0.11)
         until PathIsRunning() or retries >= max_retries -- Stop if path is running or max retries reached
 
         Sleep(0.05)
@@ -14237,7 +14215,7 @@ function Movement(x_position, y_position, z_position, range, mount_name)
 
             -- Wait for teleporting or loading to finish
             repeat
-                Sleep(0.1)
+                Sleep(0.12)
             until not GetCharacterCondition(45) and not GetCharacterCondition(51)
 
             -- Resume navmesh after conditions clear
@@ -14279,7 +14257,7 @@ function Movement(x_position, y_position, z_position, range, mount_name)
         -- If the stuck timer exceeds the threshold, attempt to get unstuck
         if stuck_timer >= stuck_threshold_seconds then
             DoGeneralAction("Jump")
-            Sleep(0.1)
+            Sleep(0.13)
             NavReload()
             NavToDestination()
             stuck_timer = 0
@@ -14289,46 +14267,9 @@ function Movement(x_position, y_position, z_position, range, mount_name)
         previous_squared_distance_to_target = current_squared_distance_to_target
         previous_relative_position = { x = xpos, y = ypos, z = zpos }
 
-        Sleep(0.05)
+        Sleep(stuck_check_interval)
     end
 end
-
--- Usage: OpenTimers()
--- this should probably be renamed to open gc timers
--- Opens the timers window
--- function OpenTimers()
-    -- local last_trigger_time = os.time()
-    -- local retry_interval = 5 -- x seconds interval between retries
-
-    -- repeat
-        -- Sleep(0.1)
-    -- until IsPlayerAvailable() and not IsPlayerOccupied()
-
-    -- yield("/timers")
-
-    -- repeat
-        -- local current_time = os.time()
-
-        -- if current_time - last_trigger_time >= retry_interval then -- Activate once every x seconds
-            -- yield("/timers")
-            -- last_trigger_time = current_time                       -- Store the last trigger time
-        -- end
-
-        -- Sleep(0.1)
-    -- until IsAddonReady("ContentsInfo")
-
-    -- last_trigger_time = 0 -- Reset the trigger time
-
-    -- repeat
-        -- local current_time = os.time()
-
-        -- if current_time - last_trigger_time >= retry_interval and IsAddonReady("ContentsInfo") then -- Activate once every x seconds
-            -- yield("/callback ContentsInfo true 12 1")
-            -- last_trigger_time = current_time                       -- Store the last trigger time
-        -- end
-        -- Sleep(0.1)
-    -- until IsAddonReady("ContentsInfoDetail")
--- end
 
 -- Come back to the other one above at some point
 function OpenTimers()
@@ -14768,11 +14709,9 @@ function CanGCRankUpWithSeals()
         if log_rank_1_complete then
             can_rankup = true
         else
-            Echo("You need to finish GC hunting log 1 to rank up more")
         end
     elseif next_rank == 8 then
         if not gc_rank_8_mission_complete then
-            Echo('You need to finish the quest "Shadows Uncast" to rank up more')
         else
             can_rankup = true
         end
@@ -14782,15 +14721,12 @@ function CanGCRankUpWithSeals()
             can_rankup = true
         else
             if not log_rank_2_complete then
-                Echo("You need to finish GC hunting log 2 to rank up more")
             end
             if not gc_rank_9_mission_complete then
-                Echo('You need to finish the quest "Gilding The Bilious" to rank up more')
             end
         end
     elseif next_rank >= 10 then
         -- Rank 10 and above are not handled in this script
-        Echo("Rank 10 and above are not handled in this script")
         return false, next_rank
     else
         can_rankup = true
@@ -15424,7 +15360,7 @@ function PathToObject(path_object_name, range)
 
     if distance > (range or 3) then  -- Use specified range or default to 3
         LogInfo("[VAC] (PathToObject) Moving to floor point.")
-        Movement(floorX, floorY, floorZ, range or 3.5)
+        Movement(floorX, floorY, floorZ, range or 3.5, mount_name)
 
         -- Wait until the pathing is complete
         repeat
@@ -15435,199 +15371,6 @@ function PathToObject(path_object_name, range)
     else
         LogInfo("[VAC] (PathToObject) Already close to the object.")
         return true
-    end
-end
-
--- Usage: PathToEstateEntrance()
--- Finds where your estate entrance is and paths to it
--- Assumes you are outside your plot/recently used estate teleport
-function PathToEstateEntrance()
-    local entranceX = GetObjectRawXPos("Entrance")
-    local entranceY = GetObjectRawYPos("Entrance")
-    local entranceZ = GetObjectRawZPos("Entrance")
-
-    -- Check if we got valid entrance coordinates
-    if not entranceX or not entranceY or not entranceZ then
-        LogInfo("[VAC] (PathToEstateEntrance) Failed to get valid entrance coordinates.")
-        LogInfo(string.format("[VAC] (PathToEstateEntrance) Entrance coordinates: X=%s, Y=%s, Z=%s", 
-            tostring(entranceX), tostring(entranceY), tostring(entranceZ)))
-        return false
-    end
-
-    -- Get player's current position
-    local playerX = GetPlayerRawXPos()
-    local playerY = GetPlayerRawYPos()
-    local playerZ = GetPlayerRawZPos()
-
-    LogInfo(string.format("[VAC] (PathToEstateEntrance) Player position: X=%.2f, Y=%.2f, Z=%.2f", playerX, playerY, playerZ))
-    LogInfo(string.format("[VAC] (PathToEstateEntrance) Entrance position: X=%.2f, Y=%.2f, Z=%.2f", entranceX, entranceY, entranceZ))
-
-    -- Try different extents for finding a valid navmesh point
-    local extents = {0, 1, 2, 5, 10, 15, 20}
-    local nearestX, nearestY, nearestZ
-
-    for _, extent in ipairs(extents) do
-        nearestX = QueryMeshNearestPointX(entranceX, entranceY, entranceZ, extent, extent)
-        nearestY = QueryMeshNearestPointY(entranceX, entranceY, entranceZ, extent, extent)
-        nearestZ = QueryMeshNearestPointZ(entranceX, entranceY, entranceZ, extent, extent)
-
-        if nearestX and nearestY and nearestZ then
-            LogInfo(string.format("[VAC] (PathToEstateEntrance) Found valid navmesh point with extent %.2f", extent))
-            LogInfo(string.format("[VAC] (PathToEstateEntrance) Nearest point: X=%.2f, Y=%.2f, Z=%.2f", nearestX, nearestY, nearestZ))
-            break
-        end
-    end
-
-    if not (nearestX and nearestY and nearestZ) then
-        LogInfo("[VAC] (PathToEstateEntrance) Couldn't find a valid navmesh point near the entrance with any extent.")
-        return false
-    end
-
-    -- Find a valid floor point for the player to path to
-    local floorX = QueryMeshPointOnFloorX(nearestX, nearestY, nearestZ, true, 2)
-    local floorY = QueryMeshPointOnFloorY(nearestX, nearestY, nearestZ, true, 2)
-    local floorZ = QueryMeshPointOnFloorZ(nearestX, nearestY, nearestZ, true, 2)
-
-    if floorX and floorY and floorZ then
-        LogInfo(string.format("[VAC] (PathToEstateEntrance) Valid floor point: X=%.2f, Y=%.2f, Z=%.2f", floorX, floorY, floorZ))
-
-        -- Calculate distance to check if we're already close enough
-        local distance = math.sqrt((playerX - floorX) ^ 2 + (playerY - floorY) ^ 2 + (playerZ - floorZ) ^ 2)
-        LogInfo(string.format("[VAC] (PathToEstateEntrance) Distance to floor point: %.2f", distance))
-
-        if distance > 3 then  -- Only move if we're more than 3 units away
-            LogInfo("[VAC] (PathToEstateEntrance) Moving to floor point.")
-            Movement(floorX, floorY, floorZ, 3.5)
-
-            -- Wait until the pathing is complete
-            repeat
-                Sleep(0.1)
-            until not PathIsRunning()
-
-            LogInfo("[VAC] (PathToEstateEntrance) Movement to estate entrance complete.")
-            return true
-        else
-            LogInfo("[VAC] (PathToEstateEntrance) Already close to the estate entrance.")
-            return true
-        end
-    else
-        LogInfo("[VAC] (PathToEstateEntrance) Couldn't find a valid floor point near the entrance.")
-        return false
-    end
-end
-
--- Function to navigate to the summoning bell in limsa lominsa lower decks
--- Usage: PathToLimsaBell()
---
--- Will move the character to the summoning bell if already in limsa lominsa lower decks,
--- Otherwise teleports to limsa lominsa and then moves to the summoning bell
-function PathToLimsaBell()
-    if not ZoneCheck("Limsa Lominsa Lower Decks") then
-        LogInfo("[VAC] (PathToLimsaBell) Not in Limsa Lominsa Lower Decks.")
-        Teleporter("Limsa Lominsa", "tp")
-    end
-
-    local bellX = GetObjectRawXPos("Summoning Bell")
-    local bellY = GetObjectRawYPos("Summoning Bell")
-    local bellZ = GetObjectRawZPos("Summoning Bell")
-
-    if not bellX or not bellY or not bellZ then
-        LogInfo("[VAC] (PathToLimsaBell) Failed to get Summoning Bell coordinates.")
-        return false
-    end
-
-    LogInfo(string.format("[VAC] (PathToLimsaBell) Summoning Bell position: X=%.2f, Y=%.2f, Z=%.2f", bellX, bellY, bellZ))
-
-    -- Try different extents for finding a valid navmesh point
-    local extents = {0, 1, 2, 5, 10, 15, 20}
-    local nearestX, nearestY, nearestZ
-
-    for _, extent in ipairs(extents) do
-        nearestX = QueryMeshNearestPointX(bellX, bellY, bellZ, extent, extent)
-        nearestY = QueryMeshNearestPointY(bellX, bellY, bellZ, extent, extent)
-        nearestZ = QueryMeshNearestPointZ(bellX, bellY, bellZ, extent, extent)
-
-        if nearestX and nearestY and nearestZ then
-            LogInfo(string.format("[VAC] (PathToLimsaBell) Found valid navmesh point with extent %.2f", extent))
-            LogInfo(string.format("[VAC] (PathToLimsaBell) Nearest point: X=%.2f, Y=%.2f, Z=%.2f", nearestX, nearestY, nearestZ))
-            break
-        end
-    end
-
-    if not (nearestX and nearestY and nearestZ) then
-        LogInfo("[VAC] (PathToLimsaBell) Couldn't find a valid navmesh point near the Summoning Bell with any extent.")
-        return false
-    end
-
-    -- Find a valid floor point for the player to stand on
-    local floorX = QueryMeshPointOnFloorX(nearestX, nearestY, nearestZ, true, 2)
-    local floorY = QueryMeshPointOnFloorY(nearestX, nearestY, nearestZ, true, 2)
-    local floorZ = QueryMeshPointOnFloorZ(nearestX, nearestY, nearestZ, true, 2)
-
-    if not (floorX and floorY and floorZ) then
-        LogInfo("[VAC] (PathToLimsaBell) Couldn't find a valid floor point near the Summoning Bell.")
-        return false
-    end
-
-    LogInfo(string.format("[VAC] (PathToLimsaBell) Moving to Summoning Bell: X=%.2f, Y=%.2f, Z=%.2f", floorX, floorY, floorZ))
-    Movement(floorX, floorY, floorZ, 3)
-
-    -- Wait until the pathing is complete
-    repeat
-        Sleep(0.1)
-    until not PathIsRunning()
-
-    LogInfo("[VAC] (PathToLimsaBell) Reached the Summoning Bell.")
-    return true
-end
-
--- Function to wait until a specified amount of gil is traded
--- Usage: WaitForGilIncrease(1)
--- This function monitors the gil amount and waits until it increases by the specified amount.
--- It acts as a trigger before proceeding with further actions.
-function WaitForGilIncrease(gil_increase_amount)
-    -- Store the current amount of gil before the trade
-    local previous_gil = GetGil()
-    -- Continuously check the gil amount until the specified increase is detected
-    while true do
-        Sleep(1.0) -- Pause execution for 1 second between checks
-        -- Retrieve the current amount of gil
-        local current_gil = GetGil()
-        local gil_difference = current_gil - previous_gil
-        -- Check if the gil has increased by the specified amount
-        if gil_difference == gil_increase_amount then
-            LogInfo(string.format("%d Gil successfully received", gil_increase_amount))
-            return true
-        end
-        if gil_difference > gil_increase_amount then
-            LogInfo(string.format("Gil difference (%d) exceeded expected amount (%d). Resetting...", gil_difference, gil_increase_amount))
-            previous_gil = current_gil
-        end
-    end
-end
-
--- Function to wait until a specified amount of gil is traded
--- Usage: WaitForGilDecrease(1)
--- This function monitors the gil amount and waits until it decreases by the specified amount.
--- It acts as a trigger before proceeding with further actions.
-function WaitForGilDecrease(gil_decrease_amount)
-    -- Store the current amount of gil before the trade
-    local previous_gil = GetGil()
-    -- Continuously check the gil amount until the specified decrease is detected
-    while true do
-        Sleep(1.0) -- Pause execution for 1 second between checks
-        -- Retrieve the current amount of gil
-        local current_gil = GetGil()
-        local gil_difference = previous_gil - current_gil
-        -- Check if the gil has decreased by the specified amount
-        if gil_difference == gil_decrease_amount then
-            LogInfo(string.format("%d Gil successfully traded", gil_decrease_amount))
-            return true
-        end
-        if gil_difference > gil_decrease_amount then
-            LogInfo(string.format("Gil difference (%d) exceeded expected amount (%d). Resetting...", gil_difference, gil_decrease_amount))
-            previous_gil = current_gil
-        end
     end
 end
 
@@ -15661,62 +15404,6 @@ function PartyInvite(party_invite_name)
     -- stuff could go here
 end
 
--- Usage: PartyInviteMenu("First", "First Last")
--- Will invite player to a party through the social menu, and retrying if the invite timeout happens
--- Can be used from anywhere
--- Semi broken at the moment
-function PartyInviteMenu(party_invite_menu_first, party_invite_menu_full)
-    local invite_timeout = 305   -- 300 Seconds is the invite timeout, adding 5 seconds for good measure
-    local start_time = os.time() -- Stores the invite time
-
-    while not IsInParty() do
-        repeat
-            Sleep(0.1)
-        until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
-
-        repeat
-            yield('/search first "' .. party_invite_menu_first .. '" en jp de fr')
-            Sleep(0.5)
-        until IsAddonVisible("SocialList")
-
-        -- Probably needs the node scanner here to match the name, otherwise it will invite whoever was previously searched, will probably mess up for multiple matches too
-
-        repeat
-            if IsAddonReady("SocialList") then
-                yield('/callback SocialList true 1 0 "' .. party_invite_menu_full .. '"')
-            end
-            Sleep(0.5)
-        until IsAddonVisible("ContextMenu")
-
-        repeat
-            if IsAddonReady("ContextMenu") then
-                yield("/callback ContextMenu true 0 3 0")
-            end
-            Sleep(0.1)
-        until not IsAddonVisible("ContextMenu")
-
-        repeat
-            if IsAddonReady("Social") then
-                yield("/callback Social true -1")
-            end
-            Sleep(0.1)
-        until not IsAddonVisible("Social")
-
-        -- Wait for the target player to accept the invite or the timeout to expire
-        while not IsInParty() do
-            Sleep(0.1)
-
-            -- Check if the invite has expired
-            if os.time() - start_time >= invite_timeout then
-                Echo("Invite expired. Reinviting " .. party_invite_menu_full)
-                start_time = os.time() -- Reset the start time for the new invite
-                break                  -- Break the loop to resend the invite
-            end
-        end
-    end
-    -- stuff could go here
-end
-
 -- Usage: PartyDisband()
 -- Will check if player is in party and disband party
 function PartyDisband()
@@ -15741,116 +15428,6 @@ function PartyDisband()
         until not IsAddonVisible("SelectYesno")
     end
 end
-
--- Usage: PartyAccept()
--- Will accept party invite if not in party
--- NEEDS a name arg
-function PartyAccept()
-    if not IsInParty() then
-        -- Wait until the player is available, not casting, and not in combat
-        repeat
-            Sleep(0.1)
-        until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
-
-        -- Wait until the "SelectYesno" addon is ready
-        repeat
-            Sleep(0.1)
-        until IsAddonReady("SelectYesno")
-
-        Sleep(0.1)
-
-        -- Accept the party invite
-        yield("/callback SelectYesno true 0")
-
-        -- Wait until the player is in a party
-        repeat
-            Sleep(0.1)
-        until IsInParty()
-
-        LogInfo("[VAC] Party invitation accepted.")
-    else
-        LogInfo("[VAC] Player is already in a party.")
-    end
-end
-
--- Usage: PartyLeave()
--- Will leave party if in a party
-function PartyLeave()
-    if IsInParty() then
-        repeat
-            Sleep(0.1)
-        until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
-
-        yield("/partycmd leave")
-
-        repeat
-            Sleep(0.1)
-        until IsAddonVisible("SelectYesno")
-
-        Sleep(0.1)
-
-        repeat
-            if IsAddonReady("SelectYesno") then
-                yield("/callback SelectYesno true 0")
-            end
-            Sleep(0.1)
-        until not IsAddonVisible("SelectYesno")
-
-        LogInfo("[VAC] Party has been left.")
-    else
-        LogInfo("[VAC] Player is not in a party.")
-    end
-end
-
--- Usage: EstateTeleport("First Last", 0)
--- Options: 0 = Free Company, 1 = Personal, 2 = Apartment
--- Opens estate list of added friend and teleports to specified location
--- ZoneTransitions() not required to be called after
-function EstateTeleport(estate_char_name, estate_type)
-    repeat
-        Sleep(0.1)
-    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
-
-    yield("/estatelist " .. estate_char_name)
-
-    repeat
-        Sleep(0.1)
-    until IsAddonReady("TeleportHousingFriend")
-    
-    Sleep(0.1)
-    
-    yield("/callback TeleportHousingFriend true " .. estate_type)
-    
-    repeat
-        Sleep(0.1)
-    until not IsAddonVisible("TeleportHousingFriend")
-
-    ZoneTransitions()
-end
-
--- Usage: RelogCharacter("First Last@Server")
--- Relogs specified character, should be followed with a LoginCheck()
--- Will check if player is in a santuary
--- Requires @Server else it will not work
--- Requires Auto Retainer plugin
-function RelogCharacter(relog_char_name)
-    -- Wait until the player is available, not casting, and conditions are met
-    repeat
-        Sleep(0.1)
-    until (IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)) or IsAddonVisible("Title")
-
-    -- If the player is not in a sanctuary, wait 20 seconds before relogging
-    if not InSanctuary() then
-        -- Start the 20 second countdown
-        for i = 1, 200 do
-            Sleep(0.1)
-        end
-    end
-
-    -- Proceed with the relog command after the wait or immediately if in sanctuary
-    yield("/ays relog " .. relog_char_name)
-end
-
 
 -- Usage: EquipRecommendedGear()
 -- Equips recommended gear if any available
@@ -15883,14 +15460,6 @@ function EquipRecommendedGear()
         end
         Sleep(0.1)
     until not IsAddonVisible("RecommendEquip")
-end
-
--- Usage: WaitUntilObjectExists("First Last") or WaitUntilObjectExists("Aetheryte")
--- Checks if specified object exists near to your character
-function WaitUntilObjectExists(object_name)
-    repeat
-        Sleep(0.1)
-    until DoesObjectExist(object_name)
 end
 
 -- Usage: GetRandomNumber(1.5, 3.5) or GetRandomNumber(2, 4)
@@ -15957,12 +15526,6 @@ function DoGeneralAction(general_action_name)
     yield('/gaction "' .. general_action_name .. '"')
 end
 
--- Usage: DoTargetLockon()
--- Locks on to current target
-function DoTargetLockon(target_lockon_name)
-    yield("/lockon")
-end
-
 -- Usage: IsQuestDone("Hello Halatali") or IsQuestDone("697")
 -- Checks if you have completed the specified quest
 function IsQuestDone(quest_done_name_or_ID)
@@ -15994,242 +15557,6 @@ function IsQuestDone(quest_done_name_or_ID)
     return false
 end
 
--- Usage: DoQuest("Hallo Halatali") or DoQuest(1433)
--- Checks if you have completed the specified quest and starts if you have not
-function DoQuest(quest_do_name)
-    EquipRecommendedGear() -- Equip recommended gear before starting a quest
-
-    -- If input is nil or an empty string
-    if not quest_do_name or quest_do_name == "" then
-        LogInfo("[VAC] (DoQuest) quest_do_name is nil or an empty string")
-        return nil -- Return nil if the quest_do_name is nil or an empty string
-    end
-
-    -- Initialize variables to store quest information
-    local quest_key = nil
-    local quest_id = nil
-
-    -- check if quest id was already provided by user directly
-    if type(quest_do_name) == "number" then
-        quest_id = quest_do_name
-    else
-        quest_id = nil
-    end
-
-    -- Search for the quest in Quest_List by name
-    if not quest_id then
-        for key, quest in pairs(Quest_List) do
-            if string.lower(quest['Name']) == string.lower(quest_do_name) and (string.lower(quest['ClassJobUnlock']) == string.lower(GetPlayerJob(true)) or string.lower(quest['ClassJobUnlock'])) == string.lower("adventurer") then
-                quest_id = tonumber(quest['ID'])
-                quest_key = tonumber(key)
-                break
-            end
-        end
-    else
-    -- Search for the quest key by quest_id instead since quest_id was provided by user
-        for key, quest in pairs(Quest_List) do
-            if tonumber(quest['ID']) == quest_do_name then
-                quest_key = tonumber(key)
-                break
-            end
-        end
-    end
-
-    -- If the quest is not found, echo and return false
-    if not quest_id or not quest_key then
-        LogInfo('[VAC] (DoQuest) Quest "' .. quest_do_name .. '" not found.')
-        Echo('Quest "' .. quest_do_name .. '" not found.')
-        return false
-    end
-
-    -- Check if the quest is already completed
-    if IsQuestComplete(tonumber(quest_key)) then
-        LogInfo('[VAC] (DoQuest) You have already completed the "' .. quest_do_name .. '" quest.')
-        Echo('You have already completed the "' .. quest_do_name .. '" quest.')
-        return true
-    end
-
-    -- Ensure the player is available and not in the middle of zone transition before starting the quest
-    repeat
-        Sleep(0.1)
-    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not (GetCharacterCondition(45) or GetCharacterCondition(51))
-
-    -- Readies the quest
-    yield("/qst next " .. quest_id)
-
-    -- Wait for player availability again after quest initiation, also acts as a small sleep
-    repeat
-        Sleep(0.1)
-    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
-
-    -- Start the quest
-    yield("/qst start")
-    
-    -- Ensure Questionable is running before checking for stuck issues
-    repeat
-        Sleep(0.1)
-    until QuestionableIsRunning() -- Wait for quest to fully start
-
-    -- Initialize stuck checker variables
-    local stuck_check_interval = 0.50   -- Time between stuck checks
-    local stuck_threshold_seconds = 4.0 -- Time before considering stuck
-    local min_progress_distance = 0.1   -- Minimum distance to be considered as progress
-
-    local stuck_timer = 0
-    local previous_position = {
-        x = GetPlayerRawXPos(),
-        y = GetPlayerRawYPos(),
-        z = GetPlayerRawZPos()
-    }
-
-    -- Function to handle stuck checks
-    local function CheckIfStuck()
-        -- Loop continuously while the quest is incomplete
-        while not IsQuestComplete(tonumber(quest_key)) do
-            Sleep(stuck_check_interval)
-
-            -- If player is busy or in a zone transition, reset the stuck timer and skip
-            if not IsPlayerAvailable() or IsPlayerCasting() or GetCharacterCondition(26) or GetCharacterCondition(32) then
-                stuck_timer = 0 -- Reset stuck timer
-                previous_position = { -- Reset position for next check
-                    x = GetPlayerRawXPos(),
-                    y = GetPlayerRawYPos(),
-                    z = GetPlayerRawZPos()
-                }
-                -- Wait for the player to be available again
-                repeat
-                    Sleep(0.1)
-                until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32) and not (GetCharacterCondition(31) or GetCharacterCondition(32))
-            end
-
-            -- Handle zone transitions
-            if GetCharacterCondition(45) or GetCharacterCondition(51) then
-                previous_position = { -- Reset position tracking
-                    x = GetPlayerRawXPos(),
-                    y = GetPlayerRawYPos(),
-                    z = GetPlayerRawZPos()
-                }
-                stuck_timer = 0 -- Reset stuck timer
-
-                -- Wait until the player finishes zoning
-                repeat
-                    Sleep(0.1)
-                until not GetCharacterCondition(45) and not GetCharacterCondition(51)
-
-                -- After zoning, reload navmesh and questionable
-                NavReload()
-                
-                -- Check if the quest has been accepted and reloads, otherwise it will loop forever
-                if IsQuestNameAccepted(quest_do_name) then
-                    yield("/qst reload")
-                else
-                    -- Retry quest start if it hasn't been accepted yet
-                    yield("/qst next " .. quest_id)
-                    
-                    repeat
-                        Sleep(0.1)
-                    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
-                    
-                    yield("/qst start")
-                end
-            end
-
-            -- Calculate player's movement since last check
-            local current_position = {
-                x = GetPlayerRawXPos(),
-                y = GetPlayerRawYPos(),
-                z = GetPlayerRawZPos()
-            }
-            local dx = current_position.x - previous_position.x
-            local dy = current_position.y - previous_position.y
-            local dz = current_position.z - previous_position.z
-            local distance_moved_squared = dx * dx + dy * dy + dz * dz
-
-            -- If the player hasn't moved far enough, increase the stuck timer
-            if distance_moved_squared < min_progress_distance * min_progress_distance then
-                stuck_timer = stuck_timer + stuck_check_interval
-            else
-                stuck_timer = 0 -- Reset stuck timer if progress is made
-            end
-
-            -- If stuck for too long, attempt to resolve by jumping and reloading quest data
-            if stuck_timer >= stuck_threshold_seconds then
-                DoGeneralAction("Jump") -- Try jumping to get unstuck
-                Sleep(0.1)
-                NavReload() -- Reload Navmesh
-                
-                -- Check if the quest has been accepted, otherwise it will loop forever
-                if IsQuestNameAccepted(quest_do_name) then
-                    NavReload() -- Reload Navmesh
-                    yield("/qst reload") -- Reload quest data
-                else
-                    -- If the quest hasn't been accepted, retry quest start
-                    yield("/qst next " .. quest_id)
-                    repeat
-                        Sleep(0.1)
-                    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
-                    yield("/qst start")
-                end
-
-                -- Wait until navigation and quest are ready
-                repeat
-                    Sleep(0.05)
-                until NavIsReady() or QuestionableIsRunning()
-
-                stuck_timer = 0 -- Reset stuck timer after reloading
-            end
-
-            -- Update the previous position for the next check
-            previous_position = current_position
-            
-            -- Exit the function if ContentsFinder and Entrance exist so stuck checker loop ends
-            if IsAddonVisible("ContentsFinder") and DoesObjectExist("Entrance") then
-                return
-            end
-        end
-    end
-
-    -- Run the stuck checker while waiting for the quest to complete
-    while not IsQuestComplete(tonumber(quest_key)) do
-        Sleep(0.1)
-
-        -- Check if the player is available and not busy before running the stuck checker
-        if IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32) then
-            CheckIfStuck() -- Run the stuck checker
-        end
-        
-        -- Exit the function if ContentsFinder and Entrance exist so stuck checker loop ends
-        if IsAddonVisible("ContentsFinder") and DoesObjectExist("Entrance") then
-            return
-        end
-    end
-
-    -- Ensure the quest is fully completed before ending
-    Sleep(0.5)
-
-    -- Clear the quest values after completion
-    quest_id = nil
-    quest_key = nil
-
-    return true
-end
-
--- Usage: IsPlayerLowerThanLevel(100)
--- Checks if player level lower than specified amount, returns true if so
-function IsPlayerLowerThanLevel(player_lower_level)
-    if GetLevel() < player_lower_level then
-        return true
-    end
-end
-
--- Usage: IsPlayerHigherThanLevel(1)
--- Checks if player level higher than specified amount, returns true if so
-function IsPlayerHigherThanLevel(player_higher_level)
-    if GetLevel() > player_higher_level then
-        return true
-    end
-end
-
 -- Usage: AutoDutyRun("Sastasha")
 -- 
 -- Runs a dungeon once through AutoDuty
@@ -16239,6 +15566,9 @@ function AutoDutyRun(duty)
     yield("/autoduty run support " .. duty_id .. " 1")
 end
 
+-- Usage: AutoDutyUnsyncRun("Sastasha")
+-- 
+-- Runs a dungeon once through AutoDuty
 function AutoDutyUnsyncRun(duty)
     yield("/ad cfg Unsynced true")
     Sleep(0.1)
@@ -16528,25 +15858,6 @@ function GetNextIncompleteHuntLog(class)
     return nil
 end
 
--- Usage: GetPlayerJobLevel() // GetPlayerJobLevel("WAR") // GetPlayerJobLevel(11)
--- Returns current player job level, can specify job to check, even id if you really want to be cursed
-function GetPlayerJobLevel(job)
-    local job = job or GetClassJobId()
-    if type(job) == "string" then
-        local function findJobXPByAbbreviation(abbreviation)
-            for index, job in ipairs(Job_List) do
-                if job["Abbreviation"] == abbreviation then
-                    return tonumber(GetLevel(job["ExpArrayIndex"]))
-                end
-            end
-            return "Unknown job"
-        end
-        return findJobXPByAbbreviation(job) or "Unknown job"
-    elseif type(job) ~= nil then
-        return tonumber(GetLevel(Job_List[job]["ExpArrayIndex"]))
-    end
-end
-
 -- Usage: ReturnHomeWorld()
 -- Checks if player is not on home world and returns Home
 -- ZoneTransitions() not required to be called after
@@ -16561,143 +15872,6 @@ function ReturnHomeWorld()
     repeat
         Sleep(0.1)
     until GetCurrentWorld() == GetHomeWorld() and IsPlayerAvailable() and not LifestreamIsBusy()
-end
-
--- Usage: CheckPluginsEnabled("AutoRetainer") or CheckPluginsEnabled("AutoRetainer", "TeleporterPlugin", "Lifestream")
--- local required_plugins = { "AutoRetainer", "TeleporterPlugin", "Lifestream" }
--- if expert_delivery then
-    -- table.insert(required_plugins, "Deliveroo")
--- end
--- if not CheckPluginsEnabled(unpack(required_plugins)) then
-    -- return
--- end
--- Will check if the player has the specified plugins installed/enabled and echoes enabled + disabled plugins
--- Use unpack() as individual arguments required
-function CheckPluginsEnabled(...)
-    local enabled_plugins = {}
-    local missing_plugins = {}
-
-    -- Pass all arguments into a table
-    local plugins = { ... }
-
-    for _, plugin_name in ipairs(plugins) do
-        if HasPlugin(plugin_name) then
-            table.insert(enabled_plugins, plugin_name)
-        else
-            table.insert(missing_plugins, plugin_name)
-        end
-    end
-
-    -- Sort the plugin names a-z
-    table.sort(enabled_plugins)
-    table.sort(missing_plugins)
-
-    -- Echo enabled plugins
-    if #enabled_plugins > 0 then
-        LogInfo("[VAC] Enabled plugins: " .. table.concat(enabled_plugins, ", "))
-        Echo("Enabled plugins: " .. table.concat(enabled_plugins, ", "))
-    else
-        LogInfo("[VAC] No plugins are enabled.")
-        Echo("No plugins are enabled.")
-    end
-
-    -- Echo missing plugins
-    if #missing_plugins > 0 then
-        LogInfo("[VAC] Missing or not enabled plugins: " .. table.concat(missing_plugins, ", "))
-        Echo("Missing or not enabled plugins: " .. table.concat(missing_plugins, ", "))
-        return false -- Returns false to be used with if statements to stop script
-    else
-        LogInfo("[VAC] All plugins are enabled.")
-        Echo("All plugins are enabled.")
-        return true -- Returns true be used with if statements to start script
-    end
-end
-
--- Usage: CheckPluginsVersion("AutoRetainer" = 1.2.3)
--- local required_plugins_versions = {
-    -- AutoRetainer = "3.0.0",
-    -- TeleporterPlugin = "2.0.0",
-    -- Lifestream = "1.0.0"
--- }
--- if not CheckPluginsVersion(required_plugins_versions) then
-    -- return
--- end
--- Will check if the player has the specified plugins at the minimum version required and echoes matching and mismatching plugins
-function CheckPluginsVersion(plugins_with_versions)
-    local matching_versions = {}
-    local mismatched_versions = {}
-    
-    -- Function to clean version string by removing extra numbers
-    local function CleanVersion(version_str)
-        local version = tostring(version_str)
-        -- Remove everything after the colon if it exists
-        local clean_ver = version:match("^([^:]+)")
-        return clean_ver or version
-    end
-    
-    -- Function to split version string into numbers
-    local function SplitVersion(version)
-        local numbers = {}
-        -- Clean the version string first
-        version = CleanVersion(version)
-        for num in string.gmatch(version, "%d+") do
-            table.insert(numbers, tonumber(num))
-        end
-        return numbers
-    end
-    
-    -- Compare version numbers
-    local function CompareVersions(current, required)
-        local current_nums = SplitVersion(current)
-        local required_nums = SplitVersion(required)
-        
-        -- Compare each number in the version
-        for i = 1, math.max(#current_nums, #required_nums) do
-            local curr = current_nums[i] or 0
-            local req = required_nums[i] or 0
-            
-            if curr < req then
-                return false
-            elseif curr > req then
-                return true
-            end
-        end
-        return true -- Versions are equal
-    end
-
-    -- Check each plugin
-    for plugin_name, required_version in pairs(plugins_with_versions) do
-        local current_version = GetPluginVersion(plugin_name)
-        local clean_current = CleanVersion(current_version)
-        
-        if CompareVersions(current_version, required_version) then
-            table.insert(matching_versions, string.format("%s (v%s)", plugin_name, clean_current))
-        else
-            table.insert(mismatched_versions, string.format("%s (current: v%s, required: v%s)", 
-                plugin_name, clean_current, required_version))
-        end
-    end
-    
-    -- Sort the plugin names a-z
-    table.sort(matching_versions)
-    table.sort(mismatched_versions)
-    
-    -- Echo plugins with matching versions
-    if #matching_versions > 0 then
-        LogInfo("[VAC] Plugins with matching versions: " .. table.concat(matching_versions, ", "))
-        Echo("Plugins with matching versions: " .. table.concat(matching_versions, ", "))
-    end
-    
-    -- Echo plugins with mismatched versions
-    if #mismatched_versions > 0 then
-        LogInfo("[VAC] Plugins with outdated versions: " .. table.concat(mismatched_versions, ", "))
-        Echo("Plugins with outdated versions: " .. table.concat(mismatched_versions, ", "))
-        return false -- Returns false if any plugin versions don't match requirements
-    else
-        LogInfo("[VAC] All plugin versions match requirements.")
-        Echo("All plugin versions match requirements.")
-        return true -- Returns true if all plugin versions match requirements
-    end
 end
 
 -- Usage: CheckPlugins("AutoRetainer" = 1.2.3)
@@ -16866,114 +16040,6 @@ function IsAetheryteAttuned(aetheryte_attuned_name)
     end
 end
 
--- Usage: GetLocalTime()
--- Returns local time in HH:MM:SS format
-function GetLocalTime()
-    return os.date("%H:%M:%S")
-end
-
--- Usage: GetServerTime()
--- Returns UTC time in HH:MM:SS format
-function GetServerTime()
-    return os.date("!%H:%M:%S")
-end
-
--- Usage: GetEorzeanTime()
--- Returns Eorzean Time in HH:MM:SS format
-function GetEorzeanTime()
-    local eorzean_time = os.time() * 3600 / 175
-    return string.format("%02d:%02d:%02d", 
-        math.floor(eorzean_time / 3600) % 24, 
-        math.floor(eorzean_time / 60) % 60, 
-        math.floor(eorzean_time) % 60)
-end
-
--- Usage: ReturnTeleport()
--- Uses /return action to return to aetheryte location
-function ReturnTeleport()
-    -- Initial check to ensure player can teleport
-    repeat
-        Sleep(0.1)
-    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not GetCharacterCondition(32)
-
-    yield("/return")
-    
-    repeat
-        Sleep(0.1)
-    until IsAddonReady("SelectYesno")
-
-    yield("/callback SelectYesno true 0")
-
-    repeat
-        Sleep(0.1)
-    until not IsAddonVisible("SelectYesno")
-
-    repeat
-        Sleep(0.1)
-    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26)
-
-    -- Wait for a zone transition to complete
-    repeat
-        Sleep(0.1)
-    until GetCharacterCondition(45) or GetCharacterCondition(51)
-
-    -- Once zone change has happened, wait until the conditions turn false
-    repeat
-        Sleep(0.1)
-    until not GetCharacterCondition(45) and not GetCharacterCondition(51)
-
-    Sleep(0.5)
-end
-
--- Usage: IsTeleportUnlocked()
--- Checks if player has teleport unlocked
-function IsTeleportUnlocked()
-    local aetheryte_list = GetAetheryteList()
-
-    -- Check if aetheryte_list is nil, empty, or has a count less than 2
-    if aetheryte_list and aetheryte_list.Count and aetheryte_list.Count >= 2 then
-        return true
-    else
-        return false
-    end
-end
-
--- Usage: AttuneAethernetShard()
--- Attunes with the Aethernet Shard, exits out of menus if already attuned
-function AttuneAethernetShard()
-    -- Wait until the player is ready to interact
-    repeat
-        Sleep(0.1)
-    until IsPlayerAvailable() and not IsPlayerCasting() and not GetCharacterCondition(26) and not IsMoving() and not (GetCharacterCondition(45) or GetCharacterCondition(51))
-
-    -- Target and interact with the Aethernet Shard
-    Target("Aethernet Shard")
-    Sleep(0.1)
-    Interact()
-
-    -- If the player is already attuned, exit the menu
-    if (GetCharacterCondition(31) or GetCharacterCondition(32)) and IsAddonVisible("TelepotTown") then
-        repeat
-            Sleep(0.1)
-        until IsAddonReady("TelepotTown")
-
-        Sleep(0.5)
-        yield("/callback TelepotTown true 1")
-
-        -- Wait until the menu is no longer visible
-        repeat
-            Sleep(0.1)
-        until not IsAddonVisible("TelepotTown")
-    end
-
-    -- Wait until player is available
-    repeat
-        Sleep(0.1)
-    until IsPlayerAvailable() and not IsPlayerCasting() and not (GetCharacterCondition(31) or GetCharacterCondition(32))
-    
-    Sleep(1.0)
-end
-
 -- Usage: GetCharacterLevel()
 -- Encapsulates the GetLevel() snd function with better handling
 -- Returns the player level
@@ -16993,784 +16059,6 @@ function GetCharacterLevel()
     return player_level
 end
 
--- Usage: ExitGame()
--- Exits the game
-function ExitGame()
-    yield("/shutdown")
-
-    repeat
-        Sleep(0.1)
-    until IsAddonReady("SelectYesno")
-
-    yield("/callback SelectYesno true 0")
-
-    repeat
-        Sleep(0.1)
-    until not IsAddonVisible("SelectYesno")
-end
-
--- Usage: GetSubmersibleParts()
--- Will return the currently open submersible components from the "CompanyCraftSupply" Addon menu in abbreviation form such as SSSS
--- Requires Addon "CompanyCraftSupply" to be visible
-function GetSubmersibleParts()
-    if IsAddonVisible("CompanyCraftSupply") then
-        -- Target totals to be used to match parts
-        local target_favor = tonumber(GetNodeText("CompanyCraftSupply", 5, 3)) or 0
-        local target_range = tonumber(GetNodeText("CompanyCraftSupply", 6, 3)) or 0
-        local target_speed = tonumber(GetNodeText("CompanyCraftSupply", 7, 3)) or 0
-        local target_retrieval = tonumber(GetNodeText("CompanyCraftSupply", 8, 3)) or 0
-        local target_surveillance = tonumber(GetNodeText("CompanyCraftSupply", 9, 3)) or 0
-
-        local num_parts = #Submersible_Part_List
-
-        for hull = 1, num_parts do
-            for stern = 1, num_parts do
-                for bow = 1, num_parts do
-                    for bridge = 1, num_parts do
-                        -- Check if the parts are of the correct type for each slot
-                        if Submersible_Part_List[hull].SlotName == "Hull" and
-                           Submersible_Part_List[stern].SlotName == "Stern" and
-                           Submersible_Part_List[bow].SlotName == "Bow" and
-                           Submersible_Part_List[bridge].SlotName == "Bridge" then
-                            
-                            local total_favor = Submersible_Part_List[hull].Favor + Submersible_Part_List[stern].Favor + Submersible_Part_List[bow].Favor + Submersible_Part_List[bridge].Favor
-                            local total_range = Submersible_Part_List[hull].Range + Submersible_Part_List[stern].Range + Submersible_Part_List[bow].Range + Submersible_Part_List[bridge].Range
-                            local total_speed = Submersible_Part_List[hull].Speed + Submersible_Part_List[stern].Speed + Submersible_Part_List[bow].Speed + Submersible_Part_List[bridge].Speed
-                            local total_retrieval = Submersible_Part_List[hull].Retrieval + Submersible_Part_List[stern].Retrieval + Submersible_Part_List[bow].Retrieval + Submersible_Part_List[bridge].Retrieval
-                            local total_surveillance = Submersible_Part_List[hull].Surveillance + Submersible_Part_List[stern].Surveillance + Submersible_Part_List[bow].Surveillance + Submersible_Part_List[bridge].Surveillance
-
-                            if total_favor == target_favor and
-                               total_range == target_range and
-                               total_speed == target_speed and
-                               total_retrieval == target_retrieval and
-                               total_surveillance == target_surveillance then
-                                
-                                local function get_abbreviation(part)
-                                    if part.PartName:find("Modified") then
-                                        return part.PartAbbreviation
-                                    else
-                                        return part.PartAbbreviation:sub(1,1)  -- Return first letter if not modified
-                                    end
-                                end
-
-                                local abbreviations = {
-                                    get_abbreviation(Submersible_Part_List[hull]),
-                                    get_abbreviation(Submersible_Part_List[stern]),
-                                    get_abbreviation(Submersible_Part_List[bow]),
-                                    get_abbreviation(Submersible_Part_List[bridge])
-                                }
-
-                                local abbreviation = table.concat(abbreviations)
-                                local modified_count = select(2, abbreviation:gsub("%+", ""))
-
-                                if modified_count == 4 then
-                                    abbreviation = abbreviation:gsub("%+", "") .. "++"
-                                end
-
-                                LogInfo("[VAC] (GetSubmersibleParts) Matching Parts Found: " .. abbreviation)
-                                LogInfo("[VAC] (GetSubmersibleParts) Hull: " .. Submersible_Part_List[hull].PartName)
-                                LogInfo("[VAC] (GetSubmersibleParts) Stern: " .. Submersible_Part_List[stern].PartName)
-                                LogInfo("[VAC] (GetSubmersibleParts) Bow: " .. Submersible_Part_List[bow].PartName)
-                                LogInfo("[VAC] (GetSubmersibleParts) Bridge: " .. Submersible_Part_List[bridge].PartName)
-                                LogInfo("[VAC] (GetSubmersibleParts) Total Favor: " .. total_favor)
-                                LogInfo("[VAC] (GetSubmersibleParts) Total Range: " .. total_range)
-                                LogInfo("[VAC] (GetSubmersibleParts) Total Speed: " .. total_speed)
-                                LogInfo("[VAC] (GetSubmersibleParts) Total Retrieval: " .. total_retrieval)
-                                LogInfo("[VAC] (GetSubmersibleParts) Total Surveillance: " .. total_surveillance)
-                                
-                                return abbreviation--[[{
-                                    abbreviation = abbreviation,
-                                    hull = Submersible_Part_List[hull],
-                                    stern = Submersible_Part_List[stern],
-                                    bow = Submersible_Part_List[bow],
-                                    bridge = Submersible_Part_List[bridge],
-                                    totals = {
-                                        favor = total_favor,
-                                        range = total_range,
-                                        speed = total_speed,
-                                        retrieval = total_retrieval,
-                                        surveillance = total_surveillance
-                                    }
-                                }--]]
-                            end
-                        end
-                    end
-                end
-            end
-        end
-        LogInfo("[VAC] (GetSubmersibleParts) No matching combination found.")
-        return nil
-    else
-        LogInfo('[VAC] (GetSubmersibleParts) Addon "CompanyCraftSupply" not visible.')
-        return nil
-    end
-end
-
--- Usage: GetSubmersibleRank() or GetSubmersibleRank(1)
--- Will return the submersible rank from either the "CompanyCraftSupply" or "SelectString" Addon menus
--- Works with both "SelectString" Addon menus that display all submersibles and individual submersibles
--- If using "SelectString" for displaying all submersibles, then specifying a submersible number is required
--- Options: 1-4 to select a submersible, defaults to 1 if empty
-function GetSubmersibleRank(sub_number)
-    if IsAddonVisible("CompanyCraftSupply") then
-        local sub_rank = tonumber(GetNodeText("CompanyCraftSupply", 40)) or 0
-        return sub_rank or 0
-    end
-    
-    if IsAddonVisible("SelectString") then
-        local node_text = tostring(GetNodeText("SelectString", 3)) or ""
-        local sub_rank_number = tonumber(node_text:match("%(Rank: (%d+)%)"))
-        
-        if sub_rank_number and sub_rank_number ~= "" then
-            return sub_rank_number or 0
-        else
-            -- Ensure sub_number is 1, 2, 3, or 4 and exit if not
-            local sub_number = tonumber(sub_number) or 1
-
-            if not sub_number or sub_number < 1 or sub_number > 4 then
-                LogInfo("[VAC] (SelectSubmersible) sub_number is not between 1 and 4")
-                return
-            end
-
-            local sub_rank_text = tostring(GetNodeText("SelectString", 2, sub_number, 3)) or ""
-            
-            -- "SelectString" multiple submersible menu
-            if node_text:match("Select a submersible%.$") and sub_rank_text:match("%(Rank:%s%d+%)") then
-                sub_rank_number = sub_rank_text:match("%(Rank:%s(%d+)%)")
-                return sub_rank_number or 0
-            end
-        end
-    end
-    
-    return 0 -- Default return if no conditions are met
-end
-
--- Usage: GetSubmersibleName() or GetSubmersibleName(1)
--- Will return the submersible name from either the "CompanyCraftSupply" or "SelectString" Addon menus
--- Works with both "SelectString" Addon menus that display all submersibles and individual submersibles
--- If using "SelectString" for displaying all submersibles, then specifying a submersible number is required
--- Options: 1-4 to select a submersible, defaults to 1 if empty
-function GetSubmersibleName(sub_number)
-    -- Check if CompanyCraftSupply addon is visible and return its node text if so
-    if IsAddonVisible("CompanyCraftSupply") then
-        return GetNodeText("CompanyCraftSupply", 42) or ""
-    end
-    -- Return empty string if SelectString addon is not visible
-    if not IsAddonVisible("SelectString") then return "" end
-
-    -- Get text from SelectString addon
-    local node_text = GetNodeText("SelectString", 3) or ""
-
-    -- Helper function to extract and clean submersible name
-    local extract_name = function(text, remove_last_dot)
-        local name = text:match("^(.-)%s*%(Rank:") or text:match("^(.-)%s*%-") or text
-        name = name:match("^%s*(.-)%s*$"):gsub(remove_last_dot and "%.$" or "$", "")
-        return name
-    end
-
-    -- Check if it's a multiple submersible selection menu
-    local is_multiple_menu = node_text:match("Select a submersible%.$")
-    local sub_name
-
-    if is_multiple_menu then
-        -- Handle multiple menu case
-        sub_number = tonumber(sub_number) or 1
-        if sub_number < 1 or sub_number > 4 then return "" end
-        sub_name = GetNodeText("SelectString", 2, sub_number, 3)
-    else
-        -- Handle single menu case
-        for line in node_text:gmatch("[^\r\n]+") do
-            if not line:match("^Ceruleum tanks:") and not line:match("^Vessels deployed:") then
-                sub_name = line
-                break
-            end
-        end
-    end
-
-    -- Extract and return the submersible name, or empty string if not found
-    return sub_name and extract_name(sub_name, is_multiple_menu) or ""
-end
-
--- Usage: GetSubmersibleExperience()
--- Will return the currently open submersible experience from the "CompanyCraftSupply" Addon menu
--- "SelectString" Addon menus do not contain this information so it can only be used in the "CompanyCraftSupply" Addon menu
-function GetSubmersibleExperience()
-    if IsAddonVisible("CompanyCraftSupply") then
-        local exp_text = GetNodeText("CompanyCraftSupply", 39)
-
-        if exp_text then
-            -- Extract the current experience value using pattern matching
-            local current_exp = exp_text:match("EXP:%s*(%d+)/")
-            
-            if current_exp then
-                LogInfo('[VAC] (GetSubmersibleExperience) Submersible "' .. GetSubmersibleName() .. '" has ' .. current_exp .. ' experience')
-                return tonumber(current_exp)
-            else
-                LogInfo("[VAC] (GetSubmersibleExperience) Failed to parse experience value from: " .. exp_text)
-            end
-        else
-            LogInfo('[VAC] (GetSubmersibleExperience) Failed to get experience text from "CompanyCraftSupply"')
-        end
-    else
-        LogInfo('[VAC] (GetSubmersibleExperience) "CompanyCraftSupply" addon is not visible')
-    end
-
-    return 0 -- Return 0 if we couldn't get or parse the experience value
-end
-
--- Usage: SelectSubmersible(1)
--- Will select the specified submersible and select the string to open it
--- Requires Addon "SelectString" to be visible
--- Options: 1-4 to select a submersible, defaults to 1 if empty
-function SelectSubmersible(sub_number)
-    -- Ensure sub_number is 1, 2, 3, or 4 and exit if not
-    local sub_number = tonumber(sub_number)
-
-    if not sub_number or sub_number < 1 or sub_number > 4 then
-        LogInfo("[VAC] (SelectSubmersible) sub_number is not between 1 and 4")
-        return
-    end
-
-    -- Adjust sub_number to be zero-indexed since the menu starts at 0
-    sub_number = sub_number - 1
-
-    if IsAddonReady("SelectString") and GetNodeText("SelectString", 3):match("Select a submersible%.$") then
-        yield("/callback SelectString true " .. sub_number)
-
-        -- Wait for the SelectString menu to show "Quit"
-        while IsAddonVisible("SelectString") do
-            local node_text_5 = GetNodeText("SelectString", 2, 5, 3)
-            local node_text_7 = GetNodeText("SelectString", 2, 7, 3)
-
-            if node_text_5 == "Quit" or node_text_7 == "Quit" then
-                break
-            end
-            Sleep(0.1)
-        end
-        LogInfo("[VAC] (SelectSubmersible) Opened submersible slot " .. sub_number)
-    else
-        LogInfo('[VAC] (SelectSubmersible) "SelectString" addon is not visible')
-    end
-end
-
--- Usage: ChangeSubmersibleParts("SSSS")
--- Will change the current submersible components by specified part abbreviation
--- Case insensitive
--- Requires Addon "CompanyCraftSupply" to be visible
-function ChangeSubmersibleParts(desired_parts)
-    if not IsAddonVisible("CompanyCraftSupply") then
-        LogInfo("[VAC] (ChangeSubmersibleParts) CompanyCraftSupply addon is not visible.")
-        return false
-    end
-
-    local current_parts = GetSubmersibleParts()
-
-    if not current_parts then
-        LogInfo("[VAC] (ChangeSubmersibleParts) Failed to get current submersible parts.")
-        return false
-    end
-
-    desired_parts = string.upper(desired_parts)
-
-    if current_parts == desired_parts then
-        LogInfo("[VAC] (ChangeSubmersibleParts) Submersible parts already match the desired configuration.")
-        return true
-    end
-
-    local part_slots = {
-        { menu_options = "2 1 0", name = "Hull", index = 1 },
-        { menu_options = "2 1 1", name = "Stern", index = 2 },
-        { menu_options = "2 1 2", name = "Bow", index = 3 },
-        { menu_options = "2 1 3", name = "Bridge", index = 4 }
-    }
-
-    for _, slot in ipairs(part_slots) do
-        local current_part = current_parts:sub(slot.index, slot.index)
-        local desired_part = desired_parts:sub(slot.index, slot.index)
-
-        if current_part ~= desired_part then
-            LogInfo(string.format("[VAC] (ChangeSubmersibleParts) Changing %s from %s to %s", slot.name, current_part, desired_part))
-
-            -- Amount of parts to try (Node capacity)
-            for attempt = 1, 35 do
-                -- Open the parts menu for the current slot
-                if IsAddonReady("CompanyCraftSupply") then
-                    yield("/callback CompanyCraftSupply true " .. slot.menu_options)
-                end
-
-                -- Wait for the menu to appear
-                local menu_appeared = false
-
-                for _ = 1, 10 do
-                    if IsAddonVisible("ContextIconMenu") then
-                        menu_appeared = true
-                        break
-                    end
-                    Sleep(0.5)
-                end
-
-                if not menu_appeared then
-                    LogInfo(string.format("[VAC] (ChangeSubmersibleParts) Failed to open menu for %s", slot.name))
-                    return false
-                end
-
-                -- Try changing the part
-                if IsAddonReady("ContextIconMenu") then
-                    yield("/callback ContextIconMenu true 0 " .. (attempt - 1))
-                end
-
-                -- Wait for the menu to disappear
-                local menu_disappeared = false
-
-                for _ = 1, 10 do
-                    if not IsAddonVisible("ContextIconMenu") then
-                        menu_disappeared = true
-                        break
-                    end
-                    Sleep(0.5)
-                end
-
-                if not menu_disappeared then
-                    LogInfo(string.format("[VAC] (ChangeSubmersibleParts) Menu didn't close for %s (Attempt %d)", slot.name, attempt))
-                    break
-                end
-
-                Sleep(0.5) -- Delay after menu closes
-
-                -- Check if the part has been changed correctly
-                local new_parts = GetSubmersibleParts()
-
-                if not new_parts then
-                    LogInfo("[VAC] (ChangeSubmersibleParts) Failed to get updated submersible parts.")
-                    return false
-                end
-
-                if new_parts:sub(slot.index, slot.index) == desired_part then
-                    LogInfo(string.format("[VAC] (ChangeSubmersibleParts) Successfully changed %s to %s", slot.name, desired_part))
-                    break
-                end
-
-                -- If this is not the last attempt, prepare for the next attempt
-                if attempt < 4 then
-                    Sleep(0.5) -- Delay before next attempt
-                else
-                    LogInfo(string.format("[VAC] (ChangeSubmersibleParts) Failed to change %s to %s after all attempts", slot.name, desired_part))
-                    return false
-                end
-            end
-        end
-
-        -- Check if all parts are correct after each change
-        current_parts = GetSubmersibleParts()
-        
-        if not current_parts then
-            LogInfo("[VAC] (ChangeSubmersibleParts) Failed to get updated submersible parts.")
-            return false
-        end
-        
-        if current_parts == desired_parts then
-            LogInfo("[VAC] (ChangeSubmersibleParts) Successfully changed submersible parts to: " .. desired_parts)
-            return true
-        end
-    end
-
-    LogInfo("[VAC] (ChangeSubmersibleParts) Failed to change submersible parts to: " .. desired_parts)
-    return false
-end
-
--- Usage: RegisterNewSubmersible()
--- Will attempt to register any available submarines
--- Requires Addon "SelectString" to be visible
-function RegisterNewSubmersible()
-    if not IsAddonReady("SelectString") and not GetNodeText("SelectString", 3):match("Select a submersible%.$") then
-        LogInfo("[VAC] (RegisterNewSubmersible) Not in the right SelectString menu")
-        return
-    end
-    for i = 1, 4 do
-        local node_text = GetNodeText("SelectString", 2, i, 3)
-
-        if node_text:match("Outfit and register a submersible%.") then
-            LogInfo("[VAC] (RegisterNewSubmersible) Submarine " .. i .. " possible to register, checking if we have the required parts")
-
-            local required_items = { -- List of all items needed for creating a submersible
-                { id = 21794, name = "Shark-class Pressure Hull" },
-                { id = 21795, name = "Shark-class Stern" },
-                { id = 21792, name = "Shark-class Bow" },
-                { id = 21793, name = "Shark-class Bridge" },
-                { id = 22317, name = "Dive Credit" }
-            }
-
-            -- Check how many dive credits we need for the submersible
-            local needed_dive_credits = 99 -- placeholder until it gets set below
-            if i == 1 then
-                needed_dive_credits = 1
-            elseif i == 2 then
-                needed_dive_credits = 3
-            elseif i == 3 then
-                needed_dive_credits = 5
-            elseif i == 4 then
-                needed_dive_credits = 7
-            end
-
-            -- Variable that will be set to false if we're missing any item
-            local enough_items = true
-
-            for _, item in ipairs(required_items) do
-                LogInfo("[VAC] (RegisterNewSubmersible) Checking if we have enough of " .. item.name)
-
-                if item.name == "Dive Credit" then -- special handling for dive credits
-                    local current_dive_credits = GetItemCount(item.id)
-                    LogInfo("[VAC] (RegisterNewSubmersible) Found " .. current_dive_credits .. " " .. item.name .. ". We need " .. needed_dive_credits)
-
-                    if current_dive_credits >= needed_dive_credits then
-                        LogInfo("[VAC] (RegisterNewSubmersible) We have enough Dive Credits")
-                    else
-                        LogInfo("[VAC] (RegisterNewSubmersible) Not enough Dive Credits")
-                        Echo("Missing " .. needed_dive_credits .. " Dive Credits")
-                        enough_items = false
-                    end
-
-                else
-                    local item_count = GetItemCount(item.id)
-                    LogInfo("[VAC] (RegisterNewSubmersible) Found " .. item_count .. " " .. item.name)
-
-                    if item_count >= 1 then
-                        LogInfo("[VAC] (RegisterNewSubmersible) Found " .. item.name)
-                    else
-                        LogInfo("[VAC] (RegisterNewSubmersible) Missing " .. item.name)
-                        enough_items = false
-                    end
-                end
-                --Sleep(0.001)
-            end
-            if enough_items then
-                LogInfo("[VAC] (RegisterNewSubmersible) Can register submersible number " .. i)
-                LogInfo("[VAC] (RegisterNewSubmersible) Attempting to register submersible number " .. i)
-
-                yield("/callback SelectString true " .. (i - 1)) -- Open the "CompanyCraftSupply" addon so we can register the submarine
-
-                repeat
-                    Sleep(0.1)
-                until IsAddonReady("CompanyCraftSupply") -- Wait for the "CompanyCraftSupply" addon to be ready
-
-                ChangeSubmersibleParts("SSSS") -- Put on the parts
-
-                yield("/callback CompanyCraftSupply true 0") -- Click Register
-
-                repeat
-                    Sleep(0.1)
-                until IsAddonReady("SelectYesno") -- Wait for the confirm menu to load
-
-                yield("/callback SelectYesno true 0") -- Confirm submersible registration
-
-                repeat
-                    Sleep(0.1)
-                until IsAddonReady("SelectString") -- Wait for the submersible selection menu to load properly
-
-                for x = 1, 10 do -- Find Quit so we can go back to the submersible selection menu
-                    local quit_text = GetNodeText("SelectString", 2, x, 3)
-                    if quit_text == "Quit" then
-                        yield("/callback SelectString true " .. (x - 1))
-                        Sleep(0.5)
-                        repeat
-                            Sleep(0.1)
-                        until IsAddonReady("SelectString")
-                        break
-                    end
-                    --Sleep(0.001)
-                end
-            else
-                Echo("Missing items for submersible " .. i .. ". Skipping.")
-            end
-        else
-            LogInfo("[VAC] (RegisterNewSubmersible) Submarine " .. i .. " unavailable")
-        end
-        --Sleep(0.001)
-    end
-end
-
--- Usage: BuyCeruleum(999)
--- Will buy X amount of ceruleum from the Mammet Voyager inside the workshop
-function BuyCeruleum(amount)
-    if not amount then -- Check if anything was passed
-        LogInfo("[VAC] (BuyCeruleum) Ceruleum amount missing")
-        return
-    end
-
-    if not type(amount) == "number" then -- Chjeck if the input is a number
-        LogInfo("[VAC] (BuyCeruleum) BuyCeruleum input not a number")
-        return
-    end
-
-    if not IsPlayerAvailable() then
-        LogInfo("[VAC] (BuyCeruleum) Player isn't available, cancelling ceruleum buy attempt")
-        Echo("Player isn't available, cancelling ceruleum buy attempt")
-        return
-    end
-
-    LogInfo("[VAC] (BuyCeruleum) Targeting the mammet")
-    Target("Mammet Voyager #004A") -- Target the mammet we're buying ceruleum from
-
-    yield("/lockon")
-
-    LogInfo("[VAC] (BuyCeruleum) Moving towards the mammet")
-    yield("/automove") -- Move to the mammet, i don't want to rely on Movement() here
-    Sleep(1)
-    repeat
-        Sleep(0.1)
-    until not IsMoving() -- Wait until we're no longer moving
-    LogInfo("[VAC] (BuyCeruleum) Attempting to talk to the mammet")
-    Interact() -- Talk to the mammet
-
-    repeat
-        Sleep(0.1)
-    until IsAddonReady("SelectIconString") -- Wait for the talk window to open
-    yield("/callback SelectIconString true 0") -- Open the company credit exchange
-
-    repeat
-        Sleep(0.1)
-    until IsAddonReady("FreeCompanyCreditShop") -- Waits for the company credit exchange to open
-
-    local ceruleum_price = 100
-    local current_fc_credits_str = GetNodeText("FreeCompanyCreditShop", 40)
-    local current_fc_credits = tonumber(current_fc_credits_str:gsub(",", ""):match("%d+")) -- Remove commas from the string and convert it to a number
-
-    if not current_fc_credits then
-        LogInfo("[VAC] (BuyCeruleum) Failed to find current fc credit amount")
-        yield("/callback FreeCompanyCreditShop true -1")
-        return
-    end
-
-    local max_affordable_amount = math.floor(current_fc_credits / ceruleum_price)
-    Echo(max_affordable_amount)
-
-    amount = math.min(amount, max_affordable_amount)
-
-    Echo(amount)
-
-    if amount <= 0 then
-        LogInfo("[VAC] (BuyCeruleum) Not enough credits to buy ceruleum")
-        yield("/callback FreeCompanyCreditShop true -1")
-        return
-    end
-
-    while amount > 0 do
-        local current_ceruleum_amount = GetItemCount(10155, true)
-        -- Limit the amount per buy to 99
-        local buy_amount = math.min(amount, 99)
-        local final_ceruleum_amount = current_ceruleum_amount + buy_amount
-        local amount_after_buying = amount - buy_amount
-        LogInfo("[VAC] (BuyCeruleum) Buying " .. buy_amount .. " ceruleum")
-        repeat
-            repeat
-                yield("/callback FreeCompanyCreditShop true 0 0 " .. buy_amount) -- Buy X amount of ceruleum
-                Sleep(0.1)
-            until IsAddonReady("SelectYesno") -- Wait for confirm window
-            yield("/callback SelectYesno true 0") -- Confirm
-            repeat
-                Sleep(0.1)
-            until not IsAddonVisible("SelectYesno")
-            Sleep(0.5)
-            current_ceruleum_amount = GetItemCount(10155, true)
-        until current_ceruleum_amount == amount_after_buying or current_ceruleum_amount == final_ceruleum_amount
-        amount = amount - buy_amount
-    end
-    LogInfo("[VAC] (BuyCeruleum) Finished buying ceruleum")
-    yield("/callback FreeCompanyCreditShop true -1") -- Exit shop menu
-    repeat
-        Sleep(0.1)
-    until IsPlayerAvailable() and not IsAddonVisible("FreeCompanyCreditShop")
-end
-
--- Usage: ManageCollection("Auto Retainer", true)
--- Enables or disables a collection
--- Options: true = enables the collection, false = disables the collection
-function ManageCollection(collection_name, enable)
-    if type(collection_name) ~= "string" or collection_name == "" then
-        LogError("[VAC] (ManageCollection) Invalid collection name provided")
-        return false
-    end
-
-    local action = enable and "enable" or "disable"
-
-    LogInfo("[VAC] (ManageCollection) Attempting to " .. action .. " profile: " .. collection_name)
-
-    yield("/xl" .. action .. "profile " .. collection_name)
-    Sleep(0.1)
-
-    local success = true
-
-    if success then
-        LogInfo("[VAC] (ManageCollection) Successfully " .. action .. "d profile: " .. collection_name)
-        return true
-    else
-        LogError("[VAC] (ManageCollection) Failed to " .. action .. " profile: " .. collection_name)
-        return false
-    end
-end
-
--- Usage: OpenLetterMenu()
--- Opens the letter menu if player is within distance of Delivery Moogle or Regal/Moogle Letter Box
-function OpenLetterMenu()
-    if not IsAddonVisible("LetterList") then
-        -- List of possible targets
-        local targets = { "Delivery Moogle", "Regal Letter Box", "Moogle Letter Box" }
-
-        -- Try to target each one in sequence
-        for _, target_name in ipairs(targets) do
-            if Target(target_name) then
-                break  -- Exit the loop once a target is found
-            else
-                return  -- Exit if no target is found
-            end
-        end
-
-        Interact()
-
-        repeat
-            Sleep(0.1)
-        until IsAddonReady("Talk")
-
-        repeat
-            yield("/callback Talk true 0")
-            Sleep(0.1)
-        until not IsAddonVisible("Talk")
-
-        repeat
-            Sleep(0.1)
-        until IsAddonReady("LetterList")
-
-        -- Handle the "SelectOk" window with a check to prevent getting stuck
-        local max_attempts = 10
-        local attempts = 0
-
-        repeat
-            if IsAddonReady("SelectOk") and string.match(GetNodeText("SelectOk", 3), "You cannot carry any more campaign") then
-                yield("/callback SelectOk true 0")
-                break
-            end
-            attempts = attempts + 1
-
-            if attempts >= max_attempts then
-                break
-            end
-
-            Sleep(0.1)
-        until IsAddonVisible("SelectOk") and IsAddonVisible("LetterList")
-
-        repeat
-            Sleep(0.1)
-        until IsAddonReady("LetterList") and string.match(GetNodeText("LetterList", 14, 13, 2), "Purchases & Rewards")
-    end
-end
-
--- Usage: SelectLetter()
--- Selects the top letter in the "LetterList" addon menu
-function SelectLetter()
-    -- Check if "LetterList" addon is ready
-    repeat
-        Sleep(0.1)
-    until IsAddonReady("LetterList")
-
-    -- Selects the first letter in the letter list
-    repeat
-        yield("/callback LetterList true 0 0")
-        Sleep(0.1)
-    until IsAddonVisible("LetterViewer")
-
-    -- If "LetterList" breaks, timeout to recover opening remaining letters
-    local max_attempts = 10
-    local attempts = 0
-
-    repeat
-        yield("/callback LetterList true 0 0")
-        Sleep(0.1)
-        attempts = attempts + 1
-
-        if attempts >= max_attempts then
-            repeat
-                yield("/callback LetterList true -1")
-            until not IsAddonVisible("LetterList")
-            OpenLetterMenu()
-        end
-
-        Sleep(0.1)
-    until IsAddonVisible("LetterViewer")
-end
-
--- Usage: TakeLetterContents()
--- Takes the letter contents in the "LetterViewer" addon menu
-function TakeLetterContents()
-    -- Check if "LetterViewer" addon is ready
-    repeat
-        Sleep(0.1)
-    until IsAddonReady("LetterViewer")
-
-    -- If letter contains "Enclosed" then take items
-    -- This also needs visibility check if it gets added here
-    if string.match(GetNodeText("LetterViewer", 28), "Enclosed") and IsNodeVisible("LetterViewer", 1, 2, 5) then
-        yield("/callback LetterViewer true 1")
-    end
-end
-
--- Usage: DeleteLetter()
--- Deletes the open letter in thet "LetterViewer" addon menu
-function DeleteLetter()
-    -- Check if "LetterViewer" addon is ready
-    repeat
-        Sleep(0.1)
-    until IsAddonReady("LetterViewer")
-
-    -- Track whether letter has been deleted
-    local deleted_letter = false
-
-    -- Check whether letter has text and node visibility, then delete the letter
-    repeat
-        if IsAddonReady("LetterViewer") and string.match(GetNodeText("LetterViewer", 28), ".+") then
-            repeat
-                yield("/callback LetterViewer true 2")
-                Sleep(0.1)
-            until IsAddonReady("SelectYesno") and string.match(GetNodeText("SelectYesno", 15), "Delete this letter?")
-            yield("/callback SelectYesno true 0")
-        end
-        Sleep(0.1)
-    until not IsAddonVisible("LetterViewer") and IsAddonVisible("LetterList")
-end
-
--- Usage: RequestLetter()
--- Requests any additional letters in the "LetterList" addon menu
-function RequestLetter()
-    -- Check if "LetterList" addon is ready
-    repeat
-        Sleep(0.1)
-    until IsAddonReady("LetterList")
-
-    repeat
-        yield("/callback LetterList true 3")
-        Sleep(0.1)
-    until IsAddonReady("SelectYesno") and string.match(GetNodeText("SelectYesno", 15), "Send a request to have recently acquired special")
-
-    repeat
-        yield("/callback SelectYesno true 0")
-        Sleep(0.1)
-    until not IsAddonVisible("SelectYesno") and IsAddonVisible("LetterList")
-end
-
--- Usage: GetFCGCID()
--- Returns the Grand Company id for your FC
-function GetFCGCID()
-    local gc_name = GetFCGrandCompany()
-    if gc_name == "Maelstrom" then
-        return 1
-    elseif gc_name == "Twin Adders" then
-        return 2
-    elseif gc_name == "Immortal Flames" then
-        return 3
-    else
-        return false -- if it fails to find a gc with that name
-    end
-end
-
 -- Usage: unpack()
 -- This allows unpack to be used for lua
 function unpack(t, i, n)
@@ -17779,62 +16067,6 @@ function unpack(t, i, n)
     if i <= n then
         return t[i], unpack(t, i + 1, n)
     end
-end
-
--- Usage: TeleportType(cmd)
--- Check if a teleport command should use "li" instead of "tp"
--- Condense into refactored Teleporter() at some point...
-function TeleportType(cmd)
-    local li_commands = {
-        "^gc%s?.*$",                  -- gc or gc <company name>
-        "^hc%s?.*$",                  -- hc or hc <company name>
-        "^gcc%s?.*$",                 -- gcc or gcc <company name>
-        "^hcc%s?.*$",                 -- hcc or hcc <company name>
-        "^fcgc$",                     -- fcgc
-        "^gcfc$",                     -- gcfc
-        "^auto$",                     -- auto
-        "^home$",                     -- home
-        "^house$",                    -- house
-        "^private$",                  -- private
-        "^fc$",                       -- fc
-        "^free$",                     -- free
-        "^company$",                  -- company
-        "^free%s?company$",           -- free company
-        "^apartment$",                -- apartment
-        "^apt$",                      -- apt
-        "^shared$",                   -- shared
-        "^inn$",                      -- inn
-        "^hinn$",                     -- hinn
-        "^island$",                   -- island
-        "^is$",                       -- is
-        "^sanctuary$",                -- sanctuary
-        "^mb$",                       -- mb
-        "^market$",                   -- market
-        "^lb%s?.*$",                  -- lb
-        "^lavender%s?.*$",            -- lavender
-        "^lavender beds%s?.*$",       -- lavender beds
-        "^the lavender beds%s?.*$",   -- the lavender beds
-        "^mist%s?.*$",                -- mist
-        "^goblet%s?.*$",              -- goblet
-        "^the goblet%s?.*$",          -- the goblet
-        "^shiro%s?.*$",               -- shiro
-        "^shirogane%s?.*$",           -- shirogane
-        "^empy%s?.*$",                -- empy
-        "^empyreum%s?.*$"             -- empyreum
-    }
-
-    if not cmd then 
-        return false
-    end
-
-    cmd = cmd:lower() -- Convert to lowercase for matching
-
-    for _, pattern in ipairs(li_commands) do
-        if cmd:match(pattern) then
-            return true
-        end
-    end
-    return false
 end
 
 function DoChocoboQuest() --needs proper rework, buy chocobo issuance too.
@@ -18140,10 +16372,18 @@ function NodeMoveFly()
     else
         yield("/vnav moveflag")
     end
+    for i=1,5 do
+        if PathIsRunning() then
+            break
+        end
+        Sleep(0.2)
+    end
     while not PathIsRunning() and not IsCloseToFlag() do --wait till vnav started or you're already close to the flag
         Sleep(interval_rate + 0.00244)
     end
-    FindAndKillEveryTarget() --Mob_List targets
+    --if not move_type == "fly" then
+        FindAndKillEveryTarget() --Mob_List targets
+    --end
     LogInfo("[AutoHuntLog] NodeMoveFly() finished.")
 end
 
@@ -18159,18 +16399,24 @@ function TargetMoveFly()
             Mount(mount_name)
         end
         if  target_x ~= 0 and target_y ~= 0 and target_z ~= 0 then --avoid cases where target is *somehow* lost
-            yield("/vnav moveto " .. target_x .. " " .. target_y .. " " .. target_z)
+            if GetCharacterCondition(80) then --get out of water
+                PathToObject(GetTargetName(), 0.1)
+            else
+                PathToObject(GetTargetName())
+            end
         end
     end
     LogInfo("[AutoHuntLog] TargetMoveFly() finished.")
 end
 
 function FindAndKillEveryTarget()
-    for _, mob_name in ipairs(Mob_Table) do
+    for i = #Mob_Table, 1, -1 do
+        local mob_name = Mob_Table[i]
         if DoesObjectExist(mob_name) then
             if HuntLogCheck(mob_name, CallbackID, rankID, false) then
                 yield("/vnav stop")
                 FindAndKillTarget(mob_name)
+                break
             end
         end
     end
@@ -18189,9 +16435,9 @@ function UnstuckCheckMobFlag()
             end
             
             --this part was added in to check if there's a nearby mob we can hunt on the way
-            if move_type == "walk" then --breaks with flight
+            --if move_type == "walk" then --breaks with flight
                 FindAndKillEveryTarget()
-            end
+            --end
 
             while os.clock() < first_time_check + 1.6 do --purposeful wait amount, but you can adjust it
                 Sleep(0.10299)
@@ -18287,13 +16533,12 @@ function UnstuckTarget()
 end
 
 function FightTarget()
-    TargetMoveFly()
     StartRotation() --just in case
-    Sleep(0.10403)
+    TargetMoveFly()
     if GetDistanceToTarget() > 15 then
         UnstuckTarget()
     elseif GetDistanceToTarget() > 3.5 then
-        Sleep(1.0407)
+        Sleep(0.16565)
     end
     local FateID = GetTargetFateID()
     while FateID ~= 0 and not IsLevelSynced() do
@@ -19017,7 +17262,7 @@ local rankID = rank_to_do-1
 Echo("[AutoHuntLog] Starting things.")
 yield("/at e")
 
-if swap_to_SAM and route == "GC" and GetClassJobId() ~= 34 and GetLevel() >= 50 and not IsQuestDone("2559") then
+if swap_to_SAM and route == "GC" and GetClassJobId() ~= 34 and GetCharacterLevel() >= 50 and not IsQuestDone("2559") then
     while GetClassJobId() ~= 34 do
         QuestionableAddQuestPriority("2559")
         if not QuestionableIsRunning() then
@@ -19049,7 +17294,7 @@ if rankID and not IsHuntLogComplete(CallbackID, rankID) then --do any actual hun
     OpenHuntLog(CallbackID, rankID) --this method is not good, but idk how else to make the bottom nodes populate
     Sleep(0.5)
     yield("/send NUMPAD0")
-    Sleep(0.5)
+    yield("/send NUMPAD0")
     yield("/send NUMPAD0")
     Sleep(0.5)
     yield("/hold NUMPAD2")
@@ -19148,9 +17393,28 @@ if rankID and not IsHuntLogComplete(CallbackID, rankID) then --do any actual hun
                     while not IsPlayerAvailable() do --this is here to prevent Failure: attempt to compare number with function on GetPlayerRawXPos() > -306
                         Sleep(0.862)
                     end
-                    if GetZoneID() == 139 and GetPlayerRawXPos() > -306 and rawX <= -306 and move_type == "walk" then -- avoid swimming to west side of Upper La Noscea by going around in Outer La Noscea
-                        Movement(283.750, 46.000, -212.500, 3.5, mount_name)
-                        Movement(-334.194, 51.997, -64.813, 3.5, mount_name)
+                    if GetZoneID() == 139 and GetPlayerRawXPos() > -306 and rawX <= -306 and move_type == "walk" then -- avoid swimming to west side of Upper La Noscea by using ferry
+                        Movement(220.9, -0.96, 257.4, 3.5, mount_name)
+                        repeat
+                            if IsAddonReady("SelectYesno") then
+                                yield("/callback SelectYesno true 0")
+                            elseif IsAddonReady("SelectIconString") then
+                                yield("/callback SelectIconString true 0")
+                            elseif GetTargetName() == "Ferry Skipper" and not IsAddonReady("SelectIconString") then
+                                yield("/interact")
+                                for i=1, 10 do
+                                Sleep(0.1)
+                                if IsAddonReady("SelectIconString") or IsAddonReady("SelectYesno") then
+                                    break
+                                end
+                            end
+                            elseif GetTargetName() ~= "Ferry Skipper" then
+                                yield("/target Ferry Skipper")
+                            end
+                            Sleep(0.0896)
+                        until GetPlayerRawXPos() < -306
+                    elseif ZoneCheck("Wineport") and rawX < 205 then
+                        Teleporter("Wineport", "tp")
                     end
 
                 -- You're in the zone now, moving to flag
@@ -19160,8 +17424,8 @@ if rankID and not IsHuntLogComplete(CallbackID, rankID) then --do any actual hun
                 while mob_is_unfinished do
                     LogInfo("[AutoHuntLog] Killing " .. mob_name .. " in progress...")
                     if not GetCharacterCondition(26) then --not in combat
-                        yield("/target \"" .. mob_name .. "\"") --/target looks for an object within 50 yalms
                         for i=1, 10 do
+                            yield("/target \"" .. mob_name .. "\"") --/target looks for an object within 50 yalms
                             Sleep(0.0873)
                             if HasTarget() then
                                 break
@@ -19171,7 +17435,7 @@ if rankID and not IsHuntLogComplete(CallbackID, rankID) then --do any actual hun
                             local target_x_pos, target_y_pos, target_z_pos = FindNearestObject(mob_name) --look for a target with 101 range instead of 50
                             if target_x_pos then
                                 Mount(mount_name)
-                                Movement(target_x_pos, target_y_pos, target_z_pos)
+                                PathToObject(mob_name)
                             elseif not IsCloseToFlag() then
                                 NodeMoveFly() --go back to node in case you went away and can't find a new target
                             end
@@ -19223,6 +17487,7 @@ if rankID and not IsHuntLogComplete(CallbackID, rankID) then --do any actual hun
             Teleporter("Ul'dah", "tp")
         end
     end
+    EndRotation()
 end
 
 if do_dungeons and route == "GC" then
