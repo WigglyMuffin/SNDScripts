@@ -5730,3 +5730,28 @@ function LeaveDuty()
         Sleep(0.1)
     end
 end
+
+-- GetCharacterCondition()
+-- 
+-- Player or self conditions service wrapper, use to check your conditions, usually always a number
+function GetCharacterCondition(index)
+    if index then
+        return Svc.Condition[index]
+    else
+        return Svc.Condition
+    end
+end
+
+-- IsPlayerAvailable()
+--
+-- Player.Available wrapper, use to check if player is available (e.g. cutscenes, loading zones.)
+function IsPlayerAvailable()
+    return Player.Available
+end
+
+-- IsPlayerCasting()
+--
+-- Player.Entity.IsCasting wrapper, use to check if player is casting (e.g. using spells,)
+function IsPlayerCasting()
+    return Player.Entity and Player.Entity.IsCasting
+end
