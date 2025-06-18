@@ -19,7 +19,7 @@ When you want to merge your changes back to the original repo, click Contribute-
 
 ![image](https://github.com/user-attachments/assets/48d420c2-df1d-4dbe-be06-aa8713c67b18)
 
-Describe the changes and if you've not tested the code, mark it as a draft
+Describe the changes and if you've not tested the code, mark it as a draft before sending.
 
 ![image](https://github.com/user-attachments/assets/6593cf18-34ed-48aa-aefb-fe12d4c638f5)
 
