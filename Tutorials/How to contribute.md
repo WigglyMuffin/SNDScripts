@@ -13,7 +13,7 @@ After some time, it'll show you your fork (copy) of the project
 
 ![image](https://github.com/user-attachments/assets/22ff93d8-e3c6-44fc-aa37-4013c6edff8e)
 
-In here, you can edit/add files as needed.
+In here, you can edit/add files as needed. Please try to follow the formatting of the source.
 
 When you want to merge your changes back to the original repo, click Contribute->Open pull request
 
