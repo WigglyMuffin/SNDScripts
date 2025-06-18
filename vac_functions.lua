@@ -8,7 +8,7 @@
 
 ####################
 ##    Version     ##
-##     2.0.0      ##
+##     2.0.1      ##
 ####################
 2.0.0: SND update. All of these and the old SND commands (pasted near the end, thanks Faye!) must be rewritten/wrapped. Contributions welcome!
 2.0.1: (Nonu) IsPlayerCasting(), IsPlayerAvailable() and GetCharacterCondition()
