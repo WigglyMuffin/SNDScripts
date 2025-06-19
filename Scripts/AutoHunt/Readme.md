@@ -1,6 +1,7 @@
 ## AutoHuntLog (formerly Hunt Log Doer)
 
-### If you have any issues, make sure both scripts are up to date! I, Friendly (ping me) &lt;AutoParty&gt;, will try to help with bugs. Don't ping Wiggly for this script.
+### SND had a massive update, all scripts need to be redone. Look at vac_functions if you want to contribute or wait till the script it done.
+After that, If you have any issues, make sure both scripts are up to date! I, Friendly (ping me) &lt;AutoParty&gt;, will try to help with bugs. Don't ping Wiggly for this script.
 
 Original by CacahuetesManu https://github.com/CacahuetesManu/SND/tree/main/Hunt%20Log%20Doer
 
