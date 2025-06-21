@@ -1,3 +1,5 @@
+# SND2 needs all functions to be wrapped/rewritten. Feel free to contribute via pr (or other means).
+
 # SND Scripts
 
 ## Table of Contents
