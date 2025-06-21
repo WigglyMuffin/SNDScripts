@@ -6,12 +6,19 @@
    \_/ \__,_|\___|___|_|  \__,_|_| |_|\___|\__|_|\___/|_| |_|___/
                 |_____|                                          
 
+All SND1 commands (pasted near the end, thanks Faye!) must be rewritten/wrapped. Contributions welcome!
+Please put your SND2 functions at the end of the file and mark them as done in the list above the new functions!
+
 ####################
 ##    Version     ##
-##     2.0.1      ##
+##     2.0.2      ##
 ####################
-2.0.0: SND update. All of these and the old SND commands (pasted near the end, thanks Faye!) must be rewritten/wrapped. Contributions welcome!
-2.0.1: (Nonu) IsPlayerCasting(), IsPlayerAvailable() and GetCharacterCondition()
+2.0.0: SND2 update. All of these and the old SND commands (pasted near the end, thanks Faye!) must be rewritten/wrapped. Contributions welcome!
+		Please put your SND2 functions at the end of the file and mark them as done in the list above the new functions!
+2.0.1: 	(Nonu) 			IsPlayerCasting(), IsPlayerAvailable() and GetCharacterCondition()
+2.0.2: 	(Clover-Stuff) 	GetCharacterName(), GetCharacterCondition(), GetDistanceToTarget(), GetNodeText() (!!check description), GetTargetName(),
+					  	IsAddonReady(), IsAddonVisible(), IsInZone(), IsMoving(), IsNodeVisible()
+		(Friendly) 		merged GetCharacterCondition() versions, changed layout to contain new funcions at the end.
 
 -> 1.0.0: Initial release
 -> 1.0.1: Updated UseFCAction()
@@ -5983,13 +5990,9 @@ function GetBronzeChestLocations() end
 
 function GetBuddyTimeRemaining() end
 
-function GetCharacterCondition(i, bool)
-	return Svc.Condition[i] == bool
-end
+function GetCharacterCondition() --done
 
-function GetCharacterName()
-	return Entity.Player.Name
-end
+function GetCharacterName() end --done
 
 ---@return Job
 function GetClassJobId() end
@@ -6073,9 +6076,7 @@ function GetDistanceToPartyMember() end
 
 function GetDistanceToPoint() end
 
-function GetDistanceToTarget()
-  return Vector3.Distance(Entity.Player.Position, Entity.Target.Position)
-end
+function GetDistanceToTarget() end --done
 
 function GetDurability() end
 
@@ -6213,19 +6214,7 @@ function GetNearestFate() end
 
 function GetNodeListCount() end
 
---[[
-    WARNING!!! GetNodeText is no longer the same as it was in v1, any uses of GetNodeText without adjusting the node ID's to be the correct values will return the wrong text!
-    GetNodeText used to return based on the ID's in the node list, but it has shifted to using the actual Node ID, similar to how GetNodeVisible was.
-    I am providing it as a function for ease of use, but just a heads up that every old GetNodeText call WILL RETURN NIL!
-]]
-function GetNodeText(addonName, ...)
-  if (IsAddonReady(addonName)) then
-    local node = Addons.GetAddon(addonName):GetNode(...)
-    return tostring(node.Text)
-  else
-    return ""
-  end
-end
+function GetNodeText() end --done
 
 function GetObjectActionID() end
 
@@ -6357,13 +6346,7 @@ function GetTargetHuntRank() end
 
 function GetTargetMaxHP() end
 
-function GetTargetName()
-  if (Entity.Target) then
-    return Entity.Target.Name
-  else
-    return ""
-  end
-end
+function GetTargetName() end --done
 
 function GetTargetObjectKind() end
 
@@ -6431,13 +6414,9 @@ function InternalGetMacroText() end
 
 function IsAchievementComplete() end
 
-function IsAddonReady(name)
-    return Addons.GetAddon(name).Ready
-end
+function IsAddonReady() end --done
 
-function IsAddonVisible(name)
-    return Addons.GetAddon(name).Exists
-end
+function IsAddonVisible() end --done
 
 function IsAetheryteUnlocked() end
 
@@ -6451,9 +6430,7 @@ function IsFriendOnline() end
 
 function IsInFate() end
 
-function IsInZone(i)
-	return Svc.ClientState.TerritoryType == i
-end
+function IsInZone() end --done
 
 function IsLeveAccepted() end
 
@@ -6463,18 +6440,9 @@ function IsLocalPlayerNull() end
 
 function IsMacroRunningOrQueued() end
 
-function IsMoving()
-	return Player.IsMoving
-end
+function IsMoving() end --done
 
-function IsNodeVisible(addonName, ...)
-  if (IsAddonReady(addonName)) then
-    local node = Addons.GetAddon(addonName):GetNode(...)
-    return node.IsVisible
-  else
-    return false
-  end
-end
+function IsNodeVisible() end --done
 
 function IsNotCrafting() end
 
@@ -6492,9 +6460,9 @@ function IsPartyMemberMounted() end
 
 function IsPauseLoopSet() end
 
-function IsPlayerAvailable() end
+function IsPlayerAvailable() end --done
 
-function IsPlayerCasting() end
+function IsPlayerCasting() end --done
 
 function IsPlayerDead() end
 
@@ -6726,18 +6694,7 @@ function WeeklyBingoNumPlacedStickers() end
 
 function WeeklyBingoNumSecondChancePoints() end
 
-
-
--- GetCharacterCondition()
--- 
--- Player or self conditions service wrapper, use to check your conditions, usually always a number
-function GetCharacterCondition(index)
-    if index then
-        return Svc.Condition[index]
-    else
-        return Svc.Condition
-    end
-end
+--SND2 functions
 
 -- IsPlayerAvailable()
 --
@@ -6751,4 +6708,76 @@ end
 -- Player.Entity.IsCasting wrapper, use to check if player is casting (e.g. using spells,)
 function IsPlayerCasting()
     return Player.Entity and Player.Entity.IsCasting
+end
+
+function GetCharacterName()
+	return Entity.Player.Name
+end
+
+-- GetCharacterCondition(index, expected)
+-- 
+-- Player or self conditions service wrapper, use to check your conditions, index is usually a number, returns bool
+-- If only 'index' is provided, returns the value of Svc.Condition[index] (as before)
+-- If both 'index' and 'expected' are provided, returns true if Svc.Condition[index] equals 'expected', otherwise false.
+-- If neither is provided, returns the entire Svc.Condition table.
+function GetCharacterCondition(index, expected)
+    if index and expected ~= nil then
+        return Svc.Condition[index] == expected
+    elseif index then
+        return Svc.Condition[index]
+    else
+        return Svc.Condition
+    end
+end
+
+-- GetNodeText(addonName, ...)
+--
+--Example: GetNodeText("_ToDoList", 1, 7001, 2, 2)
+--!!Warning!! GetNodeText is no longer the same as it was in v1, any uses of GetNodeText without adjusting the node ID's to be the correct values will return the wrong text!
+--GetNodeText used to return based on the ID's in the node list, but it has shifted to using the actual Node ID, same as the old GetNodeVisible.
+--To get the nodeID, find the node sequence with the # symbols in xldata or tweaks Debug
+function GetNodeText(addonName, ...)
+  if (IsAddonReady(addonName)) then
+    local node = Addons.GetAddon(addonName):GetNode(...)
+    return tostring(node.Text)
+  else
+    return ""
+  end
+end
+
+function GetDistanceToTarget()
+  return Vector3.Distance(Entity.Player.Position, Entity.Target.Position)
+end
+
+function GetTargetName()
+  if (Entity.Target) then
+    return Entity.Target.Name
+  else
+    return ""
+  end
+end
+
+function IsNodeVisible(addonName, ...)
+  if (IsAddonReady(addonName)) then
+    local node = Addons.GetAddon(addonName):GetNode(...)
+    return node.IsVisible
+  else
+    return false
+  end
+end
+
+function IsAddonReady(name)
+    return Addons.GetAddon(name).Ready
+end
+
+function IsAddonVisible(name)
+    return Addons.GetAddon(name).Exists
+end
+
+function IsInZone(zoneID)
+	return Svc.ClientState.TerritoryType == zoneID
+end
+
+function IsMoving()
+	return Player.IsMoving
 end
