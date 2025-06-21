@@ -5983,9 +5983,13 @@ function GetBronzeChestLocations() end
 
 function GetBuddyTimeRemaining() end
 
-function GetCharacterCondition() end
+function GetCharacterCondition(i, bool)
+	return Svc.Condition[i] == bool
+end
 
-function GetCharacterName() end
+function GetCharacterName()
+	return Entity.Player.Name
+end
 
 ---@return Job
 function GetClassJobId() end
@@ -6069,7 +6073,9 @@ function GetDistanceToPartyMember() end
 
 function GetDistanceToPoint() end
 
-function GetDistanceToTarget() end
+function GetDistanceToTarget()
+  return Vector3.Distance(Entity.Player.Position, Entity.Target.Position)
+end
 
 function GetDurability() end
 
@@ -6207,7 +6213,19 @@ function GetNearestFate() end
 
 function GetNodeListCount() end
 
-function GetNodeText() end
+--[[
+    WARNING!!! GetNodeText is no longer the same as it was in v1, any uses of GetNodeText without adjusting the node ID's to be the correct values will return the wrong text!
+    GetNodeText used to return based on the ID's in the node list, but it has shifted to using the actual Node ID, similar to how GetNodeVisible was.
+    I am providing it as a function for ease of use, but just a heads up that every old GetNodeText call WILL RETURN NIL!
+]]
+function GetNodeText(addonName, ...)
+  if (IsAddonReady(addonName)) then
+    local node = Addons.GetAddon(addonName):GetNode(...)
+    return tostring(node.Text)
+  else
+    return ""
+  end
+end
 
 function GetObjectActionID() end
 
@@ -6339,7 +6357,13 @@ function GetTargetHuntRank() end
 
 function GetTargetMaxHP() end
 
-function GetTargetName() end
+function GetTargetName()
+  if (Entity.Target) then
+    return Entity.Target.Name
+  else
+    return ""
+  end
+end
 
 function GetTargetObjectKind() end
 
@@ -6407,9 +6431,13 @@ function InternalGetMacroText() end
 
 function IsAchievementComplete() end
 
-function IsAddonReady() end
+function IsAddonReady(name)
+    return Addons.GetAddon(name).Ready
+end
 
-function IsAddonVisible() end
+function IsAddonVisible(name)
+    return Addons.GetAddon(name).Exists
+end
 
 function IsAetheryteUnlocked() end
 
@@ -6423,7 +6451,9 @@ function IsFriendOnline() end
 
 function IsInFate() end
 
-function IsInZone() end
+function IsInZone(i)
+	return Svc.ClientState.TerritoryType == i
+end
 
 function IsLeveAccepted() end
 
@@ -6433,9 +6463,18 @@ function IsLocalPlayerNull() end
 
 function IsMacroRunningOrQueued() end
 
-function IsMoving() end
+function IsMoving()
+	return Player.IsMoving
+end
 
-function IsNodeVisible() end
+function IsNodeVisible(addonName, ...)
+  if (IsAddonReady(addonName)) then
+    local node = Addons.GetAddon(addonName):GetNode(...)
+    return node.IsVisible
+  else
+    return false
+  end
+end
 
 function IsNotCrafting() end
 
