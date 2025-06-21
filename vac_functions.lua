@@ -5990,7 +5990,7 @@ function GetBronzeChestLocations() end
 
 function GetBuddyTimeRemaining() end
 
-function GetCharacterCondition() --done
+function GetCharacterCondition() end --done
 
 function GetCharacterName() end --done
 
