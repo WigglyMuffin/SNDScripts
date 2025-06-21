@@ -1,4 +1,4 @@
-# SND2 needs all functions to be wrapped/rewritten. Feel free to contribute via pr (or other means).
+# SND2 needs all functions to be wrapped/rewritten. This is being done in vac_functions. Feel free to contribute via pr (or other means).
 
 # SND Scripts
 
