@@ -15,11 +15,12 @@ Please put your SND2 functions at the end of the file and mark them as done in t
 ####################
 2.0.0: SND2 update. All of these and the old SND commands (pasted near the end, thanks Faye!) must be rewritten/wrapped. Contributions welcome!
 		Please put your SND2 functions at the end of the file and mark them as done in the list above the new functions!
-2.0.1:	(Nonu) 			IsPlayerCasting(), IsPlayerAvailable() and GetCharacterCondition()
+2.0.1:	(Nonu) 				IsPlayerCasting(), IsPlayerAvailable() and GetCharacterCondition()
 2.0.2: 	(Clover-Stuff) 		GetCharacterName(), GetCharacterCondition(), GetDistanceToTarget(), GetNodeText() (!!check description), GetTargetName()
-				IsAddonReady(), IsAddonVisible(), IsInZone(), IsMoving(), IsNodeVisible()
-	(Friendly) 		merged GetCharacterCondition() versions, changed layout to contain new funcions at the end.
-2.0.3:	(Nonu)			GetPlayerRawXPos(), ...YPos, ...ZPos, GetZoneID(), LogInfo, ...Debug, ...Verbose, IsPlayerDead()
+							IsAddonReady(), IsAddonVisible(), IsInZone(), IsMoving(), IsNodeVisible()
+	(Friendly) 				merged GetCharacterCondition() versions, changed layout to contain new funcions at the end.
+2.0.3:	(Nonu)				GetPlayerRawXPos(), ...YPos, ...ZPos, GetZoneID(), LogInfo, ...Debug, ...Verbose, IsPlayerDead()
+		(Friendly)			GetFlagZone()
 
 -> 1.0.0: Initial release
 -> 1.0.1: Updated UseFCAction()
@@ -6125,7 +6126,7 @@ function GetFlagXCoord() end
 
 function GetFlagYCoord() end
 
-function GetFlagZone() end
+function GetFlagZone() end --done
 
 function GetFlamesGCRank() end
 
@@ -6817,4 +6818,8 @@ end
 -- Wrapper for if player is under condition 2 (unconscious) and returns it.
 function IsPlayerDead()
     return GetCharacterCondition(2)
+end
+
+function GetFlagZone()
+	Instances.Map.Flag.TerritoryId
 end
