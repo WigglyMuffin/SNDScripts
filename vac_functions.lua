@@ -6276,11 +6276,11 @@ function GetPlayerContentId() end
 
 function GetPlayerGC() end
 
-function GetPlayerRawXPos() end
+function GetPlayerRawXPos() end --done
 
-function GetPlayerRawYPos() end
+function GetPlayerRawYPos() end --done
 
-function GetPlayerRawZPos() end
+function GetPlayerRawZPos() end --done
 
 function GetPluginVersion() end
 
@@ -6382,7 +6382,7 @@ function GetWeeklyBingoOrderDataType() end
 
 function GetWeeklyBingoTaskStatus() end
 
-function GetZoneID() end
+function GetZoneID() end --done
 
 function GetZoneInstance() end
 
@@ -6464,7 +6464,7 @@ function IsPlayerAvailable() end --done
 
 function IsPlayerCasting() end --done
 
-function IsPlayerDead() end
+function IsPlayerDead() end --done
 
 function IsPlayerOccupied() end
 
@@ -6504,11 +6504,11 @@ function LifestreamTeleportToHome() end
 
 function ListAllFunctions() end
 
-function LogDebug() end
+function LogDebug() end --done
 
-function LogInfo() end
+function LogInfo() end --done
 
-function LogVerbose() end
+function LogVerbose() end --done
 
 function MoveItemToContainer() end
 
@@ -6780,4 +6780,40 @@ end
 
 function IsMoving()
 	return Player.IsMoving
+end
+
+-- Uses Services to return the raw positions of the Player.
+function GetPlayerRawXPos()
+    return Svc.ClientState.LocalPlayer.Position.X
+end 
+
+function GetPlayerRawYPos() 
+    return Svc.ClientState.LocalPlayer.Position.Y
+end 
+
+function GetPlayerRawZPos() 
+    return Svc.ClientState.LocalPlayer.Position.Z
+end 
+
+-- Uses Services to return the raw territoryid
+function GetZoneID() 
+    return Svc.ClientState.TerritoryType 
+end
+
+-- Wrappers for Dalamud Logging
+function LogInfo(msg)
+    Dalamud.Log(msg)
+end
+
+function LogDebug(msg)
+    Dalamud.LogDebug(msg)
+end
+
+function LogVerbose(msg)
+    Dalamud.LogVerbose(msg)
+end
+
+-- Wrapper for if player is under condition 2 (unconscious) and returns it.
+function IsPlayerDead()
+    return GetCharacterCondition(2)
 end
