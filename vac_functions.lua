@@ -11,14 +11,15 @@ Please put your SND2 functions at the end of the file and mark them as done in t
 
 ####################
 ##    Version     ##
-##     2.0.2      ##
+##     2.0.3      ##
 ####################
 2.0.0: SND2 update. All of these and the old SND commands (pasted near the end, thanks Faye!) must be rewritten/wrapped. Contributions welcome!
 		Please put your SND2 functions at the end of the file and mark them as done in the list above the new functions!
-2.0.1: 	(Nonu) 			IsPlayerCasting(), IsPlayerAvailable() and GetCharacterCondition()
-2.0.2: 	(Clover-Stuff) 	GetCharacterName(), GetCharacterCondition(), GetDistanceToTarget(), GetNodeText() (!!check description), GetTargetName(),
-					  	IsAddonReady(), IsAddonVisible(), IsInZone(), IsMoving(), IsNodeVisible()
-		(Friendly) 		merged GetCharacterCondition() versions, changed layout to contain new funcions at the end.
+2.0.1:	(Nonu) 			IsPlayerCasting(), IsPlayerAvailable() and GetCharacterCondition()
+2.0.2: 	(Clover-Stuff) 		GetCharacterName(), GetCharacterCondition(), GetDistanceToTarget(), GetNodeText() (!!check description), GetTargetName()
+				IsAddonReady(), IsAddonVisible(), IsInZone(), IsMoving(), IsNodeVisible()
+	(Friendly) 		merged GetCharacterCondition() versions, changed layout to contain new funcions at the end.
+2.0.3:	(Nonu)			GetPlayerRawXPos(), ...YPos, ...ZPos, GetZoneID(), LogInfo, ...Debug, ...Verbose, IsPlayerDead()
 
 -> 1.0.0: Initial release
 -> 1.0.1: Updated UseFCAction()
