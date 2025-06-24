@@ -2,3 +2,4 @@ Download the file pinned in the SND channel on Punish or copy and paste this [li
 Extract the zip.  
 In Dalamud Installer, go to Dev Plugins. Add the path the extracted SomethingNeedDoing.dll.  
 Make sure the new version isn't enabled, and enable the old one.  
+If running scripts needing vac_functions, the version before the 2.0 update needs to be in your config folder. [link](https://github.com/WigglyMuffin/SNDScripts/blob/f962f350cf603a3a39b71648f4a3cfa561fc2d6f/vac_functions.lua)
