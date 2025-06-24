@@ -17516,6 +17516,7 @@ if do_extra_dungeons and IsHuntLogComplete(9, 1) and route == "GC" then
     PartyDisband()
     ReturnHomeWorld()
     Echo("Finished attempt at extra dungeons and rankup!")
+    --!! need to talk to the personnel officer once more to not get stuck in cutscene when doing next deliveroo
 end
 if goto_inn then
     if (GetZoneID() ~= 177 and GetZoneID() ~= 178 and GetZoneID() ~= 179) then
