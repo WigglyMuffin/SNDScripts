@@ -73,8 +73,8 @@ Automates GC-related tasks including hunt logs, quest unlocks, and FC-related ac
 ![Status](https://img.shields.io/badge/status-needs_testing-blue)
 ![Status](https://img.shields.io/badge/working%3F-probably_with_old_snd-aquamarine)
 
-Does one hunt log of your choice, including dungeon mobs. Currently only tested with Flames 1-2 and Marauder 1.
-
+Does one hunt log of your choice, including dungeon mobs. Currently only tested with GC logs and Marauder 1-5.
+It can also unlock GC rank 9 for you.
 
 ### Overseer
 ![Status](https://img.shields.io/badge/status-needs_testing-blue)
