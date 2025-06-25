@@ -1,5 +1,7 @@
 ## AutoHuntLog (formerly Hunt Log Doer)
 
+![Status](https://img.shields.io/badge/status-working_with_old_snd-brightgreen)
+
 ### SND had a massive update, all scripts need to be redone or be used with the old SND (tutorial in SNDScripts/Tutorials). Look at vac_functions if you want to contribute or wait till the script it done.
 After that, If you have any issues, make sure both scripts are up to date! I, Friendly (ping me) &lt;AutoParty&gt;, will try to help with bugs. Don't ping Wiggly for this script.
 
