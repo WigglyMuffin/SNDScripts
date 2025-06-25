@@ -9,7 +9,6 @@
    - [GC Supply Scripts](#gc-supply-scripts)
    - [Job Unlocker](#job-unlocker)
    - [AutoHunt](#autohunt)
-   - [Overseer](#overseer)
    - [Questionable Companion](#questionable-companion)
    - [Retainer Maker](#retainer-maker)
    - [Tools](#tools)
@@ -75,28 +74,6 @@ Automates GC-related tasks including hunt logs, quest unlocks, and FC-related ac
 
 Does one hunt log of your choice, including dungeon mobs. Currently only tested with GC logs and Marauder 1-5.
 It can also unlock GC rank 9 for you.
-
-### Overseer
-![Status](https://img.shields.io/badge/status-abandoned-orange)
-![Status](https://img.shields.io/badge/working%3F-probably_with_old_snd-aquamarine)
-
-Manages AutoRetainer tasks, including:
-- **Automated Backups**: Safeguard your Auto Retainer configuration with backup rotation (up to 50 backups).
-- **Submersible Optimisation**:
-  - Automatic creation and enabling of submersibles.
-  - Part swapping for optimal voyaging based on submersible rank and configuration, there are submersible and inventory checks to ensure you have the parts.
-  - Route handling and plan management.
-  - Optimal vessel behaviour based on number of unlocked submersibles.
-  - Incorrect submersible route and build corrections.
-- **Retainer Optimisation**:
-  - Plan management.
-- **FC Management**:
-  - GC expert delivery turnins with option for enabling Seal Sweetener I or II buffs.
-  - Ceruleum Tank purchasing and topup management.
-  - Venture purchasing and topup management.
-- **Silent Operation**: Works seamlessly in the background with no interruptions.
-- **Shutdown Timers**: Option to shutdown your client after a specified time for auth token renewal.
-- **Menu Bailouts**: Additional menu bailouts for when a menu gets stuck.
 
 ### Questionable Companion
 
