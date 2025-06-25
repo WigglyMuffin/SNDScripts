@@ -52,7 +52,7 @@ Please note that all our scripts disable the `Yes Already` plugin, that means if
 ## Script Categories
 
 ### GC Supply Scripts
-![Status](https://img.shields.io/badge/status-working-brightgreen)
+![Status](https://img.shields.io/badge/status-working_with_old_snd-brightgreen)
 
 Automate the process of leveling DoL jobs through GC turn-ins. Requires two service accounts.
 
@@ -71,14 +71,14 @@ Automates GC-related tasks including hunt logs, quest unlocks, and FC-related ac
 
 ### AutoHunt
 ![Status](https://img.shields.io/badge/status-needs_testing-blue)
-![Status](https://img.shields.io/badge/working%3F-probably-aquamarine)
+![Status](https://img.shields.io/badge/working%3F-probably_with_old_snd-aquamarine)
 
 Does one hunt log of your choice, including dungeon mobs. Currently only tested with Flames 1-2 and Marauder 1.
 
 
 ### Overseer
 ![Status](https://img.shields.io/badge/status-needs_testing-blue)
-![Status](https://img.shields.io/badge/working%3F-probably-aquamarine)
+![Status](https://img.shields.io/badge/working%3F-probably_with_old_snd-aquamarine)
 
 Manages AutoRetainer tasks, including:
 - **Automated Backups**: Safeguard your Auto Retainer configuration with backup rotation (up to 50 backups).
@@ -100,7 +100,7 @@ Manages AutoRetainer tasks, including:
 
 ### Questionable Companion
 
-![Status](https://img.shields.io/badge/status-working-brightgreen)
+![Status](https://img.shields.io/badge/status-working_with_old_snd-brightgreen)
 ![Status](https://img.shields.io/badge/bugs%3F-maybe-yellow)
 
 Enhances the Questionable plugin with features like:
@@ -108,12 +108,7 @@ Enhances the Questionable plugin with features like:
 - Solo instance automation
 - Vnavmesh stuck checking
 - Death handling
-
-### Retainer Maker
-![Status](https://img.shields.io/badge/status-needs_testing-blue)
-
-Automates the process of creating new retainers. Includes a CharListGen for easy configuration.
-
+- 
 ### Tools
 Utility scripts for various tasks:
 
@@ -124,7 +119,7 @@ Utility scripts for various tasks:
 | Pos Finder | Displays and logs current position | ![Status](https://img.shields.io/badge/status-working-brightgreen) |
 
 ### Trading Scripts
-![Status](https://img.shields.io/badge/status-working-brightgreen)
+![Status](https://img.shields.io/badge/status-working_with_old_snd-brightgreen)
 
 Facilitates item trading between multiple characters. Requires two service accounts.
 
@@ -136,7 +131,7 @@ Facilitates item trading between multiple characters. Requires two service accou
 Both include a CharListGen for easy configuration.
 
 ### Character Cycler
-![Status](https://img.shields.io/badge/status-working-brightgreen)
+![Status](https://img.shields.io/badge/status-working_with_old_snd-brightgreen)
 
 Cycles toons and runs a script on each. Meant to be used with alts, like doing the hunt log and some such.
 
