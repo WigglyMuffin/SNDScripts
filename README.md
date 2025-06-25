@@ -77,7 +77,7 @@ Does one hunt log of your choice, including dungeon mobs. Currently only tested 
 It can also unlock GC rank 9 for you.
 
 ### Overseer
-![Status](https://img.shields.io/badge/status-needs_testing-blue)
+![Status](https://img.shields.io/badge/status-abandoned-orange)
 ![Status](https://img.shields.io/badge/working%3F-probably_with_old_snd-aquamarine)
 
 Manages AutoRetainer tasks, including:
