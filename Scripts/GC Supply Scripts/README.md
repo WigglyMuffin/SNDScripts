@@ -1,6 +1,6 @@
 # GC Supply Scripts
 
-![Status](https://img.shields.io/badge/status-working-brightgreen)
+![Status](https://img.shields.io/badge/status-working_with_old_snd-brightgreen)
 
 These scripts are for levelling your DoL jobs on an alt account, they require two accounts and are not compatible with a single account. 
 
