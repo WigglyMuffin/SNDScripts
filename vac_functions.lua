@@ -11,7 +11,7 @@ Please put your SND2 functions at the end of the file and mark them as done in t
 
 ####################
 ##    Version     ##
-##     2.0.3      ##
+##     2.0.4      ##
 ####################
 2.0.0: SND2 update. All of these and the old SND commands (pasted near the end, thanks Faye!) must be rewritten/wrapped. Contributions welcome!
 		Please put your SND2 functions at the end of the file and mark them as done in the list above the new functions!
@@ -21,6 +21,8 @@ Please put your SND2 functions at the end of the file and mark them as done in t
 	(Friendly) 				merged GetCharacterCondition() versions, changed layout to contain new funcions at the end.
 2.0.3:	(Nonu)				GetPlayerRawXPos(), ...YPos, ...ZPos, GetZoneID(), LogInfo, ...Debug, ...Verbose, IsPlayerDead()
 		(Friendly)			GetFlagZone()
+2.0.4: (Clover-Stuff) 		   HasPlugin(), PathStop(), PathfindAndMoveTo(), PathfindInProgress(), PathIsRunning(), IsAetheryteUnlocked()
+       (DhogGPT)                       HasFlightUnlocked()
 
 -> 1.0.0: Initial release
 -> 1.0.1: Updated UseFCAction()
@@ -5742,6 +5744,34 @@ function LeaveDuty()
     end
 end
 
+--------------------------------------------------------------------------------
+-- Checks if a value can be converted (coerced) to a number.
+--
+-- This is a utility function to help verify whether a value (string or 
+-- otherwise) can be safely converted to a numeric type.
+--
+-- Useful for input validation before performing numeric operations.
+--
+---@param v any Value to check for number coercion
+---@return boolean True if the value can be converted to a number, false otherwise
+function IsCoercibleNumber(v)
+  return tonumber(v) ~= nil
+end
+
+--------------------------------------------------------------------------------
+-- Validates whether three given coordinates are all valid numbers or coercible to numbers.
+--
+-- This is a utility function intended to ensure X, Y, and Z values are valid before 
+-- using them in functions that require numeric coordinates.
+--
+---@param x any X coordinate to check (number or string convertible to number)
+---@param y any Y coordinate to check (number or string convertible to number)
+---@param z any Z coordinate to check (number or string convertible to number)
+---@return boolean True if all coordinates are valid numbers (or coercible), false otherwise
+function AreValidCoordinates(x, y, z)
+  return IsCoercibleNumber(x) and IsCoercibleNumber(y) and IsCoercibleNumber(z)
+end
+
 -- Old SND commands (plus other stuff that may need to be removed
 
 ---@diagnostic disable: missing-return
@@ -6392,13 +6422,13 @@ function GetZoneName() end
 
 function HasCondition() end
 
-function HasFlightUnlocked() end
+function HasFlightUnlocked() end --done
 
 function HasMaxProgress() end
 
 function HasMaxQuality() end
 
-function HasPlugin() end
+function HasPlugin() end --done
 
 function HasStats() end
 
@@ -6420,7 +6450,7 @@ function IsAddonReady() end --done
 
 function IsAddonVisible() end --done
 
-function IsAetheryteUnlocked() end
+function IsAetheryteUnlocked() end --done
 
 function IsCollectable() end
 
@@ -6556,7 +6586,7 @@ function PathGetMovementAllowed() end
 
 function PathGetTolerance() end
 
-function PathIsRunning() end
+function PathIsRunning() end --done
 
 function PathMoveTo() end
 
@@ -6568,11 +6598,11 @@ function PathSetMovementAllowed() end
 
 function PathSetTolerance() end
 
-function PathStop() end
+function PathStop() end --done
 
-function PathfindAndMoveTo() end
+function PathfindAndMoveTo() end --done
 
-function PathfindInProgress() end
+function PathfindInProgress() end --done
 
 function PauseYesAlready() end
 
@@ -6822,4 +6852,100 @@ end
 
 function GetFlagZone()
 	Instances.Map.Flag.TerritoryId
+end
+
+--------------------------------------------------------------------------------
+-- Checks if a specified plugin by name is currently installed and available.
+--
+---@param pluginName string The exact name of the plugin to check.
+---@return boolean True if the plugin is installed, false otherwise.
+function HasPlugin(pluginName)
+  return IPC.IsInstalled(pluginName)
+end
+
+--------------------------------------------------------------------------------
+-- Immediately cancels current pathfinding or movement if it is in progress.
+function PathStop()
+  if not HasPlugin("vnavmesh") then
+    echo(vnavmeshMissingInfo)
+    error(vnavmeshMissingInfo)
+    return
+  end
+  
+  IPC.vnavmesh.Stop()
+end
+
+--------------------------------------------------------------------------------
+-- Starts pathfinding and moves the player to specified coordinates using vnavmesh.
+--
+-- This function requires the "vnavmesh" plugin to be installed. It validates the
+-- input coordinates and attempts to move the player either flying or on ground.
+--
+---@param X number|string X coordinate to move to (numbers or coercible strings accepted).
+---@param Y number|string Y coordinate to move to (numbers or coercible strings accepted).
+---@param Z number|string Z coordinate to move to (numbers or coercible strings accepted).
+---@param fly boolean|nil Optional. If true, pathfinding will fly; defaults to false (ground movement).
+function PathfindAndMoveTo(X, Y, Z, fly)
+  if not HasPlugin("vnavmesh") then
+    echo(vnavmeshMissingInfo)
+    error(vnavmeshMissingInfo)
+    return
+  end
+  
+  if not AreValidCoordinates(X, Y, Z) then
+    error("Invalid coordinates passed to PathfindAndMoveTo")
+    return
+  end
+
+  fly = (type(fly) == "boolean") and fly or false
+  local dest = Vector3(X, Y, Z)
+  IPC.vnavmesh.PathfindAndMoveTo(dest, fly)
+end
+
+--------------------------------------------------------------------------------
+-- Checks if vnavmesh is currently pathfinding (calculating route to destination).
+--
+-- Returns true only if actively pathfinding, not just moving along a precomputed path.
+--
+---@return boolean True if pathfinding is in progress, false otherwise.
+function PathfindInProgress()
+  if not HasPlugin("vnavmesh") then
+    echo(vnavmeshMissingInfo)
+    return false
+  end
+  
+  return IPC.vnavmesh.PathfindInProgress()
+end
+
+--------------------------------------------------------------------------------
+-- Checks if vnavmesh is actively running along a path.
+--
+-- Returns true if currently moving along a path (not necessarily pathfinding).
+--
+---@return boolean True if currently moving along a path, false otherwise.
+function PathIsRunning()
+  if not HasPlugin("vnavmesh") then
+    echo(vnavmeshMissingInfo)
+    return false
+  end
+  
+  return IPC.vnavmesh.IsRunning()
+end
+
+--------------------------------------------------------------------------------
+-- Checks whether a given aetheryte (teleport location) is unlocked.
+--
+-- Queries the Telepo instance for unlock status of an aetheryte by its ID.
+--
+---@param aetheryteId integer The ID of the aetheryte to check.
+---@return boolean True if the aetheryte is unlocked, false otherwise.
+function IsAetheryteUnlocked(aetheryteId)
+  return Instances.Telepo:IsAetheryteUnlocked(aetheryteId)
+end
+
+--------------------------------------------------------------------------------
+--- Checks if the player has flight unlocked.
+--- @return boolean True if the player can fly, false otherwise.
+function HasFlightUnlocked()
+    return Player.CanFly
 end
