@@ -1,7 +1,7 @@
 ::FFXIV Multi-mode (re)starter
 ::by Friendly
 
-::Starts XIVLauncher (specify PROGRAM_PATH below)
+::Starts XIVLauncher (specify PROGRAM_PATH below) (start from Windows directly, runs in cmd)
 ::Kills launcher and the game if it's been running for more than 72 hours (and 18 min, just in case you're doing turnin or whatever)
 ::You need to tick the checkmark to log in automatically in the launcher and auto-enable multi mode in AR on startup
 ::Intended for a single account
