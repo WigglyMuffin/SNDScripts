@@ -1,9 +1,9 @@
-::FFXIV multi-mode (re)starter
+::FFXIV Multi-mode (re)starter
 ::by Friendly
 
 ::Starts XIVLauncher (specify PROGRAM_PATH below)
 ::Kills launcher and the game if it's been running for more than 72 hours (and 18 min, just in case you're doing turnin or whatever)
-::You need to tick the checkmark to log in automatically in the launcher
+::You need to tick the checkmark to log in automatically in the launcher and auto-enable multi mode in AR on startup
 ::Intended for a single account
 ::If it works, it works, if not, good luck. I'm not debugging this whatsoever. Written by AI but I've used it forever so it's reliable.
 
