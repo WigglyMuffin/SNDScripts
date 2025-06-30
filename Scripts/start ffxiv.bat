@@ -10,7 +10,7 @@
 setlocal enabledelayedexpansion
 set "PROCESS_NAME=XIVLauncher.exe"
 set "GAME_PROCESS=ffxiv_dx11.exe"
-set "PROGRAM_PATH=C:\Users\Laszlo\AppData\Local\XIVLauncher\XIVLauncher.exe"
+set "PROGRAM_PATH=C:\Users\Username\AppData\Local\XIVLauncher\XIVLauncher.exe"
 set "CHECK_INTERVAL=20"
 set "MAX_SECONDS=260280"
 set "START_TIME_FILE=%TEMP%\xiv_start_time.txt"
