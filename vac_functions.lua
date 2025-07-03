@@ -11,7 +11,7 @@ Please put your SND2 functions at the end of the file and mark them as done in t
 
 ####################
 ##    Version     ##
-##     2.0.4      ##
+##     2.0.5      ##
 ####################
 2.0.0: SND2 update. All of these and the old SND commands (pasted near the end, thanks Faye!) must be rewritten/wrapped. Contributions welcome!
 		Please put your SND2 functions at the end of the file and mark them as done in the list above the new functions!
@@ -21,8 +21,9 @@ Please put your SND2 functions at the end of the file and mark them as done in t
 	(Friendly) 				merged GetCharacterCondition() versions, changed layout to contain new funcions at the end.
 2.0.3:	(Nonu)				GetPlayerRawXPos(), ...YPos, ...ZPos, GetZoneID(), LogInfo, ...Debug, ...Verbose, IsPlayerDead()
 		(Friendly)			GetFlagZone()
-2.0.4: (Clover-Stuff) 		   HasPlugin(), PathStop(), PathfindAndMoveTo(), PathfindInProgress(), PathIsRunning(), IsAetheryteUnlocked()
-       (DhogGPT)                       HasFlightUnlocked()
+2.0.4: (Clover-Stuff) 		HasPlugin(), PathStop(), PathfindAndMoveTo(), PathfindInProgress(), PathIsRunning(), IsAetheryteUnlocked()
+       (DhogGPT)            HasFlightUnlocked()
+2.0.5: (Friendly)			GetItemCount(), LifestreamIsBusy()
 
 -> 1.0.0: Initial release
 -> 1.0.1: Updated UseFCAction()
@@ -6196,7 +6197,7 @@ function GetHomeWorld() end
 
 function GetInventoryFreeSlotCount() end
 
-function GetItemCount() end
+function GetItemCount() end --done
 
 function GetItemCountInContainer() end
 
@@ -6524,7 +6525,7 @@ function LifestreamAethernetTeleport() end
 
 function LifestreamExecuteCommand() end
 
-function LifestreamIsBusy() end
+function LifestreamIsBusy() end --done
 
 function LifestreamTeleport() end
 
@@ -6948,4 +6949,12 @@ end
 --- @return boolean True if the player can fly, false otherwise.
 function HasFlightUnlocked()
     return Player.CanFly
+end
+
+function GetItemCount(itemID)
+	Inventory.GetItemCount(itemID)
+end
+
+function LifestreamIsBusy()
+	IPC.Lifestream.IsBusy()
 end
