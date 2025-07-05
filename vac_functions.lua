@@ -6036,7 +6036,7 @@ function GetClipboard() end
 
 function GetCondition() end
 
-function GetContentTimeLeft() end
+function GetContentTimeLeft() end --done
 
 function GetCp() end
 
@@ -6051,51 +6051,51 @@ function GetCurrentEorzeaSecond() end
 
 function GetCurrentEorzeaTimestamp() end
 
-function GetCurrentOceanFishingMission1Goal() end
+function GetCurrentOceanFishingMission1Goal() end --done
 
 function GetCurrentOceanFishingMission1Name() end
 
-function GetCurrentOceanFishingMission1Progress() end
+function GetCurrentOceanFishingMission1Progress() end --done
 
-function GetCurrentOceanFishingMission1Type() end
+function GetCurrentOceanFishingMission1Type() end --done
 
-function GetCurrentOceanFishingMission2Goal() end
+function GetCurrentOceanFishingMission2Goal() end --done
 
 function GetCurrentOceanFishingMission2Name() end
 
-function GetCurrentOceanFishingMission2Progress() end
+function GetCurrentOceanFishingMission2Progress() end --done
 
-function GetCurrentOceanFishingMission2Type() end
+function GetCurrentOceanFishingMission2Type() end --done
 
-function GetCurrentOceanFishingMission3Goal() end
+function GetCurrentOceanFishingMission3Goal() end --done
 
 function GetCurrentOceanFishingMission3Name() end
 
-function GetCurrentOceanFishingMission3Progress() end
+function GetCurrentOceanFishingMission3Progress() end --done
 
-function GetCurrentOceanFishingMission3Type() end
+function GetCurrentOceanFishingMission3Type() end --done
 
-function GetCurrentOceanFishingPoints() end
+function GetCurrentOceanFishingPoints() end --done
 
-function GetCurrentOceanFishingRoute() end
+function GetCurrentOceanFishingRoute() end --done
 
-function GetCurrentOceanFishingScore() end
+function GetCurrentOceanFishingScore() end --done
 
 function GetCurrentOceanFishingStatus() end
 
-function GetCurrentOceanFishingTimeOfDay() end
+function GetCurrentOceanFishingTimeOfDay() end --done
 
-function GetCurrentOceanFishingTimeOffset() end
+function GetCurrentOceanFishingTimeOffset() end --done
 
-function GetCurrentOceanFishingTotalScore() end
+function GetCurrentOceanFishingTotalScore() end --done
 
-function GetCurrentOceanFishingWeatherID() end
+function GetCurrentOceanFishingWeatherID() end --done
 
-function GetCurrentOceanFishingZone() end
+function GetCurrentOceanFishingZone() end --done
 
-function GetCurrentOceanFishingZoneTimeLeft() end
+function GetCurrentOceanFishingZoneTimeLeft() end --done
 
-function GetCurrentWorld() end
+function GetCurrentWorld() end --done
 
 function GetDDPassageProgress() end
 
@@ -6957,4 +6957,164 @@ end
 
 function LifestreamIsBusy()
 	IPC.Lifestream.IsBusy()
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingMission1Goal()
+--- InstancedContent.OceanFishing.Mission1Goal wrapper
+--- @returns integer
+function GetCurrentOceanFishingMission1Goal()
+    return InstancedContent.OceanFishing.Mission1Goal
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingMission1Progress()
+--- IInstancedContent.OceanFishing.Mission1Progress wrapper
+--- @returns integer
+function GetCurrentOceanFishingMission1Progress()
+    return InstancedContent.OceanFishing.Mission1Progress
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingMission1Type()
+--- InstancedContent.OceanFishing.Mission1Type wrapper
+--- @returns integer
+function GetCurrentOceanFishingMission1Type()
+    return InstancedContent.OceanFishing.Mission1Type
+ end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingMission2Goal()
+--- InstancedContent.OceanFishing.Mission2Goal wrapper
+--- @returns integer
+function GetCurrentOceanFishingMission2Goal()
+    return InstancedContent.OceanFishing.Mission2Goal
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingMission2Progress()
+--- InstancedContent.OceanFishing.Mission2Progress wrapper
+--- @returns integer
+function GetCurrentOceanFishingMission2Progress()
+    return InstancedContent.OceanFishing.Mission2Progress
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingMission2Type()
+--- InstancedContent.OceanFishing.Mission2Type wrapper
+--- @returns integer
+function GetCurrentOceanFishingMission2Type()
+    return InstancedContent.OceanFishing.Mission2Type
+ end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingMission3Goal()
+--- InstancedContent.OceanFishing.Mission3Goal wrapper
+--- @returns integer
+function GetCurrentOceanFishingMission3Goal()
+    return InstancedContent.OceanFishing.Mission3Goal
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingMission3Progress()
+--- InstancedContent.OceanFishing.Mission3Progress wrapper
+--- @returns integer
+function GetCurrentOceanFishingMission3Progress()
+    return InstancedContent.OceanFishing.Mission3Progress
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingMission3Type()
+--- InstancedContent.OceanFishing.Mission3Type wrapper
+--- @returns integer
+function GetCurrentOceanFishingMission3Type()
+    return InstancedContent.OceanFishing.Mission3Type
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingPoints()
+--- InstancedContent.OceanFishing.Points wrapper
+--- @returns integer
+function GetCurrentOceanFishingPoints()
+    return InstancedContent.OceanFishing.Points
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingRoute()
+--- InstancedContent.OceanFishing.CurrentRoute wrapper
+--- @returns integer
+function GetCurrentOceanFishingRoute()
+    return InstancedContent.OceanFishing.CurrentRoute
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingScore()
+--- InstancedContent.OceanFishing.Score wrapper
+--- @returns integer
+function GetCurrentOceanFishingScore()
+    return InstancedContent.OceanFishing.Score
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingTimeOfDay()
+--- InstancedContent.OceanFishing.TimeOfDay wrapper
+--- @returns integer
+function GetCurrentOceanFishingTimeOfDay()
+    return InstancedContent.OceanFishing.TimeOfDay
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingTimeOffset()
+--- InstancedContent.OceanFishing.TimeOffset wrapper
+--- @returns integer
+function GetCurrentOceanFishingTimeOffset()
+    return InstancedContent.OceanFishing.TimeOffset
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingTotalScore()
+--- InstancedContent.OceanFishing.TotalScore wrapper
+--- @returns integer
+function GetCurrentOceanFishingTotalScore()
+    return InstancedContent.OceanFishing.TotalScore
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingWeatherID()
+--- InstancedContent.OceanFishing.WeatherId wrapper
+--- @returns integer
+function GetCurrentOceanFishingWeatherID()
+    return InstancedContent.OceanFishing.WeatherId
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingZone()
+--- InstancedContent.OceanFishing.GetCurrentOceanFishingZone wrapper
+--- @returns integer
+function GetCurrentOceanFishingZone()
+    return InstancedContent.OceanFishing.GetCurrentOceanFishingZone
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingZoneTimeLeft()
+--- InstancedContent.OceanFishing.TimeLeft wrapper
+--- @returns integer
+function GetCurrentOceanFishingZoneTimeLeft()
+    return InstancedContent.OceanFishing.TimeLeft
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentWorld()
+--- Player.Entity.CurrentWorld wrapper
+--- @returns integer
+function GetCurrentWorld()
+    return Player.Entity.CurrentWorld
+end
+
+--------------------------------------------------------------------------------
+--- GetContentTimeLeft()
+--- InstancedContent.ContentTimeLeft wrapper
+--- @returns integer
+function GetContentTimeLeft()
+    return InstancedContent.ContentTimeLeft
 end
