@@ -5967,7 +5967,7 @@ function DeleteAllAutoHookAnonymousPresets() end
 
 function DeletedSelectedAutoHookPreset() end
 
-function DeliverooIsTurnInRunning() end
+function DeliverooIsTurnInRunning() end --done
 
 function DistanceBetween() end
 
@@ -6107,7 +6107,7 @@ function GetDistanceToObject() end
 
 function GetDistanceToPartyMember() end
 
-function GetDistanceToPoint() end
+function GetDistanceToPoint() end --done
 
 function GetDistanceToTarget() end --done
 
@@ -6181,7 +6181,7 @@ function GetFocusTargetRawZPos() end
 
 function GetFocusTargetRotation() end
 
-function GetFreeSlotsInContainer() end
+function GetFreeSlotsInContainer() end --done
 
 function GetGil() end
 
@@ -6195,7 +6195,7 @@ function GetHashCode() end
 
 function GetHomeWorld() end
 
-function GetInventoryFreeSlotCount() end
+function GetInventoryFreeSlotCount() end --done
 
 function GetItemCount() end --done
 
@@ -6307,7 +6307,7 @@ function GetPlayerAccountId() end
 
 function GetPlayerContentId() end
 
-function GetPlayerGC() end
+function GetPlayerGC() end --done
 
 function GetPlayerRawXPos() end --done
 
@@ -6545,11 +6545,11 @@ function LogVerbose() end --done
 
 function MoveItemToContainer() end
 
-function NavBuildProgress() end
+function NavBuildProgress() end --done
 
 function NavIsAutoLoad() end
 
-function NavIsReady() end
+function NavIsReady() end --done
 
 function NavPathfind() end
 
@@ -6575,9 +6575,9 @@ function PandoraGetFeatureEnabled() end
 
 function PandoraPauseFeature() end
 
-function PandoraSetFeatureConfigState() end
+function PandoraSetFeatureConfigState() end --done
 
-function PandoraSetFeatureState() end
+function PandoraSetFeatureState() end --done
 
 function PartyMemberHasStatus() end
 
@@ -7117,4 +7117,83 @@ end
 --- @returns integer
 function GetContentTimeLeft()
     return InstancedContent.ContentTimeLeft
+end
+
+--------------------------------------------------------------------------------
+--- DeliverooIsTurnInRunning()
+--- IPC.Deliveroo.IsTurnInRunning wrapper
+--- @returns boolean
+function DeliverooIsTurnInRunning()
+    return IPC.Deliveroo.IsTurnInRunning()
+end
+
+--------------------------------------------------------------------------------
+--- GetInventoryFreeSlotCount()
+--- Inventory.GetFreeInventorySlots wrapper
+--- @returns integer
+function GetInventoryFreeSlotCount()
+    return Inventory.GetFreeInventorySlots()
+end
+
+--------------------------------------------------------------------------------
+--- GetFreeSlotsInContainer()
+--- Inventory.GetInventoryContainer(container).FreeSlots wrapper
+--- @returns integer
+function GetFreeSlotsInContainer(container)
+    return Inventory.GetInventoryContainer(container).FreeSlots
+end
+
+--------------------------------------------------------------------------------
+--- GetDistanceToPoint(x, y, z)
+--- Takes coordinates x y z
+--- @returns player distance to given x, y, z
+--- There's probably a better way to do this tho
+function GetDistanceToPoint(x, y, z)
+    local player=Entity.Player.Position
+    local dx = x - a.x
+    local dy = y - a.y
+    local dz = z - a.z
+    return math.sqrt(dx * dx + dy * dy + dz * dz)
+end
+
+--------------------------------------------------------------------------------
+--- GetPlayerGC()
+--- Player.GrandCompany wrapper
+--- @returns integer
+function GetPlayerGC()
+    return Player.GrandCompany
+end
+
+--------------------------------------------------------------------------------
+--- NavIsReady()
+--- IPC.vnavmesh.IsReady wrapper
+--- @returns boolean
+function NavIsReady()
+    return IPC.vnavmesh.IsReady()
+end
+
+--------------------------------------------------------------------------------
+--- NavBuildProgress()
+--- IPC.vnavmesh.BuildProgress wrapper
+--- @returns number in between 0 and 1
+function NavBuildProgress()
+    return IPC.vnavmesh.BuildProgress()
+end
+
+--------------------------------------------------------------------------------
+--- PandoraSetFeatureState()
+--- IPC.PandorasBox.SetFeatureEnabled(featureName, enabled) wrapper,
+--- Takes a feature name and a a boolean, enable or disable the feature according to boolean
+--- @returns No clue
+function PandoraSetFeatureState(featureName, enabled) 
+    return IPC.PandorasBox.SetFeatureEnabled(featureName, enabled)
+end
+
+--------------------------------------------------------------------------------
+--- PandoraSetFeatureConfigState()
+--- IPC.PandorasBox.SetConfigEnabled wrapper
+--- Takes a feature name, a config of said feature and a a boolean, enable or disable the config according to boolean
+--- @returns No clue
+function PandoraSetFeatureConfigState(configName, configValue, enabled)
+    return IPC.PandorasBox.SetConfigEnabled(configName, configValue, enabled)
 end
