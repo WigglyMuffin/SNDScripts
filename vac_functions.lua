@@ -11,7 +11,7 @@ Please put your SND2 functions at the end of the file and mark them as done in t
 
 ####################
 ##    Version     ##
-##     2.0.5      ##
+##     2.0.6      ##
 ####################
 2.0.0: SND2 update. All of these and the old SND commands (pasted near the end, thanks Faye!) must be rewritten/wrapped. Contributions welcome!
 		Please put your SND2 functions at the end of the file and mark them as done in the list above the new functions!
