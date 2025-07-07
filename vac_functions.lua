@@ -29,9 +29,16 @@ Please put your SND2 functions at the end of the file and mark them as done in t
                             GetCurrentOceanFishingMission3Goal(), GetCurrentOceanFishingMission3Progress(), GetCurrentOceanFishingMission3Type(), 
                             GetCurrentOceanFishingPoints(), GetCurrentOceanFishingRoute(), GetCurrentOceanFishingScore(), GetCurrentOceanFishingTimeOfDay(), 
                             GetCurrentOceanFishingTimeOffset(), GetCurrentOceanFishingTotalScore(), GetCurrentOceanFishingWeatherID(), GetCurrentOceanFishingZone(), 
-                            GetCurrentOceanFishingZoneTimeLeft(), GetCurrentWorld(), GetContentTimeLeft(), PandoraSetFeatureConfigState(), PandoraSetFeatureState(),
-                            NavBuildProgress(), NavIsReady(), GetPlayerGC(), GetDistanceToPoint(x, y, z), GetFreeSlotsInContainer(), GetFreeSlotsInContainer(), 
-                            DeliverooIsTurnInRunning()
+                            GetCurrentOceanFishingZoneTimeLeft(), GetCurrentWorld(), GetContentTimeLeft(), 
+ - PandoraSetFeatureConfigState(), 
+ - PandoraSetFeatureState(),
+ - NavBuildProgress(), 
+ - NavIsReady(), 
+ - GetPlayerGC(), 
+ - GetDistanceToPoint(x, y, z), 
+ - GetFreeSlotsInContainer(), 
+ - GetFreeSlotsInContainer(), 
+ - DeliverooIsTurnInRunning()
 
 -> 1.0.0: Initial release
 -> 1.0.1: Updated UseFCAction()
@@ -7163,9 +7170,9 @@ end
 --- There's probably a better way to do this tho
 function GetDistanceToPoint(x, y, z)
   local player=Entity.Player.Position
-  local dx = x - a.x
-  local dy = y - a.y
-  local dz = z - a.z
+  local dx = x - a.X
+  local dy = y - a.Y
+  local dz = z - a.Z
   return math.sqrt(dx * dx + dy * dy + dz * dz)
 end
 
