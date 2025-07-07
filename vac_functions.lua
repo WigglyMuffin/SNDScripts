@@ -24,6 +24,14 @@ Please put your SND2 functions at the end of the file and mark them as done in t
 2.0.4: (Clover-Stuff) 		HasPlugin(), PathStop(), PathfindAndMoveTo(), PathfindInProgress(), PathIsRunning(), IsAetheryteUnlocked()
        (DhogGPT)            HasFlightUnlocked()
 2.0.5: (Friendly)			GetItemCount(), LifestreamIsBusy()
+2.0.6 (LosDrakakos)         GetCurrentOceanFishingMission1Goal(), GetCurrentOceanFishingMission1Progress(), GetCurrentOceanFishingMission1Type(), 
+                            GetCurrentOceanFishingMission2Goal(), GetCurrentOceanFishingMission2Progress(), GetCurrentOceanFishingMission2Type(), 
+                            GetCurrentOceanFishingMission3Goal(), GetCurrentOceanFishingMission3Progress(), GetCurrentOceanFishingMission3Type(), 
+                            GetCurrentOceanFishingPoints(), GetCurrentOceanFishingRoute(), GetCurrentOceanFishingScore(), GetCurrentOceanFishingTimeOfDay(), 
+                            GetCurrentOceanFishingTimeOffset(), GetCurrentOceanFishingTotalScore(), GetCurrentOceanFishingWeatherID(), GetCurrentOceanFishingZone(), 
+                            GetCurrentOceanFishingZoneTimeLeft(), GetCurrentWorld(), GetContentTimeLeft(), PandoraSetFeatureConfigState(), PandoraSetFeatureState(),
+                            NavBuildProgress(), NavIsReady(), GetPlayerGC(), GetDistanceToPoint(x, y, z), GetFreeSlotsInContainer(), GetFreeSlotsInContainer(), 
+                            DeliverooIsTurnInRunning()
 
 -> 1.0.0: Initial release
 -> 1.0.1: Updated UseFCAction()
@@ -6962,7 +6970,7 @@ end
 --------------------------------------------------------------------------------
 --- GetCurrentOceanFishingMission1Goal()
 --- InstancedContent.OceanFishing.Mission1Goal wrapper
---- @returns integer
+--- @return integer
 function GetCurrentOceanFishingMission1Goal()
     return InstancedContent.OceanFishing.Mission1Goal
 end
@@ -6970,7 +6978,7 @@ end
 --------------------------------------------------------------------------------
 --- GetCurrentOceanFishingMission1Progress()
 --- IInstancedContent.OceanFishing.Mission1Progress wrapper
---- @returns integer
+--- @return integer
 function GetCurrentOceanFishingMission1Progress()
     return InstancedContent.OceanFishing.Mission1Progress
 end
@@ -6978,7 +6986,7 @@ end
 --------------------------------------------------------------------------------
 --- GetCurrentOceanFishingMission1Type()
 --- InstancedContent.OceanFishing.Mission1Type wrapper
---- @returns integer
+--- @return integer
 function GetCurrentOceanFishingMission1Type()
     return InstancedContent.OceanFishing.Mission1Type
  end
@@ -6986,7 +6994,7 @@ function GetCurrentOceanFishingMission1Type()
 --------------------------------------------------------------------------------
 --- GetCurrentOceanFishingMission2Goal()
 --- InstancedContent.OceanFishing.Mission2Goal wrapper
---- @returns integer
+--- @return integer
 function GetCurrentOceanFishingMission2Goal()
     return InstancedContent.OceanFishing.Mission2Goal
 end
@@ -6994,7 +7002,7 @@ end
 --------------------------------------------------------------------------------
 --- GetCurrentOceanFishingMission2Progress()
 --- InstancedContent.OceanFishing.Mission2Progress wrapper
---- @returns integer
+--- @return integer
 function GetCurrentOceanFishingMission2Progress()
     return InstancedContent.OceanFishing.Mission2Progress
 end
@@ -7002,7 +7010,7 @@ end
 --------------------------------------------------------------------------------
 --- GetCurrentOceanFishingMission2Type()
 --- InstancedContent.OceanFishing.Mission2Type wrapper
---- @returns integer
+--- @return integer
 function GetCurrentOceanFishingMission2Type()
     return InstancedContent.OceanFishing.Mission2Type
  end
@@ -7010,7 +7018,7 @@ function GetCurrentOceanFishingMission2Type()
 --------------------------------------------------------------------------------
 --- GetCurrentOceanFishingMission3Goal()
 --- InstancedContent.OceanFishing.Mission3Goal wrapper
---- @returns integer
+--- @return integer
 function GetCurrentOceanFishingMission3Goal()
     return InstancedContent.OceanFishing.Mission3Goal
 end
@@ -7018,7 +7026,7 @@ end
 --------------------------------------------------------------------------------
 --- GetCurrentOceanFishingMission3Progress()
 --- InstancedContent.OceanFishing.Mission3Progress wrapper
---- @returns integer
+--- @return integer
 function GetCurrentOceanFishingMission3Progress()
     return InstancedContent.OceanFishing.Mission3Progress
 end
@@ -7026,7 +7034,7 @@ end
 --------------------------------------------------------------------------------
 --- GetCurrentOceanFishingMission3Type()
 --- InstancedContent.OceanFishing.Mission3Type wrapper
---- @returns integer
+--- @return integer
 function GetCurrentOceanFishingMission3Type()
     return InstancedContent.OceanFishing.Mission3Type
 end
@@ -7034,7 +7042,7 @@ end
 --------------------------------------------------------------------------------
 --- GetCurrentOceanFishingPoints()
 --- InstancedContent.OceanFishing.Points wrapper
---- @returns integer
+--- @return integer
 function GetCurrentOceanFishingPoints()
     return InstancedContent.OceanFishing.Points
 end
@@ -7042,7 +7050,7 @@ end
 --------------------------------------------------------------------------------
 --- GetCurrentOceanFishingRoute()
 --- InstancedContent.OceanFishing.CurrentRoute wrapper
---- @returns integer
+--- @return integer
 function GetCurrentOceanFishingRoute()
     return InstancedContent.OceanFishing.CurrentRoute
 end
@@ -7050,7 +7058,7 @@ end
 --------------------------------------------------------------------------------
 --- GetCurrentOceanFishingScore()
 --- InstancedContent.OceanFishing.Score wrapper
---- @returns integer
+--- @return integer
 function GetCurrentOceanFishingScore()
     return InstancedContent.OceanFishing.Score
 end
@@ -7058,7 +7066,7 @@ end
 --------------------------------------------------------------------------------
 --- GetCurrentOceanFishingTimeOfDay()
 --- InstancedContent.OceanFishing.TimeOfDay wrapper
---- @returns integer
+--- @return integer
 function GetCurrentOceanFishingTimeOfDay()
     return InstancedContent.OceanFishing.TimeOfDay
 end
@@ -7066,7 +7074,7 @@ end
 --------------------------------------------------------------------------------
 --- GetCurrentOceanFishingTimeOffset()
 --- InstancedContent.OceanFishing.TimeOffset wrapper
---- @returns integer
+--- @return integer
 function GetCurrentOceanFishingTimeOffset()
     return InstancedContent.OceanFishing.TimeOffset
 end
@@ -7074,7 +7082,7 @@ end
 --------------------------------------------------------------------------------
 --- GetCurrentOceanFishingTotalScore()
 --- InstancedContent.OceanFishing.TotalScore wrapper
---- @returns integer
+--- @return integer
 function GetCurrentOceanFishingTotalScore()
     return InstancedContent.OceanFishing.TotalScore
 end
@@ -7082,7 +7090,7 @@ end
 --------------------------------------------------------------------------------
 --- GetCurrentOceanFishingWeatherID()
 --- InstancedContent.OceanFishing.WeatherId wrapper
---- @returns integer
+--- @return integer
 function GetCurrentOceanFishingWeatherID()
     return InstancedContent.OceanFishing.WeatherId
 end
@@ -7090,7 +7098,7 @@ end
 --------------------------------------------------------------------------------
 --- GetCurrentOceanFishingZone()
 --- InstancedContent.OceanFishing.GetCurrentOceanFishingZone wrapper
---- @returns integer
+--- @return integer
 function GetCurrentOceanFishingZone()
     return InstancedContent.OceanFishing.GetCurrentOceanFishingZone
 end
@@ -7098,7 +7106,7 @@ end
 --------------------------------------------------------------------------------
 --- GetCurrentOceanFishingZoneTimeLeft()
 --- InstancedContent.OceanFishing.TimeLeft wrapper
---- @returns integer
+--- @return integer
 function GetCurrentOceanFishingZoneTimeLeft()
     return InstancedContent.OceanFishing.TimeLeft
 end
@@ -7106,7 +7114,7 @@ end
 --------------------------------------------------------------------------------
 --- GetCurrentWorld()
 --- Player.Entity.CurrentWorld wrapper
---- @returns integer
+--- @return integer
 function GetCurrentWorld()
     return Player.Entity.CurrentWorld
 end
@@ -7114,7 +7122,7 @@ end
 --------------------------------------------------------------------------------
 --- GetContentTimeLeft()
 --- InstancedContent.ContentTimeLeft wrapper
---- @returns integer
+--- @return integer
 function GetContentTimeLeft()
     return InstancedContent.ContentTimeLeft
 end
@@ -7122,78 +7130,91 @@ end
 --------------------------------------------------------------------------------
 --- DeliverooIsTurnInRunning()
 --- IPC.Deliveroo.IsTurnInRunning wrapper
---- @returns boolean
+--- @return boolean
 function DeliverooIsTurnInRunning()
+  if not HasPlugin("Deliveroo") then
+    echo('DeliverooMissingInfo')
+    error('DeliverooMissingInfo')
+    return false
+  end
     return IPC.Deliveroo.IsTurnInRunning()
 end
 
 --------------------------------------------------------------------------------
---- GetInventoryFreeSlotCount()
+--- GetFreeSlotsInContainer()
 --- Inventory.GetFreeInventorySlots wrapper
---- @returns integer
+--- @return integer
 function GetInventoryFreeSlotCount()
-    return Inventory.GetFreeInventorySlots()
+  return Inventory.GetFreeInventorySlots()
 end
 
 --------------------------------------------------------------------------------
 --- GetFreeSlotsInContainer()
 --- Inventory.GetInventoryContainer(container).FreeSlots wrapper
---- @returns integer
+--- @return integer
 function GetFreeSlotsInContainer(container)
-    return Inventory.GetInventoryContainer(container).FreeSlots
+  return Inventory.GetInventoryContainer(container).FreeSlots
 end
 
 --------------------------------------------------------------------------------
 --- GetDistanceToPoint(x, y, z)
---- Takes coordinates x y z
---- @returns player distance to given x, y, z
+--- Takes coordinates x y z, returns player distance to given x, y, z
+--- @return number 
 --- There's probably a better way to do this tho
 function GetDistanceToPoint(x, y, z)
-    local player=Entity.Player.Position
-    local dx = x - a.x
-    local dy = y - a.y
-    local dz = z - a.z
-    return math.sqrt(dx * dx + dy * dy + dz * dz)
+  local player=Entity.Player.Position
+  local dx = x - a.x
+  local dy = y - a.y
+  local dz = z - a.z
+  return math.sqrt(dx * dx + dy * dy + dz * dz)
 end
 
 --------------------------------------------------------------------------------
 --- GetPlayerGC()
 --- Player.GrandCompany wrapper
---- @returns integer
+--- @return integer
 function GetPlayerGC()
-    return Player.GrandCompany
+  return Player.GrandCompany
 end
 
 --------------------------------------------------------------------------------
 --- NavIsReady()
 --- IPC.vnavmesh.IsReady wrapper
---- @returns boolean
+--- @return boolean
 function NavIsReady()
-    return IPC.vnavmesh.IsReady()
+  if not HasPlugin("vnavmesh") then
+    echo('vnavmeshMissingInfo')
+    error('vnavmeshMissingInfo')
+    return false
+  end
+  return IPC.vnavmesh.IsReady()
 end
 
 --------------------------------------------------------------------------------
 --- NavBuildProgress()
 --- IPC.vnavmesh.BuildProgress wrapper
---- @returns number in between 0 and 1
+--- @return number in between 0 and 1
 function NavBuildProgress()
-    return IPC.vnavmesh.BuildProgress()
+  if not HasPlugin("vnavmesh") then
+    echo('vnavmeshMissingInfo')
+    error('vnavmeshMissingInfo')
+    return false
+  end
+  return IPC.vnavmesh.BuildProgress()
 end
 
 --------------------------------------------------------------------------------
---- PandoraSetFeatureState()
+--- PandoraSetFeatureState(string, boolean) 
 --- IPC.PandorasBox.SetFeatureEnabled(featureName, enabled) wrapper,
 --- Takes a feature name and a a boolean, enable or disable the feature according to boolean
---- @returns No clue
 function PandoraSetFeatureState(featureName, enabled) 
-    return IPC.PandorasBox.SetFeatureEnabled(featureName, enabled)
+  return IPC.PandorasBox.SetFeatureEnabled(featureName, enabled)
 end
 
 --------------------------------------------------------------------------------
---- PandoraSetFeatureConfigState()
+--- function PandoraSetFeatureConfigState(string, string, boolean)
 --- IPC.PandorasBox.SetConfigEnabled wrapper
 --- Takes a feature name, a config of said feature and a a boolean, enable or disable the config according to boolean
---- @returns No clue
 function PandoraSetFeatureConfigState(configName, configValue, enabled)
-    return IPC.PandorasBox.SetConfigEnabled(configName, configValue, enabled)
+  return IPC.PandorasBox.SetConfigEnabled(configName, configValue, enabled)
 end
