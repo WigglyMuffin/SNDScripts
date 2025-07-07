@@ -29,16 +29,10 @@ Please put your SND2 functions at the end of the file and mark them as done in t
                             GetCurrentOceanFishingMission3Goal(), GetCurrentOceanFishingMission3Progress(), GetCurrentOceanFishingMission3Type(), 
                             GetCurrentOceanFishingPoints(), GetCurrentOceanFishingRoute(), GetCurrentOceanFishingScore(), GetCurrentOceanFishingTimeOfDay(), 
                             GetCurrentOceanFishingTimeOffset(), GetCurrentOceanFishingTotalScore(), GetCurrentOceanFishingWeatherID(), GetCurrentOceanFishingZone(), 
-                            GetCurrentOceanFishingZoneTimeLeft(), GetCurrentWorld(), GetContentTimeLeft(), 
- - PandoraSetFeatureConfigState(), 
- - PandoraSetFeatureState(),
- - NavBuildProgress(), 
- - NavIsReady(), 
- - GetPlayerGC(), 
- - GetDistanceToPoint(x, y, z), 
- - GetFreeSlotsInContainer(), 
- - GetFreeSlotsInContainer(), 
- - DeliverooIsTurnInRunning()
+                            GetCurrentOceanFishingZoneTimeLeft(), GetCurrentWorld(), GetContentTimeLeft(), PandoraSetFeatureConfigState(), PandoraSetFeatureState(),
+                            NavBuildProgress(), NavIsReady(), GetPlayerGC(), GetDistanceToPoint(x, y, z), GetFreeSlotsInContainer(), GetFreeSlotsInContainer(),
+                            DeliverooIsTurnInRunning()
+
 
 -> 1.0.0: Initial release
 -> 1.0.1: Updated UseFCAction()
