@@ -11,7 +11,7 @@ Please put your SND2 functions at the end of the file and mark them as done in t
 
 ####################
 ##    Version     ##
-##     2.0.5      ##
+##     2.0.6      ##
 ####################
 2.0.0: SND2 update. All of these and the old SND commands (pasted near the end, thanks Faye!) must be rewritten/wrapped. Contributions welcome!
 		Please put your SND2 functions at the end of the file and mark them as done in the list above the new functions!
@@ -24,6 +24,15 @@ Please put your SND2 functions at the end of the file and mark them as done in t
 2.0.4: (Clover-Stuff) 		HasPlugin(), PathStop(), PathfindAndMoveTo(), PathfindInProgress(), PathIsRunning(), IsAetheryteUnlocked()
        (DhogGPT)            HasFlightUnlocked()
 2.0.5: (Friendly)			GetItemCount(), LifestreamIsBusy()
+2.0.6 (LosDrakakos)         GetCurrentOceanFishingMission1Goal(), GetCurrentOceanFishingMission1Progress(), GetCurrentOceanFishingMission1Type(), 
+                            GetCurrentOceanFishingMission2Goal(), GetCurrentOceanFishingMission2Progress(), GetCurrentOceanFishingMission2Type(), 
+                            GetCurrentOceanFishingMission3Goal(), GetCurrentOceanFishingMission3Progress(), GetCurrentOceanFishingMission3Type(), 
+                            GetCurrentOceanFishingPoints(), GetCurrentOceanFishingRoute(), GetCurrentOceanFishingScore(), GetCurrentOceanFishingTimeOfDay(), 
+                            GetCurrentOceanFishingTimeOffset(), GetCurrentOceanFishingTotalScore(), GetCurrentOceanFishingWeatherID(), GetCurrentOceanFishingZone(), 
+                            GetCurrentOceanFishingZoneTimeLeft(), GetCurrentWorld(), GetContentTimeLeft(), PandoraSetFeatureConfigState(), PandoraSetFeatureState(),
+                            NavBuildProgress(), NavIsReady(), GetPlayerGC(), GetDistanceToPoint(x, y, z), GetInventoryFreeSlotCount(), GetFreeSlotsInContainer(),
+                            DeliverooIsTurnInRunning()
+
 
 -> 1.0.0: Initial release
 -> 1.0.1: Updated UseFCAction()
@@ -5967,7 +5976,7 @@ function DeleteAllAutoHookAnonymousPresets() end
 
 function DeletedSelectedAutoHookPreset() end
 
-function DeliverooIsTurnInRunning() end
+function DeliverooIsTurnInRunning() end --done
 
 function DistanceBetween() end
 
@@ -6036,7 +6045,7 @@ function GetClipboard() end
 
 function GetCondition() end
 
-function GetContentTimeLeft() end
+function GetContentTimeLeft() end --done
 
 function GetCp() end
 
@@ -6051,51 +6060,51 @@ function GetCurrentEorzeaSecond() end
 
 function GetCurrentEorzeaTimestamp() end
 
-function GetCurrentOceanFishingMission1Goal() end
+function GetCurrentOceanFishingMission1Goal() end --done
 
 function GetCurrentOceanFishingMission1Name() end
 
-function GetCurrentOceanFishingMission1Progress() end
+function GetCurrentOceanFishingMission1Progress() end --done
 
-function GetCurrentOceanFishingMission1Type() end
+function GetCurrentOceanFishingMission1Type() end --done
 
-function GetCurrentOceanFishingMission2Goal() end
+function GetCurrentOceanFishingMission2Goal() end --done
 
 function GetCurrentOceanFishingMission2Name() end
 
-function GetCurrentOceanFishingMission2Progress() end
+function GetCurrentOceanFishingMission2Progress() end --done
 
-function GetCurrentOceanFishingMission2Type() end
+function GetCurrentOceanFishingMission2Type() end --done
 
-function GetCurrentOceanFishingMission3Goal() end
+function GetCurrentOceanFishingMission3Goal() end --done
 
 function GetCurrentOceanFishingMission3Name() end
 
-function GetCurrentOceanFishingMission3Progress() end
+function GetCurrentOceanFishingMission3Progress() end --done
 
-function GetCurrentOceanFishingMission3Type() end
+function GetCurrentOceanFishingMission3Type() end --done
 
-function GetCurrentOceanFishingPoints() end
+function GetCurrentOceanFishingPoints() end --done
 
-function GetCurrentOceanFishingRoute() end
+function GetCurrentOceanFishingRoute() end --done
 
-function GetCurrentOceanFishingScore() end
+function GetCurrentOceanFishingScore() end --done
 
 function GetCurrentOceanFishingStatus() end
 
-function GetCurrentOceanFishingTimeOfDay() end
+function GetCurrentOceanFishingTimeOfDay() end --done
 
-function GetCurrentOceanFishingTimeOffset() end
+function GetCurrentOceanFishingTimeOffset() end --done
 
-function GetCurrentOceanFishingTotalScore() end
+function GetCurrentOceanFishingTotalScore() end --done
 
-function GetCurrentOceanFishingWeatherID() end
+function GetCurrentOceanFishingWeatherID() end --done
 
-function GetCurrentOceanFishingZone() end
+function GetCurrentOceanFishingZone() end --done
 
-function GetCurrentOceanFishingZoneTimeLeft() end
+function GetCurrentOceanFishingZoneTimeLeft() end --done
 
-function GetCurrentWorld() end
+function GetCurrentWorld() end --done
 
 function GetDDPassageProgress() end
 
@@ -6107,7 +6116,7 @@ function GetDistanceToObject() end
 
 function GetDistanceToPartyMember() end
 
-function GetDistanceToPoint() end
+function GetDistanceToPoint() end --done
 
 function GetDistanceToTarget() end --done
 
@@ -6181,7 +6190,7 @@ function GetFocusTargetRawZPos() end
 
 function GetFocusTargetRotation() end
 
-function GetFreeSlotsInContainer() end
+function GetFreeSlotsInContainer() end --done
 
 function GetGil() end
 
@@ -6195,7 +6204,7 @@ function GetHashCode() end
 
 function GetHomeWorld() end
 
-function GetInventoryFreeSlotCount() end
+function GetInventoryFreeSlotCount() end --done
 
 function GetItemCount() end --done
 
@@ -6307,7 +6316,7 @@ function GetPlayerAccountId() end
 
 function GetPlayerContentId() end
 
-function GetPlayerGC() end
+function GetPlayerGC() end --done
 
 function GetPlayerRawXPos() end --done
 
@@ -6545,11 +6554,11 @@ function LogVerbose() end --done
 
 function MoveItemToContainer() end
 
-function NavBuildProgress() end
+function NavBuildProgress() end --done
 
 function NavIsAutoLoad() end
 
-function NavIsReady() end
+function NavIsReady() end --done
 
 function NavPathfind() end
 
@@ -6575,9 +6584,9 @@ function PandoraGetFeatureEnabled() end
 
 function PandoraPauseFeature() end
 
-function PandoraSetFeatureConfigState() end
+function PandoraSetFeatureConfigState() end --done
 
-function PandoraSetFeatureState() end
+function PandoraSetFeatureState() end --done
 
 function PartyMemberHasStatus() end
 
@@ -6957,4 +6966,256 @@ end
 
 function LifestreamIsBusy()
 	IPC.Lifestream.IsBusy()
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingMission1Goal()
+--- InstancedContent.OceanFishing.Mission1Goal wrapper
+--- @return integer
+function GetCurrentOceanFishingMission1Goal()
+    return InstancedContent.OceanFishing.Mission1Goal
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingMission1Progress()
+--- IInstancedContent.OceanFishing.Mission1Progress wrapper
+--- @return integer
+function GetCurrentOceanFishingMission1Progress()
+    return InstancedContent.OceanFishing.Mission1Progress
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingMission1Type()
+--- InstancedContent.OceanFishing.Mission1Type wrapper
+--- @return integer
+function GetCurrentOceanFishingMission1Type()
+    return InstancedContent.OceanFishing.Mission1Type
+ end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingMission2Goal()
+--- InstancedContent.OceanFishing.Mission2Goal wrapper
+--- @return integer
+function GetCurrentOceanFishingMission2Goal()
+    return InstancedContent.OceanFishing.Mission2Goal
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingMission2Progress()
+--- InstancedContent.OceanFishing.Mission2Progress wrapper
+--- @return integer
+function GetCurrentOceanFishingMission2Progress()
+    return InstancedContent.OceanFishing.Mission2Progress
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingMission2Type()
+--- InstancedContent.OceanFishing.Mission2Type wrapper
+--- @return integer
+function GetCurrentOceanFishingMission2Type()
+    return InstancedContent.OceanFishing.Mission2Type
+ end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingMission3Goal()
+--- InstancedContent.OceanFishing.Mission3Goal wrapper
+--- @return integer
+function GetCurrentOceanFishingMission3Goal()
+    return InstancedContent.OceanFishing.Mission3Goal
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingMission3Progress()
+--- InstancedContent.OceanFishing.Mission3Progress wrapper
+--- @return integer
+function GetCurrentOceanFishingMission3Progress()
+    return InstancedContent.OceanFishing.Mission3Progress
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingMission3Type()
+--- InstancedContent.OceanFishing.Mission3Type wrapper
+--- @return integer
+function GetCurrentOceanFishingMission3Type()
+    return InstancedContent.OceanFishing.Mission3Type
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingPoints()
+--- InstancedContent.OceanFishing.Points wrapper
+--- @return integer
+function GetCurrentOceanFishingPoints()
+    return InstancedContent.OceanFishing.Points
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingRoute()
+--- InstancedContent.OceanFishing.CurrentRoute wrapper
+--- @return integer
+function GetCurrentOceanFishingRoute()
+    return InstancedContent.OceanFishing.CurrentRoute
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingScore()
+--- InstancedContent.OceanFishing.Score wrapper
+--- @return integer
+function GetCurrentOceanFishingScore()
+    return InstancedContent.OceanFishing.Score
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingTimeOfDay()
+--- InstancedContent.OceanFishing.TimeOfDay wrapper
+--- @return integer
+function GetCurrentOceanFishingTimeOfDay()
+    return InstancedContent.OceanFishing.TimeOfDay
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingTimeOffset()
+--- InstancedContent.OceanFishing.TimeOffset wrapper
+--- @return integer
+function GetCurrentOceanFishingTimeOffset()
+    return InstancedContent.OceanFishing.TimeOffset
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingTotalScore()
+--- InstancedContent.OceanFishing.TotalScore wrapper
+--- @return integer
+function GetCurrentOceanFishingTotalScore()
+    return InstancedContent.OceanFishing.TotalScore
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingWeatherID()
+--- InstancedContent.OceanFishing.WeatherId wrapper
+--- @return integer
+function GetCurrentOceanFishingWeatherID()
+    return InstancedContent.OceanFishing.WeatherId
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingZone()
+--- InstancedContent.OceanFishing.GetCurrentOceanFishingZone wrapper
+--- @return integer
+function GetCurrentOceanFishingZone()
+    return InstancedContent.OceanFishing.GetCurrentOceanFishingZone
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentOceanFishingZoneTimeLeft()
+--- InstancedContent.OceanFishing.TimeLeft wrapper
+--- @return integer
+function GetCurrentOceanFishingZoneTimeLeft()
+    return InstancedContent.OceanFishing.TimeLeft
+end
+
+--------------------------------------------------------------------------------
+--- GetCurrentWorld()
+--- Player.Entity.CurrentWorld wrapper
+--- @return integer
+function GetCurrentWorld()
+    return Player.Entity.CurrentWorld
+end
+
+--------------------------------------------------------------------------------
+--- GetContentTimeLeft()
+--- InstancedContent.ContentTimeLeft wrapper
+--- @return integer
+function GetContentTimeLeft()
+    return InstancedContent.ContentTimeLeft
+end
+
+--------------------------------------------------------------------------------
+--- DeliverooIsTurnInRunning()
+--- IPC.Deliveroo.IsTurnInRunning wrapper
+--- @return boolean
+function DeliverooIsTurnInRunning()
+  if not HasPlugin("Deliveroo") then
+    echo('DeliverooMissingInfo')
+    error('DeliverooMissingInfo')
+    return false
+  end
+    return IPC.Deliveroo.IsTurnInRunning()
+end
+
+--------------------------------------------------------------------------------
+--- GetInventoryFreeSlotCount()
+--- Inventory.GetFreeInventorySlots wrapper
+--- @return integer
+function GetInventoryFreeSlotCount()
+  return Inventory.GetFreeInventorySlots()
+end
+
+--------------------------------------------------------------------------------
+--- GetFreeSlotsInContainer()
+--- Inventory.GetInventoryContainer(container).FreeSlots wrapper
+--- @return integer
+function GetFreeSlotsInContainer(container)
+  return Inventory.GetInventoryContainer(container).FreeSlots
+end
+
+--------------------------------------------------------------------------------
+--- GetDistanceToPoint(x, y, z)
+--- Takes coordinates x y z, returns player distance to given x, y, z
+--- @return number 
+--- There's probably a better way to do this tho
+function GetDistanceToPoint(x, y, z)
+  local player=Entity.Player.Position
+  local dx = x - a.X
+  local dy = y - a.Y
+  local dz = z - a.Z
+  return math.sqrt(dx * dx + dy * dy + dz * dz)
+end
+
+--------------------------------------------------------------------------------
+--- GetPlayerGC()
+--- Player.GrandCompany wrapper
+--- @return integer
+function GetPlayerGC()
+  return Player.GrandCompany
+end
+
+--------------------------------------------------------------------------------
+--- NavIsReady()
+--- IPC.vnavmesh.IsReady wrapper
+--- @return boolean
+function NavIsReady()
+  if not HasPlugin("vnavmesh") then
+    echo('vnavmeshMissingInfo')
+    error('vnavmeshMissingInfo')
+    return false
+  end
+  return IPC.vnavmesh.IsReady()
+end
+
+--------------------------------------------------------------------------------
+--- NavBuildProgress()
+--- IPC.vnavmesh.BuildProgress wrapper
+--- @return number in between 0 and 1
+function NavBuildProgress()
+  if not HasPlugin("vnavmesh") then
+    echo('vnavmeshMissingInfo')
+    error('vnavmeshMissingInfo')
+    return false
+  end
+  return IPC.vnavmesh.BuildProgress()
+end
+
+--------------------------------------------------------------------------------
+--- PandoraSetFeatureState(string, boolean) 
+--- IPC.PandorasBox.SetFeatureEnabled(featureName, enabled) wrapper,
+--- Takes a feature name and a a boolean, enable or disable the feature according to boolean
+function PandoraSetFeatureState(featureName, enabled) 
+  return IPC.PandorasBox.SetFeatureEnabled(featureName, enabled)
+end
+
+--------------------------------------------------------------------------------
+--- function PandoraSetFeatureConfigState(string, string, boolean)
+--- IPC.PandorasBox.SetConfigEnabled wrapper
+--- Takes a feature name, a config of said feature and a a boolean, enable or disable the config according to boolean
+function PandoraSetFeatureConfigState(configName, configValue, enabled)
+  return IPC.PandorasBox.SetConfigEnabled(configName, configValue, enabled)
 end
