@@ -30,7 +30,7 @@ Please put your SND2 functions at the end of the file and mark them as done in t
                             GetCurrentOceanFishingPoints(), GetCurrentOceanFishingRoute(), GetCurrentOceanFishingScore(), GetCurrentOceanFishingTimeOfDay(), 
                             GetCurrentOceanFishingTimeOffset(), GetCurrentOceanFishingTotalScore(), GetCurrentOceanFishingWeatherID(), GetCurrentOceanFishingZone(), 
                             GetCurrentOceanFishingZoneTimeLeft(), GetCurrentWorld(), GetContentTimeLeft(), PandoraSetFeatureConfigState(), PandoraSetFeatureState(),
-                            NavBuildProgress(), NavIsReady(), GetPlayerGC(), GetDistanceToPoint(x, y, z), GetFreeSlotsInContainer(), GetFreeSlotsInContainer(),
+                            NavBuildProgress(), NavIsReady(), GetPlayerGC(), GetDistanceToPoint(x, y, z), GetInventoryFreeSlotCount(), GetFreeSlotsInContainer(),
                             DeliverooIsTurnInRunning()
 
 
@@ -7142,7 +7142,7 @@ function DeliverooIsTurnInRunning()
 end
 
 --------------------------------------------------------------------------------
---- GetFreeSlotsInContainer()
+--- GetInventoryFreeSlotCount()
 --- Inventory.GetFreeInventorySlots wrapper
 --- @return integer
 function GetInventoryFreeSlotCount()
